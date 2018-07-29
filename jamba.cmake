@@ -200,7 +200,8 @@ endfunction()
 ###################################################
 # Testing - for this framework
 ###################################################
-file(GLOB_RECURSE TEST_SRC_FILES RELATIVE ${PROJECT_SOURCE_DIR} jamba/test/cpp/*cpp)
+message(STATUS "JAMBA_ROOT=${JAMBA_ROOT}" )
+file(GLOB_RECURSE TEST_SRC_FILES ${JAMBA_ROOT}/test/cpp/*cpp)
 set(test_sources ""
     )
 

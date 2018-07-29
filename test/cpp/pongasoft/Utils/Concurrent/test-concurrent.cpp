@@ -52,7 +52,7 @@ std::atomic<int> MyTestValue::instanceCounter{0};
 TEST(AtomicValueTest, SingleThreadCorrectBehavior)
 {
   {
-    AtomicValue<MyTestValue> value{MyTestValue{3}};
+    AtomicValue<MyTestValue> value{std::make_unique<MyTestValue>(3)};
 
     // AtomicValue.fValue
     ASSERT_EQ(1, MyTestValue::instanceCounter.load());
@@ -103,7 +103,7 @@ TEST(AtomicValueTest, MultiThreadSafe)
   }
 
   {
-    AtomicValue<MyTestValue> value{MyTestValue{}};
+    AtomicValue<MyTestValue> value{std::make_unique<MyTestValue>()};
 
     auto ui = [&] {
       for(int i = 0; i < N; i++)
@@ -147,7 +147,7 @@ TEST(AtomicValueTest, MultiThreadSafe2)
   constexpr int M = 10;
 
   {
-    AtomicValue<MyTestValue> value{MyTestValue{}};
+    AtomicValue<MyTestValue> value{std::make_unique<MyTestValue>()};
 
     ASSERT_EQ(0, value.get().fOperatorEqualCounter);
     value.set(MyTestValue{3});

@@ -2,6 +2,7 @@
 #define __PONGASOFT_VST_PARAMETERS_H__
 
 #include "ParamDef.h"
+#include "NormalizedState.h"
 
 #include <map>
 #include <vector>
@@ -64,15 +65,6 @@ public:
   };
 
 public:
-  /**
-   * Maintains the order used to save/restore the RT and GUI state
-   */
-  struct SaveStateOrder
-  {
-    uint16 fVersion{0};
-    std::vector<ParamID> fOrder{};
-    int getParamCount() const { return fOrder.size(); }
-  };
 
 public:
   // Constructor
@@ -100,7 +92,7 @@ public:
   /**
    * @return the order used when saving the GUI state (getState/setState in the controller)
    */
-  SaveStateOrder getGUISaveStateOrder() const { return fGUISaveStateOrder; }
+  NormalizedState::SaveOrder const &getGUISaveStateOrder() const { return fGUISaveStateOrder; }
 
   /**
    * Used to change the default order (registration order) used when saving the GUI state (getState/setState in
@@ -115,13 +107,44 @@ public:
    * @return the order used when saving the RT state (getState/setState in the processor, setComponentState in
    *         the controller)
    */
-  SaveStateOrder getRTSaveStateOrder() const { return fRTSaveStateOrder; }
+  NormalizedState::SaveOrder const &getRTSaveStateOrder() const { return fRTSaveStateOrder; }
 
   /**
    * This method is called from the GUI controller to register all the parameters to the ParameterContainer class
    * which is the class managing the parameters in the vst sdk
    */
   void registerVstParameters(Vst::ParameterContainer &iParameterContainer) const;
+
+  /**
+   * This method is called to read the RTState from the stream */
+  virtual std::unique_ptr<NormalizedState> readRTState(IBStreamer &iStreamer) const;
+
+  /**
+   * This method is called to write the NormalizedState to the stream */
+  virtual tresult writeRTState(NormalizedState const *iNormalizedState, IBStreamer &oStreamer) const;
+
+  /**
+   * This method is called to read the GUIState from the stream  */
+  virtual std::unique_ptr<NormalizedState> readGUIState(IBStreamer &iStreamer) const;
+
+  /**
+   * This method is called to write the NormalizedState to the stream */
+  virtual tresult writeGUIState(NormalizedState const *iNormalizedState, IBStreamer &oStreamer) const;
+
+  /**
+   * @return a new normalized state for RT (can be overridden to return a subclass!)
+   */
+  virtual std::unique_ptr<NormalizedState> newRTState() const;
+
+  /**
+   * @return a new normalized state for GUI (can be overridden to return a subclass!)
+   */
+  virtual std::unique_ptr<NormalizedState> newGUIState() const;
+
+  /**
+   * @return normalized value read from the stream for the given parameter
+   */
+  virtual ParamValue readNormalizedValue(ParamID iParamID, IBStreamer &iStreamer) const;
 
   // getRawParamDef - nullptr when not found
   std::shared_ptr<RawParamDef> getRawParamDef(ParamID iParamID) const;
@@ -141,9 +164,10 @@ private:
   std::vector<ParamID> fPluginOrder{};
 
   // TODO: Handle multiple versions with upgrade
-  SaveStateOrder fRTSaveStateOrder{};
-  SaveStateOrder fGUISaveStateOrder{};
+  NormalizedState::SaveOrder fRTSaveStateOrder{};
+  NormalizedState::SaveOrder fGUISaveStateOrder{};
 
+private:
   // leaf of templated calls to build a list of ParamIDs from ParamID or ParamDefs
   void buildParamIDs(std::vector<ParamID> &iParamIDs) {}
 

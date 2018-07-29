@@ -68,8 +68,8 @@ public:
   virtual tresult writeLatestState(IBStreamer &oStreamer);
 
 protected:
-  // the order in which to save the state
-  Parameters::SaveStateOrder fSaveStateOrder;
+  // the parameters
+  Parameters const &fPluginParameters;
 
   // contains all the registered parameters (unique ID, will be checked on add)
   std::map<ParamID, std::shared_ptr<RTRawParameter>> fParameters{};
@@ -77,9 +77,27 @@ protected:
   // add raw parameter to the structures
   void addRawParameter(std::shared_ptr<RTRawParameter> const &iParameter);
 
+  /**
+   * Called from the RT thread from beforeProcessing to set the new state. Can be overridden
+   * @return true if the state has changed, false otherwise
+   */
+  virtual bool onNewState(NormalizedState const *iLatestState);
+
+  /**
+   * Called from the RT thread from afterProcessing to reset previous values (copy current value to previous).
+   * Can be overridden.
+   *
+   * @return true if the state has changed, false otherwise */
+  virtual bool resetPreviousValues();
+
+  /**
+   * Called from the RT thread from afterProcessing to compute the latest state. Can be overridden
+   */
+  virtual void computeLatestState(NormalizedState *oLatestState) const;
+
 private:
   // need to allocate memory only at creation time for RT!
-  NormalizedState fNormalizedStateRT;
+  std::unique_ptr<NormalizedState> fNormalizedStateRT;
 
   // computeLatestState
   void computeLatestState();

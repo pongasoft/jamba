@@ -1,4 +1,5 @@
 #include "NormalizedState.h"
+#include "Parameters.h"
 
 #include <sstream>
 
@@ -8,18 +9,12 @@ namespace VST {
 //------------------------------------------------------------------------
 // NormalizedState::NormalizedState
 //------------------------------------------------------------------------
-NormalizedState::NormalizedState(int iCount)
+NormalizedState::NormalizedState(SaveOrder const *iSaveOrder) : fSaveOrder{iSaveOrder}
 {
-  DCHECK_F(iCount >= 0);
-  if(iCount > 0)
+  if(getCount() > 0)
   {
-    fCount = iCount;
-    fValues = new ParamValue[fCount];
-
-    for(int i = 0; i < fCount; i++)
-    {
-      fValues[i] = 0.0;
-    }
+    // () initializes the element to their default (0.0)
+    fValues = new ParamValue[getCount()]();
   }
 }
 
@@ -32,18 +27,6 @@ NormalizedState::~NormalizedState()
 }
 
 //------------------------------------------------------------------------
-// NormalizedState::NormalizedState(&&) - Move constructor
-//------------------------------------------------------------------------
-NormalizedState::NormalizedState(NormalizedState &&other) noexcept
-{
-  fCount = other.fCount;
-  fValues = other.fValues;
-
-  other.fCount = 0;
-  other.fValues = nullptr;
-}
-
-//------------------------------------------------------------------------
 // NormalizedState::operator=
 //------------------------------------------------------------------------
 NormalizedState &NormalizedState::operator=(const NormalizedState &other)
@@ -52,32 +35,63 @@ NormalizedState &NormalizedState::operator=(const NormalizedState &other)
     return *this;
 
   // should not happen but sanity check!
-  if(fCount != other.fCount)
+  if(fSaveOrder != other.fSaveOrder)
     ABORT_F("no memory allocation allowed => aborting");
   else
   {
-    std::copy(other.fValues, other.fValues + fCount, fValues);
+    std::copy(other.fValues, other.fValues + getCount(), fValues);
   }
 
   return *this;
 }
 
 //------------------------------------------------------------------------
+// NormalizedState::readFromStream
+//------------------------------------------------------------------------
+tresult NormalizedState::readFromStream(const Parameters *iParameters, IBStreamer &iStreamer)
+{
+  // Skipping version reading on purpose: needs to be read before in order to handle upgrade/multiple versions
+
+  for(int i = 0; i < getCount(); i++)
+  {
+    auto paramID = fSaveOrder->fOrder[i];
+    fValues[i] = iParameters->readNormalizedValue(paramID, iStreamer);
+  }
+
+  return kResultOk;
+}
+
+//------------------------------------------------------------------------
+// NormalizedState::writeToStream
+//------------------------------------------------------------------------
+tresult NormalizedState::writeToStream(Parameters const * /* iParameters */, IBStreamer &oStreamer) const
+{
+  // write version for later upgrade
+  oStreamer.writeInt16u(fSaveOrder->fVersion);
+
+  for(int i = 0; i < getCount(); i ++)
+  {
+    oStreamer.writeDouble(fValues[i]);
+  }
+
+  return kResultOk;
+}
+
+//------------------------------------------------------------------------
 // NormalizedState::toString -- only for debug
 //------------------------------------------------------------------------
-std::string NormalizedState::toString(ParamID const *iParamIDs) const
+std::string NormalizedState::toString() const
 {
   std::ostringstream s;
-  s << "{";
-  for(int i = 0; i < fCount; i++)
+  s << "{v=" << fSaveOrder->fVersion;
+  for(int i = 0; i < fSaveOrder->getCount(); i++)
   {
-    if(i > 0)
-      s << ", ";
-    s << iParamIDs[i] << "=" << fValues[i];
+    s << ", " << fSaveOrder->fOrder[i] << "=" << fValues[i];
   }
   s << "}";
   return s.str();
 }
+
 
 
 }

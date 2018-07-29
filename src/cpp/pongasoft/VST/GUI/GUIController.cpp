@@ -98,23 +98,9 @@ tresult GUIController::setComponentState(IBStream *state)
   if(state == nullptr)
     return kResultFalse;
 
-  std::unique_ptr<NormalizedState> normalizedState = nullptr;
-
-#ifdef JAMBA_DEBUG_LOGGING
-  auto const &order = fGUIParameters->getPluginParameters().getRTSaveStateOrder();
-  normalizedState = std::make_unique<NormalizedState>(order.getParamCount());
-#endif
-
   // using helper to read the stream
   IBStreamer streamer(state, kLittleEndian);
-  
-  tresult res = fGUIParameters->readRTState(streamer, normalizedState.get());
-
-#ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "GUIController::readRTState - v=%d, %s", order.fVersion, normalizedState->toString(order.fOrder.data()).c_str());
-#endif
-
-  return res;
+  return fGUIParameters->readRTState(streamer);
 }
 
 //------------------------------------------------------------------------
@@ -125,21 +111,8 @@ tresult GUIController::setState(IBStream *state)
   if(state == nullptr)
     return kResultFalse;
 
-  std::unique_ptr<NormalizedState> normalizedState = nullptr;
-
-#ifdef JAMBA_DEBUG_LOGGING
-  auto const &order = fGUIParameters->getPluginParameters().getGUISaveStateOrder();
-  normalizedState = std::make_unique<NormalizedState>(order.getParamCount());
-#endif
-
   IBStreamer streamer(state, kLittleEndian);
-  tresult res = fGUIParameters->readGUIState(streamer, normalizedState.get());
-
-#ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "GUIController::readGUIState - v=%d, %s", order.fVersion, normalizedState->toString(order.fOrder.data()).c_str());
-#endif
-
-  return res;
+  return fGUIParameters->readGUIState(streamer);
 }
 
 //------------------------------------------------------------------------
@@ -150,21 +123,8 @@ tresult GUIController::getState(IBStream *state)
   if(state == nullptr)
     return kResultFalse;
 
-  std::unique_ptr<NormalizedState> normalizedState = nullptr;
-
-#ifdef JAMBA_DEBUG_LOGGING
-  auto const &order = fGUIParameters->getPluginParameters().getGUISaveStateOrder();
-  normalizedState = std::make_unique<NormalizedState>(order.getParamCount());
-#endif
-
   IBStreamer streamer(state, kLittleEndian);
-  tresult res = fGUIParameters->writeGUIState(streamer, normalizedState.get());
-
-#ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "GUIController::writeGUIState - v=%d, %s", order.fVersion, normalizedState->toString(order.fOrder.data()).c_str());
-#endif
-
-  return res;
+  return fGUIParameters->writeGUIState(streamer);
 }
 
 //------------------------------------------------------------------------

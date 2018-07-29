@@ -8,10 +8,10 @@ namespace RT {
 // RTState::RTState
 //------------------------------------------------------------------------
 RTState::RTState(Parameters const &iParameters) :
-  fSaveStateOrder{iParameters.getRTSaveStateOrder()},
-  fStateUpdate{NormalizedState{fSaveStateOrder.getParamCount()}, true},
-  fLatestState{NormalizedState{fSaveStateOrder.getParamCount()}},
-  fNormalizedStateRT{fSaveStateOrder.getParamCount()}
+  fPluginParameters{iParameters},
+  fStateUpdate{iParameters.newRTState(), true},
+  fLatestState{iParameters.newRTState()},
+  fNormalizedStateRT{iParameters.newRTState()}
 {
 }
 
@@ -67,15 +67,26 @@ bool RTState::applyParameterChanges(IParameterChanges &inputParameterChanges)
 //------------------------------------------------------------------------
 // RTState::computeLatestState
 //------------------------------------------------------------------------
+void RTState::computeLatestState(NormalizedState *oLatestState) const
+{
+  auto const &saveOrder = oLatestState->fSaveOrder;
+
+  for(int i = 0; i < oLatestState->getCount(); i++)
+  {
+    auto paramID = saveOrder->fOrder[i];
+    oLatestState->set(i, fParameters.at(paramID)->getNormalizedValue());
+  }
+}
+
+//------------------------------------------------------------------------
+// RTState::computeLatestState
+//------------------------------------------------------------------------
 void RTState::computeLatestState()
 {
-  for(int i = 0; i < fNormalizedStateRT.fCount; i++)
-  {
-    auto paramID = fSaveStateOrder.fOrder[i];
-    fNormalizedStateRT.set(i, fParameters.at(paramID)->getNormalizedValue());
-  }
+  computeLatestState(fNormalizedStateRT.get());
 
-  fLatestState.set(fNormalizedStateRT);
+  // atomically copy it for access later by GUI thread in writeLatestState
+  fLatestState.set(fNormalizedStateRT.get());
 }
 
 //------------------------------------------------------------------------
@@ -83,33 +94,20 @@ void RTState::computeLatestState()
 //------------------------------------------------------------------------
 tresult RTState::readNewState(IBStreamer &iStreamer)
 {
-  // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
-  NormalizedState normalizedState{fSaveStateOrder.getParamCount()};
+  auto normalizedState = fPluginParameters.readRTState(iStreamer);
 
-  uint16 stateVersion;
-  if(!iStreamer.readInt16u(stateVersion))
-    stateVersion = fSaveStateOrder.fVersion;
-
-  // TODO handle multiple versions
-  if(stateVersion != fSaveStateOrder.fVersion)
+  if(normalizedState)
   {
-    DLOG_F(WARNING, "unexpected state version %d", stateVersion);
-  }
-
-  for(int i = 0; i < normalizedState.fCount; i++)
-  {
-    auto paramID = fSaveStateOrder.fOrder[i];
-    // readNormalizedValue handles default values
-    normalizedState.set(i, fParameters.at(paramID)->getRawParamDef()->readNormalizedValue(iStreamer));
-  }
-
 #ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "RTState::readNewState - v=%d, %s", fSaveStateOrder.fVersion, normalizedState.toString(fSaveStateOrder.fOrder.data()).c_str());
+    DLOG_F(INFO, "RTState::readNewState - %s", normalizedState->toString().c_str());
 #endif
 
-  fStateUpdate.push(normalizedState);
+    // atomically copy it for access later by RT thread in before processing
+    fStateUpdate.push(normalizedState.get());
+    return kResultOk;
+  }
 
-  return kResultOk;
+  return kResultFalse;
 }
 
 //------------------------------------------------------------------------
@@ -118,23 +116,19 @@ tresult RTState::readNewState(IBStreamer &iStreamer)
 tresult RTState::writeLatestState(IBStreamer &oStreamer)
 {
   // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
-  NormalizedState normalizedState{fSaveStateOrder.getParamCount()};
+  auto normalizedState = fPluginParameters.newRTState();
 
-  fLatestState.get(normalizedState);
+  fLatestState.get(normalizedState.get());
 
-  // write version for later upgrade
-  oStreamer.writeInt16u(fSaveStateOrder.fVersion);
+  tresult res = fPluginParameters.writeRTState(normalizedState.get(), oStreamer);
 
-  for(int i = 0; i < normalizedState.fCount; i ++)
+  if(res == kResultOk)
   {
-    oStreamer.writeDouble(normalizedState.fValues[i]);
-  }
-
 #ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "RTState::writeLatestState - v=%d, %s", fSaveStateOrder.fVersion, normalizedState.toString(fSaveStateOrder.fOrder.data()).c_str());
+    DLOG_F(INFO, "RTState::writeLatestState - %s", normalizedState->toString().c_str());
 #endif
-
-  return kResultOk;
+  }
+  return res;
 }
 
 //------------------------------------------------------------------------
@@ -142,18 +136,28 @@ tresult RTState::writeLatestState(IBStreamer &oStreamer)
 //------------------------------------------------------------------------
 bool RTState::beforeProcessing()
 {
-  if(fStateUpdate.pop(fNormalizedStateRT))
+  if(fStateUpdate.pop(fNormalizedStateRT.get()))
   {
-    bool res = false;
-
-    for(int i = 0; i < fNormalizedStateRT.fCount; i ++)
-    {
-      res |= fParameters.at(fSaveStateOrder.fOrder[i])->updateNormalizedValue(fNormalizedStateRT.fValues[i]);
-    }
-
-    return res;
+    return onNewState(fNormalizedStateRT.get());
   }
   return false;
+}
+
+//------------------------------------------------------------------------
+// RTState::onNewState
+//------------------------------------------------------------------------
+bool RTState::onNewState(NormalizedState const *iLatestState)
+{
+  auto const &saveOrder = iLatestState->fSaveOrder;
+
+  bool res = false;
+
+  for(int i = 0; i < iLatestState->getCount(); i ++)
+  {
+    res |= fParameters.at(saveOrder->fOrder[i])->updateNormalizedValue(iLatestState->fValues[i]);
+  }
+
+  return res;
 }
 
 //------------------------------------------------------------------------
@@ -161,17 +165,25 @@ bool RTState::beforeProcessing()
 //------------------------------------------------------------------------
 void RTState::afterProcessing()
 {
+  // when the state has changed we update latest state for writeLatestState
+  if(resetPreviousValues())
+  {
+    computeLatestState();
+  }
+}
+
+//------------------------------------------------------------------------
+// RTState::resetPreviousValues
+//------------------------------------------------------------------------
+bool RTState::resetPreviousValues()
+{
   bool stateChanged = false;
   for(auto &iter : fParameters)
   {
     stateChanged |= iter.second->resetPreviousValue();
   }
 
-  // when the state has changed we update latest state for writeLatestState
-  if(stateChanged)
-  {
-    computeLatestState();
-  }
+  return stateChanged;
 }
 
 //------------------------------------------------------------------------
@@ -180,9 +192,9 @@ void RTState::afterProcessing()
 tresult RTState::init()
 {
   tresult result = kResultOk;
-  for(int i = 0; i < fSaveStateOrder.getParamCount(); i++)
+  for(int i = 0; i < fNormalizedStateRT->getCount(); i++)
   {
-    auto paramID = fSaveStateOrder.fOrder[i];
+    auto paramID = fNormalizedStateRT->fSaveOrder->fOrder[i];
     // param exist
     if(fParameters.find(paramID) == fParameters.cend())
     {
@@ -205,7 +217,7 @@ tresult RTState::init()
   {
     computeLatestState();
 #ifdef JAMBA_DEBUG_LOGGING
-    DLOG_F(INFO, "RT Init State - %s", fNormalizedStateRT.toString(fSaveStateOrder.fOrder.data()).c_str());
+    DLOG_F(INFO, "RT Init State - %s", fNormalizedStateRT->toString().c_str());
 #endif
   }
 

@@ -36,16 +36,6 @@ public:
   // exists
   inline bool exists(ParamID iParamID) const { return getParameterObject(iParamID) != nullptr; }
 
-  // setParamNormalized
-  ParamValue setParamNormalized(ParamID iParamID, IBStreamer &iStreamer, ParamValue iDefaultNormalizedValue)
-  {
-    double value;
-    if(!iStreamer.readDouble(value))
-      value = iDefaultNormalizedValue;
-    setParamNormalized(iParamID, value);
-    return value;
-  }
-
 private:
   EditController *const fParametersOwner;
 };

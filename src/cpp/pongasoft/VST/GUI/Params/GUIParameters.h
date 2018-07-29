@@ -51,19 +51,19 @@ public:
    * This method is called from the GUI controller setComponentState method and reads the state coming from RT
    * and initializes the vst host parameters accordingly
    */
-  tresult readRTState(IBStreamer &iStreamer, NormalizedState *oNormalizedState = nullptr);
+  tresult readRTState(IBStreamer &iStreamer);
 
   /**
    * This method is called from the GUI controller setState method and reads the state previously saved by the
    * GUI only (parameters that are ui only) and initializes the vst host parameters accordingly
    */
-  tresult readGUIState(IBStreamer &iStreamer, NormalizedState *oNormalizedState = nullptr);
+  tresult readGUIState(IBStreamer &iStreamer);
 
   /**
    * This method is called from the GUI controller getState method and writes the state specific to the
    * GUI only (parameters that are ui only), reading the values from the vst host parameters
    */
-  tresult writeGUIState(IBStreamer &oStreamer, NormalizedState *oNormalizedState = nullptr) const;
+  tresult writeGUIState(IBStreamer &oStreamer) const;
 
   /**
    * @return the raw parameter given its id
@@ -80,10 +80,8 @@ public:
   std::unique_ptr<GUIParamCxMgr> createParamCxMgr() const;
 
 protected:
-  // readState according to iSaveStateOrder
-  tresult readState(PluginParameters::SaveStateOrder const &iSaveStateOrder,
-                    IBStreamer &iStreamer,
-                    NormalizedState *oNormalizedState = nullptr);
+  // setParamNormalized
+  tresult setParamNormalized(NormalizedState const *iNormalizedState);
 
 private:
   HostParameters fHostParameters;

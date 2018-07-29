@@ -176,6 +176,12 @@ public:
     fPtr{std::move(iPtr)}
   {}
 
+  // shortcut to normalize
+  inline ParamValue normalize(ParamType const &iValue) const { return ParamConverter::normalize(iValue); }
+
+  // shortcut to denormalize
+  inline ParamType denormalize(ParamValue iNormalizedValue) const { return ParamConverter::denormalize(iNormalizedValue); }
+
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
    * the change needs to be propagated to the VST sdk (using addToOutput). Use this version of the call if you want to
@@ -208,6 +214,9 @@ public:
 
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
   inline ParamType const *operator->() const { return &fPtr->getValue(); }
+
+  // getPreviousValue
+  inline ParamType const &previous() const { return fPtr->getPreviousValue(); }
 
 private:
   std::shared_ptr<RTParameter<ParamConverter>> fPtr;

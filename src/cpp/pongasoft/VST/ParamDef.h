@@ -111,6 +111,15 @@ public:
   {
   }
 
+  // getDefaultValue
+  ParamType getDefaultValue() const { return denormalize(fDefaultNormalizedValue); }
+
+  // shortcut to normalize
+  inline ParamValue normalize(ParamType const &iValue) const { return ParamConverter::normalize(iValue); }
+
+  // shortcut to denormalize
+  inline ParamType denormalize(ParamValue iNormalizedValue) const { return ParamConverter::denormalize(iNormalizedValue); }
+
   /**
    * Using ParamConverter::toString
    */

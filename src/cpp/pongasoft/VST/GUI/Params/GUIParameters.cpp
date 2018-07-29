@@ -23,71 +23,78 @@ std::unique_ptr<GUIParamCxMgr> GUIParameters::createParamCxMgr() const
 }
 
 //------------------------------------------------------------------------
-// GUIParameters::readState
+// GUIParameters::setParamNormalized
 //------------------------------------------------------------------------
-tresult GUIParameters::readState(Parameters::SaveStateOrder const &iSaveStateOrder,
-                                 IBStreamer &iStreamer,
-                                 NormalizedState *oNormalizedState)
+tresult GUIParameters::setParamNormalized(NormalizedState const *iNormalizedState)
 {
-  uint16 stateVersion;
-  if(!iStreamer.readInt16u(stateVersion))
-    stateVersion = iSaveStateOrder.fVersion;
+  tresult res = kResultOk;
 
-  // TODO handle multiple versions
-  if(stateVersion != iSaveStateOrder.fVersion)
+  for(int i = 0; i < iNormalizedState->getCount(); i++)
   {
-    DLOG_F(WARNING, "unexpected state version %d", stateVersion);
-  }
-  
-  int i = 0;
-  for(auto paramID : iSaveStateOrder.fOrder)
-  {
-    auto param = fPluginParameters.getRawParamDef(paramID);
-    ParamValue defaultNormalizedValue = param ? param->fDefaultNormalizedValue : 0.0;
-    ParamValue value = fHostParameters.setParamNormalized(paramID, iStreamer, defaultNormalizedValue);
-    if(oNormalizedState)
-      oNormalizedState->set(i++, value);
+    auto paramID = iNormalizedState->fSaveOrder->fOrder[i];
+    res |= fHostParameters.setParamNormalized(paramID, iNormalizedState->fValues[i]);
   }
 
-  return kResultOk;
+  return res;
 }
 
 //------------------------------------------------------------------------
 // GUIParameters::readRTState
 //------------------------------------------------------------------------
-tresult GUIParameters::readRTState(IBStreamer &iStreamer, NormalizedState *oNormalizedState)
+tresult GUIParameters::readRTState(IBStreamer &iStreamer)
 {
-  return readState(fPluginParameters.getRTSaveStateOrder(), iStreamer, oNormalizedState);
-}
+  auto normalizedState = fPluginParameters.readRTState(iStreamer);
 
+  if(normalizedState)
+  {
+#ifdef JAMBA_DEBUG_LOGGING
+    DLOG_F(INFO, "GUIParameters::readRTState - %s", normalizedState->toString().c_str());
+#endif
+    return setParamNormalized(normalizedState.get());
+  }
+
+  return kResultFalse;
+}
 
 //------------------------------------------------------------------------
 // GUIParameters::readGUIState
 //------------------------------------------------------------------------
-tresult GUIParameters::readGUIState(IBStreamer &iStreamer, NormalizedState *oNormalizedState)
+tresult GUIParameters::readGUIState(IBStreamer &iStreamer)
 {
-  return readState(fPluginParameters.getGUISaveStateOrder(), iStreamer, oNormalizedState);
+  auto normalizedState = fPluginParameters.readGUIState(iStreamer);
+
+  if(normalizedState)
+  {
+#ifdef JAMBA_DEBUG_LOGGING
+    DLOG_F(INFO, "GUIParameters::readGUIState - %s", normalizedState->toString().c_str());
+#endif
+    return setParamNormalized(normalizedState.get());
+  }
+
+  return kResultFalse;
 }
 
 //------------------------------------------------------------------------
 // GUIParameters::writeGUIState
 //------------------------------------------------------------------------
-tresult GUIParameters::writeGUIState(IBStreamer &oStreamer, NormalizedState *oNormalizedState) const
+tresult GUIParameters::writeGUIState(IBStreamer &oStreamer) const
 {
-  auto sso = fPluginParameters.getGUISaveStateOrder();
+  // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
+  auto normalizedState = fPluginParameters.newGUIState();
 
-  oStreamer.writeInt16u(sso.fVersion);
+  auto const &saveOrder = normalizedState->fSaveOrder;
 
-  int i = 0;
-  for(auto paramID : sso.fOrder)
+  for(int i = 0; i < normalizedState->getCount(); i++)
   {
-    ParamValue value = fHostParameters.getParamNormalized(paramID);
-    oStreamer.writeDouble(value);
-    if(oNormalizedState)
-      oNormalizedState->set(i++, value);
+    auto paramID = saveOrder->fOrder[i];
+    normalizedState->set(i, fHostParameters.getParamNormalized(paramID));
   }
 
-  return kResultOk;
+#ifdef JAMBA_DEBUG_LOGGING
+  DLOG_F(INFO, "GUIParameters::writeGUIState - %s", normalizedState->toString().c_str());
+#endif
+
+  return fPluginParameters.writeGUIState(normalizedState.get(), oStreamer);
 }
 
 }

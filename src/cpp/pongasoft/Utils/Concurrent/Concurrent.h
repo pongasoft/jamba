@@ -2,6 +2,7 @@
 #define __PONGASOFT_UTILS_CONCURRENT_CONCURRENT_H__
 
 #include <atomic>
+#include <memory>
 
 namespace pongasoft {
 namespace Utils {
@@ -126,25 +127,14 @@ template<typename T>
 class SingleElementQueue
 {
 public:
-  SingleElementQueue() : fSingleElement{T{}}, fIsEmpty{true}, fSpinLock{}
+  SingleElementQueue() : fSingleElement{std::make_unique<T>()}, fIsEmpty{true}, fSpinLock{}
   {}
 
   /**
    * This constructor can be used to add one element to the queue right away or when there is no empty constructor
    * (required by the no argument constructor).
    */
-  explicit SingleElementQueue(T const &iFirstElement,
-                              bool iIsEmpty = false) :
-    fSingleElement{iFirstElement},
-    fIsEmpty{iIsEmpty},
-    fSpinLock{}
-  {}
-
-  /**
-   * This constructor can be used to add one element to the queue right away or when there is no empty constructor
-   * (required by the no argument constructor).
-   */
-  explicit SingleElementQueue(T &&iFirstElement,
+  explicit SingleElementQueue(std::unique_ptr<T> iFirstElement,
                               bool iIsEmpty = false) :
     fSingleElement{std::move(iFirstElement)},
     fIsEmpty{iIsEmpty},
@@ -164,11 +154,31 @@ public:
     if(fIsEmpty)
       return false;
 
-    oElement = fSingleElement;
+    oElement = *fSingleElement;
     fIsEmpty = true;
 
     return true;
   };
+
+  /**
+   * Returns the single element in the queue if there is one
+   *
+   * @param oElement this will be populated with the value of the element in the queue or left untouched if there
+   *                 isn't one
+   * @return true if there was one element in the queue, false otherwise
+   */
+  bool pop(T *oElement)
+  {
+    auto lock = fSpinLock.acquire();
+    if(fIsEmpty)
+      return false;
+
+    *oElement = *fSingleElement;
+    fIsEmpty = true;
+
+    return true;
+  };
+
 
   /**
    * Pushes one element in the queue. If the queue already had an element it will be replaced.
@@ -177,12 +187,23 @@ public:
   void push(T const &iElement)
   {
     auto lock = fSpinLock.acquire();
-    fSingleElement = iElement;
+    *fSingleElement = iElement;
+    fIsEmpty = false;
+  }
+
+  /**
+   * Pushes one element in the queue. If the queue already had an element it will be replaced.
+   * @param iElement the element to push (clearly not modified by the call)
+   */
+  void push(T const *iElement)
+  {
+    auto lock = fSpinLock.acquire();
+    *fSingleElement = *iElement;
     fIsEmpty = false;
   }
 
 private:
-  T fSingleElement;
+  std::unique_ptr<T> fSingleElement;
   bool fIsEmpty;
   SpinLock fSpinLock;
 };
@@ -196,30 +217,38 @@ template<typename T>
 class AtomicValue
 {
 public:
-  explicit AtomicValue(T const &iValue) : fValue{iValue}, fSpinLock{} {}
+  explicit AtomicValue(std::unique_ptr<T> iValue) : fValue{std::move(iValue)}, fSpinLock{} {}
 
-  explicit AtomicValue(T &&iValue) : fValue{std::move(iValue)}, fSpinLock{} {}
+  explicit AtomicValue(T const &iValue) : fValue{std::make_unique<T>(iValue)}, fSpinLock{} {}
 
   /**
    * Returns the "current" value. Note that this method should be called by one thread at a time (it is ok to call
-   * "set" at the same time with another thread).
-   *
-   * @return the value (a copy which uses copy constructor)
+   * "set" at the same time with another thread). The return value is copied in the oElement (copy vs creation).
    */
   T get()
   {
     auto lock = fSpinLock.acquire();
-    return fValue;
+    return *fValue;
+  };
+
+  /**
+ * Returns the "current" value. Note that this method should be called by one thread at a time (it is ok to call
+ * "set" at the same time with another thread). The return value is copied in the oElement (copy vs creation).
+ */
+  void get(T &oElement)
+  {
+    auto lock = fSpinLock.acquire();
+    oElement = *fValue;
   };
 
   /**
    * Returns the "current" value. Note that this method should be called by one thread at a time (it is ok to call
    * "set" at the same time with another thread). The return value is copied in the oElement (copy vs creation).
    */
-  void get(T &oElement)
+  void get(T *oElement)
   {
     auto lock = fSpinLock.acquire();
-    oElement = fValue;
+    *oElement = *fValue;
   };
 
   /**
@@ -228,12 +257,20 @@ public:
   void set(T const &iValue)
   {
     auto lock = fSpinLock.acquire();
-    fValue = iValue;
+    *fValue = iValue;
   }
 
+  /**
+   * Updates the current value with the provided one.
+   */
+  void set(T const *iValue)
+  {
+    auto lock = fSpinLock.acquire();
+    *fValue = *iValue;
+  }
 
 private:
-  T fValue;
+  std::unique_ptr<T> fValue;
   SpinLock fSpinLock;
 };
 

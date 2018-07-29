@@ -46,6 +46,110 @@ void Parameters::registerVstParameters(Vst::ParameterContainer &iParameterContai
 }
 
 //------------------------------------------------------------------------
+// Parameters::newRTState
+//------------------------------------------------------------------------
+std::unique_ptr<NormalizedState> Parameters::newRTState() const
+{
+  return std::make_unique<NormalizedState>(&fRTSaveStateOrder);
+}
+
+//------------------------------------------------------------------------
+// Parameters::newGUIState
+//------------------------------------------------------------------------
+std::unique_ptr<NormalizedState> Parameters::newGUIState() const
+{
+  return std::make_unique<NormalizedState>(&fGUISaveStateOrder);
+}
+
+//------------------------------------------------------------------------
+// __readStateVersion
+//------------------------------------------------------------------------
+uint16 __readStateVersion(IBStreamer &iStreamer)
+{
+  uint16 stateVersion;
+  if(!iStreamer.readInt16u(stateVersion))
+    stateVersion = 0;
+  return stateVersion;
+}
+
+//------------------------------------------------------------------------
+// Parameters::readRTState
+//------------------------------------------------------------------------
+std::unique_ptr<NormalizedState> Parameters::readRTState(IBStreamer &iStreamer) const
+{
+  uint16 stateVersion = __readStateVersion(iStreamer);
+
+  // TODO handle multiple versions
+  if(stateVersion != fRTSaveStateOrder.fVersion)
+  {
+    DLOG_F(WARNING, "unexpected RT state version %d", stateVersion);
+  }
+
+  // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
+  auto normalizedState = newRTState();
+
+  if(normalizedState->readFromStream(this, iStreamer) == kResultOk)
+    return normalizedState;
+
+  return nullptr;
+}
+
+//------------------------------------------------------------------------
+// Parameters::readGUIState
+//------------------------------------------------------------------------
+std::unique_ptr<NormalizedState> Parameters::readGUIState(IBStreamer &iStreamer) const
+{
+  uint16 stateVersion = __readStateVersion(iStreamer);
+
+  // TODO handle multiple versions
+  if(stateVersion != fGUISaveStateOrder.fVersion)
+  {
+    DLOG_F(WARNING, "unexpected GUI state version %d", stateVersion);
+  }
+
+  // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
+  auto normalizedState = newGUIState();
+
+  if(normalizedState->readFromStream(this, iStreamer) == kResultOk)
+    return normalizedState;
+
+  return nullptr;
+}
+
+//------------------------------------------------------------------------
+// Parameters::writeRTState
+//------------------------------------------------------------------------
+tresult Parameters::writeRTState(NormalizedState const *iNormalizedState, IBStreamer &oStreamer) const
+{
+  DCHECK_F(iNormalizedState->fSaveOrder == &fRTSaveStateOrder);
+  return iNormalizedState->writeToStream(this, oStreamer);
+}
+
+//------------------------------------------------------------------------
+// Parameters::writeGUIState
+//------------------------------------------------------------------------
+tresult Parameters::writeGUIState(NormalizedState const *iNormalizedState, IBStreamer &oStreamer) const
+{
+  DCHECK_F(iNormalizedState->fSaveOrder == &fGUISaveStateOrder);
+  return iNormalizedState->writeToStream(this, oStreamer);
+}
+
+//------------------------------------------------------------------------
+// Parameters::addRawParamDef
+//------------------------------------------------------------------------
+ParamValue Parameters::readNormalizedValue(ParamID iParamID, IBStreamer &iStreamer) const
+{
+  auto iter = fParameters.find(iParamID);
+  if(iter == fParameters.cend())
+  {
+    DLOG_F(WARNING, "Could not find parameter [%d]", iParamID);
+    return 0;
+  }
+
+  return iter->second->readNormalizedValue(iStreamer);
+}
+
+//------------------------------------------------------------------------
 // Parameters::getRawParamDef
 //------------------------------------------------------------------------
 std::shared_ptr<RawParamDef> Parameters::getRawParamDef(ParamID iParamID) const
