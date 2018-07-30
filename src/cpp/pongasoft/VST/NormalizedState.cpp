@@ -67,7 +67,8 @@ tresult NormalizedState::readFromStream(const Parameters *iParameters, IBStreame
 tresult NormalizedState::writeToStream(Parameters const * /* iParameters */, IBStreamer &oStreamer) const
 {
   // write version for later upgrade
-  oStreamer.writeInt16u(fSaveOrder->fVersion);
+  if(fSaveOrder->fVersion >= 0)
+    oStreamer.writeInt16u(static_cast<uint16>(fSaveOrder->fVersion));
 
   for(int i = 0; i < getCount(); i ++)
   {

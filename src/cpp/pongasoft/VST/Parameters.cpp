@@ -15,7 +15,7 @@ public:
     Vst::Parameter(iParamDef->fTitle,
                    iParamDef->fParamID,
                    iParamDef->fUnits,
-                   iParamDef->fDefaultNormalizedValue,
+                   iParamDef->fDefaultValue,
                    iParamDef->fStepCount,
                    iParamDef->fFlags,
                    iParamDef->fUnitID,
@@ -41,7 +41,7 @@ void Parameters::registerVstParameters(Vst::ParameterContainer &iParameterContai
   for(auto paramID : fPluginOrder)
   {
     // YP Note: ParameterContainer is expecting a pointer and then assumes ownership
-    iParameterContainer.addParameter(new VstParameterImpl(fParameters.at(paramID)));
+    iParameterContainer.addParameter(new VstParameterImpl(fRawParameters.at(paramID)));
   }
 }
 
@@ -51,14 +51,6 @@ void Parameters::registerVstParameters(Vst::ParameterContainer &iParameterContai
 std::unique_ptr<NormalizedState> Parameters::newRTState() const
 {
   return std::make_unique<NormalizedState>(&fRTSaveStateOrder);
-}
-
-//------------------------------------------------------------------------
-// Parameters::newGUIState
-//------------------------------------------------------------------------
-std::unique_ptr<NormalizedState> Parameters::newGUIState() const
-{
-  return std::make_unique<NormalizedState>(&fGUISaveStateOrder);
 }
 
 //------------------------------------------------------------------------
@@ -77,38 +69,20 @@ uint16 __readStateVersion(IBStreamer &iStreamer)
 //------------------------------------------------------------------------
 std::unique_ptr<NormalizedState> Parameters::readRTState(IBStreamer &iStreamer) const
 {
-  uint16 stateVersion = __readStateVersion(iStreamer);
-
-  // TODO handle multiple versions
-  if(stateVersion != fRTSaveStateOrder.fVersion)
+  // ignoring version if negative
+  if(fRTSaveStateOrder.fVersion >= 0)
   {
-    DLOG_F(WARNING, "unexpected RT state version %d", stateVersion);
+    uint16 stateVersion = __readStateVersion(iStreamer);
+
+    // TODO handle multiple versions
+    if(stateVersion != fRTSaveStateOrder.fVersion)
+    {
+      DLOG_F(WARNING, "unexpected RT state version %d", stateVersion);
+    }
   }
 
   // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
   auto normalizedState = newRTState();
-
-  if(normalizedState->readFromStream(this, iStreamer) == kResultOk)
-    return normalizedState;
-
-  return nullptr;
-}
-
-//------------------------------------------------------------------------
-// Parameters::readGUIState
-//------------------------------------------------------------------------
-std::unique_ptr<NormalizedState> Parameters::readGUIState(IBStreamer &iStreamer) const
-{
-  uint16 stateVersion = __readStateVersion(iStreamer);
-
-  // TODO handle multiple versions
-  if(stateVersion != fGUISaveStateOrder.fVersion)
-  {
-    DLOG_F(WARNING, "unexpected GUI state version %d", stateVersion);
-  }
-
-  // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
-  auto normalizedState = newGUIState();
 
   if(normalizedState->readFromStream(this, iStreamer) == kResultOk)
     return normalizedState;
@@ -126,27 +100,18 @@ tresult Parameters::writeRTState(NormalizedState const *iNormalizedState, IBStre
 }
 
 //------------------------------------------------------------------------
-// Parameters::writeGUIState
-//------------------------------------------------------------------------
-tresult Parameters::writeGUIState(NormalizedState const *iNormalizedState, IBStreamer &oStreamer) const
-{
-  DCHECK_F(iNormalizedState->fSaveOrder == &fGUISaveStateOrder);
-  return iNormalizedState->writeToStream(this, oStreamer);
-}
-
-//------------------------------------------------------------------------
-// Parameters::addRawParamDef
+// Parameters::readNormalizedValue
 //------------------------------------------------------------------------
 ParamValue Parameters::readNormalizedValue(ParamID iParamID, IBStreamer &iStreamer) const
 {
-  auto iter = fParameters.find(iParamID);
-  if(iter == fParameters.cend())
+  auto iter = fRawParameters.find(iParamID);
+  if(iter == fRawParameters.cend())
   {
     DLOG_F(WARNING, "Could not find parameter [%d]", iParamID);
     return 0;
   }
 
-  return iter->second->readNormalizedValue(iStreamer);
+  return iter->second->readFromStream(iStreamer);
 }
 
 //------------------------------------------------------------------------
@@ -154,8 +119,20 @@ ParamValue Parameters::readNormalizedValue(ParamID iParamID, IBStreamer &iStream
 //------------------------------------------------------------------------
 std::shared_ptr<RawParamDef> Parameters::getRawParamDef(ParamID iParamID) const
 {
-  auto iter = fParameters.find(iParamID);
-  if(iter == fParameters.cend())
+  auto iter = fRawParameters.find(iParamID);
+  if(iter == fRawParameters.cend())
+    return nullptr;
+
+  return iter->second;
+}
+
+//------------------------------------------------------------------------
+// Parameters::getSerializableParamDef
+//------------------------------------------------------------------------
+std::shared_ptr<SerializableParamDef> Parameters::getSerializableParamDef(ParamID iParamID) const
+{
+  auto iter = fSerializableParameters.find(iParamID);
+  if(iter == fSerializableParameters.cend())
     return nullptr;
 
   return iter->second;
@@ -166,17 +143,24 @@ std::shared_ptr<RawParamDef> Parameters::getRawParamDef(ParamID iParamID) const
 //------------------------------------------------------------------------
 void Parameters::addRawParamDef(std::shared_ptr<RawParamDef> iParamDef)
 {
-  if(fParameters.find(iParamDef->fParamID) != fParameters.cend())
+  ParamID paramID = iParamDef->fParamID;
+
+  if(fRawParameters.find(paramID) != fRawParameters.cend())
   {
-    ABORT_F("Parameter [%d] already registered", iParamDef->fParamID);
+    ABORT_F("Parameter [%d] already registered", paramID);
+  }
+
+  if(fSerializableParameters.find(paramID) != fSerializableParameters.cend())
+  {
+    ABORT_F("Parameter [%d] already registered", paramID);
   }
 
 #ifdef JAMBA_DEBUG_LOGGING
   DLOG_F(INFO, "Parameters::addRawParamDef{%d, \"%s\", \"%s\", %f, %d, %d, %d, \"%s\", %d%s%s}",
-         iParamDef->fParamID,
+         paramID,
          String(iParamDef->fTitle).text8(),
          String(iParamDef->fUnits).text8(),
-         iParamDef->fDefaultNormalizedValue,
+         iParamDef->fDefaultValue,
          iParamDef->fStepCount,
          iParamDef->fFlags,
          iParamDef->fUnitID,
@@ -186,17 +170,47 @@ void Parameters::addRawParamDef(std::shared_ptr<RawParamDef> iParamDef)
          iParamDef->fTransient ? ", transient" : "");
 #endif
 
-  fParameters[iParamDef->fParamID] = iParamDef;
+  fRawParameters[paramID] = iParamDef;
 
-  fPluginOrder.emplace_back(iParamDef->fParamID);
+  fPluginOrder.emplace_back(paramID);
 
   if(!iParamDef->fTransient)
   {
     if(iParamDef->fUIOnly)
-      fGUISaveStateOrder.fOrder.emplace_back(iParamDef->fParamID);
+      fGUISaveStateOrder.fOrder.emplace_back(paramID);
     else
-      fRTSaveStateOrder.fOrder.emplace_back(iParamDef->fParamID);
+      fRTSaveStateOrder.fOrder.emplace_back(paramID);
   }
+}
+
+//------------------------------------------------------------------------
+// Parameters::addSerializableParamDef
+//------------------------------------------------------------------------
+void Parameters::addSerializableParamDef(std::shared_ptr<SerializableParamDef> iParamDef)
+{
+  ParamID paramID = iParamDef->fParamID;
+  
+  if(fRawParameters.find(paramID) != fRawParameters.cend())
+  {
+    ABORT_F("Parameter [%d] already registered", paramID);
+  }
+
+  if(fSerializableParameters.find(paramID) != fSerializableParameters.cend())
+  {
+    ABORT_F("Parameter [%d] already registered", paramID);
+  }
+
+  DCHECK_F(iParamDef->fUIOnly, "Serializable parameter [%d] must be marked UIOnly (not supported in RT for now)", paramID);
+
+#ifdef JAMBA_DEBUG_LOGGING
+  DLOG_F(INFO, "Parameters::addSerializableParamDef{%d, \"%s\", %s%s}",
+         paramID,
+         String(iParamDef->fTitle).text8(),
+         iParamDef->fUIOnly ? ", uiOnly" : "",
+         iParamDef->fTransient ? ", transient" : "");
+#endif
+
+  fSerializableParameters[paramID] = iParamDef;
 }
 
 //------------------------------------------------------------------------

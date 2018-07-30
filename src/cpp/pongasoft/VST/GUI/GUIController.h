@@ -7,6 +7,7 @@
 #include <pongasoft/VST/GUI/Params/GUIParameters.h>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include <pongasoft/VST/GUI/GUIViewState.h>
+#include <pongasoft/VST/GUI/GUIState.h>
 
 namespace pongasoft {
 namespace VST {
@@ -29,9 +30,9 @@ public:
   ~GUIController() override;
 
   /**
-   * Must be implemented to return the "base" plugin parameter class
+   * Subclasses must implement this method to return the state
    */
-  virtual pongasoft::VST::Parameters const *getPluginParameters() const = 0;
+  virtual GUIState *getGUIState() = 0;
 
   /**
    * Registers the view state used by the (sub) controller so that they get properly initialized  */

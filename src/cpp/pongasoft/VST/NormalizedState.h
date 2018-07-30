@@ -26,7 +26,7 @@ public:
    */
   struct SaveOrder
   {
-    uint16 fVersion{0};
+    int16 fVersion{0};
     std::vector<ParamID> fOrder{};
     inline int getCount() const { return static_cast<int>(fOrder.size()); }
   };

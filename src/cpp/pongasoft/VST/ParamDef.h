@@ -2,6 +2,7 @@
 #define __PONGASOFT_VST_PARAM_DEF_H__
 
 #include "ParamConverters.h"
+#include "ParamSerializers.h"
 
 #include <base/source/fstreamer.h>
 #include <pluginterfaces/vst/vsttypes.h>
@@ -17,9 +18,61 @@ using namespace Steinberg;
 using namespace Steinberg::Vst;
 
 /**
- * Base class for a raw parameter definition
+ * Base class for all ParamDef
  */
-class RawParamDef
+class SerializableParamDef
+{
+public:
+  SerializableParamDef(ParamID const iParamID,
+                       TChar const *const iTitle,
+                       bool const iUIOnly,
+                       bool const iTransient) :
+    fParamID{iParamID},
+    fTitle{iTitle},
+    fUIOnly{iUIOnly},
+    fTransient{iTransient}
+  {}
+
+public:
+  const ParamID fParamID;
+  const TChar *const fTitle;
+  const bool fUIOnly; // not used in RT (saved in the UI stream)
+  const bool fTransient; // not saved in the stream
+};
+
+/**
+ * Base class for all parameter defs (provide serialization/deserialization)
+ *
+ * @tparam ParamSerializer the serializer (see ParamSerializers.h for an explanation of what is expected) */
+template<typename ParamSerializer>
+class AnyParamDef : public SerializableParamDef
+{
+public:
+  using SerializableParamType = typename ParamSerializer::ParamType;
+
+  AnyParamDef(ParamID const iParamID,
+              TChar const *const iTitle,
+              bool const iUIOnly,
+              bool const iTransient,
+              SerializableParamType const &iDefaultValue) :
+    SerializableParamDef(iParamID, iTitle, iUIOnly, iTransient),
+    fDefaultValue{iDefaultValue}
+  {}
+
+  // readFromStream
+  SerializableParamType readFromStream(IBStreamer &iStreamer) const;
+
+  // writeToStream
+  tresult writeToStream(SerializableParamType const &iValue, IBStreamer &oStreamer) const;
+
+public:
+  const SerializableParamType fDefaultValue;
+};
+
+/**
+ * Base class for a raw vst parameter definition
+ */
+class RawParamDef : public AnyParamDef<RawParamSerializer>
 {
 public:
   RawParamDef(ParamID const iParamID,
@@ -33,47 +86,25 @@ public:
               int32 const iPrecision,
               bool const iUIOnly,
               bool const iTransient) :
-    fParamID{iParamID},
-    fTitle{iTitle},
+    AnyParamDef(iParamID, iTitle, iUIOnly, iTransient, iDefaultNormalizedValue),
     fUnits{iUnits},
-    fDefaultNormalizedValue{iDefaultNormalizedValue},
     fStepCount{iStepCount},
     fFlags{iFlags},
     fUnitID{iUnitID},
     fShortTitle{iShortTitle},
-    fPrecision{iPrecision},
-    fUIOnly{iUIOnly},
-    fTransient{iTransient}
+    fPrecision{iPrecision}
   {}
 
 public:
-  ParamValue readNormalizedValue(IBStreamer &iStreamer) const
-  {
-    if(!fTransient)
-    {
-      double value;
-      if(!iStreamer.readDouble(value))
-        value = fDefaultNormalizedValue;
-      return value;
-    }
-    else
-      return fDefaultNormalizedValue;
-  }
-
   virtual void toString(ParamValue iNormalizedValue, String128 iString) const = 0;
 
 public:
-  const ParamID fParamID;
-  const TChar *const fTitle;
   const TChar *const fUnits;
-  const ParamValue fDefaultNormalizedValue;
   const int32 fStepCount;
   const int32 fFlags;
   const UnitID fUnitID;
   const TChar *const fShortTitle;
   const int32 fPrecision;
-  const bool fUIOnly; // not used in RT (saved in the UI stream)
-  const bool fTransient; // not saved in the stream
 };
 
 /**
@@ -112,7 +143,7 @@ public:
   }
 
   // getDefaultValue
-  ParamType getDefaultValue() const { return denormalize(fDefaultNormalizedValue); }
+  ParamType getDefaultValue() const { return denormalize(fDefaultValue); }
 
   // shortcut to normalize
   inline ParamValue normalize(ParamType const &iValue) const { return ParamConverter::normalize(iValue); }
@@ -130,10 +161,39 @@ public:
 };
 
 //------------------------------------------------------------------------
+// AnyParamDef::readFromStream
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+typename ParamSerializer::ParamType AnyParamDef<ParamSerializer>::readFromStream(IBStreamer &iStreamer) const
+{
+  if(!fTransient)
+  {
+    return ParamSerializer::readFromStream(iStreamer, fDefaultValue);
+  }
+  else
+    return fDefaultValue;
+}
+
+//------------------------------------------------------------------------
+// AnyParamDef::writeToStream
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+tresult AnyParamDef<ParamSerializer>::writeToStream(const typename ParamSerializer::ParamType &iValue, IBStreamer &oStreamer) const
+{
+  return ParamSerializer::writeToStream(iValue, oStreamer);
+}
+
+//------------------------------------------------------------------------
 // ParamDefSPtr - define shortcut notation
 //------------------------------------------------------------------------
 template<typename ParamConverter>
 using ParamDefSPtr = std::shared_ptr<ParamDef<ParamConverter>>;
+
+//------------------------------------------------------------------------
+// AnyParamDefSPtr - define shortcut notation
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+using AnyParamDefSPtr = std::shared_ptr<AnyParamDef<ParamSerializer>>;
 
 }
 }

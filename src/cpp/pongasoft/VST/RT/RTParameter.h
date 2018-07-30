@@ -21,7 +21,7 @@ public:
   // Constructor
   explicit RTRawParameter(std::shared_ptr<RawParamDef> iParamDef) :
     fRawParamDef{iParamDef},
-    fNormalizedValue{fRawParamDef->fDefaultNormalizedValue},
+    fNormalizedValue{fRawParamDef->fDefaultValue},
     fPreviousNormalizedValue{fNormalizedValue}
   {}
 

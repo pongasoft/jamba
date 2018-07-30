@@ -39,6 +39,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/ParamConverters.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/ParamDef.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Parameters.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/ParamSerializers.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/SampleRateBasedClock.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Timer.h
 
@@ -46,10 +47,11 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTProcessor.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTState.h
 
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxMgr.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParameters.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamSerializers.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/HostParameters.h
 
@@ -62,6 +64,7 @@ set(JAMBA_sources_h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIController.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIViewState.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Types.h
     )
@@ -87,6 +90,7 @@ set(JAMBA_sources_cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIController.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.cpp
 
     )
 

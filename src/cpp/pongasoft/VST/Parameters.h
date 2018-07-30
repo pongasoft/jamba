@@ -64,7 +64,37 @@ public:
     Parameters *fParameters;
   };
 
-public:
+  /**
+   * Implements the builder pattern for ease of build.
+   * @tparam ParamSerializer the serializer (see ParamSerializers.h for an explanation of what is expected) */
+  template<typename ParamSerializer>
+  struct AnyParamDefBuilder
+  {
+    // builder methods
+    AnyParamDefBuilder &defaultValue(typename ParamSerializer::ParamType const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
+    AnyParamDefBuilder &uiOnly(bool iUIOnly = true) { fUIOnly = iUIOnly; return *this; }
+    AnyParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+
+    // parameter factory method
+    AnyParamDefSPtr<ParamSerializer> add() const;
+
+    // fields
+    ParamID fParamID;
+    const TChar *fTitle;
+    typename ParamSerializer::ParamType fDefaultValue{};
+    bool fUIOnly = false;
+    bool fTransient = false;
+
+    friend class Parameters;
+
+  protected:
+    AnyParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
+      fParameters{iParameters}, fParamID{iParamID}, fTitle{iTitle} {}
+
+  private:
+    Parameters *fParameters;
+  };
+
 
 public:
   // Constructor
@@ -74,20 +104,27 @@ public:
   virtual ~Parameters() = default;
 
   /**
-   * Used from derived classes to build a parameter.
+   * Used from derived classes to build a parameter backed by a VST parameter
    * TODO add example + don't forget that order is important (define the order in Maschine for example)
    */
   template<typename ParamConverter>
   ParamDefBuilder<ParamConverter> build(ParamID iParamID, const TChar* iTitle);
 
   /**
+   * Used from derived classes to build a parameter of any type not convertible to a ParamValue
+   */
+  template<typename ParamSerializer>
+  AnyParamDefBuilder<ParamSerializer> buildAny(ParamID iParamID, const TChar* iTitle);
+
+  /**
    * Used to change the default order (registration order) used when saving the RT state (getState/setState in the
    * processor, setComponentState in the controller)
    *
+   * @param iVersion should be a >= 0 number. If negative it will be ignored
    * @tparam Args can be any combination of ParamID, RawParamDef or ParamDef<ParamConverter>
    */
   template<typename... Args>
-  void setRTSaveStateOrder(uint16 iVersion, Args... args);
+  void setRTSaveStateOrder(int16 iVersion, Args... args);
 
   /**
    * @return the order used when saving the GUI state (getState/setState in the controller)
@@ -98,10 +135,11 @@ public:
    * Used to change the default order (registration order) used when saving the GUI state (getState/setState in
    * the controller)
    *
+   * @param iVersion should be a >= 0 number. If negative it will be ignored
    * @tparam Args can be any combination of ParamID, RawParamDef or ParamDef<ParamConverter>
    */
   template<typename... Args>
-  void setGUISaveStateOrder(uint16 iVersion, Args... args);
+  void setGUISaveStateOrder(int16 iVersion, Args... args);
 
   /**
    * @return the order used when saving the RT state (getState/setState in the processor, setComponentState in
@@ -124,22 +162,9 @@ public:
   virtual tresult writeRTState(NormalizedState const *iNormalizedState, IBStreamer &oStreamer) const;
 
   /**
-   * This method is called to read the GUIState from the stream  */
-  virtual std::unique_ptr<NormalizedState> readGUIState(IBStreamer &iStreamer) const;
-
-  /**
-   * This method is called to write the NormalizedState to the stream */
-  virtual tresult writeGUIState(NormalizedState const *iNormalizedState, IBStreamer &oStreamer) const;
-
-  /**
    * @return a new normalized state for RT (can be overridden to return a subclass!)
    */
   virtual std::unique_ptr<NormalizedState> newRTState() const;
-
-  /**
-   * @return a new normalized state for GUI (can be overridden to return a subclass!)
-   */
-  virtual std::unique_ptr<NormalizedState> newGUIState() const;
 
   /**
    * @return normalized value read from the stream for the given parameter
@@ -149,16 +174,30 @@ public:
   // getRawParamDef - nullptr when not found
   std::shared_ptr<RawParamDef> getRawParamDef(ParamID iParamID) const;
 
+  // getSerializableParamDef - nullptr when not found
+  std::shared_ptr<SerializableParamDef> getSerializableParamDef(ParamID iParamID) const;
+
 protected:
   // internally called by the builder
   template<typename ParamConverter>
   ParamDefSPtr<ParamConverter> add(ParamDefBuilder<ParamConverter> const &iBuilder);
 
+  // internally called by the builder
+  template<typename ParamSerializer>
+  AnyParamDefSPtr<ParamSerializer> add(AnyParamDefBuilder<ParamSerializer> const &iBuilder);
+
+  // addRawParamDef
   void addRawParamDef(std::shared_ptr<RawParamDef> iParamDef);
 
+  // addSerializableParamDef
+  void addSerializableParamDef(std::shared_ptr<SerializableParamDef> iParamDef);
+
 private:
-  // contains all the registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::shared_ptr<RawParamDef>> fParameters{};
+  // contains all the registered (raw type) parameters (unique ID, will be checked on add)
+  std::map<ParamID, std::shared_ptr<RawParamDef>> fRawParameters{};
+
+  // contains all the registered (serializable type) parameters (unique ID, will be checked on add)
+  std::map<ParamID, std::shared_ptr<SerializableParamDef>> fSerializableParameters{};
 
   // order in which the parameters will be registered in the plugin
   std::vector<ParamID> fPluginOrder{};
@@ -175,9 +214,9 @@ private:
   template<typename... Args>
   void buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID id, Args... args);
 
-  // case when RawParamDef
+  // case when SerializableParamDef
   template<typename... Args>
-  void buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<RawParamDef> &iParamDef, Args... args)
+  void buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<SerializableParamDef> &iParamDef, Args... args)
   {
     buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
@@ -190,6 +229,15 @@ private:
   }
 
 };
+
+//------------------------------------------------------------------------
+// Parameters::AnyParamDefBuilder::add
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+AnyParamDefSPtr<ParamSerializer> Parameters::AnyParamDefBuilder<ParamSerializer>::add() const
+{
+  return fParameters->add(*this);
+}
 
 //------------------------------------------------------------------------
 // Parameters::ParamDefBuilder::add
@@ -224,6 +272,24 @@ ParamDefSPtr<ParamConverter> Parameters::add(ParamDefBuilder<ParamConverter> con
 }
 
 //------------------------------------------------------------------------
+// Parameters::add (called by the builder)
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+AnyParamDefSPtr<ParamSerializer> Parameters::add(Parameters::AnyParamDefBuilder<ParamSerializer> const &iBuilder)
+{
+  auto param = std::make_shared<AnyParamDef<ParamSerializer>>(iBuilder.fParamID,
+                                                              iBuilder.fTitle,
+                                                              iBuilder.fDefaultValue,
+                                                              iBuilder.fUIOnly,
+                                                              iBuilder.fTransient);
+
+  addSerializableParamDef(param);
+
+  return param;
+}
+
+
+//------------------------------------------------------------------------
 // Parameters::build
 //------------------------------------------------------------------------
 template<typename ParamConverter>
@@ -233,13 +299,23 @@ Parameters::ParamDefBuilder<ParamConverter> Parameters::build(ParamID iParamID, 
 }
 
 //------------------------------------------------------------------------
+// Parameters::buildAny
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+Parameters::AnyParamDefBuilder<ParamSerializer> Parameters::buildAny(ParamID iParamID, const TChar *iTitle)
+{
+  return Parameters::AnyParamDefBuilder<ParamSerializer>(this, iParamID, iTitle);
+}
+
+//------------------------------------------------------------------------
 // Parameters::buildParamIDs
 //------------------------------------------------------------------------
 template<typename... Args>
 void Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID, Args... args)
 {
-  auto iter = fParameters.find(iParamID);
-  if(iter != fParameters.cend())
+  auto iter = fRawParameters.find(iParamID);
+  if(fRawParameters.find(iParamID) != fRawParameters.cend() ||
+     fSerializableParameters.find(iParamID) != fSerializableParameters.cend())
   {
     iParamIDs.emplace_back(iParamID);
   }
@@ -254,7 +330,7 @@ void Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID
 // Parameters::setRTSaveStateOrder
 //------------------------------------------------------------------------
 template<typename... Args>
-void Parameters::setRTSaveStateOrder(uint16 iVersion, Args... args)
+void Parameters::setRTSaveStateOrder(int16 iVersion, Args... args)
 {
   std::vector<ParamID> ids{};
   buildParamIDs(ids, args...);
@@ -263,7 +339,7 @@ void Parameters::setRTSaveStateOrder(uint16 iVersion, Args... args)
 
   for(auto id : ids)
   {
-    if(fParameters.at(id)->fTransient)
+    if(fRawParameters.at(id)->fTransient)
     {
       ok = false;
       DLOG_F(ERROR,
@@ -271,7 +347,7 @@ void Parameters::setRTSaveStateOrder(uint16 iVersion, Args... args)
              id);
     }
 
-    if(fParameters.at(id)->fUIOnly)
+    if(fRawParameters.at(id)->fUIOnly)
     {
       ok = false;
       DLOG_F(ERROR,
@@ -281,7 +357,7 @@ void Parameters::setRTSaveStateOrder(uint16 iVersion, Args... args)
     }
   }
 
-  for(auto p : fParameters)
+  for(auto p : fRawParameters)
   {
     auto param = p.second;
     if(!param->fUIOnly && !param->fTransient)
@@ -302,7 +378,7 @@ void Parameters::setRTSaveStateOrder(uint16 iVersion, Args... args)
 // Parameters::setRTSaveStateOrder
 //------------------------------------------------------------------------
 template<typename... Args>
-void Parameters::setGUISaveStateOrder(uint16 iVersion, Args... args)
+void Parameters::setGUISaveStateOrder(int16 iVersion, Args... args)
 {
   std::vector<ParamID> ids{};
   buildParamIDs(ids, args...);
@@ -311,7 +387,7 @@ void Parameters::setGUISaveStateOrder(uint16 iVersion, Args... args)
 
   for(auto id : ids)
   {
-    if(fParameters.at(id)->fTransient)
+    if(fRawParameters.at(id)->fTransient)
     {
       ok = false;
       DLOG_F(ERROR,
@@ -319,7 +395,7 @@ void Parameters::setGUISaveStateOrder(uint16 iVersion, Args... args)
              id);
     }
 
-    if(!fParameters.at(id)->fUIOnly)
+    if(!fRawParameters.at(id)->fUIOnly)
     {
       ok = false;
       DLOG_F(ERROR,
@@ -329,7 +405,7 @@ void Parameters::setGUISaveStateOrder(uint16 iVersion, Args... args)
     }
   }
 
-  for(auto p : fParameters)
+  for(auto p : fRawParameters)
   {
     auto param = p.second;
     if(param->fUIOnly && !param->fTransient)

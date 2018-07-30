@@ -41,11 +41,14 @@ tresult GUIController::initialize(FUnknown *context)
     return result;
   }
 
+  // initializing the state
+  getGUIState()->init(HostParameters(this));
+
   // making sure that the knob mode is set to the default specified
   CFrame::kDefaultKnobMode = fDefaultKnobMode;
   setKnobMode(fDefaultKnobMode);
 
-  fGUIParameters = std::make_shared<GUIParameters>(HostParameters(this), *getPluginParameters());
+  fGUIParameters = std::make_shared<GUIParameters>(HostParameters(this), getGUIState()->getPluginParameters());
   fGUIParameters->registerVstParameters(parameters);
 
   fViewFactory = new CustomUIViewFactory(fGUIParameters);
@@ -100,7 +103,7 @@ tresult GUIController::setComponentState(IBStream *state)
 
   // using helper to read the stream
   IBStreamer streamer(state, kLittleEndian);
-  return fGUIParameters->readRTState(streamer);
+  return getGUIState()->readRTState(streamer);
 }
 
 //------------------------------------------------------------------------
@@ -112,7 +115,7 @@ tresult GUIController::setState(IBStream *state)
     return kResultFalse;
 
   IBStreamer streamer(state, kLittleEndian);
-  return fGUIParameters->readGUIState(streamer);
+  return getGUIState()->readGUIState(streamer);
 }
 
 //------------------------------------------------------------------------
@@ -124,7 +127,7 @@ tresult GUIController::getState(IBStream *state)
     return kResultFalse;
 
   IBStreamer streamer(state, kLittleEndian);
-  return fGUIParameters->writeGUIState(streamer);
+  return getGUIState()->writeGUIState(streamer);
 }
 
 //------------------------------------------------------------------------
