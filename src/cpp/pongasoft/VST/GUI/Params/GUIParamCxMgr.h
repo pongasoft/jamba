@@ -1,7 +1,7 @@
 #ifndef __PONGASOFT_VST_GUI_PARAM_CX_MGR_H__
 #define __PONGASOFT_VST_GUI_PARAM_CX_MGR_H__
 
-#include "GUIParameters.h"
+#include <pongasoft/VST/GUI/GUIState.h>
 
 namespace pongasoft {
 namespace VST {
@@ -14,35 +14,33 @@ public:
   /**
    * @return true if the param actually exists
    */
-  bool exists(ParamID iParamID) const
-  {
-    return fParameters->exists(iParamID);
-  }
+  inline bool existsVst(ParamID iParamID) const { return fGUIState->existsVst(iParamID); }
 
   /**
    * Registers a raw parameter (no conversion)
    */
-  std::unique_ptr<GUIRawParameter> registerGUIRawParam(ParamID iParamID,
-                                                       GUIRawParameter::IChangeListener *iChangeListener = nullptr);
+  std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
+                                                          Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
    * Generic register with any kind of conversion
    */
   template<typename T>
-  std::unique_ptr<T> registerGUIParam(ParamID iParamID,
-                                      GUIRawParameter::IChangeListener *iChangeListener = nullptr)
+  std::unique_ptr<T> registerVstParam(ParamID iParamID,
+                                      Parameters::IChangeListener *iChangeListener = nullptr)
   {
-    return std::make_unique<T>(registerGUIRawParam(iParamID, iChangeListener));
+    return std::make_unique<T>(registerRawVstParam(iParamID, iChangeListener));
   }
 
   /**
    * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
    */
   template<typename ParamConverter>
-  GUIParamUPtr<ParamConverter> registerGUIParam(ParamDefSPtr<ParamConverter> iParamDef,
-                                                GUIRawParameter::IChangeListener *iChangeListener = nullptr)
+  GUIVstParam<ParamConverter> registerVstParam(VstParam<ParamConverter> iParamDef,
+                                               Parameters::IChangeListener *iChangeListener = nullptr)
   {
-    return std::make_unique<GUIParameter<ParamConverter>>(registerGUIRawParam(iParamDef->fParamID, iChangeListener));
+    return std::make_unique<GUIVstParameter<ParamConverter>>(registerRawVstParam(iParamDef->fParamID,
+                                                                                 iChangeListener));
   }
 
   /**
@@ -52,22 +50,23 @@ public:
   template<typename TParameters>
   TParameters const *getPluginParameters() const
   {
-    return dynamic_cast<TParameters const *>(&fParameters->getPluginParameters());
+    return dynamic_cast<TParameters const *>(&fGUIState->getPluginParameters());
   }
 
-  friend class GUIParameters;
+  friend class GUI::GUIState;
 
 protected:
-  explicit GUIParamCxMgr(std::shared_ptr<const GUIParameters> iParameters) :
-    fParameters{std::move(iParameters)}
-  {}
+  explicit GUIParamCxMgr(GUIState *iGUIState) : fGUIState{iGUIState}
+  {
+    DCHECK_F(fGUIState != nullptr);
+  }
 
 private:
-  // the parameters
-  std::shared_ptr<const GUIParameters> fParameters;
+  // the gui state
+  GUIState *fGUIState;
 
   // Maintains the connections for the listeners... will be automatically discarded in the destructor
-  std::map<ParamID, std::unique_ptr<GUIRawParameter::Connection>> fParameterConnections;
+  std::map<ParamID, std::unique_ptr<GUIRawVstParameter::Connection>> fVstParamCxs;
 };
 
 

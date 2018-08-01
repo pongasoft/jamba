@@ -61,7 +61,7 @@ void CustomView::drawStyleChanged()
 ///////////////////////////////////////////
 // CustomView::onParameterChange
 ///////////////////////////////////////////
-void CustomView::onParameterChange(ParamID iParamID, ParamValue iNormalizedValue)
+void CustomView::onParameterChange(ParamID /* iParamID */)
 {
   markDirty();
 }
@@ -99,9 +99,9 @@ bool CustomView::getEditorMode() const
 ///////////////////////////////////////////
 void CustomView::afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription)
 {
-  auto provider = dynamic_cast<GUIParametersProvider const *>(iDescription->getViewFactory());
+  auto provider = dynamic_cast<GUIStateProvider const *>(iDescription->getViewFactory());
   if(provider)
-    initParameters(provider->getGUIParameters());
+    initState(provider->getGUIState());
 }
 
 ///////////////////////////////////////////

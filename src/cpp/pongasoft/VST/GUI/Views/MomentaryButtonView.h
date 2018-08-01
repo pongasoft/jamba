@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vstgui4/vstgui/lib/controls/ccontrol.h>
-#include <pongasoft/VST/GUI/Params/GUIParameter.h>
+#include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include "CustomControlView.h"
 
 namespace pongasoft {

@@ -15,27 +15,27 @@ namespace RT {
  * range [0.0,1.0]). Also keeps the "previous" value which is the value the param had in the previous frame/call to
  * process.
  */
-class RTRawParameter
+class RTRawVstParameter
 {
 public:
   // Constructor
-  explicit RTRawParameter(std::shared_ptr<RawParamDef> iParamDef) :
-    fRawParamDef{iParamDef},
-    fNormalizedValue{fRawParamDef->fDefaultValue},
+  explicit RTRawVstParameter(std::shared_ptr<RawVstParamDef> iParamDef) :
+    fParamDef{iParamDef},
+    fNormalizedValue{fParamDef->fDefaultValue},
     fPreviousNormalizedValue{fNormalizedValue}
   {}
 
   // getParamID
-  ParamID getParamID() const { return fRawParamDef->fParamID; }
+  ParamID getParamID() const { return fParamDef->fParamID; }
 
-  // getRawParamDef
-  std::shared_ptr<RawParamDef> getRawParamDef() const { return fRawParamDef; }
+  // getParamDef
+  std::shared_ptr<RawVstParamDef> getParamDef() const { return fParamDef; }
 
   /**
    * Update the parameter with a new normalized value. This is typically called after the VST parameter managed
    * by the VST sdk changes (for example, moving a knob or loading a previously saved plugin)
    *
-   * @return true if the value was actually update, false if it is the same
+   * @return true if the value was actually updated, false if it is the same
    */
   virtual bool updateNormalizedValue(ParamValue iNormalizedValue);
 
@@ -62,7 +62,7 @@ public:
   virtual bool resetPreviousValue();
 
 protected:
-  std::shared_ptr<RawParamDef> fRawParamDef;
+  std::shared_ptr<RawVstParamDef> fParamDef;
   ParamValue fNormalizedValue;
   ParamValue fPreviousNormalizedValue;
 };
@@ -73,14 +73,14 @@ protected:
  * @tparam ParamConverter the converter (see ParamConverters.h for an explanation of what is expected)
  */
 template<typename ParamConverter>
-class RTParameter : public RTRawParameter
+class RTVstParameter : public RTRawVstParameter
 {
 public:
   using ParamType = typename ParamConverter::ParamType;
 
   // Constructor
-  explicit RTParameter(ParamDefSPtr<ParamConverter> iParamDef) :
-    RTRawParameter(iParamDef),
+  explicit RTVstParameter(VstParam<ParamConverter> iParamDef) :
+    RTRawVstParameter(iParamDef),
     fValue{denormalize(fNormalizedValue)},
     fPreviousValue{fValue}
   {
@@ -120,9 +120,9 @@ protected:
 // RTParameter::updateNormalizedValue - update fValue to the new value and return true if it changed
 //------------------------------------------------------------------------
 template<typename ParamConverter>
-bool RTParameter<ParamConverter>::updateNormalizedValue(ParamValue iNormalizedValue)
+bool RTVstParameter<ParamConverter>::updateNormalizedValue(ParamValue iNormalizedValue)
 {
-  if(RTRawParameter::updateNormalizedValue(iNormalizedValue))
+  if(RTRawVstParameter::updateNormalizedValue(iNormalizedValue))
   {
     fValue = denormalize(iNormalizedValue);
     return true;
@@ -135,9 +135,9 @@ bool RTParameter<ParamConverter>::updateNormalizedValue(ParamValue iNormalizedVa
 // RTParameter::resetPreviousValue
 //------------------------------------------------------------------------
 template<typename ParamConverter>
-bool RTParameter<ParamConverter>::resetPreviousValue()
+bool RTVstParameter<ParamConverter>::resetPreviousValue()
 {
-  if(RTRawParameter::resetPreviousValue())
+  if(RTRawVstParameter::resetPreviousValue())
   {
     fPreviousValue = fValue;
     return true;
@@ -150,14 +150,14 @@ bool RTParameter<ParamConverter>::resetPreviousValue()
 // RTParameter::update
 //------------------------------------------------------------------------
 template<typename ParamConverter>
-void RTParameter<ParamConverter>::update(const ParamType &iNewValue)
+void RTVstParameter<ParamConverter>::update(const ParamType &iNewValue)
 {
   fValue = iNewValue;
   fNormalizedValue = normalize(fValue);
 }
 
 //------------------------------------------------------------------------
-// RTParam - wrapper to make writing the code much simpler and natural
+// RTVstParam - wrapper to make writing the code much simpler and natural
 //------------------------------------------------------------------------
 /**
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
@@ -167,12 +167,12 @@ void RTParameter<ParamConverter>::update(const ParamType &iNewValue)
  * @tparam ParamConverter the converter (see ParamConverters.h for an explanation of what is expected)
  */
 template<typename ParamConverter>
-class RTParam
+class RTVstParam
 {
   using ParamType = typename ParamConverter::ParamType;
 
 public:
-  RTParam(std::shared_ptr<RTParameter<ParamConverter>> iPtr) :
+  RTVstParam(std::shared_ptr<RTVstParameter<ParamConverter>> iPtr) :
     fPtr{std::move(iPtr)}
   {}
 
@@ -219,7 +219,7 @@ public:
   inline ParamType const &previous() const { return fPtr->getPreviousValue(); }
 
 private:
-  std::shared_ptr<RTParameter<ParamConverter>> fPtr;
+  std::shared_ptr<RTVstParameter<ParamConverter>> fPtr;
 };
 
 }

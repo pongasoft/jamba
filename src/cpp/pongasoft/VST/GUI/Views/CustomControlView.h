@@ -61,7 +61,7 @@ public:
 
 protected:
   // the gui parameter tied to the control
-  GUIParamUPtr<ParamConverter> fControlParameter{nullptr};
+  GUIVstParam<ParamConverter> fControlParameter{nullptr};
 
 #if EDITOR_MODE
   // the value (in sync with control parameter but may exist on its own in editor mode)
@@ -126,9 +126,9 @@ void TCustomControlView<ParamConverter>::registerParameters()
   if(getControlTag() >= 0)
   {
     auto paramID = static_cast<ParamID>(getControlTag());
-    if(fParamCxMgr->exists(paramID))
+    if(fParamCxMgr->existsVst(paramID))
     {
-      fControlParameter = registerGUIParam<ParamConverter>(paramID);
+      fControlParameter = registerVstParam<ParamConverter>(paramID);
       fControlValue = fControlParameter->getValue();
     }
     else

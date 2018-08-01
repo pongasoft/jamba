@@ -7,9 +7,9 @@ namespace VST {
 namespace RT {
 
 //------------------------------------------------------------------------
-// RTParameter::update - update fValue to the new value and return true if it changed
+// RTRawVstParameter::addToOutput
 //------------------------------------------------------------------------
-tresult RTRawParameter::addToOutput(ProcessData &oData)
+tresult RTRawVstParameter::addToOutput(ProcessData &oData)
 {
   IParameterChanges* outParamChanges = oData.outputParameterChanges;
   if(outParamChanges != nullptr)
@@ -29,7 +29,7 @@ tresult RTRawParameter::addToOutput(ProcessData &oData)
 //------------------------------------------------------------------------
 // RTParameter::updateNormalizedValue
 //------------------------------------------------------------------------
-bool RTRawParameter::updateNormalizedValue(ParamValue iNormalizedValue)
+bool RTRawVstParameter::updateNormalizedValue(ParamValue iNormalizedValue)
 {
   if(fNormalizedValue != iNormalizedValue)
   {
@@ -43,7 +43,7 @@ bool RTRawParameter::updateNormalizedValue(ParamValue iNormalizedValue)
 //------------------------------------------------------------------------
 // RTParameter::resetPreviousValue
 //------------------------------------------------------------------------
-bool RTRawParameter::resetPreviousValue()
+bool RTRawVstParameter::resetPreviousValue()
 {
   if(hasChanged())
   {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pongasoft/VST/GUI/Params/GUIParameter.h>
+#include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include "CustomControlView.h"
 
 #include <iostream>

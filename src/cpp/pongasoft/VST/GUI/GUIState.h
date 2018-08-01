@@ -1,8 +1,9 @@
 #pragma once
 
 #include <pongasoft/VST/Parameters.h>
-#include <pongasoft/VST/GUI/Params/HostParameters.h>
-#include <pongasoft/VST/GUI/Params/GUIParameter.h>
+#include <pongasoft/VST/GUI/Params/VstParameters.h>
+#include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
+#include <pongasoft/VST/GUI/Params/GUISerParameter.h>
 
 namespace pongasoft {
 namespace VST {
@@ -10,16 +11,20 @@ namespace GUI {
 
 using namespace Params;
 
+namespace Params {
+class GUIParamCxMgr;
+}
+
 class GUIState
 {
 public:
-  explicit GUIState(Parameters const &iParameters) :
-    fPluginParameters{iParameters}
+  explicit GUIState(Parameters const &iPluginParameters) :
+    fPluginParameters{iPluginParameters}
   {};
 
   /**
    * Called by the GUIController. */
-  tresult init(HostParameters const &iHostParameters);
+  virtual tresult init(VstParametersSPtr iVstParameters);
 
   // getPluginParameters
   Parameters const &getPluginParameters() const { return fPluginParameters; }
@@ -28,7 +33,20 @@ public:
    * This method is called for each parameter managed by the GUIState that is not a regular VST parameter
    */
   template<typename ParamSerializer>
-  GUIParam<ParamSerializer> add(AnyParamDefSPtr<ParamSerializer> iParamDef);
+  GUISerParam<ParamSerializer> add(SerParam<ParamSerializer> iParamDef);
+
+  /**
+   * @return true if there is a vst param with the provided ID
+   */
+  inline bool existsVst(ParamID iParamID) const { return fVstParameters->exists(iParamID); }
+
+  /**
+   * @return the raw parameter given its id
+   */
+  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
+  {
+    return std::make_unique<GUIRawVstParameter>(iParamID, fVstParameters);
+  }
 
   /**
    * This method is called from the GUI controller setComponentState method and reads the state coming from RT
@@ -48,29 +66,58 @@ public:
    */
   virtual tresult writeGUIState(IBStreamer &oStreamer) const;
 
+  /**
+   * The CustomView class automatically calls this method to get a handle of a ParamCxMgr used to register for interest
+   * and obtain GUIParam instances. See CustomView::registerXXX methods.
+   */
+  std::unique_ptr<GUIParamCxMgr> createParamCxMgr();
+
 protected:
+  // the parameters
+  Parameters const &fPluginParameters;
+
   // setParamNormalized
   tresult setParamNormalized(NormalizedState const *iNormalizedState);
 
 protected:
-  std::unique_ptr<HostParameters> fHostParameters{};
-  Parameters const &fPluginParameters;
+  VstParametersSPtr fVstParameters{};
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::shared_ptr<GUISerializableParameter>> fSerializableParameters{};
+  std::map<ParamID, std::shared_ptr<IGUISerParameter>> fSerParams{};
 
   // add serializable parameter to the structures
-  void addSerializableParameter(std::shared_ptr<GUISerializableParameter> const &iParameter);
+  void addSerParam(std::shared_ptr<IGUISerParameter> const &iParameter);
+};
+
+/**
+ * Simple templated extension to expose the plugin parameters as its real type
+ *
+ * @tparam TPluginParameters the type of the plugin parameters (subclass of Parameters)
+ */
+template<typename TPluginParameters>
+class GUIPluginState : public GUIState
+{
+public:
+  using PluginParameters = TPluginParameters;
+
+public:
+  explicit GUIPluginState(PluginParameters const &iPluginParameters) :
+    GUIState{iPluginParameters},
+    fParams{iPluginParameters}
+  { }
+
+public:
+  PluginParameters const &fParams;
 };
 
 //------------------------------------------------------------------------
 // GUIState::add
 //------------------------------------------------------------------------
 template<typename ParamSerializer>
-GUIParam<ParamSerializer> GUIState::add(AnyParamDefSPtr<ParamSerializer> iParamDef)
+GUISerParam<ParamSerializer> GUIState::add(SerParam<ParamSerializer> iParamDef)
 {
-  auto guiParam = std::make_shared<AnyParamDef<ParamSerializer>>(iParamDef);
-  addSerializableParameter(guiParam);
+  auto guiParam = std::make_shared<SerParamDef<ParamSerializer>>(iParamDef);
+  addSerParam(guiParam);
   return guiParam;
 }
 

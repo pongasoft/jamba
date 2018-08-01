@@ -3,7 +3,6 @@
 #include <vstgui4/vstgui/lib/iviewlistener.h>
 #include <vstgui4/vstgui/lib/cview.h>
 #include <pongasoft/logging/logging.h>
-#include <pongasoft/VST/GUI/Params/GUIParameters.h>
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
 
 namespace pongasoft {
@@ -73,9 +72,9 @@ template<typename TPluginParameters>
 class PluginGUIViewState : public GUIViewState
 {
 public:
-  void initParameters(std::shared_ptr<GUIParameters> iParameters) override
+  void initState(GUIState *iGUIState) override
   {
-    GUIViewState::initParameters(iParameters);
+    GUIViewState::initState(iGUIState);
     if(fParamCxMgr)
       fParams = getPluginParameters<TPluginParameters>();
   }

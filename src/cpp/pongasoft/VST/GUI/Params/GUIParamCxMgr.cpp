@@ -6,16 +6,16 @@ namespace GUI {
 namespace Params {
 
 //------------------------------------------------------------------------
-// GUIParamCxMgr::registerGUIRawParam
+// GUIParamCxMgr::registerRawVstParam
 //------------------------------------------------------------------------
-std::unique_ptr<GUIRawParameter>
-GUIParamCxMgr::registerGUIRawParam(ParamID iParamID, GUIRawParameter::IChangeListener *iChangeListener)
+std::unique_ptr<GUIRawVstParameter>
+GUIParamCxMgr::registerRawVstParam(ParamID iParamID, Parameters::IChangeListener *iChangeListener)
 {
-  auto parameter = fParameters->getRawParameter(iParamID);
+  auto parameter = fGUIState->getRawVstParameter(iParamID);
 
   if(iChangeListener)
   {
-    fParameterConnections[iParamID] = std::move(parameter->connect(iChangeListener));
+    fVstParamCxs[iParamID] = std::move(parameter->connect(iChangeListener));
   }
 
   return parameter;

@@ -1,10 +1,10 @@
-#ifndef __PONGASOFT_VST_GUI_HOST_PARAMETERS_H__
-#define __PONGASOFT_VST_GUI_HOST_PARAMETERS_H__
+#pragma once
 
 #include <pongasoft/logging/logging.h>
 
 #include <base/source/fstreamer.h>
 #include <public.sdk/source/vst/vsteditcontroller.h>
+#include <memory>
 
 namespace pongasoft {
 namespace VST {
@@ -15,12 +15,12 @@ using namespace Steinberg;
 using namespace Steinberg::Vst;
 
 /**
- * This class acts as a facade/proxy to the host parameters.
+ * This class acts as a facade/proxy to the vst parameters managed by the host daw
  */
-class HostParameters
+class VstParameters
 {
 public:
-  explicit HostParameters(EditController *const iParametersOwner) : fParametersOwner{iParametersOwner}
+  explicit VstParameters(EditController *const iParametersOwner) : fParametersOwner{iParametersOwner}
   {
     DCHECK_NOTNULL_F(iParametersOwner);
   }
@@ -40,9 +40,9 @@ private:
   EditController *const fParametersOwner;
 };
 
-}
-}
-}
-}
+using VstParametersSPtr = std::shared_ptr<VstParameters>;
 
-#endif //__PONGASOFT_VST_GUI_HOST_PARAMETERS_H__
+}
+}
+}
+}

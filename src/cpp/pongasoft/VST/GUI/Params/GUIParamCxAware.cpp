@@ -6,30 +6,30 @@ namespace GUI {
 namespace Params {
 
 ///////////////////////////////////////////
-// GUIParamCxAware::registerGUIRawParam
+// GUIParamCxAware::registerRawVstParam
 ///////////////////////////////////////////
-std::unique_ptr<GUIRawParameter> GUIParamCxAware::registerGUIRawParam(ParamID iParamID, bool iSubscribeToChanges)
+std::unique_ptr<GUIRawVstParameter> GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges)
 {
   if(!fParamCxMgr)
     ABORT_F("fParamCxMgr should have been registered");
 
-  return fParamCxMgr->registerGUIRawParam(iParamID, iSubscribeToChanges ? this : nullptr);
+  return fParamCxMgr->registerRawVstParam(iParamID, iSubscribeToChanges ? this : nullptr);
 }
 
 ///////////////////////////////////////////
-// GUIParamCxAware::registerBooleanParam
+// GUIParamCxAware::registerVstBooleanParam
 ///////////////////////////////////////////
-GUIParamUPtr<BooleanParamConverter> GUIParamCxAware::registerBooleanParam(ParamID iParamID, bool iSubscribeToChanges)
+GUIVstParam<BooleanParamConverter> GUIParamCxAware::registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges)
 {
-  return registerGUIParam<BooleanParamConverter>(iParamID, iSubscribeToChanges);
+  return registerVstParam<BooleanParamConverter>(iParamID, iSubscribeToChanges);
 }
 
 ///////////////////////////////////////////
-// GUIParamCxAware::registerPercentParam
+// GUIParamCxAware::registerVstPercentParam
 ///////////////////////////////////////////
-GUIParamUPtr<PercentParamConverter> GUIParamCxAware::registerPercentParam(ParamID iParamID, bool iSubscribeToChanges)
+GUIVstParam<PercentParamConverter> GUIParamCxAware::registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges)
 {
-  return registerGUIParam<PercentParamConverter>(iParamID, iSubscribeToChanges);
+  return registerVstParam<PercentParamConverter>(iParamID, iSubscribeToChanges);
 }
 
 }

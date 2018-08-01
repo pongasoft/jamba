@@ -41,21 +41,25 @@ tresult GUIController::initialize(FUnknown *context)
     return result;
   }
 
+  // vst parameters
+  VstParametersSPtr vstParameters = std::make_shared<VstParameters>(this);
+
   // initializing the state
-  getGUIState()->init(HostParameters(this));
+  auto guiState = getGUIState();
+
+  guiState->init(vstParameters);
 
   // making sure that the knob mode is set to the default specified
   CFrame::kDefaultKnobMode = fDefaultKnobMode;
   setKnobMode(fDefaultKnobMode);
 
-  fGUIParameters = std::make_shared<GUIParameters>(HostParameters(this), getGUIState()->getPluginParameters());
-  fGUIParameters->registerVstParameters(parameters);
+  guiState->getPluginParameters().registerVstParameters(parameters);
 
-  fViewFactory = new CustomUIViewFactory(fGUIParameters);
+  fViewFactory = new CustomUIViewFactory(guiState);
 
   for(const auto &viewState : fViewStates)
   {
-    viewState->initParameters(fGUIParameters);
+    viewState->initState(guiState);
     viewState->registerParameters();
   }
 

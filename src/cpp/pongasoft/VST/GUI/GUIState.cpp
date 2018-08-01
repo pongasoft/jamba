@@ -1,27 +1,29 @@
 #include <sstream>
 #include "GUIState.h"
+#include <pongasoft/VST/GUI/Params/GUIParamCxMgr.h>
 
 namespace pongasoft {
 namespace VST {
 namespace GUI {
 
 //------------------------------------------------------------------------
-// GUIParameters::addSerializableParameter
+// GUIState::addSerParam
 //------------------------------------------------------------------------
-void GUIState::addSerializableParameter(std::shared_ptr<GUISerializableParameter> const &iParameter)
+void GUIState::addSerParam(std::shared_ptr<IGUISerParameter> const &iParameter)
 {
+  DCHECK_F(iParameter != nullptr);
+
   ParamID paramID = iParameter->getParamID();
 
-  DCHECK_F(iParameter != nullptr);
-  DCHECK_F(fPluginParameters.getSerializableParamDef(paramID) != nullptr, "serializable parameter [%d] not registered", paramID);
-  DCHECK_F(fSerializableParameters.find(paramID) == fSerializableParameters.cend(), "duplicate paramID [%d]", paramID);
-  DCHECK_F(fPluginParameters.getSerializableParamDef(paramID)->fUIOnly, "only GUI parameter allowed");
+  DCHECK_F(fPluginParameters.getSerParamDef(paramID) != nullptr, "serializable parameter [%d] not registered", paramID);
+  DCHECK_F(fSerParams.find(paramID) == fSerParams.cend(), "duplicate paramID [%d]", paramID);
+  DCHECK_F(fPluginParameters.getSerParamDef(paramID)->fUIOnly, "only GUI parameter allowed");
 
-  fSerializableParameters[paramID] = iParameter;
+  fSerParams[paramID] = iParameter;
 }
 
 //------------------------------------------------------------------------
-// GUIParameters::setParamNormalized
+// GUIState::setParamNormalized
 //------------------------------------------------------------------------
 tresult GUIState::setParamNormalized(NormalizedState const *iNormalizedState)
 {
@@ -30,7 +32,7 @@ tresult GUIState::setParamNormalized(NormalizedState const *iNormalizedState)
   for(int i = 0; i < iNormalizedState->getCount(); i++)
   {
     auto paramID = iNormalizedState->fSaveOrder->fOrder[i];
-    res |= fHostParameters->setParamNormalized(paramID, iNormalizedState->fValues[i]);
+    res |= fVstParameters->setParamNormalized(paramID, iNormalizedState->fValues[i]);
   }
 
   return res;
@@ -84,13 +86,12 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
   for(int i = 0; i < saveOrder.getCount(); i++)
   {
     auto paramID = saveOrder.fOrder[i];
-    auto iter = fSerializableParameters.find(paramID);
-    if(iter == fSerializableParameters.cend())
+    auto iter = fSerParams.find(paramID);
+    if(iter == fSerParams.cend())
     {
       // not found => regular parameter
-      ParamValue defaultValue = fPluginParameters.getRawParamDef(paramID)->fDefaultValue;
-      ParamValue value = RawParamSerializer::readFromStream(iStreamer, defaultValue);
-      fHostParameters->setParamNormalized(paramID, value);
+      ParamValue value = fPluginParameters.readNormalizedValue(paramID, iStreamer);
+      fVstParameters->setParamNormalized(paramID, value);
       
 #ifdef JAMBA_DEBUG_LOGGING
       state << ", " << paramID << "=" << value;
@@ -116,7 +117,7 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
 }
 
 //------------------------------------------------------------------------
-// GUIParameters::writeGUIState
+// GUIState::writeGUIState
 //------------------------------------------------------------------------
 tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
 {
@@ -135,10 +136,10 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
   for(int i = 0; i < saveOrder.getCount(); i++)
   {
     auto paramID = saveOrder.fOrder[i];
-    auto iter = fSerializableParameters.find(paramID);
-    if(iter == fSerializableParameters.cend())
+    auto iter = fSerParams.find(paramID);
+    if(iter == fSerParams.cend())
     {
-      ParamValue value = fHostParameters->getParamNormalized(paramID);
+      ParamValue value = fVstParameters->getParamNormalized(paramID);
       res |= RawParamSerializer::writeToStream(value, oStreamer);
 
 #ifdef JAMBA_DEBUG_LOGGING
@@ -164,12 +165,20 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
 }
 
 //------------------------------------------------------------------------
-// GUIParameters::init
+// GUIState::init
 //------------------------------------------------------------------------
-tresult GUIState::init(HostParameters const &iHostParameters)
+tresult GUIState::init(VstParametersSPtr iVstParameters)
 {
-  fHostParameters = std::make_unique<HostParameters>(iHostParameters);
+  fVstParameters = std::move(iVstParameters);
   return kResultOk;
+}
+
+//------------------------------------------------------------------------
+// GUIState::createParamCxMgr
+//------------------------------------------------------------------------
+std::unique_ptr<GUIParamCxMgr> GUIState::createParamCxMgr()
+{
+  return std::unique_ptr<GUIParamCxMgr>(new GUIParamCxMgr(this));
 }
 
 }

@@ -29,7 +29,7 @@ public:
    * important and reflects the order that will be used when reading/writing state to the stream
    */
   template<typename ParamConverter>
-  RTParam<ParamConverter> add(ParamDefSPtr<ParamConverter> iParamDef);
+  RTVstParam<ParamConverter> add(VstParam<ParamConverter> iParamDef);
 
   /**
    * Call this method after adding all the parameters. If using the RT processor, it will happen automatically. */
@@ -72,10 +72,10 @@ protected:
   Parameters const &fPluginParameters;
 
   // contains all the registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::shared_ptr<RTRawParameter>> fParameters{};
+  std::map<ParamID, std::shared_ptr<RTRawVstParameter>> fParameters{};
 
   // add raw parameter to the structures
-  void addRawParameter(std::shared_ptr<RTRawParameter> const &iParameter);
+  void addRawParameter(std::shared_ptr<RTRawVstParameter> const &iParameter);
 
   /**
    * Called from the RT thread from beforeProcessing to set the new state. Can be overridden
@@ -116,9 +116,9 @@ private:
 // RTState::add
 //------------------------------------------------------------------------
 template<typename ParamConverter>
-RTParam<ParamConverter> RTState::add(ParamDefSPtr<ParamConverter> iParamDef)
+RTVstParam<ParamConverter> RTState::add(VstParam<ParamConverter> iParamDef)
 {
-  auto rtParam = std::make_shared<RTParameter<ParamConverter>>(iParamDef);
+  auto rtParam = std::make_shared<RTVstParameter<ParamConverter>>(iParamDef);
   addRawParameter(rtParam);
   return rtParam;
 }

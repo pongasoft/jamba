@@ -18,13 +18,13 @@ RTState::RTState(Parameters const &iParameters) :
 //------------------------------------------------------------------------
 // RTState::RTState
 //------------------------------------------------------------------------
-void RTState::addRawParameter(std::shared_ptr<RTRawParameter> const &iParameter)
+void RTState::addRawParameter(std::shared_ptr<RTRawVstParameter> const &iParameter)
 {
   ParamID paramID = iParameter->getParamID();
 
   DCHECK_F(iParameter != nullptr);
   DCHECK_F(fParameters.find(paramID) == fParameters.cend(), "duplicate paramID [%d]", paramID);
-  DCHECK_F(!iParameter->getRawParamDef()->fUIOnly, "only RT parameter allowed");
+  DCHECK_F(!iParameter->getParamDef()->fUIOnly, "only RT parameter allowed");
 
   fParameters[paramID] = iParameter;
 }
@@ -203,7 +203,7 @@ tresult RTState::init()
              "Expected parameter [%d] used in RTSaveStateOrder not registered",
              paramID);
     }
-    if(fParameters.at(paramID)->getRawParamDef()->fTransient)
+    if(fParameters.at(paramID)->getParamDef()->fTransient)
     {
       result = kResultFalse;
       DLOG_F(ERROR,

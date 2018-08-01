@@ -49,11 +49,11 @@ set(JAMBA_sources_h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxMgr.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParameter.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParameters.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamSerializers.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawParameter.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/HostParameters.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawVstParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUISerParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIVstParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/VstParameters.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomControlView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.h
@@ -80,9 +80,8 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTState.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxMgr.cpp
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParameters.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.cpp
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawParameter.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawVstParameter.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.cpp

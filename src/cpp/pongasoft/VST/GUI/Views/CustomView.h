@@ -2,7 +2,7 @@
 
 #include <vstgui4/vstgui/lib/cview.h>
 #include <map>
-#include <pongasoft/VST/GUI/Params/GUIParameters.h>
+#include <pongasoft/VST/GUI/GUIState.h>
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
 #include "CustomViewCreator.h"
 
@@ -120,7 +120,7 @@ public:
   /**
    * Callback when a parameter changes. By default simply marks the view as dirty.
    */
-  void onParameterChange(ParamID iParamID, ParamValue iNormalizedValue) override;
+  void onParameterChange(ParamID iParamID) override;
 
   // markDirty
   inline void markDirty() { setDirty(true); }
@@ -198,10 +198,10 @@ public:
   explicit PluginCustomView(const CRect &iSize) : CustomView(iSize) {}
 
 protected:
-  // initParameters - overriden to extract fParams
-  void initParameters(std::shared_ptr<GUIParameters> iParameters) override
+  // initState - overriden to extract fParams
+  virtual void initState(GUIState *iGUIState) override
   {
-    CustomView::initParameters(iParameters);
+    CustomView::initState(iGUIState);
     if(fParamCxMgr)
       fParams = fParamCxMgr->getPluginParameters<TPluginParameters>();
   }

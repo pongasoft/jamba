@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GUIParameters.h"
 #include "GUIParamCxMgr.h"
 
 namespace pongasoft {
@@ -11,37 +10,37 @@ namespace Params {
 /**
  * Encapsulates classes that want to be aware of parameters and be notified when they change
  */
-class GUIParamCxAware : public GUIRawParameter::IChangeListener
+class GUIParamCxAware : public Parameters::IChangeListener
 {
 public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  std::unique_ptr<GUIRawParameter> registerGUIRawParam(ParamID iParamID, bool iSubscribeToChanges = true);
+  std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
    * Generic register with any kind of conversion
    */
   template<typename ParamConverter>
-  GUIParamUPtr<ParamConverter> registerGUIParam(ParamID iParamID, bool iSubscribeToChanges = true)
+  GUIVstParam<ParamConverter> registerVstParam(ParamID iParamID, bool iSubscribeToChanges = true)
   {
-    return std::make_unique<GUIParameter<ParamConverter>>(registerGUIRawParam(iParamID, iSubscribeToChanges));
+    return std::make_unique<GUIVstParameter<ParamConverter>>(registerRawVstParam(iParamID, iSubscribeToChanges));
   }
 
   // shortcut for BooleanParameter
-  GUIBooleanParamUPtr registerBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
+  GUIVstBooleanParam registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   // shortcut for PercentParameter
-  GUIPercentParamUPtr registerPercentParam(ParamID iParamID, bool iSubscribeToChanges = true);
+  GUIVstPercentParam registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
    * Generic register with any kind of conversion using an actual param def (no param id)
    */
   template<typename ParamConverter>
-  GUIParamUPtr<ParamConverter> registerGUIParam(ParamDefSPtr<ParamConverter> iParamDef,
-                                                bool iSubscribeToChanges = true)
+  GUIVstParam<ParamConverter> registerVstParam(VstParam<ParamConverter> iParamDef, bool iSubscribeToChanges = true)
   {
-    return std::make_unique<GUIParameter<ParamConverter>>(registerGUIRawParam(iParamDef->fParamID, iSubscribeToChanges));
+    return std::make_unique<GUIVstParameter<ParamConverter>>(registerRawVstParam(iParamDef->fParamID,
+                                                                                 iSubscribeToChanges));
   }
 
   /**
@@ -56,9 +55,9 @@ public:
   /**
    * Called during initialization
    */
-  virtual void initParameters(std::shared_ptr<GUIParameters> iParameters)
+  virtual void initState(GUIState *iGUIState)
   {
-    fParamCxMgr = iParameters->createParamCxMgr();
+    fParamCxMgr = iGUIState->createParamCxMgr();
   }
 
   /**
@@ -70,9 +69,9 @@ public:
   }
 
   /**
-   * Callback when a parameter changes. By default simply marks the view as dirty.
+   * Callback when a parameter changes. Empty default implementation
    */
-  void onParameterChange(ParamID iParamID, ParamValue iNormalizedValue) override {}
+  void onParameterChange(ParamID iParamID) override {}
 
 protected:
   // Access to parameters

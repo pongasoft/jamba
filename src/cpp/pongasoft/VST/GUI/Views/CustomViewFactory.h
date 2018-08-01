@@ -1,9 +1,7 @@
-#include <utility>
-
 #pragma once
 
 #include <vstgui4/vstgui/uidescription/uiviewfactory.h>
-#include <pongasoft/VST/GUI/Params/GUIParameters.h>
+#include <pongasoft/VST/GUI/GUIState.h>
 
 namespace pongasoft {
 namespace VST {
@@ -13,34 +11,33 @@ namespace Views {
 using namespace Params;
 
 /**
- * interface to access vst parameters
+ * interface to access gui state
  */
-class GUIParametersProvider
+class GUIStateProvider
 {
 public:
-  virtual std::shared_ptr<GUIParameters> getGUIParameters() const = 0;
+  virtual GUIState *getGUIState() const = 0;
 };
 
 /**
  * Custom view factory to give access to vst parameters
  */
-class CustomUIViewFactory : public VSTGUI::UIViewFactory, public GUIParametersProvider
+class CustomUIViewFactory : public VSTGUI::UIViewFactory, public GUIStateProvider
 {
 public:
-  explicit CustomUIViewFactory(std::shared_ptr<GUIParameters> iGUIParameters) :
-    fGUIParameters{std::move(iGUIParameters)}
+  explicit CustomUIViewFactory(GUIState *iGUIState) : fGUIState{iGUIState}
   {
   }
 
   ~CustomUIViewFactory() override = default;
 
-  std::shared_ptr<GUIParameters> getGUIParameters() const override
+  GUIState *getGUIState() const override
   {
-    return fGUIParameters;
+    return fGUIState;
   }
 
 private:
-  std::shared_ptr<GUIParameters> fGUIParameters{nullptr};
+  GUIState *fGUIState{};
 };
 
 

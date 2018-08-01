@@ -4,7 +4,6 @@
 
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <vstgui4/vstgui/lib/cframe.h>
-#include <pongasoft/VST/GUI/Params/GUIParameters.h>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include <pongasoft/VST/GUI/GUIViewState.h>
 #include <pongasoft/VST/GUI/GUIState.h>
@@ -61,9 +60,6 @@ protected:
   // the name of the xml file (relative) which contains the ui description
   char const *const fXmlFileName;
 
-  // the parameters
-  std::shared_ptr<GUIParameters> fGUIParameters{nullptr};
-
   // the default knob mode to use (you can override it in your controller)
   VSTGUI::CKnobMode fDefaultKnobMode{VSTGUI::CKnobMode::kLinearMode};
 
@@ -71,7 +67,7 @@ private:
   // keeps track of the view states
   std::vector<std::shared_ptr<GUIViewState>> fViewStates{};
 
-  // view factory used to give access to GUIParameters to views
+  // view factory used to give access to GUIState to views
   Views::CustomUIViewFactory *fViewFactory{nullptr};
 
 };

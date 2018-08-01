@@ -10,7 +10,7 @@ namespace VST {
 class VstParameterImpl : public Vst::Parameter
 {
 public:
-  explicit VstParameterImpl(std::shared_ptr<RawParamDef> const &iParamDef) :
+  explicit VstParameterImpl(std::shared_ptr<RawVstParamDef> const &iParamDef) :
     fParamDef{iParamDef},
     Vst::Parameter(iParamDef->fTitle,
                    iParamDef->fParamID,
@@ -30,7 +30,7 @@ public:
   }
 
 private:
-  std::shared_ptr<RawParamDef> fParamDef;
+  std::shared_ptr<RawVstParamDef> fParamDef;
 };
 
 //------------------------------------------------------------------------
@@ -41,7 +41,7 @@ void Parameters::registerVstParameters(Vst::ParameterContainer &iParameterContai
   for(auto paramID : fPluginOrder)
   {
     // YP Note: ParameterContainer is expecting a pointer and then assumes ownership
-    iParameterContainer.addParameter(new VstParameterImpl(fRawParameters.at(paramID)));
+    iParameterContainer.addParameter(new VstParameterImpl(fVstParams.at(paramID)));
   }
 }
 
@@ -104,8 +104,8 @@ tresult Parameters::writeRTState(NormalizedState const *iNormalizedState, IBStre
 //------------------------------------------------------------------------
 ParamValue Parameters::readNormalizedValue(ParamID iParamID, IBStreamer &iStreamer) const
 {
-  auto iter = fRawParameters.find(iParamID);
-  if(iter == fRawParameters.cend())
+  auto iter = fVstParams.find(iParamID);
+  if(iter == fVstParams.cend())
   {
     DLOG_F(WARNING, "Could not find parameter [%d]", iParamID);
     return 0;
@@ -115,48 +115,48 @@ ParamValue Parameters::readNormalizedValue(ParamID iParamID, IBStreamer &iStream
 }
 
 //------------------------------------------------------------------------
-// Parameters::getRawParamDef
+// Parameters::getParamDef
 //------------------------------------------------------------------------
-std::shared_ptr<RawParamDef> Parameters::getRawParamDef(ParamID iParamID) const
+std::shared_ptr<RawVstParamDef> Parameters::getRawVstParamDef(ParamID iParamID) const
 {
-  auto iter = fRawParameters.find(iParamID);
-  if(iter == fRawParameters.cend())
+  auto iter = fVstParams.find(iParamID);
+  if(iter == fVstParams.cend())
     return nullptr;
 
   return iter->second;
 }
 
 //------------------------------------------------------------------------
-// Parameters::getSerializableParamDef
+// Parameters::getSerParamDef
 //------------------------------------------------------------------------
-std::shared_ptr<SerializableParamDef> Parameters::getSerializableParamDef(ParamID iParamID) const
+std::shared_ptr<IParamDef> Parameters::getSerParamDef(ParamID iParamID) const
 {
-  auto iter = fSerializableParameters.find(iParamID);
-  if(iter == fSerializableParameters.cend())
+  auto iter = fSerParams.find(iParamID);
+  if(iter == fSerParams.cend())
     return nullptr;
 
   return iter->second;
 }
 
 //------------------------------------------------------------------------
-// Parameters::addRawParamDef
+// Parameters::addVstParamDef
 //------------------------------------------------------------------------
-void Parameters::addRawParamDef(std::shared_ptr<RawParamDef> iParamDef)
+void Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
 {
   ParamID paramID = iParamDef->fParamID;
 
-  if(fRawParameters.find(paramID) != fRawParameters.cend())
+  if(fVstParams.find(paramID) != fVstParams.cend())
   {
     ABORT_F("Parameter [%d] already registered", paramID);
   }
 
-  if(fSerializableParameters.find(paramID) != fSerializableParameters.cend())
+  if(fSerParams.find(paramID) != fSerParams.cend())
   {
     ABORT_F("Parameter [%d] already registered", paramID);
   }
 
 #ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "Parameters::addRawParamDef{%d, \"%s\", \"%s\", %f, %d, %d, %d, \"%s\", %d%s%s}",
+  DLOG_F(INFO, "Parameters::addVstParamDef{%d, \"%s\", \"%s\", %f, %d, %d, %d, \"%s\", %d%s%s}",
          paramID,
          String(iParamDef->fTitle).text8(),
          String(iParamDef->fUnits).text8(),
@@ -170,7 +170,7 @@ void Parameters::addRawParamDef(std::shared_ptr<RawParamDef> iParamDef)
          iParamDef->fTransient ? ", transient" : "");
 #endif
 
-  fRawParameters[paramID] = iParamDef;
+  fVstParams[paramID] = iParamDef;
 
   fPluginOrder.emplace_back(paramID);
 
@@ -184,18 +184,18 @@ void Parameters::addRawParamDef(std::shared_ptr<RawParamDef> iParamDef)
 }
 
 //------------------------------------------------------------------------
-// Parameters::addSerializableParamDef
+// Parameters::addSerParamDef
 //------------------------------------------------------------------------
-void Parameters::addSerializableParamDef(std::shared_ptr<SerializableParamDef> iParamDef)
+void Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
 {
   ParamID paramID = iParamDef->fParamID;
   
-  if(fRawParameters.find(paramID) != fRawParameters.cend())
+  if(fVstParams.find(paramID) != fVstParams.cend())
   {
     ABORT_F("Parameter [%d] already registered", paramID);
   }
 
-  if(fSerializableParameters.find(paramID) != fSerializableParameters.cend())
+  if(fSerParams.find(paramID) != fSerParams.cend())
   {
     ABORT_F("Parameter [%d] already registered", paramID);
   }
@@ -203,23 +203,23 @@ void Parameters::addSerializableParamDef(std::shared_ptr<SerializableParamDef> i
   DCHECK_F(iParamDef->fUIOnly, "Serializable parameter [%d] must be marked UIOnly (not supported in RT for now)", paramID);
 
 #ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "Parameters::addSerializableParamDef{%d, \"%s\", %s%s}",
+  DLOG_F(INFO, "Parameters::addSerParamDef{%d, \"%s\", %s%s}",
          paramID,
          String(iParamDef->fTitle).text8(),
          iParamDef->fUIOnly ? ", uiOnly" : "",
          iParamDef->fTransient ? ", transient" : "");
 #endif
 
-  fSerializableParameters[paramID] = iParamDef;
+  fSerParams[paramID] = iParamDef;
 }
 
 //------------------------------------------------------------------------
 // Parameters::build<BooleanParamConverter> => make sure stepCount is 1
 //------------------------------------------------------------------------
 template<>
-Parameters::ParamDefBuilder<BooleanParamConverter> Parameters::build(ParamID iParamID, const TChar *iTitle)
+Parameters::VstParamDefBuilder<BooleanParamConverter> Parameters::vst(ParamID iParamID, const TChar *iTitle)
 {
-  return Parameters::ParamDefBuilder<BooleanParamConverter>(this, iParamID, iTitle).stepCount(1);
+  return Parameters::VstParamDefBuilder<BooleanParamConverter>(this, iParamID, iTitle).stepCount(1);
 }
 
 

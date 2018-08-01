@@ -1,7 +1,8 @@
 #ifndef __PONGASOFT_VST_GUI_RAW_PARAMETER_H__
 #define __PONGASOFT_VST_GUI_RAW_PARAMETER_H__
 
-#include "HostParameters.h"
+#include <pongasoft/VST/Parameters.h>
+#include "VstParameters.h"
 
 #include <string>
 
@@ -16,18 +17,8 @@ namespace Params {
  * which is always a number in the range [0.0, 1.0]. The class VSTParameter deals with other types and automatic
  * normalization/denormalization.
  */
-class GUIRawParameter
+class GUIRawVstParameter
 {
-public:
-  /**
-   * Interface to implement to receive parameter changes
-   */
-  class IChangeListener
-  {
-  public:
-    virtual void onParameterChange(ParamID iParamID, ParamValue iNormalizedValue) = 0;
-  };
-
 public:
   /**
    * Wrapper to edit a single parameter. Usage:
@@ -45,7 +36,7 @@ public:
   class Editor
   {
   public:
-    Editor(ParamID iParamID, HostParameters const &iHostParameters);
+    Editor(ParamID iParamID, VstParametersSPtr iVstParameters);
 
     // disabling copy
     Editor(Editor const &) = delete;
@@ -90,7 +81,7 @@ public:
 
   private:
     ParamID fParamID;
-    HostParameters const &fHostParameters;
+    VstParametersSPtr fVstParameters;
 
     ParamValue fInitialParamValue;
     bool fIsEditing;
@@ -104,7 +95,9 @@ public:
   class Connection : public Steinberg::FObject
   {
   public:
-    Connection(ParamID iParamID, HostParameters const &iHostParameters, IChangeListener *iChangeListener);
+    Connection(ParamID iParamID,
+               VstParametersSPtr iVstParameters,
+               Parameters::IChangeListener *iChangeListener);
 
     /**
      * Call to stop listening for changes. Also called automatically from the destructor.
@@ -131,17 +124,17 @@ public:
   private:
     ParamID fParamID;
     Vst::Parameter *fParameter;
-    HostParameters const &fHostParameters;
-    IChangeListener *const fChangeListener;
+    VstParametersSPtr fVstParameters;
+    Parameters::IChangeListener *const fChangeListener;
     bool fIsConnected;
   };
 
 public:
   // Constructor
-  GUIRawParameter(ParamID iParamID, HostParameters const &iHostParameters);
+  GUIRawVstParameter(ParamID iParamID, VstParametersSPtr iVstParameters);
 
   // Destructor
-  ~GUIRawParameter()
+  ~GUIRawVstParameter()
   {
     // DLOG_F(INFO, "RawParameter::~RawParameter(%d)", fParamID);
   }
@@ -157,7 +150,7 @@ public:
    */
   inline ParamValue getValue() const
   {
-    return fHostParameters.getParamNormalized(fParamID);
+    return fVstParameters->getParamNormalized(fParamID);
   }
 
   /**
@@ -165,7 +158,7 @@ public:
    */
   void toString(String128 oString)
   {
-    auto parameter = fHostParameters.getParameterObject(fParamID);
+    auto parameter = fVstParameters->getParameterObject(fParamID);
     if(parameter)
       parameter->toString(getValue(), oString);
   }
@@ -186,7 +179,7 @@ public:
    */
   inline tresult setValue(ParamValue iValue)
   {
-    Editor editor(fParamID, fHostParameters);
+    Editor editor(fParamID, fVstParameters);
     editor.setValue(iValue);
     return editor.commit();
   }
@@ -196,7 +189,7 @@ public:
    */
   std::unique_ptr<Editor> edit()
   {
-    return std::make_unique<Editor>(fParamID, fHostParameters);
+    return std::make_unique<Editor>(fParamID, fVstParameters);
   }
 
   /**
@@ -214,14 +207,14 @@ public:
   /**
    * @return a connection that will listen to parameter changes (see Connection)
    */
-  std::unique_ptr<Connection> connect(IChangeListener *iChangeListener)
+  std::unique_ptr<Connection> connect(Parameters::IChangeListener *iChangeListener)
   {
-    return std::make_unique<Connection>(fParamID, fHostParameters, iChangeListener);
+    return std::make_unique<Connection>(fParamID, fVstParameters, iChangeListener);
   }
 
 private:
   ParamID fParamID;
-  HostParameters const &fHostParameters;
+  VstParametersSPtr fVstParameters{};
 };
 
 
