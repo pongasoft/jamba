@@ -15,7 +15,7 @@ GUIParamCxMgr::registerRawVstParam(ParamID iParamID, Parameters::IChangeListener
 
   if(iChangeListener)
   {
-    fVstParamCxs[iParamID] = std::move(parameter->connect(iChangeListener));
+    fParamCxs[iParamID] = std::move(parameter->connect(iChangeListener));
   }
 
   return parameter;

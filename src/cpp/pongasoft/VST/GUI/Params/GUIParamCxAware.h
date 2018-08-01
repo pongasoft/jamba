@@ -44,6 +44,16 @@ public:
   }
 
   /**
+   * This method registers this class to be notified of the GUISerParam changes. Note that GUISerParam is already
+   * a wrapper directly accessible from the view so there is no need to return something from this method.
+   */
+  template<typename ParamSerializer>
+  void registerSerParam(GUISerParam<ParamSerializer> const &iParamDef)
+  {
+    fParamCxMgr->registerSerParam(iParamDef, this);
+  }
+
+  /**
    * Called during initialization
    */
   virtual void initState(GUIState *iGUIState)

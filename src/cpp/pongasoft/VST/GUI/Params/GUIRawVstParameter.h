@@ -3,6 +3,7 @@
 
 #include <pongasoft/VST/Parameters.h>
 #include "VstParameters.h"
+#include "GUIParamCx.h"
 
 #include <string>
 
@@ -88,48 +89,6 @@ public:
   };
 
 public:
-  /**
-   * Wrapper class which maintains the connection between a parameter and its listener. The connection will be
-   * terminated if close() is called or automatically when the destructor is called.
-   */
-  class Connection : public Steinberg::FObject
-  {
-  public:
-    Connection(ParamID iParamID,
-               VstParametersSPtr iVstParameters,
-               Parameters::IChangeListener *iChangeListener);
-
-    /**
-     * Call to stop listening for changes. Also called automatically from the destructor.
-     */
-    void close();
-
-    /**
-     * Automatically closes the connection and stops listening */
-    inline ~Connection() override
-    {
-      // DLOG_F(INFO, "~RawParameter::Connection(%d)", fParamID);
-      close();
-    }
-
-    /**
-     * This is being called when the parameter receives a message... do not call explicitely
-     */
-    void PLUGIN_API update(FUnknown *iChangedUnknown, Steinberg::int32 iMessage) SMTG_OVERRIDE;
-
-    // disabling copy
-    Connection(Connection const &) = delete;
-    Connection& operator=(Connection const &) = delete;
-
-  private:
-    ParamID fParamID;
-    Vst::Parameter *fParameter;
-    VstParametersSPtr fVstParameters;
-    Parameters::IChangeListener *const fChangeListener;
-    bool fIsConnected;
-  };
-
-public:
   // Constructor
   GUIRawVstParameter(ParamID iParamID, VstParametersSPtr iVstParameters);
 
@@ -205,11 +164,11 @@ public:
   }
 
   /**
-   * @return a connection that will listen to parameter changes (see Connection)
+   * @return a connection that will listen to parameter changes (see GUIParamCx)
    */
-  std::unique_ptr<Connection> connect(Parameters::IChangeListener *iChangeListener)
+  std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener)
   {
-    return std::make_unique<Connection>(fParamID, fVstParameters, iChangeListener);
+    return std::make_unique<GUIParamCx>(fParamID, fVstParameters->getParameterObject(fParamID), iChangeListener);
   }
 
 private:

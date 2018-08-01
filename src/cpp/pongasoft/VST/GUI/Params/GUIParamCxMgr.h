@@ -36,13 +36,24 @@ public:
    * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
    */
   template<typename ParamConverter>
-  GUIVstParam<ParamConverter> registerVstParam(VstParam<ParamConverter> iParamDef,
+  GUIVstParam<ParamConverter> registerVstParam(VstParam<ParamConverter> const &iParamDef,
                                                Parameters::IChangeListener *iChangeListener = nullptr)
   {
     return std::make_unique<GUIVstParameter<ParamConverter>>(registerRawVstParam(iParamDef->fParamID,
                                                                                  iChangeListener));
   }
 
+  /**
+   * This method registers the listener to be notified of the GUISerParam changes. Note that GUISerParam is already
+   * a wrapper directly accessible from the view so there is no need to return something from this method. As a result
+   * there is no need to call this method unless a listener is provided, hence the listener is required.
+   */
+  template<typename ParamSerializer>
+  void registerSerParam(GUISerParam<ParamSerializer> const &iParamDef, Parameters::IChangeListener *iChangeListener)
+  {
+    DCHECK_F(iChangeListener != nullptr);
+    fParamCxs[iParamDef] = std::move(iParamDef.connect(iChangeListener));
+  }
 
   // getGUIState
   GUIState *getGUIState() const { return fGUIState; };
@@ -60,7 +71,7 @@ private:
   GUIState *fGUIState;
 
   // Maintains the connections for the listeners... will be automatically discarded in the destructor
-  std::map<ParamID, std::unique_ptr<GUIRawVstParameter::Connection>> fVstParamCxs;
+  std::map<ParamID, std::unique_ptr<GUIParamCx>> fParamCxs;
 };
 
 

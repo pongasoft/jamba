@@ -63,52 +63,6 @@ tresult GUIRawVstParameter::Editor::rollback()
 }
 
 ///////////////////////////////////////////
-// GUIRawVstParameter::Connection::Connection
-///////////////////////////////////////////
-GUIRawVstParameter::Connection::Connection(ParamID iParamID,
-                                           VstParametersSPtr iVstParameters,
-                                           Parameters::IChangeListener *iChangeListener)  :
-  fParamID{iParamID},
-  fVstParameters{std::move(iVstParameters)},
-  fChangeListener{iChangeListener}
-{
-  // DLOG_F(INFO, "GUIRawVstParameter::Connection(%d)", fParamID);
-
-  fParameter = fVstParameters->getParameterObject(fParamID);
-
-  DCHECK_NOTNULL_F(fParameter);
-  DCHECK_NOTNULL_F(fChangeListener);
-
-  fParameter->addRef();
-  fParameter->addDependent(this);
-  fIsConnected = true;
-}
-
-///////////////////////////////////////////
-// GUIRawVstParameter::Connection::close
-///////////////////////////////////////////
-void GUIRawVstParameter::Connection::close()
-{
-  if(fIsConnected)
-  {
-    fParameter->removeDependent(this);
-    fParameter->release();
-    fIsConnected = false;
-  }
-}
-
-///////////////////////////////////////////
-// GUIRawVstParameter::Connection::update
-///////////////////////////////////////////
-void PLUGIN_API GUIRawVstParameter::Connection::update(FUnknown *iChangedUnknown, Steinberg::int32 iMessage)
-{
-  if(iMessage == IDependent::kChanged)
-  {
-    fChangeListener->onParameterChange(fParamID);
-  }
-}
-
-///////////////////////////////////////////
 // GUIRawVstParameter::GUIRawVstParameter
 ///////////////////////////////////////////
 GUIRawVstParameter::GUIRawVstParameter(ParamID iParamID, VstParametersSPtr iVstParameters)  :
