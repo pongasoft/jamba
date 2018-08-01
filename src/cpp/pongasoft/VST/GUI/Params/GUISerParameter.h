@@ -102,6 +102,13 @@ protected:
   SerParamType fValue;
 };
 
+
+//------------------------------------------------------------------------
+// shortcut notation
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+using GUISerParameterSPtr = std::shared_ptr<GUISerParameter<ParamSerializer>>;
+
 //------------------------------------------------------------------------
 // GUISerParam - wrapper to make writing the code much simpler and natural
 //------------------------------------------------------------------------
@@ -117,7 +124,7 @@ class GUISerParam
   using SerParamType = typename ParamSerializer::ParamType;
 
 public:
-  explicit GUISerParam(std::shared_ptr<GUISerParameter<ParamSerializer>> iPtr) :
+  GUISerParam(std::shared_ptr<GUISerParameter<ParamSerializer>> iPtr) : // NOLINT (not marked explicit on purpose)
     fPtr{std::move(iPtr)}
   {}
 

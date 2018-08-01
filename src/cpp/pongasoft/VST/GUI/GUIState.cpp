@@ -181,6 +181,17 @@ std::unique_ptr<GUIParamCxMgr> GUIState::createParamCxMgr()
   return std::unique_ptr<GUIParamCxMgr>(new GUIParamCxMgr(this));
 }
 
+//------------------------------------------------------------------------
+// GUIState::getSerParameter
+//------------------------------------------------------------------------
+std::shared_ptr<IGUISerParameter> GUIState::getSerParameter(ParamID iParamID) const
+{
+  auto iter = fSerParams.find(iParamID);
+  if(iter == fSerParams.cend())
+    return nullptr;
+  return iter->second;
+}
+
 }
 }
 }

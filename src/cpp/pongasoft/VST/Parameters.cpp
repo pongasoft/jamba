@@ -214,6 +214,155 @@ void Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
 }
 
 //------------------------------------------------------------------------
+// Parameters::setRTSaveStateOrder
+//------------------------------------------------------------------------
+tresult Parameters::setRTSaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder)
+{
+  tresult res = kResultOk;
+
+  auto ids = iSaveOrder.fOrder;
+  std::vector<ParamID> newIds{};
+
+  for(auto id : ids)
+  {
+    tresult paramOk = kResultOk;
+
+    auto iter = fVstParams.find(id);
+    if(iter == fVstParams.cend())
+    {
+      paramOk = kResultFalse;
+      DLOG_F(ERROR,
+             "Param [%d] was not registered as a vst parameter (did you register as a ser parameter?)",
+             id);
+    }
+    else
+    {
+      auto param = iter->second;
+
+      if(param->fTransient)
+      {
+        paramOk = kResultFalse;
+        DLOG_F(ERROR,
+               "Param [%d] cannot be used for RTSaveStateOrder as it is defined transient",
+               id);
+      }
+
+      if(param->fUIOnly)
+      {
+        paramOk = kResultFalse;
+        DLOG_F(ERROR,
+               "Param [%d] cannot be used for RTSaveStateOrder as it is defined UIOnly",
+               id);
+
+      }
+    }
+
+    if(paramOk == kResultOk)
+    {
+      newIds.emplace_back(id);
+    }
+
+    res |= paramOk;
+  }
+
+  for(auto p : fVstParams)
+  {
+    auto param = p.second;
+    if(!param->fUIOnly && !param->fTransient)
+    {
+      if(std::find(newIds.cbegin(), newIds.cend(), p.first) == newIds.cend())
+      {
+        DLOG_F(WARNING, "Param [%d] is not marked transient. Either mark the parameter transient or add it to RTSaveStateOrder", p.first);
+      }
+    }
+  }
+
+  fRTSaveStateOrder = {iSaveOrder.fVersion, newIds};
+
+  return res;
+}
+
+//------------------------------------------------------------------------
+// Parameters::setGUISaveStateOrder
+//------------------------------------------------------------------------
+tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder)
+{
+  tresult res = kResultOk;
+
+  auto ids = iSaveOrder.fOrder;
+  std::vector<ParamID> newIds{};
+
+  std::map<ParamID, std::shared_ptr<IParamDef>> allParams{};
+  for(auto &&p : fVstParams)
+  {
+    allParams[p.first] = p.second;
+  }
+
+  for(auto &&p : fSerParams)
+  {
+    allParams[p.first] = p.second;
+  }
+
+  for(auto id : ids)
+  {
+    tresult paramOk = kResultOk;
+
+    auto iter = allParams.find(id);
+    if(iter == allParams.cend())
+    {
+      paramOk = kResultFalse;
+      DLOG_F(ERROR,
+             "Param [%d] was not registered as a vst or ser parameter",
+             id);
+    }
+    else
+    {
+      auto param = iter->second;
+      if(param->fTransient)
+      {
+        paramOk = kResultFalse;
+        DLOG_F(ERROR,
+               "Param [%d] cannot be used for GUISaveStateOrder as it is defined transient",
+               id);
+      }
+
+      if(!param->fUIOnly)
+      {
+        paramOk = kResultFalse;
+        DLOG_F(ERROR,
+               "Param [%d] cannot be used for GUISaveStateOrder as it is not defined UIOnly",
+               id);
+
+      }
+    }
+
+    if(paramOk == kResultOk)
+    {
+      newIds.emplace_back(id);
+    }
+
+    res |= paramOk;
+
+  }
+
+  for(auto &&p : allParams)
+  {
+    auto param = p.second;
+    if(param->fUIOnly && !param->fTransient)
+    {
+      if(std::find(newIds.cbegin(), newIds.cend(), p.first) == newIds.cend())
+      {
+        DLOG_F(WARNING, "Param [%d] is not marked transient. Either mark the parameter transient or add it to GUISaveStateOrder", p.first);
+      }
+    }
+  }
+
+  fGUISaveStateOrder = {iSaveOrder.fVersion, newIds};
+
+  return res;
+}
+
+//------------------------------------------------------------------------
 // Parameters::build<BooleanParamConverter> => make sure stepCount is 1
 //------------------------------------------------------------------------
 template<>

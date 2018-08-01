@@ -134,7 +134,13 @@ public:
    * @tparam Args can be any combination of ParamID, RawParamDef or ParamDef<ParamConverter>
    */
   template<typename... Args>
-  void setRTSaveStateOrder(int16 iVersion, Args... args);
+  tresult setRTSaveStateOrder(int16 iVersion, Args... args);
+
+  /**
+   * Used to change the default order (registration order) used when saving the RT state (getState/setState in the
+   * processor, setComponentState in the controller)
+   */
+  tresult setRTSaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder);
 
   /**
    * @return the order used when saving the GUI state (getState/setState in the controller)
@@ -149,7 +155,13 @@ public:
    * @tparam Args can be any combination of ParamID, RawVstParamDef, VstParamDef<ParamConverter>,
    */
   template<typename... Args>
-  void setGUISaveStateOrder(int16 iVersion, Args... args);
+  tresult setGUISaveStateOrder(int16 iVersion, Args... args);
+
+  /**
+   * Used to change the default order (registration order) used when saving the GUI state (getState/setState in
+   * the controller)
+   */
+  tresult setGUISaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder);
 
   /**
    * @return the order used when saving the RT state (getState/setState in the processor, setComponentState in
@@ -218,38 +230,38 @@ private:
 
 private:
   // leaf of templated calls to build a list of ParamIDs from ParamID or ParamDefs
-  void buildParamIDs(std::vector<ParamID> &iParamIDs) {}
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs) { return kResultOk; }
 
   // case when ParamID
   template<typename... Args>
-  void buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID id, Args... args);
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID id, Args... args);
 
   // case when ISerParamDef
   template<typename... Args>
-  void buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<ISerParamDef> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<ISerParamDef> &iParamDef, Args... args)
   {
-    buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
 
   // case when ISerParamDef
   template<typename ParamSerializer, typename... Args>
-  void buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<SerParamDef<ParamSerializer>> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<SerParamDef<ParamSerializer>> &iParamDef, Args... args)
   {
-    buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
 
   // case when VstParamDef
   template<typename ParamConverver, typename... Args>
-  void buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<VstParamDef<ParamConverver>> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<VstParamDef<ParamConverver>> &iParamDef, Args... args)
   {
-    buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
 
   // case when RawVstParamDef
   template<typename... Args>
-  void buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<RawVstParamDef> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<RawVstParamDef> &iParamDef, Args... args)
   {
-    buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
 
 };
@@ -303,9 +315,9 @@ SerParam<ParamSerializer> Parameters::add(Parameters::SerParamDefBuilder<ParamSe
 {
   auto param = std::make_shared<SerParamDef<ParamSerializer>>(iBuilder.fParamID,
                                                               iBuilder.fTitle,
-                                                              iBuilder.fDefaultValue,
                                                               iBuilder.fUIOnly,
-                                                              iBuilder.fTransient);
+                                                              iBuilder.fTransient,
+                                                              iBuilder.fDefaultValue);
 
   addSerParamDef(param);
 
@@ -335,8 +347,10 @@ Parameters::SerParamDefBuilder<ParamSerializer> Parameters::ser(ParamID iParamID
 // Parameters::buildParamIDs
 //------------------------------------------------------------------------
 template<typename... Args>
-void Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID, Args... args)
+tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID, Args... args)
 {
+  tresult res = kResultOk;
+
   auto iter = fVstParams.find(iParamID);
   if(fVstParams.find(iParamID) != fVstParams.cend() ||
      fSerParams.find(iParamID) != fSerParams.cend())
@@ -345,105 +359,33 @@ void Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID
   }
   else
   {
-    ABORT_F("No such parameter %d", iParamID);
+    DLOG_F(ERROR, "No such parameter [%d]", iParamID);
+    res = kResultFalse;
   }
-  buildParamIDs(iParamIDs, args...);
+  res |= buildParamIDs(iParamIDs, args...);
+  return res;
 }
 
 //------------------------------------------------------------------------
 // Parameters::setRTSaveStateOrder
 //------------------------------------------------------------------------
 template<typename... Args>
-void Parameters::setRTSaveStateOrder(int16 iVersion, Args... args)
+tresult Parameters::setRTSaveStateOrder(int16 iVersion, Args... args)
 {
   std::vector<ParamID> ids{};
   buildParamIDs(ids, args...);
-
-  bool ok = true;
-
-  for(auto id : ids)
-  {
-    if(fVstParams.at(id)->fTransient)
-    {
-      ok = false;
-      DLOG_F(ERROR,
-             "Param [%d] cannot be used for RTSaveStateOrder as it is defined transient",
-             id);
-    }
-
-    if(fVstParams.at(id)->fUIOnly)
-    {
-      ok = false;
-      DLOG_F(ERROR,
-             "Param [%d] cannot be used for RTSaveStateOrder as it is defined UIOnly",
-             id);
-
-    }
-  }
-
-  for(auto p : fVstParams)
-  {
-    auto param = p.second;
-    if(!param->fUIOnly && !param->fTransient)
-    {
-      if(std::find(ids.cbegin(), ids.cend(), p.first) == ids.cend())
-      {
-        DLOG_F(WARNING, "Param [%d] is not marked transient. Either mark the parameter transient or add it to RTSaveStateOrder", p.first);
-      }
-    }
-  }
-
-  DCHECK_F(ok, "Issue with setRTSaveStateOrder... failing in development mode");
-
-  fRTSaveStateOrder = {iVersion, ids};
+  return setRTSaveStateOrder({iVersion, ids});
 }
 
 //------------------------------------------------------------------------
 // Parameters::setRTSaveStateOrder
 //------------------------------------------------------------------------
 template<typename... Args>
-void Parameters::setGUISaveStateOrder(int16 iVersion, Args... args)
+tresult Parameters::setGUISaveStateOrder(int16 iVersion, Args... args)
 {
   std::vector<ParamID> ids{};
   buildParamIDs(ids, args...);
-
-  bool ok = true;
-
-  for(auto id : ids)
-  {
-    if(fVstParams.at(id)->fTransient)
-    {
-      ok = false;
-      DLOG_F(ERROR,
-             "Param [%d] cannot be used for GUISaveStateOrder as it is defined transient",
-             id);
-    }
-
-    if(!fVstParams.at(id)->fUIOnly)
-    {
-      ok = false;
-      DLOG_F(ERROR,
-             "Param [%d] cannot be used for GUISaveStateOrder as it is not defined UIOnly",
-             id);
-
-    }
-  }
-
-  for(auto p : fVstParams)
-  {
-    auto param = p.second;
-    if(param->fUIOnly && !param->fTransient)
-    {
-      if(std::find(ids.cbegin(), ids.cend(), p.first) == ids.cend())
-      {
-        DLOG_F(WARNING, "Param [%d] is not marked transient. Either mark the parameter transient or add it to GUISaveStateOrder", p.first);
-      }
-    }
-  }
-
-  DCHECK_F(ok, "Issue with setGUISaveStateOrder... failing in development mode");
-
-  fGUISaveStateOrder = {iVersion, ids};
+  return setGUISaveStateOrder({iVersion, ids});
 }
 
 //------------------------------------------------------------------------

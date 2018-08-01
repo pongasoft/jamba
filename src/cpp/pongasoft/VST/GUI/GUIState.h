@@ -41,12 +41,22 @@ public:
   inline bool existsVst(ParamID iParamID) const { return fVstParameters->exists(iParamID); }
 
   /**
+   * @return true if there is a ser param with the provided ID
+   */
+  inline bool existsSer(ParamID iParamID) const { return fSerParams.find(iParamID) != fSerParams.cend(); }
+
+  /**
    * @return the raw parameter given its id
    */
   std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
   {
     return std::make_unique<GUIRawVstParameter>(iParamID, fVstParameters);
   }
+
+  /**
+   * @return the ser parameter given its id (nullptr if not found)
+   */
+  std::shared_ptr<IGUISerParameter> getSerParameter(ParamID iParamID) const;
 
   /**
    * This method is called from the GUI controller setComponentState method and reads the state coming from RT
@@ -116,7 +126,7 @@ public:
 template<typename ParamSerializer>
 GUISerParam<ParamSerializer> GUIState::add(SerParam<ParamSerializer> iParamDef)
 {
-  auto guiParam = std::make_shared<SerParamDef<ParamSerializer>>(iParamDef);
+  auto guiParam = std::make_shared<GUISerParameter<ParamSerializer>>(iParamDef);
   addSerParam(guiParam);
   return guiParam;
 }

@@ -44,7 +44,6 @@ private:
   FObject *fParameter;
   Parameters::IChangeListener *const fChangeListener;
   bool fIsConnected;
-
 };
 
 }

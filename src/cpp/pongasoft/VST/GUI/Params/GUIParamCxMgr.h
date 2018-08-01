@@ -17,6 +17,11 @@ public:
   inline bool existsVst(ParamID iParamID) const { return fGUIState->existsVst(iParamID); }
 
   /**
+   * @return true if the param actually exists
+   */
+  inline bool existsSer(ParamID iParamID) const { return fGUIState->existsSer(iParamID); }
+
+  /**
    * Registers a raw parameter (no conversion)
    */
   std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
@@ -52,8 +57,15 @@ public:
   void registerSerParam(GUISerParam<ParamSerializer> const &iParamDef, Parameters::IChangeListener *iChangeListener)
   {
     DCHECK_F(iChangeListener != nullptr);
-    fParamCxs[iParamDef] = std::move(iParamDef.connect(iChangeListener));
+    fParamCxs[iParamDef.getParamID()] = std::move(iParamDef.connect(iChangeListener));
   }
+
+  /**
+   * Registers the ser param only given its id and return the associated GUISerParameterSPtr
+   */
+  template<typename ParamSerializer>
+  GUISerParameterSPtr<ParamSerializer> registerSerParam(ParamID iParamID,
+                                                        Parameters::IChangeListener *iChangeListener = nullptr);
 
   // getGUIState
   GUIState *getGUIState() const { return fGUIState; };
@@ -74,6 +86,25 @@ private:
   std::map<ParamID, std::unique_ptr<GUIParamCx>> fParamCxs;
 };
 
+
+//------------------------------------------------------------------------
+// GUIParamCxMgr::registerSerParam
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+GUISerParameterSPtr<ParamSerializer> GUIParamCxMgr::registerSerParam(ParamID iParamID,
+                                                                     Parameters::IChangeListener *iChangeListener)
+{
+  auto param = fGUIState->getSerParameter(iParamID);
+
+  DCHECK_F(param != nullptr, "param [%d] not found", iParamID);
+
+  auto res = std::dynamic_pointer_cast<GUISerParameter<ParamSerializer>>(param);
+  DCHECK_F(res != nullptr, "param [%d] is not of expected type", iParamID);
+  if(iChangeListener)
+    fParamCxs[iParamID] = std::move(res->connect(iChangeListener));
+
+  return res;
+}
 
 }
 }

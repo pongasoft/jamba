@@ -13,6 +13,8 @@ GUIParamCxMgr::registerRawVstParam(ParamID iParamID, Parameters::IChangeListener
 {
   auto parameter = fGUIState->getRawVstParameter(iParamID);
 
+  DCHECK_F(parameter != nullptr, "param [%d] not found", iParamID);
+
   if(iChangeListener)
   {
     fParamCxs[iParamID] = std::move(parameter->connect(iChangeListener));

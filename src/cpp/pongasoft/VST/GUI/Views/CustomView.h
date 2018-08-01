@@ -4,6 +4,7 @@
 #include <map>
 #include <pongasoft/VST/GUI/GUIState.h>
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
+#include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include "CustomViewCreator.h"
 
 namespace pongasoft {
@@ -216,6 +217,94 @@ public:
   // direct access to parameters (ex: fParams->fBypassParam)
   typename TGUIPluginState::PluginParameters const *fParams{};
 };
+
+/**
+ * This class can be used to extend VST SDK classes directly while still benefiting from the extensions added by
+ * this framework (multiple param access and state access)
+ *
+ * @tparam TView the view class (for ex: CTextEdit)
+ */
+template<typename TView>
+class CustomViewAdapter : public TView, public GUIParamCxAware, public CustomViewInitializer
+{
+public:
+  // Constructor
+  template<typename... Args>
+  explicit CustomViewAdapter(const CRect &iSize, Args... args) : TView(iSize, args...) {}
+
+  // markDirty
+  inline void markDirty() { TView::setDirty(true); }
+
+  /**
+   * Callback when a parameter changes. By default simply marks the view as dirty.
+   */
+  void onParameterChange(ParamID iParamID) override { markDirty(); };
+
+  void afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
+
+  // beforeApply
+  void beforeApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override {};
+
+  // afterApply
+  void afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
+};
+
+/**
+ * This class can be used to extend VST SDK classes directly while still benefiting from the extensions added by
+ * this framework (multiple param access and state access)
+ *
+ * @tparam TView the view class (for ex: CTextEdit)
+ * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+ */
+template<typename TView, typename TGUIPluginState>
+class PluginCustomViewAdapter : public CustomViewAdapter<TView>
+{
+public:
+  // Constructor
+  explicit PluginCustomViewAdapter(const CRect &iSize) : CustomViewAdapter<TView>(iSize) {}
+
+protected:
+  // initState - overridden to extract fParams
+  void initState(GUIState *iGUIState) override
+  {
+    GUIParamCxAware::initState(iGUIState);
+    if(GUIParamCxAware::fParamCxMgr)
+    {
+      fState = dynamic_cast<TGUIPluginState *>(GUIParamCxAware::fParamCxMgr->getGUIState());
+      fParams = &fState->fParams;
+    }
+  }
+
+public:
+  // direct access to state (ex: fParams->fBypassParam)
+  TGUIPluginState const *fState{};
+
+  // direct access to parameters (ex: fParams->fBypassParam)
+  typename TGUIPluginState::PluginParameters const *fParams{};
+};
+
+//------------------------------------------------------------------------
+// CustomViewAdapter::afterCreate
+//------------------------------------------------------------------------
+template<typename TView>
+void CustomViewAdapter<TView>::afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription)
+{
+  auto provider = dynamic_cast<GUIStateProvider const *>(iDescription->getViewFactory());
+  if(provider)
+    initState(provider->getGUIState());
+}
+
+//------------------------------------------------------------------------
+// CustomViewAdapter::afterApply
+//------------------------------------------------------------------------
+template<typename TView>
+void CustomViewAdapter<TView>::afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription)
+{
+  if(fParamCxMgr)
+    registerParameters();
+}
+
+
 }
 }
 }

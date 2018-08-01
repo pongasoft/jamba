@@ -54,6 +54,16 @@ public:
   }
 
   /**
+   * Registers the ser param only given its id and return the associated GUISerParameterSPtr
+   */
+  template<typename ParamSerializer>
+  GUISerParameterSPtr<ParamSerializer> registerSerParam(ParamID iParamID,
+                                                        bool iSubscribeToChanges = true)
+  {
+    return fParamCxMgr->registerSerParam<ParamSerializer>(iParamID, iSubscribeToChanges ? this : nullptr);
+  }
+
+  /**
    * Called during initialization
    */
   virtual void initState(GUIState *iGUIState)
