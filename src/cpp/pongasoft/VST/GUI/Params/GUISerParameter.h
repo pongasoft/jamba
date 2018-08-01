@@ -77,7 +77,7 @@ public:
   // readFromStream
   tresult readFromStream(IBStreamer &iStreamer) override
   {
-    fValue = ParamSerializer::readFromStream(iStreamer, fValue);
+    setValue(ParamSerializer::readFromStream(iStreamer, fValue));
     return kResultOk;
   }
 
