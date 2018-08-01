@@ -67,8 +67,10 @@ protected:
 
 /**
  * This subclass gives access to plugin parameters with the fParams variable (similar to PluginCustomView)
- */
-template<typename TPluginParameters>
+ *
+ * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+*/
+template<typename TGUIPluginState>
 class PluginGUIViewState : public GUIViewState
 {
 public:
@@ -76,12 +78,18 @@ public:
   {
     GUIViewState::initState(iGUIState);
     if(fParamCxMgr)
-      fParams = getPluginParameters<TPluginParameters>();
+    {
+      fState = dynamic_cast<TGUIPluginState *>(fParamCxMgr->getGUIState());
+      fParams = &fState->fParams;
+    }
   }
 
 public:
+  // direct access to state (ex: fParams->fBypassParam)
+  TGUIPluginState const *fState{};
+
   // direct access to parameters (ex: fParams->fBypassParam)
-  TPluginParameters const *fParams{nullptr};
+  typename TGUIPluginState::PluginParameters const *fParams{};
 };
 
 }

@@ -44,15 +44,6 @@ public:
   }
 
   /**
-   * Gives access to plugin parameters
-   */
-  template<typename TParameters>
-  TParameters const *getPluginParameters() const
-  {
-    return fParamCxMgr->getPluginParameters<TParameters>();
-  }
-
-  /**
    * Called during initialization
    */
   virtual void initState(GUIState *iGUIState)

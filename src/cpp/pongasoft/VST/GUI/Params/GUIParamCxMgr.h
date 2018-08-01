@@ -43,15 +43,9 @@ public:
                                                                                  iChangeListener));
   }
 
-  /**
-   * Returns the plugin parameters downcasting it to the proper subclass for direct access to the parameters by name.
-   * Note that it will return nullptr if the plugin parameters are not of the proper type.
-   */
-  template<typename TParameters>
-  TParameters const *getPluginParameters() const
-  {
-    return dynamic_cast<TParameters const *>(&fGUIState->getPluginParameters());
-  }
+
+  // getGUIState
+  GUIState *getGUIState() const { return fGUIState; };
 
   friend class GUI::GUIState;
 

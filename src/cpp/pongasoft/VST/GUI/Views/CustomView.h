@@ -186,11 +186,11 @@ public:
 
 /**
  * When implementing a CustomView specific to a given plugin, you can use this class instead to get direct
- * access to the parameters registered with the plugin via the fParams member.
+ * access to the state and parameters registered with the plugin via the fState/fParams member.
  *
- * @tparam TPluginParameters type of the plugin parameters class (should be a subclass of Param::Parameters)
+ * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
  */
-template<typename TPluginParameters>
+template<typename TGUIPluginState>
 class PluginCustomView : public CustomView
 {
 public:
@@ -198,17 +198,23 @@ public:
   explicit PluginCustomView(const CRect &iSize) : CustomView(iSize) {}
 
 protected:
-  // initState - overriden to extract fParams
-  virtual void initState(GUIState *iGUIState) override
+  // initState - overridden to extract fParams
+  void initState(GUIState *iGUIState) override
   {
     CustomView::initState(iGUIState);
     if(fParamCxMgr)
-      fParams = fParamCxMgr->getPluginParameters<TPluginParameters>();
+    {
+      fState = dynamic_cast<TGUIPluginState *>(fParamCxMgr->getGUIState());
+      fParams = &fState->fParams;
+    }
   }
 
 public:
+  // direct access to state (ex: fParams->fBypassParam)
+  TGUIPluginState const *fState{};
+
   // direct access to parameters (ex: fParams->fBypassParam)
-  TPluginParameters const *fParams;
+  typename TGUIPluginState::PluginParameters const *fParams{};
 };
 }
 }
