@@ -22,6 +22,13 @@ public:
   inline bool existsSer(ParamID iParamID) const { return fGUIState->existsSer(iParamID); }
 
   /**
+   * Removes the registration of the provided param (closing the connection/stopping to listen)
+   *
+   * @return true if the param was present, false otherwise
+   */
+  bool unregisterParam(ParamID iParamID);
+
+  /**
    * Registers a raw parameter (no conversion)
    */
   std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
@@ -99,9 +106,18 @@ GUISerParameterSPtr<ParamSerializer> GUIParamCxMgr::registerSerParam(ParamID iPa
   DCHECK_F(param != nullptr, "param [%d] not found", iParamID);
 
   auto res = std::dynamic_pointer_cast<GUISerParameter<ParamSerializer>>(param);
-  DCHECK_F(res != nullptr, "param [%d] is not of expected type", iParamID);
-  if(iChangeListener)
-    fParamCxs[iParamID] = std::move(res->connect(iChangeListener));
+  if(res)
+  {
+    if(iChangeListener)
+      fParamCxs[iParamID] = std::move(res->connect(iChangeListener));
+    else
+      unregisterParam(iParamID);
+  }
+  else
+  {
+    DLOG_F(WARNING, "Ser. param [%d] is not of the requested type", iParamID);
+    unregisterParam(iParamID);
+  }
 
   return res;
 }

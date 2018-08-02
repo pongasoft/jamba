@@ -80,6 +80,13 @@ public:
   }
 
   /**
+   * Removes the registration of the provided param (closing the connection/stopping to listen)
+   *
+   * @return true if the param was present, false otherwise
+   */
+  bool unregisterParam(ParamID iParamID) { return fParamCxMgr->unregisterParam(iParamID); }
+
+  /**
    * Callback when a parameter changes. Empty default implementation
    */
   void onParameterChange(ParamID iParamID) override {}

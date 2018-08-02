@@ -8,8 +8,8 @@ namespace Params {
 //------------------------------------------------------------------------
 // GUIParamCxMgr::registerRawVstParam
 //------------------------------------------------------------------------
-std::unique_ptr<GUIRawVstParameter>
-GUIParamCxMgr::registerRawVstParam(ParamID iParamID, Parameters::IChangeListener *iChangeListener)
+std::unique_ptr<GUIRawVstParameter> GUIParamCxMgr::registerRawVstParam(ParamID iParamID,
+                                                                       Parameters::IChangeListener *iChangeListener)
 {
   auto parameter = fGUIState->getRawVstParameter(iParamID);
 
@@ -19,8 +19,20 @@ GUIParamCxMgr::registerRawVstParam(ParamID iParamID, Parameters::IChangeListener
   {
     fParamCxs[iParamID] = std::move(parameter->connect(iChangeListener));
   }
+  else
+  {
+    unregisterParam(iParamID);
+  }
 
   return parameter;
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxMgr::unregisterParam
+//------------------------------------------------------------------------
+bool GUIParamCxMgr::unregisterParam(ParamID iParamID)
+{
+  return fParamCxs.erase(iParamID) == 1;
 }
 
 }
