@@ -94,55 +94,72 @@ public:
 
 /**
  * Typed parameter definition.
- * @tparam ParamConverter the converter (see ParamConverters.h for an explanation of what is expected)
- */
-template<typename ParamConverter>
+ * @tparam T the underlying type of the param */
+template<typename T>
 class VstParamDef : public RawVstParamDef
 {
 public:
-  using ParamType = typename ParamConverter::ParamType;
+  using ParamType = T;
 
   VstParamDef(ParamID const iParamID,
               TChar const *const iTitle,
               TChar const *const iUnits,
-              ParamValue const iDefaultNormalizedValue,
+              ParamType const iDefaultValue,
               int32 const iStepCount,
               int32 const iFlags,
               UnitID const iUnitID,
               TChar const *const iShortTitle,
               int32 const iPrecision,
               bool const iUIOnly,
-              bool const iTransient) :
+              bool const iTransient,
+              std::shared_ptr<IParamConverter<ParamType>> iConverter) :
     RawVstParamDef(iParamID,
                    iTitle,
                    iUnits,
-                   iDefaultNormalizedValue,
+                   iConverter ? iConverter->normalize(iDefaultValue) : 0,
                    iStepCount,
                    iFlags,
                    iUnitID,
                    iShortTitle,
                    iPrecision,
                    iUIOnly,
-                   iTransient)
+                   iTransient),
+    fDefaultValue{iDefaultValue},
+    fConverter{std::move(iConverter)}
   {
   }
 
   // getDefaultValue
-  ParamType getDefaultValue() const { return denormalize(fDefaultValue); }
+  ParamType getDefaultValue() const { return fDefaultValue; }
 
   // shortcut to normalize
-  inline ParamValue normalize(ParamType const &iValue) const { return ParamConverter::normalize(iValue); }
+  inline ParamValue normalize(ParamType const &iValue) const
+  {
+    if(fConverter)
+      return fConverter->normalize(iValue);
+    return 0;
+  }
 
   // shortcut to denormalize
-  inline ParamType denormalize(ParamValue iNormalizedValue) const { return ParamConverter::denormalize(iNormalizedValue); }
+  inline ParamType denormalize(ParamValue iNormalizedValue) const
+  {
+    if(fConverter)
+      return fConverter->denormalize(iNormalizedValue);
+    return fDefaultValue;
+  }
 
   /**
    * Using ParamConverter::toString
    */
   void toString(ParamValue iNormalizedValue, String128 iString) const override
   {
-    ParamConverter::toString(ParamConverter::denormalize(iNormalizedValue), iString, fPrecision);
+    if(fConverter)
+      fConverter->toString(fConverter->denormalize(iNormalizedValue), iString, fPrecision);
   }
+
+public:
+  const ParamType fDefaultValue;
+  const std::shared_ptr<IParamConverter<ParamType>> fConverter;
 };
 
 /**
@@ -154,46 +171,51 @@ public:
   ISerParamDef(const ParamID iParamID, const TChar *const iTitle, const bool iUIOnly, const bool iTransient)
     : IParamDef(iParamID, iTitle, iUIOnly, iTransient)
   {}
+
+  virtual ~ISerParamDef() = default;
 };
 
 /**
  * Base class for all non vst parameters (need to provide serialization/deserialization)
  *
- * @tparam ParamSerializer the serializer (see ParamSerializers.h for an explanation of what is expected) */
-template<typename ParamSerializer>
+ * @tparam T the underlying type of the param */
+template<typename T>
 class SerParamDef : public ISerParamDef
 {
 public:
-  using SerializableParamType = typename ParamSerializer::ParamType;
+  using ParamType = T;
 
   SerParamDef(ParamID const iParamID,
               TChar const *const iTitle,
               bool const iUIOnly,
               bool const iTransient,
-              SerializableParamType const &iDefaultValue) :
+              ParamType const &iDefaultValue,
+              std::shared_ptr<IParamSerializer<ParamType>> iSerializer) :
     ISerParamDef(iParamID, iTitle, iUIOnly, iTransient),
-    fDefaultValue{iDefaultValue}
+    fDefaultValue{iDefaultValue},
+    fSerializer{std::move(iSerializer)}
   {}
 
   // readFromStream
-  SerializableParamType readFromStream(IBStreamer &iStreamer) const;
+  ParamType readFromStream(IBStreamer &iStreamer) const;
 
   // writeToStream
-  tresult writeToStream(SerializableParamType const &iValue, IBStreamer &oStreamer) const;
+  tresult writeToStream(ParamType const &iValue, IBStreamer &oStreamer) const;
 
 public:
-  const SerializableParamType fDefaultValue;
+  const ParamType fDefaultValue;
+  const std::shared_ptr<IParamSerializer<ParamType>> fSerializer;
 };
 
 //------------------------------------------------------------------------
 // SerParamDef::readFromStream
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-typename ParamSerializer::ParamType SerParamDef<ParamSerializer>::readFromStream(IBStreamer &iStreamer) const
+template<typename T>
+T SerParamDef<T>::readFromStream(IBStreamer &iStreamer) const
 {
-  if(!fTransient)
+  if(!fTransient && fSerializer)
   {
-    return ParamSerializer::readFromStream(iStreamer, fDefaultValue);
+    return fSerializer->readFromStream(iStreamer, fDefaultValue);
   }
   else
     return fDefaultValue;
@@ -202,23 +224,26 @@ typename ParamSerializer::ParamType SerParamDef<ParamSerializer>::readFromStream
 //------------------------------------------------------------------------
 // SerParamDef::writeToStream
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-tresult SerParamDef<ParamSerializer>::writeToStream(const typename ParamSerializer::ParamType &iValue, IBStreamer &oStreamer) const
+template<typename T>
+tresult SerParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) const
 {
-  return ParamSerializer::writeToStream(iValue, oStreamer);
+  if(fSerializer)
+    return fSerializer->writeToStream(iValue, oStreamer);
+  else
+    return kResultFalse;
 }
 
 //------------------------------------------------------------------------
 // VstParam - define shortcut notation
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-using VstParam = std::shared_ptr<VstParamDef<ParamConverter>>;
+template<typename T>
+using VstParam = std::shared_ptr<VstParamDef<T>>;
 
 //------------------------------------------------------------------------
 // SerParam - define shortcut notation
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-using SerParam = std::shared_ptr<SerParamDef<ParamSerializer>>;
+template<typename T>
+using SerParam = std::shared_ptr<SerParamDef<T>>;
 
 }
 }

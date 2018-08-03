@@ -28,8 +28,8 @@ public:
    * This method is called for each parameter managed by RTState. The order in which this method is called is
    * important and reflects the order that will be used when reading/writing state to the stream
    */
-  template<typename ParamConverter>
-  RTVstParam<ParamConverter> add(VstParam<ParamConverter> iParamDef);
+  template<typename T>
+  RTVstParam<T> add(VstParam<T> iParamDef);
 
   /**
    * Call this method after adding all the parameters. If using the RT processor, it will happen automatically. */
@@ -115,10 +115,10 @@ private:
 //------------------------------------------------------------------------
 // RTState::add
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-RTVstParam<ParamConverter> RTState::add(VstParam<ParamConverter> iParamDef)
+template<typename T>
+RTVstParam<T> RTState::add(VstParam<T> iParamDef)
 {
-  auto rtParam = std::make_shared<RTVstParameter<ParamConverter>>(iParamDef);
+  auto rtParam = std::make_shared<RTVstParameter<T>>(iParamDef);
   addRawParameter(rtParam);
   return rtParam;
 }

@@ -70,27 +70,32 @@ protected:
 /**
  * The typed version. Maintains the denormalized (aka "typed") version of the value and previous value.
  *
- * @tparam ParamConverter the converter (see ParamConverters.h for an explanation of what is expected)
- */
-template<typename ParamConverter>
+ * @tparam T the underlying type of the param */
+template<typename T>
 class RTVstParameter : public RTRawVstParameter
 {
 public:
-  using ParamType = typename ParamConverter::ParamType;
+  using ParamType = T;
 
   // Constructor
-  explicit RTVstParameter(VstParam<ParamConverter> iParamDef) :
+  explicit RTVstParameter(VstParam<T> iParamDef) :
     RTRawVstParameter(iParamDef),
     fValue{denormalize(fNormalizedValue)},
     fPreviousValue{fValue}
   {
   }
 
+  // getParamDef (correct type for this subclass)
+  VstParam<T> getVstParamDef() const
+  {
+    return std::dynamic_pointer_cast<VstParamDef<T>>(getParamDef());
+  }
+
   // shortcut to normalize
-  inline ParamValue normalize(ParamType const &iValue) const { return ParamConverter::normalize(iValue); }
+  inline ParamValue normalize(ParamType const &iValue) const { return getVstParamDef()->normalize(iValue); }
 
   // shortcut to denormalize
-  inline ParamType denormalize(ParamValue iNormalizedValue) const { return ParamConverter::denormalize(iNormalizedValue); }
+  inline ParamType denormalize(ParamValue iNormalizedValue) const { return getVstParamDef()->denormalize(iNormalizedValue); }
 
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
@@ -119,8 +124,8 @@ protected:
 //------------------------------------------------------------------------
 // RTParameter::updateNormalizedValue - update fValue to the new value and return true if it changed
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-bool RTVstParameter<ParamConverter>::updateNormalizedValue(ParamValue iNormalizedValue)
+template<typename T>
+bool RTVstParameter<T>::updateNormalizedValue(ParamValue iNormalizedValue)
 {
   if(RTRawVstParameter::updateNormalizedValue(iNormalizedValue))
   {
@@ -134,8 +139,8 @@ bool RTVstParameter<ParamConverter>::updateNormalizedValue(ParamValue iNormalize
 //------------------------------------------------------------------------
 // RTParameter::resetPreviousValue
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-bool RTVstParameter<ParamConverter>::resetPreviousValue()
+template<typename T>
+bool RTVstParameter<T>::resetPreviousValue()
 {
   if(RTRawVstParameter::resetPreviousValue())
   {
@@ -149,8 +154,8 @@ bool RTVstParameter<ParamConverter>::resetPreviousValue()
 //------------------------------------------------------------------------
 // RTParameter::update
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-void RTVstParameter<ParamConverter>::update(const ParamType &iNewValue)
+template<typename T>
+void RTVstParameter<T>::update(const ParamType &iNewValue)
 {
   fValue = iNewValue;
   fNormalizedValue = normalize(fValue);
@@ -162,25 +167,24 @@ void RTVstParameter<ParamConverter>::update(const ParamType &iNewValue)
 /**
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
  * as well as redefine a couple of iterators which helps in writing simpler and natural code (the param
- * behaves like ParamConverter::ParamType in many ways).
+ * behaves like T in many ways).
  *
- * @tparam ParamConverter the converter (see ParamConverters.h for an explanation of what is expected)
- */
-template<typename ParamConverter>
+ * @tparam T the underlying type of the param */
+template<typename T>
 class RTVstParam
 {
-  using ParamType = typename ParamConverter::ParamType;
+  using ParamType = T;
 
 public:
-  RTVstParam(std::shared_ptr<RTVstParameter<ParamConverter>> iPtr) :
+  RTVstParam(std::shared_ptr<RTVstParameter<T>> iPtr) :
     fPtr{std::move(iPtr)}
   {}
 
   // shortcut to normalize
-  inline ParamValue normalize(ParamType const &iValue) const { return ParamConverter::normalize(iValue); }
+  inline ParamValue normalize(ParamType const &iValue) const { return fPtr->normalize(iValue); }
 
   // shortcut to denormalize
-  inline ParamType denormalize(ParamValue iNormalizedValue) const { return ParamConverter::denormalize(iNormalizedValue); }
+  inline ParamType denormalize(ParamValue iNormalizedValue) const { return fPtr->denormalize(iNormalizedValue); }
 
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
@@ -219,7 +223,7 @@ public:
   inline ParamType const &previous() const { return fPtr->getPreviousValue(); }
 
 private:
-  std::shared_ptr<RTVstParameter<ParamConverter>> fPtr;
+  std::shared_ptr<RTVstParameter<T>> fPtr;
 };
 
 }

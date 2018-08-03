@@ -363,12 +363,12 @@ tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSave
 }
 
 //------------------------------------------------------------------------
-// Parameters::build<BooleanParamConverter> => make sure stepCount is 1
+// Parameters::build<bool> => make sure stepCount is 1
 //------------------------------------------------------------------------
 template<>
-Parameters::VstParamDefBuilder<BooleanParamConverter> Parameters::vst(ParamID iParamID, const TChar *iTitle)
+Parameters::VstParamDefBuilder<bool> Parameters::vstFromType(ParamID iParamID, const TChar *iTitle)
 {
-  return Parameters::VstParamDefBuilder<BooleanParamConverter>(this, iParamID, iTitle).stepCount(1);
+  return Parameters::VstParamDefBuilder<bool>(this, iParamID, iTitle).stepCount(1);
 }
 
 

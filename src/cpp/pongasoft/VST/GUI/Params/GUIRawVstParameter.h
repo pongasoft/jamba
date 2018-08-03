@@ -93,10 +93,10 @@ public:
   GUIRawVstParameter(ParamID iParamID, VstParametersSPtr iVstParameters);
 
   // Destructor
-  ~GUIRawVstParameter()
-  {
-    // DLOG_F(INFO, "RawParameter::~RawParameter(%d)", fParamID);
-  }
+  ~GUIRawVstParameter() = default;
+//  {
+//    DLOG_F(INFO, "RawParameter::~RawParameter(%d)", fParamID);
+//  }
 
   // getParamID
   inline ParamID getParamID() const

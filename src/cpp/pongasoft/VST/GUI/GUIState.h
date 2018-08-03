@@ -32,8 +32,8 @@ public:
   /**
    * This method is called for each parameter managed by the GUIState that is not a regular VST parameter
    */
-  template<typename ParamSerializer>
-  GUISerParam<ParamSerializer> add(SerParam<ParamSerializer> iParamDef);
+  template<typename T>
+  GUISerParam<T> add(SerParam<T> iParamDef);
 
   /**
    * @return true if there is a vst param with the provided ID
@@ -48,9 +48,18 @@ public:
   /**
    * @return the raw parameter given its id
    */
-  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
+  std::shared_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
   {
-    return std::make_unique<GUIRawVstParameter>(iParamID, fVstParameters);
+    if(existsVst(iParamID))
+      return std::make_shared<GUIRawVstParameter>(iParamID, fVstParameters);
+    else
+      return nullptr;
+  }
+
+  // getRawVstParamDef
+  std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const
+  {
+    return fPluginParameters.getRawVstParamDef(iParamID);
   }
 
   /**
@@ -123,10 +132,10 @@ public:
 //------------------------------------------------------------------------
 // GUIState::add
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-GUISerParam<ParamSerializer> GUIState::add(SerParam<ParamSerializer> iParamDef)
+template<typename T>
+GUISerParam<T> GUIState::add(SerParam<T> iParamDef)
 {
-  auto guiParam = std::make_shared<GUISerParameter<ParamSerializer>>(iParamDef);
+  auto guiParam = std::make_shared<GUISerParameter<T>>(iParamDef);
   addSerParam(guiParam);
   return guiParam;
 }

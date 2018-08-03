@@ -16,51 +16,62 @@ public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
-
-  /**
-   * Generic register with any kind of conversion
-   */
-  template<typename ParamConverter>
-  GUIVstParam<ParamConverter> registerVstParam(ParamID iParamID, bool iSubscribeToChanges = true)
-  {
-    return std::make_unique<GUIVstParameter<ParamConverter>>(registerRawVstParam(iParamID, iSubscribeToChanges));
-  }
+  std::shared_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   // shortcut for BooleanParameter
-  GUIVstBooleanParam registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
+  GUIVstParam<bool> registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   // shortcut for PercentParameter
-  GUIVstPercentParam registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges = true);
+  GUIVstParam<Percent> registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
-   * Generic register with any kind of conversion using an actual param def (no param id)
+   * Register a vst parameter simply given its id
+   * @return nullptr if not found or not proper type
    */
-  template<typename ParamConverter>
-  GUIVstParam<ParamConverter> registerVstParam(VstParam<ParamConverter> iParamDef, bool iSubscribeToChanges = true)
+  template<typename T>
+  GUIVstParam<T> registerVstParam(ParamID iParamID, bool iSubscribeToChanges = true)
   {
-    return std::make_unique<GUIVstParameter<ParamConverter>>(registerRawVstParam(iParamDef->fParamID,
-                                                                                 iSubscribeToChanges));
+    if(fParamCxMgr)
+      return fParamCxMgr->registerVstParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
+    else
+      return nullptr;
+  }
+
+  /**
+   * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
+   * @return nullptr if not found or not proper type
+   */
+  template<typename T>
+  GUIVstParam<T> registerVstParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges = true)
+  {
+    if(fParamCxMgr)
+      return fParamCxMgr->registerVstParam(iParamDef, iSubscribeToChanges ? this : nullptr);
+    else
+      return nullptr;
   }
 
   /**
    * This method registers this class to be notified of the GUISerParam changes. Note that GUISerParam is already
    * a wrapper directly accessible from the view so there is no need to return something from this method.
    */
-  template<typename ParamSerializer>
-  void registerSerParam(GUISerParam<ParamSerializer> const &iParamDef)
+  template<typename T>
+  void registerSerParam(GUISerParam<T> const &iParamDef)
   {
-    fParamCxMgr->registerSerParam(iParamDef, this);
+    if(fParamCxMgr)
+      fParamCxMgr->registerSerParam(iParamDef, this);
   }
 
   /**
    * Registers the ser param only given its id and return the associated GUISerParameterSPtr
    */
-  template<typename ParamSerializer>
-  GUISerParameterSPtr<ParamSerializer> registerSerParam(ParamID iParamID,
-                                                        bool iSubscribeToChanges = true)
+  template<typename T>
+  GUISerParameterSPtr<T> registerSerParam(ParamID iParamID,
+                                          bool iSubscribeToChanges = true)
   {
-    return fParamCxMgr->registerSerParam<ParamSerializer>(iParamID, iSubscribeToChanges ? this : nullptr);
+    if(fParamCxMgr)
+      return fParamCxMgr->registerSerParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
+    else
+      return nullptr;
   }
 
   /**

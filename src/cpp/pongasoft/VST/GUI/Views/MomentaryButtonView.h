@@ -32,7 +32,7 @@ using namespace VSTGUI;
  * CKickButton which is similar but it behaves improperly (for example, the button gets stuck in "pressed" state
  * for some reason...)
  */
-class MomentaryButtonView : public TCustomControlView<BooleanParamConverter>
+class MomentaryButtonView : public TCustomControlView<bool>
 {
 public:
   explicit MomentaryButtonView(const CRect &iSize) : TCustomControlView(iSize)
@@ -72,14 +72,14 @@ public:
   void setImage(BitmapPtr iImage) { fImage = std::move(iImage); }
 
 public:
-  CLASS_METHODS_NOCOPY(MomentaryButtonView, TCustomControlView<BooleanParamConverter>)
+  CLASS_METHODS_NOCOPY(MomentaryButtonView, TCustomControlView<bool>)
 
 protected:
   CColor fOnColor{kRedCColor};
   BitmapPtr fImage{nullptr};
 
 public:
-  class Creator : public CustomViewCreator<MomentaryButtonView, TCustomControlView<BooleanParamConverter>>
+  class Creator : public CustomViewCreator<MomentaryButtonView, TCustomControlView<bool>>
   {
     public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :

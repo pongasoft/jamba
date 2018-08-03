@@ -18,18 +18,46 @@ using namespace Steinberg;
 using namespace Steinberg::Vst;
 
 /**
- * Conceptually a ParamConverter needs to be defined like this
+ * A vst parameter is represented by a ParamValue type which is a double in the range [0,1].
+ * This interface represents a converter which knows how to convert from this normalized value to any other kind of
+ * value (T)
  *
- * template<typename T>
- * class ParamConverter
- * {
- *   public:
- *     using ParamType = T;
- *     inline static ParamValue normalize(T const &iValue);
- *     inline static T denormalize(ParamValue iNormalizedValue);
- *     inline static void toString(ParamValue const &iValue, String128 iString, int32 iPrecision)
- * };
+ * @tparam T the actual type that the vst parameter represents
  */
+template<typename T>
+class IParamConverter
+{
+public:
+  using ParamType = T;
+  virtual ParamValue normalize(ParamType const &iValue) const = 0;
+  virtual ParamType denormalize(ParamValue iNormalizedValue) const = 0;
+  virtual void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const = 0;
+};
+
+
+/**
+ * Wrapper/convenient class using a class containing static method instead.
+ *
+ * @tparam ParamConverter the type of the static class
+ */
+template<typename ParamConverter>
+class StaticParamConverter : public IParamConverter<typename ParamConverter::ParamType>
+{
+public:
+  using ParamType = typename ParamConverter::ParamType;
+  inline ParamValue normalize(ParamType const &iValue) const override { return ParamConverter::normalize(iValue); }
+  inline ParamType denormalize(ParamValue iNormalizedValue) const override { return ParamConverter::denormalize(iNormalizedValue); }
+  inline void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const override { return ParamConverter::toString(iValue, iString, iPrecision); }
+};
+
+/**
+ * Simple function to create a param converter from a class with static methods
+ */
+template<typename ParamConverter>
+inline static std::unique_ptr<StaticParamConverter<ParamConverter>> createParamConverter()
+{
+  return std::make_unique<StaticParamConverter<ParamConverter>>();
+}
 
 /**
  * This parameter is just a no-op wrapper to the ParamValue to adapt it to the use of the ParamConverter concept
@@ -88,13 +116,18 @@ public:
 };
 
 /**
+ * Percent type represented by a double
+ */
+using Percent = double;
+
+/**
  * A trivial percent converter. The toString method returns the value as a percentage (precision is used to adjust
  * how many digits to use for display)
  */
 class PercentParamConverter
 {
 public:
-  using ParamType = double;
+  using ParamType = Percent;
 
   inline static ParamValue normalize(double const &iValue)
   {

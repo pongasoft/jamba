@@ -42,7 +42,7 @@ public:
  * This base class automatically registers the custom control and also keeps a control value for the case when
  * the control does not exist (for example in editor the control tag may not be defined).
  */
-template<typename ParamConverter>
+template<typename T>
 class TCustomControlView : public CustomControlView
 {
 public:
@@ -53,26 +53,26 @@ public:
   CLASS_METHODS_NOCOPY(CustomControlView, TCustomControlView)
 
   // set/getControlValue
-  typename ParamConverter::ParamType getControlValue() const;
-  void setControlValue(typename ParamConverter::ParamType const &iControlValue);
+  T getControlValue() const;
+  void setControlValue(T const &iControlValue);
 
   // registerParameters
   void registerParameters() override;
 
 protected:
   // the gui parameter tied to the control
-  GUIVstParam<ParamConverter> fControlParameter{nullptr};
+  GUIVstParam<T> fControlParameter{nullptr};
 
 #if EDITOR_MODE
   // the value (in sync with control parameter but may exist on its own in editor mode)
-  typename ParamConverter::ParamType fControlValue{};
+  T fControlValue{};
 #endif
 
 public:
-  class Creator : public CustomViewCreator<TCustomControlView<ParamConverter>, CustomControlView>
+  class Creator : public CustomViewCreator<TCustomControlView<T>, CustomControlView>
   {
   private:
-    using CustomViewCreatorT = CustomViewCreator<TCustomControlView<ParamConverter>, CustomControlView>;
+    using CustomViewCreatorT = CustomViewCreator<TCustomControlView<T>, CustomControlView>;
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
       CustomViewCreatorT(iViewName, iDisplayName)
@@ -82,10 +82,10 @@ public:
 };
 
 ///////////////////////////////////////////
-// TCustomControlView<ParamConverter>::getControlValue
+// TCustomControlView<T>::getControlValue
 ///////////////////////////////////////////
-template<typename ParamConverter>
-typename ParamConverter::ParamType TCustomControlView<ParamConverter>::getControlValue() const
+template<typename T>
+T TCustomControlView<T>::getControlValue() const
 {
 #if EDITOR_MODE
   if(fControlParameter)
@@ -98,10 +98,10 @@ typename ParamConverter::ParamType TCustomControlView<ParamConverter>::getContro
 }
 
 ///////////////////////////////////////////
-// TCustomControlView<ParamConverter>::setControlValue
+// TCustomControlView<T>::setControlValue
 ///////////////////////////////////////////
-template<typename ParamConverter>
-void TCustomControlView<ParamConverter>::setControlValue(typename ParamConverter::ParamType const &iControlValue)
+template<typename T>
+void TCustomControlView<T>::setControlValue(T const &iControlValue)
 {
 #if EDITOR_MODE
   fControlValue = iControlValue;
@@ -113,35 +113,24 @@ void TCustomControlView<ParamConverter>::setControlValue(typename ParamConverter
 }
 
 ///////////////////////////////////////////
-// TCustomControlView<ParamConverter>::registerParameters
+// TCustomControlView<T>::registerParameters
 ///////////////////////////////////////////
-template<typename ParamConverter>
-void TCustomControlView<ParamConverter>::registerParameters()
+template<typename T>
+void TCustomControlView<T>::registerParameters()
 {
   CustomControlView::registerParameters();
-  if(!fParamCxMgr)
-    ABORT_F("fParamCxMgr should have been registered");
+
+  if(!fParamCxMgr || getControlTag() < 0)
+    return; // not set yet
+
+  auto paramID = static_cast<ParamID>(getControlTag());
+  fControlParameter = registerVstParam<T>(paramID);
 
 #if EDITOR_MODE
-  if(getControlTag() >= 0)
-  {
-    auto paramID = static_cast<ParamID>(getControlTag());
-    if(fParamCxMgr->existsVst(paramID))
-    {
-      fControlParameter = registerVstParam<ParamConverter>(paramID);
-      fControlValue = fControlParameter->getValue();
-    }
-    else
-    {
-      DLOG_F(WARNING, "Parameter[%d] does not exist", paramID);
-      fControlParameter = nullptr;
-    }
-  }
+  if(fControlParameter)
+    fControlValue = fControlParameter->getValue();
 #else
-  auto paramID = static_cast<ParamID>(getControlTag());
-  if(fParamCxMgr->exists(paramID))
-    fControlParameter = registerGUIParam<ParamConverter>(paramID);
-  else
+  if(!fControlParameter)
     ABORT_F("Could not find parameter for control tag [%d]", paramID);
 #endif
 }

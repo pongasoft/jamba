@@ -13,7 +13,7 @@ namespace Views {
 using namespace VSTGUI;
 using namespace Params;
 
-class ToggleButtonView : public TCustomControlView<BooleanParamConverter>
+class ToggleButtonView : public TCustomControlView<bool>
 {
 public:
   explicit ToggleButtonView(const CRect &iSize) : TCustomControlView(iSize)
@@ -85,7 +85,7 @@ public:
   { fImage = std::move(iImage); }
 
 public:
-  CLASS_METHODS_NOCOPY(ToggleButtonView, TCustomControlView<BooleanParamConverter>)
+  CLASS_METHODS_NOCOPY(ToggleButtonView, TCustomControlView<bool>)
 
 protected:
   int fFrames{4};
@@ -96,7 +96,7 @@ protected:
   bool fPressed{false};
 
 public:
-  class Creator : public CustomViewCreator<ToggleButtonView, TCustomControlView<BooleanParamConverter>>
+  class Creator : public CustomViewCreator<ToggleButtonView, TCustomControlView<bool>>
   {
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :

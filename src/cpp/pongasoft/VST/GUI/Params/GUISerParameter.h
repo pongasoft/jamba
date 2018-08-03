@@ -44,19 +44,25 @@ protected:
 /**
  * This is the templated version providing serializer methods, very similar to the GUIVstParameter concept.
  *
- * @tparam ParamSerializer the serializer (see ParamSerializers.h for an explanation of what is expected) */
-template<typename ParamSerializer>
+ * @tparam T the underlying type of the param */
+template<typename T>
 class GUISerParameter : public IGUISerParameter, public FObject
 {
 public:
-  using SerParamType = typename ParamSerializer::ParamType;
+  using SerParamType = T;
 
   // Constructor
-  explicit GUISerParameter(std::shared_ptr<SerParamDef<ParamSerializer>> iParamDef) :
+  explicit GUISerParameter(std::shared_ptr<SerParamDef<T>> iParamDef) :
     IGUISerParameter(iParamDef),
     FObject(),
     fValue{iParamDef->fDefaultValue}
   {}
+
+  // getParamDef (correct type for this subclass)
+  inline std::shared_ptr<SerParamDef<T>> getSerParamDef() const
+  {
+    return std::dynamic_pointer_cast<SerParamDef<T>>(getParamDef());
+  }
 
   /**
    * Update the parameter with a value.
@@ -77,14 +83,14 @@ public:
   // readFromStream
   tresult readFromStream(IBStreamer &iStreamer) override
   {
-    setValue(ParamSerializer::readFromStream(iStreamer, fValue));
+    setValue(getSerParamDef()->readFromStream(iStreamer));
     return kResultOk;
   }
 
   // writeToStream
   tresult writeToStream(IBStreamer &oStreamer) const override
   {
-    return ParamSerializer::writeToStream(fValue, oStreamer);
+    return getSerParamDef()->writeToStream(fValue, oStreamer);
   }
 
   // getValue
@@ -106,8 +112,8 @@ protected:
 //------------------------------------------------------------------------
 // shortcut notation
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-using GUISerParameterSPtr = std::shared_ptr<GUISerParameter<ParamSerializer>>;
+template<typename T>
+using GUISerParameterSPtr = std::shared_ptr<GUISerParameter<T>>;
 
 //------------------------------------------------------------------------
 // GUISerParam - wrapper to make writing the code much simpler and natural
@@ -115,16 +121,14 @@ using GUISerParameterSPtr = std::shared_ptr<GUISerParameter<ParamSerializer>>;
 /**
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
  * as well as redefine a couple of iterators which helps in writing simpler and natural code (the param
- * behaves like ParamSerializer::ParamType in many ways).
+ * behaves like T in many ways).
  *
- * @tparam ParamSerializer the serializer (see ParamSerializers.h for an explanation of what is expected) */
-template<typename ParamSerializer>
+ * @tparam T the underlying type of the param */
+template<typename T>
 class GUISerParam
 {
-  using SerParamType = typename ParamSerializer::ParamType;
-
 public:
-  GUISerParam(std::shared_ptr<GUISerParameter<ParamSerializer>> iPtr) : // NOLINT (not marked explicit on purpose)
+  GUISerParam(std::shared_ptr<GUISerParameter<T>> iPtr) : // NOLINT (not marked explicit on purpose)
     fPtr{std::move(iPtr)}
   {}
 
@@ -135,13 +139,13 @@ public:
    * This method is typically called by a view to change the value of the parameter. Listeners will be notified
    * of the changes.
    */
-  inline void setValue(SerParamType const &iNewValue) { fPtr->setValue(iNewValue); }
+  inline void setValue(T const &iNewValue) { fPtr->setValue(iNewValue); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
-  inline operator SerParamType const &() const { return fPtr->getValue(); } // NOLINT
+  inline operator T const &() const { return fPtr->getValue(); } // NOLINT
 
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
-  inline SerParamType const *operator->() const { return &fPtr->getValue(); }
+  inline T const *operator->() const { return &fPtr->getValue(); }
 
   // readFromStream
   inline tresult readFromStream(IBStreamer &iStreamer) { return fPtr->readFromStream(iStreamer); };
@@ -153,7 +157,7 @@ public:
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }
 
 private:
-  std::shared_ptr<GUISerParameter<ParamSerializer>> fPtr;
+  std::shared_ptr<GUISerParameter<T>> fPtr;
 };
 
 }

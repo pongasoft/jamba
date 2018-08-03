@@ -31,37 +31,32 @@ public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
+  std::shared_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
                                                           Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
-   * Generic register with any kind of conversion
+   * Register a vst parameter simply given its id
+   * @return nullptr if not found or not proper type
    */
   template<typename T>
-  std::unique_ptr<T> registerVstParam(ParamID iParamID,
-                                      Parameters::IChangeListener *iChangeListener = nullptr)
-  {
-    return std::make_unique<T>(registerRawVstParam(iParamID, iChangeListener));
-  }
+  GUIVstParam<T> registerVstParam(ParamID iParamID,
+                                  Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
    * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
+   * @return nullptr if not found or not proper type
    */
-  template<typename ParamConverter>
-  GUIVstParam<ParamConverter> registerVstParam(VstParam<ParamConverter> const &iParamDef,
-                                               Parameters::IChangeListener *iChangeListener = nullptr)
-  {
-    return std::make_unique<GUIVstParameter<ParamConverter>>(registerRawVstParam(iParamDef->fParamID,
-                                                                                 iChangeListener));
-  }
+  template<typename T>
+  GUIVstParam<T> registerVstParam(VstParam<T> iParamDef,
+                                  Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
    * This method registers the listener to be notified of the GUISerParam changes. Note that GUISerParam is already
    * a wrapper directly accessible from the view so there is no need to return something from this method. As a result
    * there is no need to call this method unless a listener is provided, hence the listener is required.
    */
-  template<typename ParamSerializer>
-  void registerSerParam(GUISerParam<ParamSerializer> const &iParamDef, Parameters::IChangeListener *iChangeListener)
+  template<typename T>
+  void registerSerParam(GUISerParam<T> const &iParamDef, Parameters::IChangeListener *iChangeListener)
   {
     DCHECK_F(iChangeListener != nullptr);
     fParamCxs[iParamDef.getParamID()] = std::move(iParamDef.connect(iChangeListener));
@@ -69,10 +64,11 @@ public:
 
   /**
    * Registers the ser param only given its id and return the associated GUISerParameterSPtr
+   * @return nullptr if not found or not proper type
    */
-  template<typename ParamSerializer>
-  GUISerParameterSPtr<ParamSerializer> registerSerParam(ParamID iParamID,
-                                                        Parameters::IChangeListener *iChangeListener = nullptr);
+  template<typename T>
+  GUISerParameterSPtr<T> registerSerParam(ParamID iParamID,
+                                          Parameters::IChangeListener *iChangeListener = nullptr);
 
   // getGUIState
   GUIState *getGUIState() const { return fGUIState; };
@@ -95,17 +91,71 @@ private:
 
 
 //------------------------------------------------------------------------
+// GUIParamCxMgr::registerVstParam
+//------------------------------------------------------------------------
+template<typename T>
+GUIVstParam<T> GUIParamCxMgr::registerVstParam(VstParam<T> iParamDef,
+                                               Parameters::IChangeListener *iChangeListener)
+{
+  auto param = registerRawVstParam(iParamDef->fParamID, iChangeListener);
+
+  if(param)
+    return std::make_shared<GUIVstParameter<T>>(std::move(param), iParamDef);
+  else
+    return nullptr;
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxMgr::registerVstParam
+//------------------------------------------------------------------------
+template<typename T>
+GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
+                                               Parameters::IChangeListener *iChangeListener)
+{
+  auto param = registerRawVstParam(iParamID, iChangeListener);
+
+  if(!param)
+  {
+    DLOG_F(WARNING, "vst param [%d] not found", iParamID);
+    return nullptr;
+  }
+
+  auto rawParamDef = fGUIState->getRawVstParamDef(iParamID);
+
+  auto paramDef = std::dynamic_pointer_cast<VstParamDef<T>>(rawParamDef);
+
+  if(paramDef)
+  {
+    if(iChangeListener)
+      fParamCxs[iParamID] = std::move(param->connect(iChangeListener));
+    else
+      unregisterParam(iParamID);
+
+    return std::make_shared<GUIVstParameter<T>>(std::move(param), paramDef);
+  }
+
+  DLOG_F(WARNING, "vst param [%d] is not of the requested type", iParamID);
+  unregisterParam(iParamID);
+  return nullptr;
+
+}
+
+//------------------------------------------------------------------------
 // GUIParamCxMgr::registerSerParam
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-GUISerParameterSPtr<ParamSerializer> GUIParamCxMgr::registerSerParam(ParamID iParamID,
-                                                                     Parameters::IChangeListener *iChangeListener)
+template<typename T>
+GUISerParameterSPtr<T> GUIParamCxMgr::registerSerParam(ParamID iParamID,
+                                                       Parameters::IChangeListener *iChangeListener)
 {
   auto param = fGUIState->getSerParameter(iParamID);
 
-  DCHECK_F(param != nullptr, "param [%d] not found", iParamID);
+  if(!param)
+  {
+    DLOG_F(WARNING, "ser param [%d] not found", iParamID);
+    return nullptr;
+  }
 
-  auto res = std::dynamic_pointer_cast<GUISerParameter<ParamSerializer>>(param);
+  auto res = std::dynamic_pointer_cast<GUISerParameter<T>>(param);
   if(res)
   {
     if(iChangeListener)
@@ -115,12 +165,13 @@ GUISerParameterSPtr<ParamSerializer> GUIParamCxMgr::registerSerParam(ParamID iPa
   }
   else
   {
-    DLOG_F(WARNING, "Ser. param [%d] is not of the requested type", iParamID);
+    DLOG_F(WARNING, "ser param [%d] is not of the requested type", iParamID);
     unregisterParam(iParamID);
   }
 
   return res;
 }
+
 
 }
 }

@@ -32,14 +32,13 @@ public:
 public:
   /**
    * Implements the builder pattern for ease of build.
-   * @tparam ParamConverter the converter (see ParamConverters.h for an explanation of what is expected)
-   */
-  template<typename ParamConverter>
+   * @tparam T the underlying type of the param */
+  template<typename T>
   struct VstParamDefBuilder
   {
     // builder methods
     VstParamDefBuilder &units(const TChar *iUnits) { fUnits = iUnits; return *this; }
-    VstParamDefBuilder &defaultValue(typename ParamConverter::ParamType const &iDefaultValue) { fDefaultNormalizedValue = ParamConverter::normalize(iDefaultValue); return *this;}
+    VstParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     VstParamDefBuilder &stepCount(int32 iStepCount) { fStepCount = iStepCount; return *this; }
     VstParamDefBuilder &flags(int32 iFlags) { fFlags = iFlags; return *this; }
     VstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
@@ -47,15 +46,18 @@ public:
     VstParamDefBuilder &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
     VstParamDefBuilder &uiOnly(bool iUIOnly = true) { fUIOnly = iUIOnly; return *this; }
     VstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+    VstParamDefBuilder &converter(std::shared_ptr<IParamConverter<T>> iConverter) { fConverter = std::move(iConverter); return *this; }
+    template<typename ParamConverter>
+    VstParamDefBuilder &converter() { fConverter = std::move(createParamConverter<ParamConverter>()); return *this; }
 
     // parameter factory method
-    VstParam<ParamConverter> add() const;
+    VstParam<T> add() const;
 
     // fields
     ParamID fParamID;
     const TChar *fTitle;
     const TChar *fUnits = nullptr;
-    ParamValue fDefaultNormalizedValue = 0;
+    T fDefaultValue{};
     int32 fStepCount = 0;
     int32 fFlags = ParameterInfo::kCanAutomate;
     UnitID fUnitID = kRootUnitId;
@@ -63,6 +65,7 @@ public:
     int32 fPrecision = 4;
     bool fUIOnly = false;
     bool fTransient = false;
+    std::shared_ptr<IParamConverter<T>> fConverter{};
 
     friend class Parameters;
 
@@ -76,24 +79,28 @@ public:
 
   /**
    * Implements the builder pattern for ease of build.
-   * @tparam ParamSerializer the serializer (see ParamSerializers.h for an explanation of what is expected) */
-  template<typename ParamSerializer>
+   * @tparam T the underlying type of the param */
+  template<typename T>
   struct SerParamDefBuilder
   {
     // builder methods
-    SerParamDefBuilder &defaultValue(typename ParamSerializer::ParamType const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
+    SerParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     SerParamDefBuilder &uiOnly(bool iUIOnly = true) { fUIOnly = iUIOnly; return *this; }
     SerParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+    SerParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
+    template<typename ParamSerializer>
+    SerParamDefBuilder &serializer() { fSerializer = std::move(createParamSerializer<ParamSerializer>()); return *this; }
 
     // parameter factory method
-    SerParam<ParamSerializer> add() const;
+    SerParam<T> add() const;
 
     // fields
     ParamID fParamID;
     const TChar *fTitle;
-    typename ParamSerializer::ParamType fDefaultValue{};
+    T fDefaultValue{};
     bool fUIOnly = false;
     bool fTransient = false;
+    std::shared_ptr<IParamSerializer<T>> fSerializer{};
 
     friend class Parameters;
 
@@ -118,20 +125,34 @@ public:
    * TODO add example + don't forget that order is important (define the order in Maschine for example)
    */
   template<typename ParamConverter>
-  VstParamDefBuilder<ParamConverter> vst(ParamID iParamID, const TChar *iTitle);
+  VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, const TChar *iTitle);
 
   /**
-   * Used from derived classes to build a parameter of any type not convertible to a ParamValue
+   * Used from derived classes to build a parameter backed by a VST parameter. Use this version
+   * if you want to provide a different converter.
+   */
+  template<typename T>
+  VstParamDefBuilder<T> vstFromType(ParamID iParamID, const TChar *iTitle);
+
+  /**
+   * Used from derived classes to build a non vst parameter (not convertible to a ParamValue)
    */
   template<typename ParamSerializer>
-  SerParamDefBuilder<ParamSerializer> ser(ParamID iParamID, const TChar *iTitle);
+  SerParamDefBuilder<typename ParamSerializer::ParamType> ser(ParamID iParamID, const TChar *iTitle);
+
+  /**
+   * Used from derived classes to build a non vst parameter (not convertible to a ParamValue). Use this version
+   * if you want to provide a different serializer.
+   */
+  template<typename T>
+  SerParamDefBuilder<T> serFromType(ParamID iParamID, const TChar *iTitle);
 
   /**
    * Used to change the default order (registration order) used when saving the RT state (getState/setState in the
    * processor, setComponentState in the controller)
    *
    * @param iVersion should be a >= 0 number. If negative it will be ignored
-   * @tparam Args can be any combination of ParamID, RawParamDef or ParamDef<ParamConverter>
+   * @tparam Args can be any combination of ParamID, RawParamDef or VstParamDef<T>
    */
   template<typename... Args>
   tresult setRTSaveStateOrder(int16 iVersion, Args... args);
@@ -152,7 +173,7 @@ public:
    * the controller)
    *
    * @param iVersion should be a >= 0 number. If negative it will be ignored
-   * @tparam Args can be any combination of ParamID, RawVstParamDef, VstParamDef<ParamConverter>,
+   * @tparam Args can be any combination of ParamID, RawVstParamDef, VstParamDef<T>, SerParamDef<T>
    */
   template<typename... Args>
   tresult setGUISaveStateOrder(int16 iVersion, Args... args);
@@ -201,12 +222,12 @@ public:
 
 protected:
   // internally called by the builder
-  template<typename ParamConverter>
-  VstParam<ParamConverter> add(VstParamDefBuilder<ParamConverter> const &iBuilder);
+  template<typename T>
+  VstParam<T> add(VstParamDefBuilder<T> const &iBuilder);
 
   // internally called by the builder
-  template<typename ParamSerializer>
-  SerParam<ParamSerializer> add(SerParamDefBuilder<ParamSerializer> const &iBuilder);
+  template<typename T>
+  SerParam<T> add(SerParamDefBuilder<T> const &iBuilder);
 
   // addVstParamDef
   void addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef);
@@ -244,8 +265,8 @@ private:
   }
 
   // case when ISerParamDef
-  template<typename ParamSerializer, typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<SerParamDef<ParamSerializer>> &iParamDef, Args... args)
+  template<typename T, typename... Args>
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<SerParamDef<T>> &iParamDef, Args... args)
   {
     return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
@@ -269,8 +290,8 @@ private:
 //------------------------------------------------------------------------
 // Parameters::SerParamDefBuilder::add
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-SerParam<ParamSerializer> Parameters::SerParamDefBuilder<ParamSerializer>::add() const
+template<typename T>
+SerParam<T> Parameters::SerParamDefBuilder<T>::add() const
 {
   return fParameters->add(*this);
 }
@@ -278,8 +299,8 @@ SerParam<ParamSerializer> Parameters::SerParamDefBuilder<ParamSerializer>::add()
 //------------------------------------------------------------------------
 // Parameters::VstParamDefBuilder::add
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-VstParam<ParamConverter> Parameters::VstParamDefBuilder<ParamConverter>::add() const
+template<typename T>
+VstParam<T> Parameters::VstParamDefBuilder<T>::add() const
 {
   return fParameters->add(*this);
 }
@@ -287,20 +308,26 @@ VstParam<ParamConverter> Parameters::VstParamDefBuilder<ParamConverter>::add() c
 //------------------------------------------------------------------------
 // Parameters::add (called by the builder)
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-VstParam<ParamConverter> Parameters::add(VstParamDefBuilder<ParamConverter> const &iBuilder)
+template<typename T>
+VstParam<T> Parameters::add(VstParamDefBuilder<T> const &iBuilder)
 {
-  auto param = std::make_shared<VstParamDef<ParamConverter>>(iBuilder.fParamID,
-                                                             iBuilder.fTitle,
-                                                             iBuilder.fUnits,
-                                                             iBuilder.fDefaultNormalizedValue,
-                                                             iBuilder.fStepCount,
-                                                             iBuilder.fFlags,
-                                                             iBuilder.fUnitID,
-                                                             iBuilder.fShortTitle,
-                                                             iBuilder.fPrecision,
-                                                             iBuilder.fUIOnly,
-                                                             iBuilder.fTransient);
+  auto param = std::make_shared<VstParamDef<T>>(iBuilder.fParamID,
+                                                iBuilder.fTitle,
+                                                iBuilder.fUnits,
+                                                iBuilder.fDefaultValue,
+                                                iBuilder.fStepCount,
+                                                iBuilder.fFlags,
+                                                iBuilder.fUnitID,
+                                                iBuilder.fShortTitle,
+                                                iBuilder.fPrecision,
+                                                iBuilder.fUIOnly,
+                                                iBuilder.fTransient,
+                                                iBuilder.fConverter);
+
+  if(!iBuilder.fTransient && !iBuilder.fConverter)
+  {
+    DLOG_F(WARNING, "No converter defined for non transient parameter [%d]", iBuilder.fParamID);
+  }
 
   addVstParamDef(param);
 
@@ -310,14 +337,20 @@ VstParam<ParamConverter> Parameters::add(VstParamDefBuilder<ParamConverter> cons
 //------------------------------------------------------------------------
 // Parameters::add (called by the builder)
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-SerParam<ParamSerializer> Parameters::add(Parameters::SerParamDefBuilder<ParamSerializer> const &iBuilder)
+template<typename T>
+SerParam<T> Parameters::add(Parameters::SerParamDefBuilder<T> const &iBuilder)
 {
-  auto param = std::make_shared<SerParamDef<ParamSerializer>>(iBuilder.fParamID,
-                                                              iBuilder.fTitle,
-                                                              iBuilder.fUIOnly,
-                                                              iBuilder.fTransient,
-                                                              iBuilder.fDefaultValue);
+  auto param = std::make_shared<SerParamDef<T>>(iBuilder.fParamID,
+                                                iBuilder.fTitle,
+                                                iBuilder.fUIOnly,
+                                                iBuilder.fTransient,
+                                                iBuilder.fDefaultValue,
+                                                iBuilder.fSerializer);
+
+  if(!iBuilder.fTransient && !iBuilder.fSerializer)
+  {
+    DLOG_F(WARNING, "No serializer defined for non transient parameter [%d]", iBuilder.fParamID);
+  }
 
   addSerParamDef(param);
 
@@ -326,21 +359,43 @@ SerParam<ParamSerializer> Parameters::add(Parameters::SerParamDefBuilder<ParamSe
 
 
 //------------------------------------------------------------------------
-// Parameters::build
+// Parameters::vstFromType
+//------------------------------------------------------------------------
+template<typename T>
+Parameters::VstParamDefBuilder<T> Parameters::vstFromType(ParamID iParamID, const TChar *iTitle)
+{
+  return Parameters::VstParamDefBuilder<T>(this, iParamID, iTitle);
+}
+
+//------------------------------------------------------------------------
+// Parameters::vst
 //------------------------------------------------------------------------
 template<typename ParamConverter>
-Parameters::VstParamDefBuilder<ParamConverter> Parameters::vst(ParamID iParamID, const TChar *iTitle)
+Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::vst(ParamID iParamID, const TChar *iTitle)
 {
-  return Parameters::VstParamDefBuilder<ParamConverter>(this, iParamID, iTitle);
+  auto builder = vstFromType<typename ParamConverter::ParamType>(iParamID, iTitle);
+  builder.template converter<ParamConverter>();
+  return builder;
+}
+
+//------------------------------------------------------------------------
+// Parameters::serFromType
+//------------------------------------------------------------------------
+template<typename T>
+Parameters::SerParamDefBuilder<T> Parameters::serFromType(ParamID iParamID, const TChar *iTitle)
+{
+  return Parameters::SerParamDefBuilder<T>(this, iParamID, iTitle);
 }
 
 //------------------------------------------------------------------------
 // Parameters::ser
 //------------------------------------------------------------------------
 template<typename ParamSerializer>
-Parameters::SerParamDefBuilder<ParamSerializer> Parameters::ser(ParamID iParamID, const TChar *iTitle)
+Parameters::SerParamDefBuilder<typename ParamSerializer::ParamType> Parameters::ser(ParamID iParamID, const TChar *iTitle)
 {
-  return Parameters::SerParamDefBuilder<ParamSerializer>(this, iParamID, iTitle);
+  auto builder = serFromType<typename ParamSerializer::ParamType>(iParamID, iTitle);
+  builder.template serializer<ParamSerializer>();
+  return builder;
 }
 
 //------------------------------------------------------------------------
@@ -392,7 +447,7 @@ tresult Parameters::setGUISaveStateOrder(int16 iVersion, Args... args)
 // Parameters::build - specialization for BooleanParamConverter
 //------------------------------------------------------------------------
 template<>
-Parameters::VstParamDefBuilder<BooleanParamConverter> Parameters::vst(ParamID iParamID, const TChar *iTitle);
+Parameters::VstParamDefBuilder<bool> Parameters::vstFromType(ParamID iParamID, const TChar *iTitle);
 
 // TODO should handle DiscreteValueParamConverter (because it is templated, it doesn't seem that I can do like BooleanParamConverter)
 // check https://stackoverflow.com/questions/87372/check-if-a-class-has-a-member-function-of-a-given-signature

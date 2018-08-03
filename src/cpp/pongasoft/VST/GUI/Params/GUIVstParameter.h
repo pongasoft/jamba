@@ -11,14 +11,13 @@ namespace GUI {
 namespace Params {
 
 /**
- * This class wraps a GUIRawVstParameter to deal with any type using a ParamConverter
+ * This class wraps a GUIRawVstParameter to deal with any type T
  */
-template<typename ParamConverter>
+template<typename T>
 class GUIVstParameter
 {
 public:
-  using ParamType = typename ParamConverter::ParamType;
-  typedef GUIVstParameter<ParamConverter> class_type;
+  using ParamType = T;
 
 public:
   /**
@@ -37,8 +36,10 @@ public:
   class Editor
   {
   public:
-    inline explicit Editor(std::unique_ptr<GUIRawVstParameter::Editor> iRawEditor) :
-      fRawEditor{std::move(iRawEditor)}
+    inline explicit Editor(std::shared_ptr<GUIRawVstParameter::Editor> iRawEditor,
+                           std::shared_ptr<VstParamDef<T>> iVstParamDef) :
+      fRawEditor{std::move(iRawEditor)},
+      fVstParamDef{std::move(iVstParamDef)}
     {
     }
 
@@ -51,7 +52,7 @@ public:
      */
     inline tresult setValue(ParamType iValue)
     {
-      return fRawEditor->setValue(ParamConverter::normalize(iValue));
+      return fRawEditor->setValue(fVstParamDef->normalize(iValue));
     }
 
     /*
@@ -84,13 +85,16 @@ public:
     }
 
   private:
-    std::unique_ptr<GUIRawVstParameter::Editor> fRawEditor;
+    std::shared_ptr<GUIRawVstParameter::Editor> fRawEditor;
+    std::shared_ptr<VstParamDef<T>> fVstParamDef;
   };
 
 public:
   // Constructor
-  explicit GUIVstParameter(std::unique_ptr<GUIRawVstParameter> iRawParameter) :
-    fRawParameter{std::move(iRawParameter)}
+  GUIVstParameter(std::shared_ptr<GUIRawVstParameter> iRawParameter,
+                  std::shared_ptr<VstParamDef<T>> iVstParamDef) :
+    fRawParameter{std::move(iRawParameter)},
+    fVstParamDef{std::move(iVstParamDef)}
   {
     DCHECK_NOTNULL_F(fRawParameter.get());
     // DLOG_F(INFO, "VSTParameter::VSTParameter(%d)", fRawParameter->getParamID());
@@ -113,7 +117,7 @@ public:
    */
   ParamType getValue() const
   {
-    return ParamConverter::denormalize(fRawParameter->getValue());
+    return fVstParamDef->denormalize(fRawParameter->getValue());
   }
 
   /**
@@ -122,7 +126,7 @@ public:
    */
   tresult setValue(ParamType iValue)
   {
-    return fRawParameter->setValue(ParamConverter::normalize(iValue));
+    return fRawParameter->setValue(fVstParamDef->normalize(iValue));
   }
 
   /**
@@ -146,7 +150,7 @@ public:
    */
   std::unique_ptr<Editor> edit()
   {
-    return std::make_unique<Editor>(fRawParameter->edit());
+    return std::make_unique<Editor>(fRawParameter->edit(), fVstParamDef);
   }
 
   /**
@@ -162,20 +166,21 @@ public:
   }
 
 private:
-  std::unique_ptr<GUIRawVstParameter> fRawParameter;
+  std::shared_ptr<GUIRawVstParameter> fRawParameter;
+  std::shared_ptr<VstParamDef<T>> fVstParamDef;
 };
 
 //------------------------------------------------------------------------
 // shortcut notations
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-using GUIVstParam = std::unique_ptr<GUIVstParameter<ParamConverter>>;
+template<typename T>
+using GUIVstParam = std::shared_ptr<GUIVstParameter<T>>;
 
-template<typename ParamConverter>
-using GUIVstParamEditor = std::unique_ptr<typename GUIVstParameter<ParamConverter>::Editor>;
+template<typename T>
+using GUIVstParamEditor = std::unique_ptr<typename GUIVstParameter<T>::Editor>;
 
-using GUIVstBooleanParam = std::unique_ptr<GUIVstParameter<BooleanParamConverter>>;
-using GUIVstPercentParam = std::unique_ptr<GUIVstParameter<PercentParamConverter>>;
+using GUIVstBooleanParam = std::shared_ptr<GUIVstParameter<bool>>;
+using GUIVstPercentParam = std::shared_ptr<GUIVstParameter<Percent>>;
 
 }
 }
