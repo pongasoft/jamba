@@ -36,7 +36,7 @@ public:
   class Editor
   {
   public:
-    inline explicit Editor(std::shared_ptr<GUIRawVstParameter::Editor> iRawEditor,
+    inline explicit Editor(std::unique_ptr<GUIRawVstParameter::Editor> iRawEditor,
                            std::shared_ptr<VstParamDef<T>> iVstParamDef) :
       fRawEditor{std::move(iRawEditor)},
       fVstParamDef{std::move(iVstParamDef)}
@@ -85,7 +85,7 @@ public:
     }
 
   private:
-    std::shared_ptr<GUIRawVstParameter::Editor> fRawEditor;
+    std::unique_ptr<GUIRawVstParameter::Editor> fRawEditor;
     std::shared_ptr<VstParamDef<T>> fVstParamDef;
   };
 
@@ -174,13 +174,13 @@ private:
 // shortcut notations
 //------------------------------------------------------------------------
 template<typename T>
-using GUIVstParam = std::shared_ptr<GUIVstParameter<T>>;
+using GUIVstParam = std::unique_ptr<GUIVstParameter<T>>;
 
 template<typename T>
 using GUIVstParamEditor = std::unique_ptr<typename GUIVstParameter<T>::Editor>;
 
-using GUIVstBooleanParam = std::shared_ptr<GUIVstParameter<bool>>;
-using GUIVstPercentParam = std::shared_ptr<GUIVstParameter<Percent>>;
+using GUIVstBooleanParam = std::unique_ptr<GUIVstParameter<bool>>;
+using GUIVstPercentParam = std::unique_ptr<GUIVstParameter<Percent>>;
 
 }
 }

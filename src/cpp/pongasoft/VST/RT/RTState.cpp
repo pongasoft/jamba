@@ -18,7 +18,7 @@ RTState::RTState(Parameters const &iParameters) :
 //------------------------------------------------------------------------
 // RTState::RTState
 //------------------------------------------------------------------------
-void RTState::addRawParameter(std::shared_ptr<RTRawVstParameter> const &iParameter)
+void RTState::addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter)
 {
   ParamID paramID = iParameter->getParamID();
 
@@ -26,7 +26,7 @@ void RTState::addRawParameter(std::shared_ptr<RTRawVstParameter> const &iParamet
   DCHECK_F(fParameters.find(paramID) == fParameters.cend(), "duplicate paramID [%d]", paramID);
   DCHECK_F(!iParameter->getParamDef()->fUIOnly, "only RT parameter allowed");
 
-  fParameters[paramID] = iParameter;
+  fParameters[paramID] = std::move(iParameter);
 }
 
 //------------------------------------------------------------------------

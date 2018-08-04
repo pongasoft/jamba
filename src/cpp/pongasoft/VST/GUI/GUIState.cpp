@@ -9,7 +9,7 @@ namespace GUI {
 //------------------------------------------------------------------------
 // GUIState::addSerParam
 //------------------------------------------------------------------------
-void GUIState::addSerParam(std::shared_ptr<IGUISerParameter> const &iParameter)
+void GUIState::addSerParam(std::unique_ptr<IGUISerParameter> iParameter)
 {
   DCHECK_F(iParameter != nullptr);
 
@@ -19,7 +19,7 @@ void GUIState::addSerParam(std::shared_ptr<IGUISerParameter> const &iParameter)
   DCHECK_F(fSerParams.find(paramID) == fSerParams.cend(), "duplicate paramID [%d]", paramID);
   DCHECK_F(fPluginParameters.getSerParamDef(paramID)->fUIOnly, "only GUI parameter allowed");
 
-  fSerParams[paramID] = iParameter;
+  fSerParams[paramID] = std::move(iParameter);
 }
 
 //------------------------------------------------------------------------
@@ -184,12 +184,12 @@ std::unique_ptr<GUIParamCxMgr> GUIState::createParamCxMgr()
 //------------------------------------------------------------------------
 // GUIState::getSerParameter
 //------------------------------------------------------------------------
-std::shared_ptr<IGUISerParameter> GUIState::getSerParameter(ParamID iParamID) const
+IGUISerParameter *GUIState::getSerParameter(ParamID iParamID) const
 {
   auto iter = fSerParams.find(iParamID);
   if(iter == fSerParams.cend())
     return nullptr;
-  return iter->second;
+  return iter->second.get();
 }
 
 }

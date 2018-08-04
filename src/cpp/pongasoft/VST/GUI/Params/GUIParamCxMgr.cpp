@@ -8,7 +8,7 @@ namespace Params {
 //------------------------------------------------------------------------
 // GUIParamCxMgr::registerRawVstParam
 //------------------------------------------------------------------------
-std::shared_ptr<GUIRawVstParameter> GUIParamCxMgr::registerRawVstParam(ParamID iParamID,
+std::unique_ptr<GUIRawVstParameter> GUIParamCxMgr::registerRawVstParam(ParamID iParamID,
                                                                        Parameters::IChangeListener *iChangeListener)
 {
   auto param = fGUIState->getRawVstParameter(iParamID);

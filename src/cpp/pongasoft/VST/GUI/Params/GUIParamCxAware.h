@@ -62,16 +62,18 @@ public:
   }
 
   /**
-   * Registers the ser param only given its id and return the associated GUISerParameterSPtr
+   * Registers the ser param only given its id and return the wrapper to the param.
+   *
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
    */
   template<typename T>
-  GUISerParameterSPtr<T> registerSerParam(ParamID iParamID,
-                                          bool iSubscribeToChanges = true)
+  GUISerParam<T> registerSerParam(ParamID iParamID,
+                                  bool iSubscribeToChanges = true)
   {
     if(fParamCxMgr)
       return fParamCxMgr->registerSerParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
     else
-      return nullptr;
+      return GUISerParam<T>{};
   }
 
   /**

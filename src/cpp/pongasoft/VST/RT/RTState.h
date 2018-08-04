@@ -72,10 +72,10 @@ protected:
   Parameters const &fPluginParameters;
 
   // contains all the registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::shared_ptr<RTRawVstParameter>> fParameters{};
+  std::map<ParamID, std::unique_ptr<RTRawVstParameter>> fParameters{};
 
   // add raw parameter to the structures
-  void addRawParameter(std::shared_ptr<RTRawVstParameter> const &iParameter);
+  void addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter);
 
   /**
    * Called from the RT thread from beforeProcessing to set the new state. Can be overridden
@@ -118,9 +118,15 @@ private:
 template<typename T>
 RTVstParam<T> RTState::add(VstParam<T> iParamDef)
 {
-  auto rtParam = std::make_shared<RTVstParameter<T>>(iParamDef);
-  addRawParameter(rtParam);
-  return rtParam;
+  // YP Impl note: this method exports the raw pointer on purpose. The map fParameters is storing unique_ptr so that
+  // when the map gets deleted, all the parameters get deleted as well. The raw pointer is wrapped inside the RTVstParam
+  // wrapper and the normal usage is that it will not outlive the map. Using shared_ptr would be the safest approach
+  // but in the RT code, we want to make sure that we do not pay the penalty of managing a ref counter (which may
+  // use a lock...)
+  auto rawPtr = new RTVstParameter<T>(iParamDef);
+  std::unique_ptr<RTRawVstParameter> rtParam{rawPtr};
+  addRawParameter(std::move(rtParam));
+  return rawPtr;
 }
 
 }

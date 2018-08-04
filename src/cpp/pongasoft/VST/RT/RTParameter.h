@@ -29,7 +29,7 @@ public:
   ParamID getParamID() const { return fParamDef->fParamID; }
 
   // getParamDef
-  std::shared_ptr<RawVstParamDef> getParamDef() const { return fParamDef; }
+  std::shared_ptr<RawVstParamDef> const &getParamDef() const { return fParamDef; }
 
   /**
    * Update the parameter with a new normalized value. This is typically called after the VST parameter managed
@@ -80,22 +80,23 @@ public:
   // Constructor
   explicit RTVstParameter(VstParam<T> iParamDef) :
     RTRawVstParameter(iParamDef),
+    fParamDef{std::move(iParamDef)},
     fValue{denormalize(fNormalizedValue)},
     fPreviousValue{fValue}
   {
   }
 
   // getParamDef (correct type for this subclass)
-  VstParam<T> getVstParamDef() const
+  inline VstParam<T> const &getVstParamDef() const
   {
-    return std::dynamic_pointer_cast<VstParamDef<T>>(getParamDef());
+    return fParamDef;
   }
 
   // shortcut to normalize
-  inline ParamValue normalize(ParamType const &iValue) const { return getVstParamDef()->normalize(iValue); }
+  inline ParamValue normalize(ParamType const &iValue) const { return fParamDef->normalize(iValue); }
 
   // shortcut to denormalize
-  inline ParamType denormalize(ParamValue iNormalizedValue) const { return getVstParamDef()->denormalize(iNormalizedValue); }
+  inline ParamType denormalize(ParamValue iNormalizedValue) const { return fParamDef->denormalize(iNormalizedValue); }
 
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
@@ -117,6 +118,7 @@ protected:
   bool resetPreviousValue() override;
 
 protected:
+  VstParam<T> fParamDef;
   ParamType fValue;
   ParamType fPreviousValue;
 };
@@ -176,8 +178,7 @@ class RTVstParam
   using ParamType = T;
 
 public:
-  RTVstParam(std::shared_ptr<RTVstParameter<T>> iPtr) :
-    fPtr{std::move(iPtr)}
+  RTVstParam(RTVstParameter<T> *iPtr) : fPtr{iPtr}
   {}
 
   // shortcut to normalize
@@ -185,6 +186,9 @@ public:
 
   // shortcut to denormalize
   inline ParamType denormalize(ParamValue iNormalizedValue) const { return fPtr->denormalize(iNormalizedValue); }
+
+  // getValue
+  inline T const &getValue() const { return fPtr->getValue(); }
 
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
@@ -223,7 +227,7 @@ public:
   inline ParamType const &previous() const { return fPtr->getPreviousValue(); }
 
 private:
-  std::shared_ptr<RTVstParameter<T>> fPtr;
+  RTVstParameter<T> *fPtr;
 };
 
 }

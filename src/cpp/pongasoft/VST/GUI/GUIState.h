@@ -48,10 +48,10 @@ public:
   /**
    * @return the raw parameter given its id
    */
-  std::shared_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
+  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
   {
     if(existsVst(iParamID))
-      return std::make_shared<GUIRawVstParameter>(iParamID, fVstParameters);
+      return std::make_unique<GUIRawVstParameter>(iParamID, fVstParameters);
     else
       return nullptr;
   }
@@ -65,7 +65,7 @@ public:
   /**
    * @return the ser parameter given its id (nullptr if not found)
    */
-  std::shared_ptr<IGUISerParameter> getSerParameter(ParamID iParamID) const;
+  IGUISerParameter *getSerParameter(ParamID iParamID) const;
 
   /**
    * This method is called from the GUI controller setComponentState method and reads the state coming from RT
@@ -102,10 +102,10 @@ protected:
   VstParametersSPtr fVstParameters{};
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::shared_ptr<IGUISerParameter>> fSerParams{};
+  std::map<ParamID, std::unique_ptr<IGUISerParameter>> fSerParams{};
 
   // add serializable parameter to the structures
-  void addSerParam(std::shared_ptr<IGUISerParameter> const &iParameter);
+  void addSerParam(std::unique_ptr<IGUISerParameter> iParameter);
 };
 
 /**
@@ -135,9 +135,10 @@ public:
 template<typename T>
 GUISerParam<T> GUIState::add(SerParam<T> iParamDef)
 {
-  auto guiParam = std::make_shared<GUISerParameter<T>>(iParamDef);
-  addSerParam(guiParam);
-  return guiParam;
+  auto rawPtr = new GUISerParameter<T>(iParamDef);
+  std::unique_ptr<IGUISerParameter> guiParam{rawPtr};
+  addSerParam(std::move(guiParam));
+  return rawPtr;
 }
 
 }

@@ -31,7 +31,7 @@ public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  std::shared_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
+  std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
                                                           Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
@@ -63,12 +63,13 @@ public:
   }
 
   /**
-   * Registers the ser param only given its id and return the associated GUISerParameterSPtr
-   * @return nullptr if not found or not proper type
+   * Registers the ser param only given its id and return the wrapper to the param.
+   *
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
    */
   template<typename T>
-  GUISerParameterSPtr<T> registerSerParam(ParamID iParamID,
-                                          Parameters::IChangeListener *iChangeListener = nullptr);
+  GUISerParam<T> registerSerParam(ParamID iParamID,
+                                  Parameters::IChangeListener *iChangeListener = nullptr);
 
   // getGUIState
   GUIState *getGUIState() const { return fGUIState; };
@@ -100,7 +101,7 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(VstParam<T> iParamDef,
   auto param = registerRawVstParam(iParamDef->fParamID, iChangeListener);
 
   if(param)
-    return std::make_shared<GUIVstParameter<T>>(std::move(param), iParamDef);
+    return std::make_unique<GUIVstParameter<T>>(std::move(param), iParamDef);
   else
     return nullptr;
 }
@@ -131,7 +132,7 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
     else
       unregisterParam(iParamID);
 
-    return std::make_shared<GUIVstParameter<T>>(std::move(param), paramDef);
+    return std::make_unique<GUIVstParameter<T>>(std::move(param), paramDef);
   }
 
   DLOG_F(WARNING, "vst param [%d] is not of the requested type", iParamID);
@@ -144,8 +145,8 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
 // GUIParamCxMgr::registerSerParam
 //------------------------------------------------------------------------
 template<typename T>
-GUISerParameterSPtr<T> GUIParamCxMgr::registerSerParam(ParamID iParamID,
-                                                       Parameters::IChangeListener *iChangeListener)
+GUISerParam<T> GUIParamCxMgr::registerSerParam(ParamID iParamID,
+                                               Parameters::IChangeListener *iChangeListener)
 {
   auto param = fGUIState->getSerParameter(iParamID);
 
@@ -155,7 +156,7 @@ GUISerParameterSPtr<T> GUIParamCxMgr::registerSerParam(ParamID iParamID,
     return nullptr;
   }
 
-  auto res = std::dynamic_pointer_cast<GUISerParameter<T>>(param);
+  auto res = dynamic_cast<GUISerParameter<T> *>(param);
   if(res)
   {
     if(iChangeListener)

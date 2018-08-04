@@ -26,7 +26,7 @@ public:
   {}
 
   // getParamDef
-  std::shared_ptr<ISerParamDef> getParamDef() const { return fParamDef; }
+  std::shared_ptr<ISerParamDef> const &getParamDef() const { return fParamDef; }
 
   // getParamID
   ParamID getParamID() const { return fParamDef->fParamID; }
@@ -55,13 +55,14 @@ public:
   explicit GUISerParameter(std::shared_ptr<SerParamDef<T>> iParamDef) :
     IGUISerParameter(iParamDef),
     FObject(),
-    fValue{iParamDef->fDefaultValue}
+    fParamDef{std::move(iParamDef)},
+    fValue{fParamDef->fDefaultValue}
   {}
 
   // getParamDef (correct type for this subclass)
-  inline std::shared_ptr<SerParamDef<T>> getSerParamDef() const
+  inline std::shared_ptr<SerParamDef<T>> const &getSerParamDef() const
   {
-    return std::dynamic_pointer_cast<SerParamDef<T>>(getParamDef());
+    return fParamDef;
   }
 
   /**
@@ -105,15 +106,10 @@ public:
   }
 
 protected:
+  std::shared_ptr<SerParamDef<T>> fParamDef;
   SerParamType fValue;
 };
 
-
-//------------------------------------------------------------------------
-// shortcut notation
-//------------------------------------------------------------------------
-template<typename T>
-using GUISerParameterSPtr = std::shared_ptr<GUISerParameter<T>>;
 
 //------------------------------------------------------------------------
 // GUISerParam - wrapper to make writing the code much simpler and natural
@@ -128,9 +124,12 @@ template<typename T>
 class GUISerParam
 {
 public:
-  GUISerParam(std::shared_ptr<GUISerParameter<T>> iPtr) : // NOLINT (not marked explicit on purpose)
-    fPtr{std::move(iPtr)}
+  GUISerParam(GUISerParameter<T> *iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
+    fPtr{iPtr}
   {}
+
+  // exists
+  inline bool exists() const { return fPtr != nullptr; }
 
   // getParamID
   inline ParamID getParamID() const { return fPtr->getParamID(); }
@@ -140,6 +139,9 @@ public:
    * of the changes.
    */
   inline void setValue(T const &iNewValue) { fPtr->setValue(iNewValue); }
+
+  // getValue
+  inline T const &getValue() const { return fPtr->getValue(); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
   inline operator T const &() const { return fPtr->getValue(); } // NOLINT
@@ -157,7 +159,7 @@ public:
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }
 
 private:
-  std::shared_ptr<GUISerParameter<T>> fPtr;
+  GUISerParameter<T> *fPtr;
 };
 
 }
