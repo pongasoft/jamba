@@ -13,7 +13,7 @@ using namespace VSTGUI;
 
 struct StringDrawContext
 {
-  CHoriTxtAlign fHoriTxtAlign{kCenterText};
+  CHoriTxtAlign fHorizTxtAlign{kCenterText};
   int32_t fStyle{0};
   FontPtr fFont{nullptr};
   CColor fFontColor{kWhiteCColor};

@@ -40,31 +40,24 @@ public:
   bool sizeToFit() override;
 
   // is on or off
-  bool isOn() const
-  { return getControlValue(); }
+  bool isOn() const { return getControlValue(); }
 
-  bool isOff() const
-  { return !isOn(); }
+  bool isOff() const { return !isOn(); }
 
   // get/set frames (should be either 2 or 4) 4 includes the pressed state
-  int getFrames() const
-  { return fFrames; }
+  int getFrames() const { return fFrames; }
 
   void setFrames(int iFrames);
 
   // get/setOnColor (the off color is the back color...)
-  CColor const &getOnColor() const
-  { return fOnColor; }
+  CColor const &getOnColor() const { return fOnColor; }
 
-  void setOnColor(CColor const &iColor)
-  { fOnColor = iColor; }
+  void setOnColor(CColor const &iColor) { fOnColor = iColor; }
 
   // get/setInverse (toggles which image is on and which is off)
-  bool getInverse() const
-  { return fInverse; }
+  bool getInverse() const { return fInverse; }
 
-  void setInverse(bool iInverse)
-  { fInverse = iInverse; }
+  void setInverse(bool iInverse) { fInverse = iInverse; }
 
   /**
    * get/setImage for the button which should have 2 or 4 frames depending on the fFrames value
@@ -78,11 +71,8 @@ public:
    *   - at y = image height * 2/4, the button in its on state
    *   - at y = image height * 3/4, the button in its on state depressed
    */
-  BitmapPtr getImage() const
-  { return fImage; }
-
-  void setImage(BitmapPtr iImage)
-  { fImage = std::move(iImage); }
+  BitmapPtr getImage() const { return fImage; }
+  void setImage(BitmapPtr iImage) { fImage = iImage; }
 
 public:
   CLASS_METHODS_NOCOPY(ToggleButtonView, TCustomControlView<bool>)
@@ -90,7 +80,7 @@ public:
 protected:
   int fFrames{4};
   CColor fOnColor{kRedCColor};
-  BitmapPtr fImage{nullptr};
+  BitmapSPtr fImage{nullptr};
   bool fInverse{false};
 
   bool fPressed{false};

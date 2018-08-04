@@ -9,11 +9,13 @@ namespace GUI {
 
 using namespace VSTGUI;
 
-// Defines a BitmapPtr shortcut notation
-using BitmapPtr = std::shared_ptr<CBitmap>;
+// Defines a BitmapSPtr shortcut notation
+using BitmapPtr = CBitmap *;
+using BitmapSPtr = SharedPointer<CBitmap>;
 
-// Defines a FontPtr shortcut notation
-using FontPtr = std::shared_ptr<CFontDesc>;
+// Defines a FontSPtr shortcut notation
+using FontPtr = CFontDesc *;
+using FontSPtr = SharedPointer<CFontDesc>;
 
 
 }

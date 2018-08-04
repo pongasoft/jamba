@@ -23,7 +23,7 @@ void RelativeDrawContext::drawString(UTF8String const &fText, RelativeRect const
 
     if(sdc.fAntialias)
       fDrawContext->setDrawMode(kAntiAliasing);
-    fDrawContext->setFont(sdc.fFont ? sdc.fFont.get() : nullptr);
+    fDrawContext->setFont(sdc.fFont);
 
     // draw darker text (as shadow)
     if(sdc.fStyle & kShadowText)
@@ -31,10 +31,10 @@ void RelativeDrawContext::drawString(UTF8String const &fText, RelativeRect const
       CRect newSize(textRect);
       newSize.offset(sdc.fShadowTextOffset);
       fDrawContext->setFontColor(sdc.fShadowColor);
-      fDrawContext->drawString(fText.getPlatformString(), newSize, sdc.fHoriTxtAlign, sdc.fAntialias);
+      fDrawContext->drawString(fText.getPlatformString(), newSize, sdc.fHorizTxtAlign, sdc.fAntialias);
     }
     fDrawContext->setFontColor(sdc.fFontColor);
-    fDrawContext->drawString(fText.getPlatformString(), textRect, sdc.fHoriTxtAlign, sdc.fAntialias);
+    fDrawContext->drawString(fText.getPlatformString(), textRect, sdc.fHorizTxtAlign, sdc.fAntialias);
     fDrawContext->restoreGlobalState();
   }
 

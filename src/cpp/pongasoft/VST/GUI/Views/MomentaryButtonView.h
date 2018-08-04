@@ -69,14 +69,14 @@ public:
    *   - at y = image height / 2, the button in its on state
    */
   BitmapPtr getImage() const { return fImage; }
-  void setImage(BitmapPtr iImage) { fImage = std::move(iImage); }
+  void setImage(BitmapPtr iImage) { fImage = iImage; }
 
 public:
   CLASS_METHODS_NOCOPY(MomentaryButtonView, TCustomControlView<bool>)
 
 protected:
   CColor fOnColor{kRedCColor};
-  BitmapPtr fImage{nullptr};
+  BitmapSPtr fImage{nullptr};
 
 public:
   class Creator : public CustomViewCreator<MomentaryButtonView, TCustomControlView<bool>>

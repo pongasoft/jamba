@@ -25,26 +25,6 @@ namespace Views {
 using namespace VSTGUI;
 
 /**
- * Turns a ReferenceCounted* into a std::shared_ptr<ReferenceCounted> which will properly
- * decrements the counter when no more shared references are held. The issue with the sdk SharedPointer concept
- * is that it behaves differently than the native std::shared_ptr concept (for example, bool operator to test if null).
- */
-template<typename RefCounted>
-inline std::shared_ptr<RefCounted> toSharedPtr(RefCounted *iRefCounted)
-{
-  if(iRefCounted)
-  {
-    auto deleter = [](RefCounted *rf) {
-      rf->forget();
-      // NO DELETE on purpose!
-    };
-    iRefCounted->remember();
-    return std::shared_ptr<RefCounted>(iRefCounted, deleter);
-  }
-  return nullptr;
-}
-
-/**
  * Base abstract class for an attribute of a view
  */
 class ViewAttribute
@@ -435,9 +415,14 @@ private:
           CBitmap *bitmap;
           if(UIViewCreator::stringToBitmap(bitmapAttr, bitmap, iDescription))
           {
-            (tv->*fSetter)(toSharedPtr(bitmap));
+            (tv->*fSetter)(bitmap);
             return true;
           }
+        }
+        else
+        {
+          (tv->*fSetter)(nullptr);
+          return true;
         }
       }
       return false;
@@ -451,7 +436,7 @@ private:
       {
         auto bitmap = (tv->*fGetter)();
         if(bitmap)
-          return UIViewCreator::bitmapToString(bitmap.get(), oStringValue, iDescription);
+          return UIViewCreator::bitmapToString(bitmap, oStringValue, iDescription);
       }
       return false;
     }
@@ -498,9 +483,14 @@ private:
           auto font = iDescription->getFont(fontAttr->c_str());
           if(font)
           {
-            (tv->*fSetter)(toSharedPtr(font));
+            (tv->*fSetter)(font);
             return true;
           }
+        }
+        else
+        {
+          (tv->*fSetter)(nullptr);
+          return true;
         }
       }
       return false;
@@ -515,7 +505,7 @@ private:
         auto font = (tv->*fGetter)();
         if(font)
         {
-          auto fontName = iDescription->lookupFontName(font.get());
+          auto fontName = iDescription->lookupFontName(font);
           if(fontName)
             oStringValue = fontName;
         }
