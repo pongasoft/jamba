@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+rm -rf ~/Library/Audio/Plug-Ins/VST/${target}.vst
+cp -r VST3/${target}.vst3  ~/Library/Audio/Plug-Ins/VST/${target}.vst
+
+rm -rf ~/Library/Audio/Plug-Ins/VST3/${target}.vst3
+cp -r VST3/${target}.vst3  ~/Library/Audio/Plug-Ins/VST3

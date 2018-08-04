@@ -183,6 +183,17 @@ function(jamba_fix_vst2 target)
 endfunction()
 
 ###################################################
+# jamba_dev_scripts
+###################################################
+function(jamba_dev_scripts target)
+  if(MAC)
+    configure_file(${JAMBA_ROOT}/scripts/build-dev.sh.in ${CMAKE_BINARY_DIR}/build-dev.sh)
+    configure_file(${JAMBA_ROOT}/scripts/install-dev.sh.in ${CMAKE_BINARY_DIR}/install-dev.sh)
+    configure_file(${JAMBA_ROOT}/scripts/test-dev.sh.in ${CMAKE_BINARY_DIR}/test-dev.sh)
+  endif()
+endfunction()
+
+###################################################
 # jamba_add_test - Testing
 ###################################################
 # Download and unpack googletest at configure time
