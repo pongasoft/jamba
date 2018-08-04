@@ -18,10 +18,6 @@ set(JAMBA_CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/cpp)
 set(LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.cpp)
 include_directories(${JAMBA_CPP_SOURCES})
 
-set(JAMBA_SRC_COMMON_DIR ${JAMBA_CPP_SOURCES}/pongasoft/VST/Common)
-set(JAMBA_SRC_GUI_DIR ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI)
-set(JAMBA_SRC_RT_DIR ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT)
-
 set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.h
     ${JAMBA_CPP_SOURCES}/pongasoft/logging/loguru.hpp
@@ -60,6 +56,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewCreator.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewFactory.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.h
@@ -115,6 +112,9 @@ if(JAMBA_DEBUG_LOGGING)
   message(STATUS "Enabling debug logging for jamba framework")
   add_definitions(-DJAMBA_DEBUG_LOGGING)
 endif()
+
+add_library(jamba STATIC ${JAMBA_sources_cpp} ${JAMBA_vst2_sources} ${JAMBA_sources_h})
+target_include_directories(jamba PUBLIC ${VSTGUI_ROOT}/vstgui4)
 
 ###################################################
 # jamba_create_archive - Create archive (.tgz)

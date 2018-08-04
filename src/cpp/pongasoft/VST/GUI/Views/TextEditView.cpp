@@ -62,8 +62,6 @@ void TextEditView::onParameterChange(ParamID iParamID)
   CustomViewAdapter::onParameterChange(iParamID);
 }
 
-TextEditView::Creator __gTextEditCreator("pongasoft::TextEdit", "pongasoft - Text Edit");
-
 }
 }
 }

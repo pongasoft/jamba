@@ -1,5 +1,6 @@
 #include "GUIController.h"
 #include <vstgui4/vstgui/plugin-bindings/vst3editor.h>
+#include <pongasoft/VST/GUI/Views/JambaViews.h>
 
 namespace pongasoft {
 namespace VST {
@@ -15,7 +16,7 @@ GUIController::GUIController(const char *iXmlFileName) :
   EditController(),
   fXmlFileName{iXmlFileName}
 {
-
+  Views::JambaViews::instance();
 }
 
 //------------------------------------------------------------------------

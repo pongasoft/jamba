@@ -145,8 +145,6 @@ bool ToggleButtonView::sizeToFit()
   return CustomView::sizeToFit(getImage(), fFrames);
 }
 
-ToggleButtonView::Creator __gToggleButtonCreator("pongasoft::ToggleButton", "pongasoft - Toggle Button (on/off)");
-
 }
 }
 }

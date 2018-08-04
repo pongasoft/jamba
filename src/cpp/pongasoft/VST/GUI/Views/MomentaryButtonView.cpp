@@ -108,8 +108,6 @@ bool MomentaryButtonView::sizeToFit()
   return CustomView::sizeToFit(getImage(), 2);
 }
 
-MomentaryButtonView::Creator __gMomentaryButtonCreator("pongasoft::MomentaryButton", "pongasoft - Momentary Button (on when pressed)");
-
 }
 }
 }
