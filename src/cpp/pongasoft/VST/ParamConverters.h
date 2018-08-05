@@ -27,6 +27,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <memory>
 
 namespace pongasoft {
 namespace VST {
