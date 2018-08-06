@@ -40,7 +40,7 @@ class IParamSerializer
 {
 public:
   using ParamType = T;
-  virtual ParamType readFromStream(IBStreamer &iStreamer, ParamType const &iDefaultValue) = 0;
+  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) = 0;
   virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) = 0;
 };
 
@@ -54,9 +54,9 @@ class StaticParamSerializer : public IParamSerializer<typename ParamSerializer::
 {
 public:
   using ParamType = typename ParamSerializer::ParamType;
-  virtual ParamType readFromStream(IBStreamer &iStreamer, ParamType const &iDefaultValue)
+  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
   {
-    return ParamSerializer::readFromStream(iStreamer, iDefaultValue);
+    return ParamSerializer::readFromStream(iStreamer, oValue);
   }
 
   virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer)
@@ -82,12 +82,13 @@ class RawParamSerializer
 public:
   using ParamType = ParamValue;
 
-  inline static ParamType readFromStream(IBStreamer &iStreamer, ParamType const &iDefaultValue)
+  inline static tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
   {
     double value;
     if(!iStreamer.readDouble(value))
-      value = iDefaultValue;
-    return value;
+      return kResultFalse;
+    oValue = value;
+    return kResultOk;
   }
 
   inline static tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer)

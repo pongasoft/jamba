@@ -1,4 +1,12 @@
 #-------------------------------------------------------------------------------
+# Version
+#-------------------------------------------------------------------------------
+set(JAMBA_MAJOR_VERSION 1)
+set(JAMBA_MINOR_VERSION 0)
+set(JAMBA_PATCH_VERSION 0)
+set(JAMBA_VERSION "${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}")
+
+#-------------------------------------------------------------------------------
 # Options
 #-------------------------------------------------------------------------------
 option(JAMBA_DEBUG_LOGGING "Enable debug logging for jamba framework" OFF)
@@ -107,6 +115,9 @@ if (SMTG_CREATE_VST2_VERSION)
       ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffectx.cpp
       )
 endif()
+
+configure_file(${JAMBA_CPP_SOURCES}/pongasoft/logging/jamba_version.h.in ${CMAKE_BINARY_DIR}/generated/jamba_version.h)
+include_directories(${CMAKE_BINARY_DIR}/generated/)
 
 if(JAMBA_DEBUG_LOGGING)
   message(STATUS "Enabling debug logging for jamba framework")

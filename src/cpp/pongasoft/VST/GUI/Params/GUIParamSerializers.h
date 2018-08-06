@@ -41,11 +41,12 @@ public:
 
 
   // readFromStream
-  inline static ParamType readFromStream(IBStreamer &iStreamer, ParamType const &iDefaultValue)
+  inline static tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
   {
     char8 str[size];
     iStreamer.readString8(str, size);
-    return UTF8String{str};
+    oValue = UTF8String{str};
+    return kResultOk;
   }
 
   // writeToStream

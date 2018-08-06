@@ -72,14 +72,14 @@ public:
   explicit GUISerParameter(std::shared_ptr<SerParamDef<T>> iParamDef) :
     IGUISerParameter(iParamDef),
     FObject(),
-    fParamDef{std::move(iParamDef)},
-    fValue{fParamDef->fDefaultValue}
+    fSerParamDef{std::move(iParamDef)},
+    fValue{fSerParamDef->fDefaultValue}
   {}
 
-  // getParamDef (correct type for this subclass)
+  // getSerParamDef (correct type for this subclass)
   inline std::shared_ptr<SerParamDef<T>> const &getSerParamDef() const
   {
-    return fParamDef;
+    return fSerParamDef;
   }
 
   /**
@@ -101,14 +101,16 @@ public:
   // readFromStream
   tresult readFromStream(IBStreamer &iStreamer) override
   {
-    setValue(getSerParamDef()->readFromStream(iStreamer));
-    return kResultOk;
+    tresult res = fSerParamDef->readFromStream(iStreamer, fValue);
+    if(res == kResultOk)
+      changed();
+    return res;
   }
 
   // writeToStream
   tresult writeToStream(IBStreamer &oStreamer) const override
   {
-    return getSerParamDef()->writeToStream(fValue, oStreamer);
+    return fSerParamDef->writeToStream(fValue, oStreamer);
   }
 
   // getValue
@@ -123,7 +125,7 @@ public:
   }
 
 protected:
-  std::shared_ptr<SerParamDef<T>> fParamDef;
+  std::shared_ptr<SerParamDef<T>> fSerParamDef;
   SerParamType fValue;
 };
 

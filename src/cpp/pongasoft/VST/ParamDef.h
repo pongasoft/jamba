@@ -89,12 +89,16 @@ public:
   // readFromStream
   ParamValue readFromStream(IBStreamer &iStreamer) const
   {
+    ParamValue res = fDefaultValue;
+
     if(!fTransient)
     {
-      return RawParamSerializer::readFromStream(iStreamer, fDefaultValue);
+      ParamValue value;
+      if(RawParamSerializer::readFromStream(iStreamer, value) == kResultOk)
+        res = value;
     }
-    else
-      return fDefaultValue;
+
+    return res;
   }
 
   virtual void toString(ParamValue iNormalizedValue, String128 iString) const = 0;
@@ -214,6 +218,7 @@ public:
   {}
 
   // readFromStream
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const;
   ParamType readFromStream(IBStreamer &iStreamer) const;
 
   // writeToStream
@@ -228,15 +233,28 @@ public:
 // SerParamDef::readFromStream
 //------------------------------------------------------------------------
 template<typename T>
-T SerParamDef<T>::readFromStream(IBStreamer &iStreamer) const
+tresult SerParamDef<T>::readFromStream(IBStreamer &iStreamer, T &oValue) const
 {
   if(!fTransient && fSerializer)
   {
-    return fSerializer->readFromStream(iStreamer, fDefaultValue);
+    return fSerializer->readFromStream(iStreamer, oValue);
   }
   else
-    return fDefaultValue;
+    return kResultFalse;
 }
+
+//------------------------------------------------------------------------
+// SerParamDef::readFromStream
+//------------------------------------------------------------------------
+template<typename T>
+T SerParamDef<T>::readFromStream(IBStreamer &iStreamer) const
+{
+  T value;
+  if(readFromStream(iStreamer, value) != kResultOk)
+    value = fDefaultValue;
+  return value;
+}
+
 
 //------------------------------------------------------------------------
 // SerParamDef::writeToStream
