@@ -15,5 +15,7 @@ namespace jamba {
 // Version with build number
 #define JAMBA_FULL_VERSION_STR "@JAMBA_VERSION@"
 
+#define JAMBA_GIT_VERSION_STR "@JAMBA_GIT_VERSION@"
+
 }
 }

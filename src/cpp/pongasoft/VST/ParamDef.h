@@ -91,12 +91,9 @@ public:
   {
     ParamValue res = fDefaultValue;
 
-    if(!fTransient)
-    {
-      ParamValue value;
-      if(RawParamSerializer::readFromStream(iStreamer, value) == kResultOk)
-        res = value;
-    }
+    ParamValue value;
+    if(RawParamSerializer::readFromStream(iStreamer, value) == kResultOk)
+      res = value;
 
     return res;
   }
@@ -235,7 +232,7 @@ public:
 template<typename T>
 tresult SerParamDef<T>::readFromStream(IBStreamer &iStreamer, T &oValue) const
 {
-  if(!fTransient && fSerializer)
+  if(fSerializer)
   {
     return fSerializer->readFromStream(iStreamer, oValue);
   }

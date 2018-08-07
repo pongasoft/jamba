@@ -6,6 +6,7 @@ include(ExternalProject)
 ExternalProject_Add(googletest 
     GIT_REPOSITORY    https://github.com/pongasoft/googletest
     GIT_TAG           bb56a77002b186efdc94edf8f2905d82b6b5cd20
+    GIT_CONFIG        advice.detachedHead=false
     SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src" 
     BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build" 
     CONFIGURE_COMMAND ""

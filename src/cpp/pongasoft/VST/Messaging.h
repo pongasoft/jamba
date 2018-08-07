@@ -20,6 +20,11 @@
 #include <pluginterfaces/base/ftypes.h>
 #include <pluginterfaces/vst/ivstmessage.h>
 #include <algorithm>
+#include <memory>
+#include <public.sdk/source/vst/vstpresetfile.h>
+#include <string>
+#include <sstream>
+#include "ParamDef.h"
 
 namespace pongasoft {
 namespace VST {
@@ -106,9 +111,106 @@ public:
     return oSize;
   }
 
+  /**
+   * Serializes the parameter value as an entry in the message (technically 2 entries: one for the byte array
+   * of serialized data and one for the size of this array)
+   *
+   * @return kResultOk if successful */
+  template<typename T>
+  tresult setSerParam(SerParam<T> const &iParamDef, T const &iValue);
+
+  /**
+   * Extract the serialized parameter from the stream (reverse of setSerParam)
+   *
+   * @return kResultOk if successful */
+  template<typename T>
+  tresult getSerParam(SerParam<T> const &iParamDef, T &oValue) const;
+
+  /**
+   * Compute the attribute name for an ser param given its id (must be a string :(
+   */
+  inline static std::string computeParamAttrID(ParamID iParamID)
+  {
+    std::ostringstream s;
+    s << "__p__" << iParamID;
+    return s.str();
+  }
+
+  /**
+   * Compute the attribute name for the size of the ser parama given its id (must be a string :(
+   */
+  inline static std::string computeSizeParamAttrID(ParamID iParamID)
+  {
+    std::ostringstream s;
+    s << "__p__" << iParamID << "__size";
+    return s.str();
+  }
+
 private:
   IMessage *fMessage;
 };
+
+/**
+ * Internal class to override the BufferStream class and give access to the buffer
+ */
+class BufferStream : public Steinberg::Vst::BufferStream
+{
+public:
+  BufferStream() : Steinberg::Vst::BufferStream() {}
+  explicit BufferStream(Buffer &&iFrom) : Steinberg::Vst::BufferStream()
+  {
+    mBuffer.take(iFrom);
+  }
+  Buffer const &getBuffer() const { return mBuffer; }
+};
+
+//------------------------------------------------------------------------
+// Message::setSerParam
+//------------------------------------------------------------------------
+template<typename T>
+tresult Message::setSerParam(const std::shared_ptr<SerParamDef<T>> &iParamDef, const T &iValue)
+{
+  BufferStream stream{};
+  
+  IBStreamer streamer{&stream};
+
+  tresult res = iParamDef->writeToStream(iValue, streamer);
+  if(res == kResultOk)
+  {
+    auto const &buffer = stream.getBuffer();
+    
+    setInt(computeSizeParamAttrID(iParamDef->fParamID).c_str(), buffer.getFillSize());
+    setBinary(computeParamAttrID(iParamDef->fParamID).c_str(), buffer.int8Ptr(), buffer.getFillSize());
+    return kResultOk;
+  }
+  return res;
+}
+
+//------------------------------------------------------------------------
+// Message::getSerParam
+//------------------------------------------------------------------------
+template<typename T>
+tresult Message::getSerParam(const SerParam<T> &iParamDef, T &oValue) const
+{
+
+  int64 size = getInt(computeSizeParamAttrID(iParamDef->fParamID).c_str(), -1);
+  if(size > 0)
+  {
+    auto bufferSize = static_cast<uint32>(size);
+    Buffer buffer(bufferSize);
+    getBinary(computeParamAttrID(iParamDef->fParamID).c_str(), buffer.int8Ptr(), bufferSize);
+
+    BufferStream stream{std::move(buffer)};
+
+    IBStreamer streamer{&stream};
+
+    return iParamDef->readFromStream(streamer, oValue);
+  }
+
+  return kResultFalse;
+
+
+}
 
 }
 }

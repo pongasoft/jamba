@@ -75,12 +75,6 @@ tresult GUIController::initialize(FUnknown *context)
 
   fViewFactory = new CustomUIViewFactory(guiState);
 
-  for(const auto &viewState : fViewStates)
-  {
-    viewState->initState(guiState);
-    viewState->registerParameters();
-  }
-
   return result;
 }
 
@@ -150,21 +144,6 @@ tresult GUIController::getState(IBStream *state)
 
   IBStreamer streamer(state, kLittleEndian);
   return getGUIState()->writeGUIState(streamer);
-}
-
-//------------------------------------------------------------------------
-// VAC6Controller::getState
-//------------------------------------------------------------------------
-void GUIController::registerViewState(std::shared_ptr<GUIViewState> iViewState)
-{
-  if(std::find(fViewStates.cbegin(), fViewStates.cend(), iViewState) != fViewStates.cend())
-  {
-    DLOG_F(WARNING, "Registering same GUIViewState multiple times (ignored");
-  }
-  else
-  {
-    fViewStates.emplace_back(std::move(iViewState));
-  }
 }
 
 }

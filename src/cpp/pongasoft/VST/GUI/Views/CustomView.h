@@ -228,8 +228,8 @@ protected:
   }
 
 public:
-  // direct access to state (ex: fParams->fBypassParam)
-  TGUIPluginState const *fState{};
+  // direct access to state (ex: fState->fLabelA)
+  TGUIPluginState *fState{};
 
   // direct access to parameters (ex: fParams->fBypassParam)
   typename TGUIPluginState::PluginParameters const *fParams{};
@@ -293,8 +293,8 @@ protected:
   }
 
 public:
-  // direct access to state (ex: fParams->fBypassParam)
-  TGUIPluginState const *fState{};
+  // direct access to state (ex: fState->fLabelA)
+  TGUIPluginState *fState{};
 
   // direct access to parameters (ex: fParams->fBypassParam)
   typename TGUIPluginState::PluginParameters const *fParams{};

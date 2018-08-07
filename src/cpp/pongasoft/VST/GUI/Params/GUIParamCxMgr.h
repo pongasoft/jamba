@@ -69,14 +69,17 @@ public:
 
   /**
    * This method registers the listener to be notified of the GUISerParam changes. Note that GUISerParam is already
-   * a wrapper directly accessible from the view so there is no need to return something from this method. As a result
-   * there is no need to call this method unless a listener is provided, hence the listener is required.
+   * a wrapper directly accessible from the view and as a result there is no need to call this method unless a
+   * listener is provided, hence the listener is required.
+   *
+   * @return a copy of iParamDef for convenience and symmetry of the APIs
    */
   template<typename T>
-  void registerSerParam(GUISerParam<T> const &iParamDef, Parameters::IChangeListener *iChangeListener)
+  GUISerParam<T> registerSerParam(GUISerParam<T> &iParamDef, Parameters::IChangeListener *iChangeListener)
   {
     DCHECK_F(iChangeListener != nullptr);
     fParamCxs[iParamDef.getParamID()] = std::move(iParamDef.connect(iChangeListener));
+    return iParamDef;
   }
 
   /**

@@ -1,10 +1,19 @@
+# JAMBA_ROOT
+set(JAMBA_ROOT ${CMAKE_CURRENT_LIST_DIR})
+
 #-------------------------------------------------------------------------------
 # Version
 #-------------------------------------------------------------------------------
 set(JAMBA_MAJOR_VERSION 1)
 set(JAMBA_MINOR_VERSION 0)
 set(JAMBA_PATCH_VERSION 0)
+execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
+    RESULT_VARIABLE result
+    OUTPUT_VARIABLE JAMBA_GIT_VERSION
+    WORKING_DIRECTORY ${JAMBA_ROOT}
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(JAMBA_VERSION "${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}")
+message(STATUS "jamba git version - ${JAMBA_GIT_VERSION}")
 
 #-------------------------------------------------------------------------------
 # Options
@@ -21,7 +30,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/VST3_SDK.cmake)
 # Defining files to include to generate the library
 #-------------------------------------------------------------------------------
 
-set(JAMBA_ROOT ${CMAKE_CURRENT_LIST_DIR})
 set(JAMBA_CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/cpp)
 set(LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.cpp)
 include_directories(${JAMBA_CPP_SOURCES})
@@ -72,7 +80,6 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIController.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIViewState.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Types.h
     )
 
@@ -116,6 +123,7 @@ if (SMTG_CREATE_VST2_VERSION)
       )
 endif()
 
+
 configure_file(${JAMBA_CPP_SOURCES}/pongasoft/logging/jamba_version.h.in ${CMAKE_BINARY_DIR}/generated/jamba_version.h)
 include_directories(${CMAKE_BINARY_DIR}/generated/)
 
@@ -126,6 +134,7 @@ endif()
 
 add_library(jamba STATIC ${JAMBA_sources_cpp} ${JAMBA_vst2_sources} ${JAMBA_sources_h})
 target_include_directories(jamba PUBLIC ${VSTGUI_ROOT}/vstgui4)
+target_compile_definitions(jamba PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
 
 ###################################################
 # jamba_create_archive - Create archive (.tgz)

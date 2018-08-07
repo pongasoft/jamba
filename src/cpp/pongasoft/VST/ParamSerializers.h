@@ -75,6 +75,32 @@ inline static std::unique_ptr<StaticParamSerializer<ParamSerializer>> createPara
 }
 
 /**
+ * IBStreamHelper - Helper functions
+ */
+namespace IBStreamHelper {
+  // readDouble - contrary to IBStreamer.readDouble, this method does NOT modify oValue if cannot be read
+  inline tresult readDouble(IBStreamer &iStreamer, double &oValue)
+  {
+    double value;
+    if(!iStreamer.readDouble(value))
+      return kResultFalse;
+    oValue = value;
+    return kResultOk;
+  }
+
+// readBool - contrary to IBStreamer.readBool, this method does NOT modify oValue if cannot be read
+inline tresult readBool(IBStreamer &iStreamer, bool &oValue)
+{
+  bool value;
+  if(!iStreamer.readBool(value))
+    return kResultFalse;
+  oValue = value;
+  return kResultOk;
+}
+
+}
+
+/**
  * This parameter handles serializing a raw parameter (ParamValue)
  */
 class RawParamSerializer
@@ -84,11 +110,7 @@ public:
 
   inline static tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
   {
-    double value;
-    if(!iStreamer.readDouble(value))
-      return kResultFalse;
-    oValue = value;
-    return kResultOk;
+    return IBStreamHelper::readDouble(iStreamer, oValue);
   }
 
   inline static tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer)

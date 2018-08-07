@@ -21,6 +21,7 @@
 #include <pongasoft/VST/ParamConverters.h>
 #include <pongasoft/VST/ParamDef.h>
 #include <pongasoft/VST/Parameters.h>
+#include <pongasoft/VST/Messaging.h>
 #include "GUIParamCx.h"
 
 namespace pongasoft {
@@ -53,6 +54,9 @@ public:
 
   // writeToStream
   virtual tresult writeToStream(IBStreamer &oStreamer) const = 0;
+
+  // setFromMessage
+  virtual tresult setFromMessage(Message const &iMessage) = 0;
 
 protected:
   std::shared_ptr<ISerParamDef> fParamDef;
@@ -87,7 +91,7 @@ public:
    *
    * @return true if the value was actually updated, false if it is the same
    */
-  bool setValue(SerParamType const &iValue)
+  bool update(SerParamType const &iValue)
   {
     if(fValue != iValue)
     {
@@ -96,6 +100,16 @@ public:
       return true;
     }
     return false;
+  }
+
+  /**
+   * Sets the value. The difference with update is that it does not check for equality (case when SerParamType is
+   * not comparable)
+   */
+  void setValue(SerParamType const &iValue)
+  {
+    fValue = iValue;
+    changed();
   }
 
   // readFromStream
@@ -111,6 +125,15 @@ public:
   tresult writeToStream(IBStreamer &oStreamer) const override
   {
     return fSerParamDef->writeToStream(fValue, oStreamer);
+  }
+
+  // setFromMessage
+  tresult setFromMessage(Message const &iMessage) override
+  {
+    tresult res = iMessage.getSerParam(fSerParamDef, fValue);
+    if(res == kResultOk)
+      changed();
+    return res;
   }
 
   // getValue
@@ -157,6 +180,11 @@ public:
    * This method is typically called by a view to change the value of the parameter. Listeners will be notified
    * of the changes.
    */
+  inline bool update(T const &iNewValue) { return fPtr->update(iNewValue); }
+
+  /**
+   * The difference with update is that it does not check for equality (case when SerParamType is not comparable)
+   */
   inline void setValue(T const &iNewValue) { fPtr->setValue(iNewValue); }
 
   // getValue
@@ -173,6 +201,9 @@ public:
 
   // writeToStream
   inline tresult writeToStream(IBStreamer &oStreamer) const { return fPtr->writeToStream(oStreamer); };
+
+  // setFromMessage
+  inline tresult setFromMessage(Message const &iMessage) { return fPtr->setFromMessage(iMessage); }
 
   // connect
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }

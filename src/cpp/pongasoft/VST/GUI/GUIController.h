@@ -22,7 +22,6 @@
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <vstgui4/vstgui/lib/cframe.h>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
-#include <pongasoft/VST/GUI/GUIViewState.h>
 #include <pongasoft/VST/GUI/GUIState.h>
 
 namespace pongasoft {
@@ -49,10 +48,6 @@ public:
    * Subclasses must implement this method to return the state
    */
   virtual GUIState *getGUIState() = 0;
-
-  /**
-   * Registers the view state used by the (sub) controller so that they get properly initialized  */
-  void registerViewState(std::shared_ptr<GUIViewState> iViewState);
 
 protected:
   /** Called at first after constructor */
@@ -81,9 +76,6 @@ protected:
   VSTGUI::CKnobMode fDefaultKnobMode{VSTGUI::CKnobMode::kLinearMode};
 
 private:
-  // keeps track of the view states
-  std::vector<std::shared_ptr<GUIViewState>> fViewStates{};
-
   // view factory used to give access to GUIState to views
   Views::CustomUIViewFactory *fViewFactory{nullptr};
 

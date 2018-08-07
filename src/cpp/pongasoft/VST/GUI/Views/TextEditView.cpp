@@ -53,7 +53,7 @@ void TextEditView::valueChanged()
   CTextEdit::valueChanged();
   if(fText.exists())
   {
-    fText.setValue(getText());
+    fText.update(getText());
   }
 }
 

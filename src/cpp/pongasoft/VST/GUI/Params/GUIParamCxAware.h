@@ -69,13 +69,19 @@ public:
 
   /**
    * This method registers this class to be notified of the GUISerParam changes. Note that GUISerParam is already
-   * a wrapper directly accessible from the view so there is no need to return something from this method.
+   * a wrapper directly accessible from the view and as a result there is no need to call this method unless you
+   * want to subscribe to the changes, hence there isn't a second optional parameter
+   *
+   * @return a copy of iParamDef for convenience and symmetry of the APIs or empty wrapper if initState has not
+   *         been called
    */
   template<typename T>
-  void registerSerParam(GUISerParam<T> const &iParamDef)
+  GUISerParam<T> registerSerParam(GUISerParam<T> &iParamDef)
   {
     if(fParamCxMgr)
-      fParamCxMgr->registerSerParam(iParamDef, this);
+      return fParamCxMgr->registerSerParam(iParamDef, this);
+    else
+      return GUISerParam<T>{};
   }
 
   /**
