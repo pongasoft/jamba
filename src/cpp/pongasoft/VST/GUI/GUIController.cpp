@@ -109,7 +109,7 @@ IPlugView *GUIController::createView(const char *name)
 }
 
 //------------------------------------------------------------------------
-// VAC6Controller::setComponentState
+// GUIController::setComponentState
 //------------------------------------------------------------------------
 tresult GUIController::setComponentState(IBStream *state)
 {
@@ -123,7 +123,7 @@ tresult GUIController::setComponentState(IBStream *state)
 }
 
 //------------------------------------------------------------------------
-// VAC6Controller::setState
+// GUIController::setState
 //------------------------------------------------------------------------
 tresult GUIController::setState(IBStream *state)
 {
@@ -135,7 +135,7 @@ tresult GUIController::setState(IBStream *state)
 }
 
 //------------------------------------------------------------------------
-// VAC6Controller::getState
+// GUIController::getState
 //------------------------------------------------------------------------
 tresult GUIController::getState(IBStream *state)
 {
@@ -145,6 +145,20 @@ tresult GUIController::getState(IBStream *state)
   IBStreamer streamer(state, kLittleEndian);
   return getGUIState()->writeGUIState(streamer);
 }
+
+//------------------------------------------------------------------------
+// GUIController::notify
+//------------------------------------------------------------------------
+tresult GUIController::notify(IMessage *message)
+{
+  if(!message)
+    return kInvalidArgument;
+
+  Message m{message};
+
+  return getGUIState()->handleMessage(m);
+}
+
 
 }
 }

@@ -24,7 +24,8 @@
 #include <public.sdk/source/vst/vstpresetfile.h>
 #include <string>
 #include <sstream>
-#include "ParamDef.h"
+
+#include "ParamSerializers.h"
 
 namespace pongasoft {
 namespace VST {
@@ -34,6 +35,8 @@ using namespace Steinberg::Vst;
 
 static const auto ATTR_MSG_ID = "ATTR_MSG_ID";
 
+using MessageID = int;
+
 /**
  * Simple wrapper class with better api
  */
@@ -42,12 +45,12 @@ class Message
 public:
   explicit Message(IMessage *message) : fMessage(message) {}
 
-  inline int getMessageID() const
+  inline MessageID getMessageID() const
   {
-    return static_cast<int>(getInt(ATTR_MSG_ID, -1));
+    return static_cast<MessageID>(getInt(ATTR_MSG_ID, -1));
   }
 
-  inline void setMessageID(int messageID)
+  inline void setMessageID(MessageID messageID)
   {
     fMessage->getAttributes()->setInt(ATTR_MSG_ID, messageID);
   }
@@ -83,9 +86,9 @@ public:
    * @param iSize the number of elements in iData array (NOT the size in bytes!)
    */
   template<typename T>
-  inline void setBinary(IAttributeList::AttrID id, const T *iData, uint32 iSize)
+  inline tresult setBinary(IAttributeList::AttrID id, const T *iData, uint32 iSize)
   {
-    fMessage->getAttributes()->setBinary(id, iData, iSize * sizeof(T));
+    return fMessage->getAttributes()->setBinary(id, iData, iSize * sizeof(T));
   }
 
   /**
@@ -95,60 +98,45 @@ public:
    * @return -1 if cannot ready binary otherwise number of elements read (always <= iSize)
    */
   template<typename T>
-  inline int32 getBinary(IAttributeList::AttrID id, T *iData, uint32 iSize) const
-  {
-    const void *data;
-    uint32 size;
-
-    if(fMessage->getAttributes()->getBinary(id, data, size) != kResultOk)
-      return -1;
-
-    uint32 oSize = size / sizeof(T);
-    oSize = std::min(iSize, oSize);
-
-    memcpy(iData, data, oSize * sizeof(T));
-
-    return oSize;
-  }
+  inline int32 getBinary(IAttributeList::AttrID id, T *iData, uint32 iSize) const;
 
   /**
-   * Serializes the parameter value as an entry in the message (technically 2 entries: one for the byte array
-   * of serialized data and one for the size of this array)
+   * Serializes the parameter value as an entry in the message
    *
    * @return kResultOk if successful */
   template<typename T>
-  tresult setSerParam(SerParam<T> const &iParamDef, T const &iValue);
+  tresult setSerializableValue(IAttributeList::AttrID id, IParamSerializer<T> const &iSerializer, T const &iValue);
 
   /**
-   * Extract the serialized parameter from the stream (reverse of setSerParam)
+   * Deserializes the parameter value from an entry in the message
    *
    * @return kResultOk if successful */
   template<typename T>
-  tresult getSerParam(SerParam<T> const &iParamDef, T &oValue) const;
-
-  /**
-   * Compute the attribute name for an ser param given its id (must be a string :(
-   */
-  inline static std::string computeParamAttrID(ParamID iParamID)
-  {
-    std::ostringstream s;
-    s << "__p__" << iParamID;
-    return s.str();
-  }
-
-  /**
-   * Compute the attribute name for the size of the ser parama given its id (must be a string :(
-   */
-  inline static std::string computeSizeParamAttrID(ParamID iParamID)
-  {
-    std::ostringstream s;
-    s << "__p__" << iParamID << "__size";
-    return s.str();
-  }
+  tresult getSerializableValue(IAttributeList::AttrID id, IParamSerializer<T> const &iSerializer, T &oValue) const;
 
 private:
   IMessage *fMessage;
 };
+
+//------------------------------------------------------------------------
+// Message::getBinary
+//------------------------------------------------------------------------
+template<typename T>
+int32 Message::getBinary(IAttributeList::AttrID id, T *iData, uint32 iSize) const
+{
+  const void *data;
+  uint32 size;
+
+  if(fMessage->getAttributes()->getBinary(id, data, size) != kResultOk)
+    return -1;
+
+  uint32 oSize = size / sizeof(T);
+  oSize = std::min(iSize, oSize);
+
+  memcpy(iData, data, oSize * sizeof(T));
+
+  return oSize;
+}
 
 /**
  * Internal class to override the BufferStream class and give access to the buffer
@@ -165,51 +153,47 @@ public:
 };
 
 //------------------------------------------------------------------------
-// Message::setSerParam
+// Message::setSerializableValue
 //------------------------------------------------------------------------
 template<typename T>
-tresult Message::setSerParam(const std::shared_ptr<SerParamDef<T>> &iParamDef, const T &iValue)
+tresult Message::setSerializableValue(IAttributeList::AttrID id, const IParamSerializer<T> &iSerializer, const T &iValue)
 {
   BufferStream stream{};
-  
+
   IBStreamer streamer{&stream};
 
-  tresult res = iParamDef->writeToStream(iValue, streamer);
+  tresult res = iSerializer.writeToStream(iValue, streamer);
   if(res == kResultOk)
   {
     auto const &buffer = stream.getBuffer();
-    
-    setInt(computeSizeParamAttrID(iParamDef->fParamID).c_str(), buffer.getFillSize());
-    setBinary(computeParamAttrID(iParamDef->fParamID).c_str(), buffer.int8Ptr(), buffer.getFillSize());
-    return kResultOk;
+    return setBinary(id, buffer.int8Ptr(), buffer.getFillSize());
   }
   return res;
 }
 
 //------------------------------------------------------------------------
-// Message::getSerParam
+// Message::getSerializableValue
 //------------------------------------------------------------------------
 template<typename T>
-tresult Message::getSerParam(const SerParam<T> &iParamDef, T &oValue) const
+tresult Message::getSerializableValue(IAttributeList::AttrID id, const IParamSerializer<T> &iSerializer, T &oValue) const
 {
+  const void *data;
+  uint32 size;
 
-  int64 size = getInt(computeSizeParamAttrID(iParamDef->fParamID).c_str(), -1);
-  if(size > 0)
-  {
-    auto bufferSize = static_cast<uint32>(size);
-    Buffer buffer(bufferSize);
-    getBinary(computeParamAttrID(iParamDef->fParamID).c_str(), buffer.int8Ptr(), bufferSize);
+  tresult res = fMessage->getAttributes()->getBinary(id, data, size);
 
-    BufferStream stream{std::move(buffer)};
+  if(res != kResultOk)
+    return res;
 
-    IBStreamer streamer{&stream};
+  // TODO this line unnecessarily copies the data but there is no other API
+  Buffer buffer(data, size);
 
-    return iParamDef->readFromStream(streamer, oValue);
-  }
+  BufferStream stream{std::move(buffer)};
+  stream.seek(IBStream::kIBSeekSet, 0, nullptr); // make sure it is at the beginning of the stream
 
-  return kResultFalse;
+  IBStreamer streamer{&stream};
 
-
+  return iSerializer.readFromStream(streamer, oValue);
 }
 
 }

@@ -18,6 +18,7 @@
 #pragma once
 
 #include <pongasoft/VST/Parameters.h>
+#include "pongasoft/VST/MessageHandler.h"
 #include <pongasoft/VST/GUI/Params/VstParameters.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include <pongasoft/VST/GUI/Params/GUISerParameter.h>
@@ -108,6 +109,11 @@ public:
    */
   std::unique_ptr<GUIParamCxMgr> createParamCxMgr();
 
+  /**
+   * Handle an incoming message => will forward to SerParam marked enabledForMessaging
+   */
+  tresult handleMessage(Message const &iMessage) { return fMessageHandler.handleMessage(iMessage); }
+
 protected:
   // the parameters
   Parameters const &fPluginParameters;
@@ -117,6 +123,9 @@ protected:
 
 protected:
   VstParametersSPtr fVstParameters{};
+
+  // handles messages for
+  MessageHandler fMessageHandler;
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
   std::map<ParamID, std::unique_ptr<IGUISerParameter>> fSerParams{};
@@ -155,6 +164,13 @@ GUISerParam<T> GUIState::add(SerParam<T> iParamDef)
   auto rawPtr = new GUISerParameter<T>(iParamDef);
   std::unique_ptr<IGUISerParameter> guiParam{rawPtr};
   addSerParam(std::move(guiParam));
+  if(iParamDef->fEnabledForMessaging)
+  {
+    if(iParamDef->fSerializer)
+      fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);
+    else
+      DLOG_F(WARNING, "param [%d] is marked enabledForMessaging but does not define a serializer", iParamDef->fParamID);
+  }
   return rawPtr;
 }
 

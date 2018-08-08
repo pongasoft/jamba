@@ -23,6 +23,7 @@
 #include <vstgui4/vstgui/lib/cframe.h>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include <pongasoft/VST/GUI/GUIState.h>
+#include "pongasoft/VST/MessageHandler.h"
 
 namespace pongasoft {
 namespace VST {
@@ -67,6 +68,9 @@ protected:
 
   /** Called to save the state (UI only!) (before saving a preset or project) */
   tresult PLUGIN_API getState(IBStream *state) override;
+
+  /** Called to handle a message (coming from RT) */
+  tresult PLUGIN_API notify(IMessage *message) SMTG_OVERRIDE;
 
 protected:
   // the name of the xml file (relative) which contains the ui description

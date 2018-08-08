@@ -104,6 +104,7 @@ public:
     SerParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     SerParamDefBuilder &uiOnly(bool iUIOnly = true) { fUIOnly = iUIOnly; return *this; }
     SerParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+    SerParamDefBuilder &enableForMessaging(bool iEnabledForMessaging = true) { fEnabledForMessaging = iEnabledForMessaging; return *this; }
     SerParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
     template<typename ParamSerializer>
     SerParamDefBuilder &serializer() { fSerializer = std::move(createParamSerializer<ParamSerializer>()); return *this; }
@@ -117,6 +118,7 @@ public:
     T fDefaultValue{};
     bool fUIOnly = false;
     bool fTransient = false;
+    bool fEnabledForMessaging = false;
     std::shared_ptr<IParamSerializer<T>> fSerializer{};
 
     friend class Parameters;
@@ -362,6 +364,7 @@ SerParam<T> Parameters::add(Parameters::SerParamDefBuilder<T> const &iBuilder)
                                                 iBuilder.fUIOnly,
                                                 iBuilder.fTransient,
                                                 iBuilder.fDefaultValue,
+                                                iBuilder.fEnabledForMessaging,
                                                 iBuilder.fSerializer);
 
   if(!iBuilder.fTransient && !iBuilder.fSerializer)

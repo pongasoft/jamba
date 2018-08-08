@@ -34,7 +34,6 @@ void GUIState::addSerParam(std::unique_ptr<IGUISerParameter> iParameter)
 
   DCHECK_F(fPluginParameters.getSerParamDef(paramID) != nullptr, "serializable parameter [%d] not registered", paramID);
   DCHECK_F(fSerParams.find(paramID) == fSerParams.cend(), "duplicate paramID [%d]", paramID);
-  DCHECK_F(fPluginParameters.getSerParamDef(paramID)->fUIOnly, "only GUI parameter allowed");
 
   fSerParams[paramID] = std::move(iParameter);
 }

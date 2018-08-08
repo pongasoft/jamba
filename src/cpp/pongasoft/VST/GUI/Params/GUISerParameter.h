@@ -22,6 +22,7 @@
 #include <pongasoft/VST/ParamDef.h>
 #include <pongasoft/VST/Parameters.h>
 #include <pongasoft/VST/Messaging.h>
+#include <pongasoft/VST/MessageHandler.h>
 #include "GUIParamCx.h"
 
 namespace pongasoft {
@@ -35,7 +36,7 @@ namespace Params {
  * a user input label to name a component) does not fit in the Vst parameter category. By implementating
  * the serializable api (readFromStream/writeToStream), any type can be part of the state.
  */
-class IGUISerParameter
+class IGUISerParameter : public IMessageHandler
 {
 public:
   // Constructor
@@ -55,8 +56,8 @@ public:
   // writeToStream
   virtual tresult writeToStream(IBStreamer &oStreamer) const = 0;
 
-  // setFromMessage
-  virtual tresult setFromMessage(Message const &iMessage) = 0;
+  // handleMessage
+  tresult handleMessage(Message const &iMessage) override = 0;
 
 protected:
   std::shared_ptr<ISerParamDef> fParamDef;
@@ -127,14 +128,23 @@ public:
     return fSerParamDef->writeToStream(fValue, oStreamer);
   }
 
-  // setFromMessage
-  tresult setFromMessage(Message const &iMessage) override
+  // readFromMessage
+  inline tresult readFromMessage(Message const &iMessage)
   {
-    tresult res = iMessage.getSerParam(fSerParamDef, fValue);
+    tresult res = fSerParamDef->readFromMessage(iMessage, fValue);
     if(res == kResultOk)
       changed();
     return res;
   }
+
+  // writeToMessage
+  inline tresult writeToMessage(Message &oMessage) const
+  {
+    return fSerParamDef->writeToMessage(fValue, oMessage);
+  }
+
+  // handleMessage
+  tresult handleMessage(Message const &iMessage) override { return readFromMessage(iMessage); }
 
   // getValue
   inline SerParamType const &getValue() { return fValue; }
@@ -202,8 +212,11 @@ public:
   // writeToStream
   inline tresult writeToStream(IBStreamer &oStreamer) const { return fPtr->writeToStream(oStreamer); };
 
-  // setFromMessage
-  inline tresult setFromMessage(Message const &iMessage) { return fPtr->setFromMessage(iMessage); }
+  // readFromMessage
+  inline tresult readFromMessage(Message const &iMessage) { return fPtr->readFromMessage(iMessage); }
+
+  // writeToMessage
+  inline tresult writeToMessage(Message &oMessage) const { return fPtr->writeToMessage(oMessage);}
 
   // connect
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }

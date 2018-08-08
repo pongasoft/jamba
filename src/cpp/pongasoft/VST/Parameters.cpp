@@ -217,8 +217,6 @@ void Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
     ABORT_F("Parameter [%d] already registered", paramID);
   }
 
-  DCHECK_F(iParamDef->fUIOnly, "Serializable parameter [%d] must be marked UIOnly (not supported in RT for now)", paramID);
-
 #ifdef JAMBA_DEBUG_LOGGING
   DLOG_F(INFO, "Parameters::addSerParamDef{%d, \"%s\", %s%s}",
          paramID,

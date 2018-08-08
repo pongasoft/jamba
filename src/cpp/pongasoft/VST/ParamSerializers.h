@@ -40,8 +40,8 @@ class IParamSerializer
 {
 public:
   using ParamType = T;
-  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) = 0;
-  virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) = 0;
+  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const = 0;
+  virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const = 0;
 };
 
 /**
@@ -54,12 +54,12 @@ class StaticParamSerializer : public IParamSerializer<typename ParamSerializer::
 {
 public:
   using ParamType = typename ParamSerializer::ParamType;
-  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
+  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const
   {
     return ParamSerializer::readFromStream(iStreamer, oValue);
   }
 
-  virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer)
+  virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const
   {
     return ParamSerializer::writeToStream(iValue, oStreamer);
   }

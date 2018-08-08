@@ -46,6 +46,7 @@ set(JAMBA_sources_h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioUtils.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageHandler.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Messaging.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/NormalizedState.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/ParamConverters.h
@@ -86,6 +87,7 @@ set(JAMBA_sources_h
 set(JAMBA_sources_cpp
     ${LOGURU_IMPL}
 
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageHandler.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Parameters.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/NormalizedState.cpp
 

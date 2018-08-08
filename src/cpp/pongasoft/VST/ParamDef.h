@@ -20,12 +20,14 @@
 
 #include "ParamConverters.h"
 #include "ParamSerializers.h"
+#include "Messaging.h"
 
 #include <base/source/fstreamer.h>
 #include <pluginterfaces/vst/vsttypes.h>
 #include <pluginterfaces/vst/ivsteditcontroller.h>
 #include <pluginterfaces/vst/ivstunits.h>
 
+#include <string>
 #include <memory>
 
 namespace pongasoft {
@@ -198,7 +200,7 @@ public:
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class SerParamDef : public ISerParamDef
+class SerParamDef : public ISerParamDef, IParamSerializer<T>
 {
 public:
   using ParamType = T;
@@ -208,21 +210,36 @@ public:
               bool const iUIOnly,
               bool const iTransient,
               ParamType const &iDefaultValue,
+              bool const iEnabledForMessaging,
               std::shared_ptr<IParamSerializer<ParamType>> iSerializer) :
     ISerParamDef(iParamID, iTitle, iUIOnly, iTransient),
     fDefaultValue{iDefaultValue},
+    fEnabledForMessaging{iEnabledForMessaging},
     fSerializer{std::move(iSerializer)}
   {}
 
   // readFromStream
-  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const;
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override;
   ParamType readFromStream(IBStreamer &iStreamer) const;
 
   // writeToStream
-  tresult writeToStream(ParamType const &iValue, IBStreamer &oStreamer) const;
+  tresult writeToStream(ParamType const &iValue, IBStreamer &oStreamer) const override;
+
+  // readFromMessage
+  tresult readFromMessage(Message const &iMessage, ParamType &oValue) const;
+
+  // writeToMessage
+  inline tresult writeToMessage(ParamType const &iValue, Message &oMessage) const;
+
+  // computeMessageAttrID
+  std::string computeMessageAttrID() const
+  {
+    return "__param__" + std::to_string(fParamID);
+  }
 
 public:
   const ParamType fDefaultValue;
+  const bool fEnabledForMessaging;
   const std::shared_ptr<IParamSerializer<ParamType>> fSerializer;
 };
 
@@ -263,6 +280,24 @@ tresult SerParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) co
     return fSerializer->writeToStream(iValue, oStreamer);
   else
     return kResultFalse;
+}
+
+//------------------------------------------------------------------------
+// SerParamDef::readFromMessage
+//------------------------------------------------------------------------
+template<typename T>
+tresult SerParamDef<T>::readFromMessage(Message const &iMessage, ParamType &oValue) const
+{
+  return iMessage.getSerializableValue(computeMessageAttrID().c_str(), *this, oValue);
+}
+
+//------------------------------------------------------------------------
+// SerParamDef::writeToMessage
+//------------------------------------------------------------------------
+template<typename T>
+tresult SerParamDef<T>::writeToMessage(const ParamType &iValue, Message &oMessage) const
+{
+  return oMessage.setSerializableValue(computeMessageAttrID().c_str(), *this, iValue);
 }
 
 //------------------------------------------------------------------------
