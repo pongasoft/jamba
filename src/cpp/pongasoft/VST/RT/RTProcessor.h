@@ -104,7 +104,7 @@ protected:
   void enableGUITimer(uint32 iUIFrameRateMs);
 
   /**
-   * Called (from a GUI timer) to send the messages to the GUI (SerParam for the moment) */
+   * Called (from a GUI timer) to send the messages to the GUI (JmbParam for the moment) */
    virtual void sendPendingMessages() { getRTState()->sendPendingMessages(this); }
 
 protected:

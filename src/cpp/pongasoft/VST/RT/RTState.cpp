@@ -62,7 +62,7 @@ tresult RTState::addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter)
 //------------------------------------------------------------------------
 // RTState::addOutboundMessagingParameter
 //------------------------------------------------------------------------
-tresult RTState::addOutboundMessagingParameter(std::unique_ptr<IRTSerParameter> iParameter)
+tresult RTState::addOutboundMessagingParameter(std::unique_ptr<IRTJmbParameter> iParameter)
 {
   if(!iParameter)
     return kInvalidArgument;
@@ -258,7 +258,7 @@ tresult RTState::sendPendingMessages(IMessageProducer *iMessageProducer)
 
   for(auto &p : fOutboundMessagingParameters)
   {
-    std::unique_ptr<IRTSerParameter> &param = p.second;
+    std::unique_ptr<IRTJmbParameter> &param = p.second;
     if(param->hasOutboundUpdate())
     {
       auto message = iMessageProducer->allocateMessage();

@@ -29,7 +29,7 @@ using namespace VSTGUI;
 using namespace Params;
 
 /**
- * Extends the CTextEdit view to tie it to a GUISerParam<UTF8String> => multiple views tied to the same paramID (aka Tag)
+ * Extends the CTextEdit view to tie it to a GUIJmbParam<UTF8String> => multiple views tied to the same paramID (aka Tag)
  * are all synchronized and the text edit value will be saved and restored with the state.
  */
 class TextEditView : public CustomViewAdapter<CTextEdit>
@@ -55,7 +55,7 @@ public:
 
 protected:
   // the underlying ser parameter of type UTF8String
-  GUISerParam<UTF8String> fText{};
+  GUIJmbParam<UTF8String> fText{};
 
 public:
   class Creator : public TCustomViewCreator<TextEditView>

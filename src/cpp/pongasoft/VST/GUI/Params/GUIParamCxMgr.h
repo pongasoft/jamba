@@ -36,7 +36,7 @@ public:
   /**
    * @return true if the param actually exists
    */
-  inline bool existsSer(ParamID iParamID) const { return fGUIState->existsSer(iParamID); }
+  inline bool existsJmb(ParamID iParamID) const { return fGUIState->existsJmb(iParamID); }
 
   /**
    * Removes the registration of the provided param (closing the connection/stopping to listen)
@@ -68,14 +68,14 @@ public:
                                   Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
-   * This method registers the listener to be notified of the GUISerParam changes. Note that GUISerParam is already
+   * This method registers the listener to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
    * a wrapper directly accessible from the view and as a result there is no need to call this method unless a
    * listener is provided, hence the listener is required.
    *
    * @return a copy of iParamDef for convenience and symmetry of the APIs
    */
   template<typename T>
-  GUISerParam<T> registerSerParam(GUISerParam<T> &iParamDef, Parameters::IChangeListener *iChangeListener)
+  GUIJmbParam<T> registerJmbParam(GUIJmbParam<T> &iParamDef, Parameters::IChangeListener *iChangeListener)
   {
     DCHECK_F(iChangeListener != nullptr);
     fParamCxs[iParamDef.getParamID()] = std::move(iParamDef.connect(iChangeListener));
@@ -88,7 +88,7 @@ public:
    * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
    */
   template<typename T>
-  GUISerParam<T> registerSerParam(ParamID iParamID,
+  GUIJmbParam<T> registerJmbParam(ParamID iParamID,
                                   Parameters::IChangeListener *iChangeListener = nullptr);
 
   // getGUIState
@@ -162,21 +162,21 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxMgr::registerSerParam
+// GUIParamCxMgr::registerJmbParam
 //------------------------------------------------------------------------
 template<typename T>
-GUISerParam<T> GUIParamCxMgr::registerSerParam(ParamID iParamID,
+GUIJmbParam<T> GUIParamCxMgr::registerJmbParam(ParamID iParamID,
                                                Parameters::IChangeListener *iChangeListener)
 {
-  auto param = fGUIState->getSerParameter(iParamID);
+  auto param = fGUIState->getJmbParameter(iParamID);
 
   if(!param)
   {
-    DLOG_F(WARNING, "ser param [%d] not found", iParamID);
+    DLOG_F(WARNING, "jmb param [%d] not found", iParamID);
     return nullptr;
   }
 
-  auto res = dynamic_cast<GUISerParameter<T> *>(param);
+  auto res = dynamic_cast<GUIJmbParameter<T> *>(param);
   if(res)
   {
     if(iChangeListener)

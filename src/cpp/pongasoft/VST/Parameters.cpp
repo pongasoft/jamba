@@ -144,12 +144,12 @@ std::shared_ptr<RawVstParamDef> Parameters::getRawVstParamDef(ParamID iParamID) 
 }
 
 //------------------------------------------------------------------------
-// Parameters::getSerParamDef
+// Parameters::getJmbParamDef
 //------------------------------------------------------------------------
-std::shared_ptr<ISerParamDef> Parameters::getSerParamDef(ParamID iParamID) const
+std::shared_ptr<IJmbParamDef> Parameters::getJmbParamDef(ParamID iParamID) const
 {
-  auto iter = fSerParams.find(iParamID);
-  if(iter == fSerParams.cend())
+  auto iter = fJmbParams.find(iParamID);
+  if(iter == fJmbParams.cend())
     return nullptr;
 
   return iter->second;
@@ -168,7 +168,7 @@ tresult Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
     return kInvalidArgument;
   }
 
-  if(fSerParams.find(paramID) != fSerParams.cend())
+  if(fJmbParams.find(paramID) != fJmbParams.cend())
   {
     DLOG_F(ERROR, "Parameter [%d] already registered", paramID);
     return kInvalidArgument;
@@ -205,9 +205,9 @@ tresult Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
 }
 
 //------------------------------------------------------------------------
-// Parameters::addSerParamDef
+// Parameters::addJmbParamDef
 //------------------------------------------------------------------------
-tresult Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
+tresult Parameters::addJmbParamDef(std::shared_ptr<IJmbParamDef> iParamDef)
 {
   ParamID paramID = iParamDef->fParamID;
   
@@ -217,14 +217,14 @@ tresult Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
     return kInvalidArgument;
   }
 
-  if(fSerParams.find(paramID) != fSerParams.cend())
+  if(fJmbParams.find(paramID) != fJmbParams.cend())
   {
     DLOG_F(ERROR, "Parameter [%d] already registered", paramID);
     return kInvalidArgument;
   }
 
 #ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "Parameters::addSerParamDef{%d, \"%s\", %s%s%s}",
+  DLOG_F(INFO, "Parameters::addJmbParamDef{%d, \"%s\", %s%s%s}",
          paramID,
          String(iParamDef->fTitle).text8(),
          iParamDef->fOwner == IParamDef::Owner::kGUI ? "guiOwned" : "rtOwned",
@@ -232,7 +232,7 @@ tresult Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
          iParamDef->fShared ? ", shared" : "");
 #endif
 
-  fSerParams[paramID] = iParamDef;
+  fJmbParams[paramID] = iParamDef;
 
   if(iParamDef->fOwner == IParamDef::Owner::kGUI)
     fGUISaveStateOrder.fOrder.emplace_back(paramID);
@@ -325,7 +325,7 @@ tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSave
     allParams[p.first] = p.second;
   }
 
-  for(auto &&p : fSerParams)
+  for(auto &&p : fJmbParams)
   {
     allParams[p.first] = p.second;
   }

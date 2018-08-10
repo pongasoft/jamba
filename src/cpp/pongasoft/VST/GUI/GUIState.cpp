@@ -24,18 +24,18 @@ namespace VST {
 namespace GUI {
 
 //------------------------------------------------------------------------
-// GUIState::addSerParam
+// GUIState::addJmbParam
 //------------------------------------------------------------------------
-void GUIState::addSerParam(std::unique_ptr<IGUISerParameter> iParameter)
+void GUIState::addJmbParam(std::unique_ptr<IGUIJmbParameter> iParameter)
 {
   DCHECK_F(iParameter != nullptr);
 
   ParamID paramID = iParameter->getParamID();
 
-  DCHECK_F(fPluginParameters.getSerParamDef(paramID) != nullptr, "serializable parameter [%d] not registered", paramID);
-  DCHECK_F(fSerParams.find(paramID) == fSerParams.cend(), "duplicate paramID [%d]", paramID);
+  DCHECK_F(fPluginParameters.getJmbParamDef(paramID) != nullptr, "jmb parameter [%d] not registered", paramID);
+  DCHECK_F(fJmbParams.find(paramID) == fJmbParams.cend(), "duplicate paramID [%d]", paramID);
 
-  fSerParams[paramID] = std::move(iParameter);
+  fJmbParams[paramID] = std::move(iParameter);
 }
 
 //------------------------------------------------------------------------
@@ -102,8 +102,8 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
   for(int i = 0; i < saveOrder.getCount(); i++)
   {
     auto paramID = saveOrder.fOrder[i];
-    auto iter = fSerParams.find(paramID);
-    if(iter == fSerParams.cend())
+    auto iter = fJmbParams.find(paramID);
+    if(iter == fJmbParams.cend())
     {
       // not found => regular parameter
       ParamValue value = fPluginParameters.readNormalizedValue(paramID, iStreamer);
@@ -152,8 +152,8 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
   for(int i = 0; i < saveOrder.getCount(); i++)
   {
     auto paramID = saveOrder.fOrder[i];
-    auto iter = fSerParams.find(paramID);
-    if(iter == fSerParams.cend())
+    auto iter = fJmbParams.find(paramID);
+    if(iter == fJmbParams.cend())
     {
       ParamValue value = fVstParameters->getParamNormalized(paramID);
       res |= RawParamSerializer::writeToStream(value, oStreamer);
@@ -198,12 +198,12 @@ std::unique_ptr<GUIParamCxMgr> GUIState::createParamCxMgr()
 }
 
 //------------------------------------------------------------------------
-// GUIState::getSerParameter
+// GUIState::getJmbParameter
 //------------------------------------------------------------------------
-IGUISerParameter *GUIState::getSerParameter(ParamID iParamID) const
+IGUIJmbParameter *GUIState::getJmbParameter(ParamID iParamID) const
 {
-  auto iter = fSerParams.find(iParamID);
-  if(iter == fSerParams.cend())
+  auto iter = fJmbParams.find(iParamID);
+  if(iter == fJmbParams.cend())
     return nullptr;
   return iter->second.get();
 }

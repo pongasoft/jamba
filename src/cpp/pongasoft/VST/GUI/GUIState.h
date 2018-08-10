@@ -21,7 +21,7 @@
 #include "pongasoft/VST/MessageHandler.h"
 #include <pongasoft/VST/GUI/Params/VstParameters.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
-#include <pongasoft/VST/GUI/Params/GUISerParameter.h>
+#include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 
 namespace pongasoft {
 namespace VST {
@@ -51,7 +51,7 @@ public:
    * This method is called for each parameter managed by the GUIState that is not a regular VST parameter
    */
   template<typename T>
-  GUISerParam<T> add(SerParam<T> iParamDef);
+  GUIJmbParam<T> add(JmbParam<T> iParamDef);
 
   /**
    * @return true if there is a vst param with the provided ID
@@ -61,7 +61,7 @@ public:
   /**
    * @return true if there is a ser param with the provided ID
    */
-  inline bool existsSer(ParamID iParamID) const { return fSerParams.find(iParamID) != fSerParams.cend(); }
+  inline bool existsJmb(ParamID iParamID) const { return fJmbParams.find(iParamID) != fJmbParams.cend(); }
 
   /**
    * @return the raw parameter given its id
@@ -83,7 +83,7 @@ public:
   /**
    * @return the ser parameter given its id (nullptr if not found)
    */
-  IGUISerParameter *getSerParameter(ParamID iParamID) const;
+  IGUIJmbParameter *getJmbParameter(ParamID iParamID) const;
 
   /**
    * This method is called from the GUI controller setComponentState method and reads the state coming from RT
@@ -110,7 +110,7 @@ public:
   std::unique_ptr<GUIParamCxMgr> createParamCxMgr();
 
   /**
-   * Handle an incoming message => will forward to SerParam marked enabledForMessaging
+   * Handle an incoming message => will forward to JmbParam marked enabledForMessaging
    */
   tresult handleMessage(Message const &iMessage) { return fMessageHandler.handleMessage(iMessage); }
 
@@ -128,10 +128,10 @@ protected:
   MessageHandler fMessageHandler;
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::unique_ptr<IGUISerParameter>> fSerParams{};
+  std::map<ParamID, std::unique_ptr<IGUIJmbParameter>> fJmbParams{};
 
   // add serializable parameter to the structures
-  void addSerParam(std::unique_ptr<IGUISerParameter> iParameter);
+  void addJmbParam(std::unique_ptr<IGUIJmbParameter> iParameter);
 };
 
 /**
@@ -159,14 +159,14 @@ public:
 // GUIState::add
 //------------------------------------------------------------------------
 template<typename T>
-GUISerParam<T> GUIState::add(SerParam<T> iParamDef)
+GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
 {
-  auto rawPtr = new GUISerParameter<T>(iParamDef);
-  std::unique_ptr<IGUISerParameter> guiParam{rawPtr};
-  addSerParam(std::move(guiParam));
+  auto rawPtr = new GUIJmbParameter<T>(iParamDef);
+  std::unique_ptr<IGUIJmbParameter> guiParam{rawPtr};
+  addJmbParam(std::move(guiParam));
   if(iParamDef->fShared)
   {
-    if(iParamDef->fOwner == ISerParamDef::Owner::kRT)
+    if(iParamDef->fOwner == IJmbParamDef::Owner::kRT)
     {
       if(iParamDef->fSerializer)
         fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);

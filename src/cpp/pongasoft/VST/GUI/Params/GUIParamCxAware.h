@@ -68,7 +68,7 @@ public:
   }
 
   /**
-   * This method registers this class to be notified of the GUISerParam changes. Note that GUISerParam is already
+   * This method registers this class to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
    * a wrapper directly accessible from the view and as a result there is no need to call this method unless you
    * want to subscribe to the changes, hence there isn't a second optional parameter
    *
@@ -76,12 +76,12 @@ public:
    *         been called
    */
   template<typename T>
-  GUISerParam<T> registerSerParam(GUISerParam<T> &iParamDef)
+  GUIJmbParam<T> registerJmbParam(GUIJmbParam<T> &iParamDef)
   {
     if(fParamCxMgr)
-      return fParamCxMgr->registerSerParam(iParamDef, this);
+      return fParamCxMgr->registerJmbParam(iParamDef, this);
     else
-      return GUISerParam<T>{};
+      return GUIJmbParam<T>{};
   }
 
   /**
@@ -90,13 +90,13 @@ public:
    * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
    */
   template<typename T>
-  GUISerParam<T> registerSerParam(ParamID iParamID,
+  GUIJmbParam<T> registerJmbParam(ParamID iParamID,
                                   bool iSubscribeToChanges = true)
   {
     if(fParamCxMgr)
-      return fParamCxMgr->registerSerParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
+      return fParamCxMgr->registerJmbParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
     else
-      return GUISerParam<T>{};
+      return GUIJmbParam<T>{};
   }
 
   /**

@@ -189,12 +189,12 @@ public:
 };
 
 /**
- * Base class for serializable params (non templated)
+ * Base class for jamba parameters (non templated)
  */
-class ISerParamDef : public IParamDef
+class IJmbParamDef : public IParamDef
 {
 public:
-  ISerParamDef(const ParamID iParamID,
+  IJmbParamDef(const ParamID iParamID,
                const TChar *const iTitle,
                Owner const iOwner,
                bool const iTransient,
@@ -203,7 +203,7 @@ public:
       fShared{iShared}
   {}
 
-  virtual ~ISerParamDef() = default;
+  virtual ~IJmbParamDef() = default;
 
 public:
   bool const fShared;
@@ -214,19 +214,19 @@ public:
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class SerParamDef : public ISerParamDef, IParamSerializer<T>
+class JmbParamDef : public IJmbParamDef, IParamSerializer<T>
 {
 public:
   using ParamType = T;
 
-  SerParamDef(ParamID const iParamID,
+  JmbParamDef(ParamID const iParamID,
               TChar const *const iTitle,
               Owner const iOwner,
               bool const iTransient,
               bool const iShared,
               ParamType const &iDefaultValue,
               std::shared_ptr<IParamSerializer<ParamType>> iSerializer) :
-    ISerParamDef(iParamID, iTitle, iOwner, iTransient, iShared),
+    IJmbParamDef(iParamID, iTitle, iOwner, iTransient, iShared),
     fDefaultValue{iDefaultValue},
     fSerializer{std::move(iSerializer)}
   {}
@@ -256,10 +256,10 @@ public:
 };
 
 //------------------------------------------------------------------------
-// SerParamDef::readFromStream
+// JmbParamDef::readFromStream
 //------------------------------------------------------------------------
 template<typename T>
-tresult SerParamDef<T>::readFromStream(IBStreamer &iStreamer, T &oValue) const
+tresult JmbParamDef<T>::readFromStream(IBStreamer &iStreamer, T &oValue) const
 {
   if(fSerializer)
   {
@@ -270,10 +270,10 @@ tresult SerParamDef<T>::readFromStream(IBStreamer &iStreamer, T &oValue) const
 }
 
 //------------------------------------------------------------------------
-// SerParamDef::readFromStream
+// JmbParamDef::readFromStream
 //------------------------------------------------------------------------
 template<typename T>
-T SerParamDef<T>::readFromStream(IBStreamer &iStreamer) const
+T JmbParamDef<T>::readFromStream(IBStreamer &iStreamer) const
 {
   T value;
   if(readFromStream(iStreamer, value) != kResultOk)
@@ -283,10 +283,10 @@ T SerParamDef<T>::readFromStream(IBStreamer &iStreamer) const
 
 
 //------------------------------------------------------------------------
-// SerParamDef::writeToStream
+// JmbParamDef::writeToStream
 //------------------------------------------------------------------------
 template<typename T>
-tresult SerParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) const
+tresult JmbParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) const
 {
   if(fSerializer)
     return fSerializer->writeToStream(iValue, oStreamer);
@@ -295,10 +295,10 @@ tresult SerParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) co
 }
 
 //------------------------------------------------------------------------
-// SerParamDef::readFromMessage
+// JmbParamDef::readFromMessage
 //------------------------------------------------------------------------
 template<typename T>
-tresult SerParamDef<T>::readFromMessage(Message const &iMessage, ParamType &oValue) const
+tresult JmbParamDef<T>::readFromMessage(Message const &iMessage, ParamType &oValue) const
 {
   if(fSerializer)
     return iMessage.getSerializableValue(computeMessageAttrID().c_str(), *this, oValue);
@@ -307,10 +307,10 @@ tresult SerParamDef<T>::readFromMessage(Message const &iMessage, ParamType &oVal
 }
 
 //------------------------------------------------------------------------
-// SerParamDef::writeToMessage
+// JmbParamDef::writeToMessage
 //------------------------------------------------------------------------
 template<typename T>
-tresult SerParamDef<T>::writeToMessage(const ParamType &iValue, Message &oMessage) const
+tresult JmbParamDef<T>::writeToMessage(const ParamType &iValue, Message &oMessage) const
 {
   if(fSerializer)
     return oMessage.setSerializableValue(computeMessageAttrID().c_str(), *this, iValue);
@@ -325,10 +325,10 @@ template<typename T>
 using VstParam = std::shared_ptr<VstParamDef<T>>;
 
 //------------------------------------------------------------------------
-// SerParam - define shortcut notation
+// JmbParam - define shortcut notation
 //------------------------------------------------------------------------
 template<typename T>
-using SerParam = std::shared_ptr<SerParamDef<T>>;
+using JmbParam = std::shared_ptr<JmbParamDef<T>>;
 
 }
 }

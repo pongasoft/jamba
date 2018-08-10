@@ -99,20 +99,20 @@ public:
    * Implements the builder pattern for ease of build.
    * @tparam T the underlying type of the param */
   template<typename T>
-  struct SerParamDefBuilder
+  struct JmbParamDefBuilder
   {
     // builder methods
-    SerParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
-    SerParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
-    SerParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
-    SerParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
-    SerParamDefBuilder &shared(bool iShared = true) { fShared = iShared; return *this; }
-    SerParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
+    JmbParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
+    JmbParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+    JmbParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
+    JmbParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
+    JmbParamDefBuilder &shared(bool iShared = true) { fShared = iShared; return *this; }
+    JmbParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
     template<typename ParamSerializer>
-    SerParamDefBuilder &serializer() { fSerializer = std::move(createParamSerializer<ParamSerializer>()); return *this; }
+    JmbParamDefBuilder &serializer() { fSerializer = std::move(createParamSerializer<ParamSerializer>()); return *this; }
 
     // parameter factory method
-    SerParam<T> add() const;
+    JmbParam<T> add() const;
 
     // fields
     ParamID fParamID;
@@ -126,7 +126,7 @@ public:
     friend class Parameters;
 
   protected:
-    SerParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
+    JmbParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
       fParameters{iParameters}, fParamID{iParamID}, fTitle{iTitle} {}
 
   private:
@@ -158,14 +158,14 @@ public:
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue)
    */
   template<typename ParamSerializer>
-  SerParamDefBuilder<typename ParamSerializer::ParamType> ser(ParamID iParamID, const TChar *iTitle);
+  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, const TChar *iTitle);
 
   /**
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue). Use this version
    * if you want to provide a different serializer.
    */
   template<typename T>
-  SerParamDefBuilder<T> serFromType(ParamID iParamID, const TChar *iTitle);
+  JmbParamDefBuilder<T> jmbFromType(ParamID iParamID, const TChar *iTitle);
 
   /**
    * Used to change the default order (registration order) used when saving the RT state (getState/setState in the
@@ -193,7 +193,7 @@ public:
    * the controller)
    *
    * @param iVersion should be a >= 0 number. If negative it will be ignored
-   * @tparam Args can be any combination of ParamID, RawVstParamDef, VstParamDef<T>, SerParamDef<T>
+   * @tparam Args can be any combination of ParamID, RawVstParamDef, VstParamDef<T>, JmbParamDef<T>
    */
   template<typename... Args>
   tresult setGUISaveStateOrder(int16 iVersion, Args... args);
@@ -237,8 +237,8 @@ public:
   // getParamDef - nullptr when not found
   std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const;
 
-  // getSerParamDef - nullptr when not found
-  std::shared_ptr<ISerParamDef> getSerParamDef(ParamID iParamID) const;
+  // getJmbParamDef - nullptr when not found
+  std::shared_ptr<IJmbParamDef> getJmbParamDef(ParamID iParamID) const;
 
 protected:
   // internally called by the builder
@@ -247,20 +247,20 @@ protected:
 
   // internally called by the builder
   template<typename T>
-  SerParam<T> add(SerParamDefBuilder<T> const &iBuilder);
+  JmbParam<T> add(JmbParamDefBuilder<T> const &iBuilder);
 
   // addVstParamDef
   tresult addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef);
 
-  // addSerParamDef
-  tresult addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef);
+  // addJmbParamDef
+  tresult addJmbParamDef(std::shared_ptr<IJmbParamDef> iParamDef);
 
 private:
   // contains all the registered (raw type) parameters (unique ID, will be checked on add)
   std::map<ParamID, std::shared_ptr<RawVstParamDef>> fVstParams{};
 
   // contains all the registered (serializable type) parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::shared_ptr<ISerParamDef>> fSerParams{};
+  std::map<ParamID, std::shared_ptr<IJmbParamDef>> fJmbParams{};
 
   // order in which the parameters will be registered in the plugin
   std::vector<ParamID> fPluginOrder{};
@@ -277,16 +277,16 @@ private:
   template<typename... Args>
   tresult buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID id, Args... args);
 
-  // case when ISerParamDef
+  // case when IJmbParamDef
   template<typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<ISerParamDef> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<IJmbParamDef> &iParamDef, Args... args)
   {
     return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
 
-  // case when ISerParamDef
+  // case when IJmbParamDef
   template<typename T, typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<SerParamDef<T>> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<JmbParamDef<T>> &iParamDef, Args... args)
   {
     return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
   }
@@ -308,10 +308,10 @@ private:
 };
 
 //------------------------------------------------------------------------
-// Parameters::SerParamDefBuilder::add
+// Parameters::JmbParamDefBuilder::add
 //------------------------------------------------------------------------
 template<typename T>
-SerParam<T> Parameters::SerParamDefBuilder<T>::add() const
+JmbParam<T> Parameters::JmbParamDefBuilder<T>::add() const
 {
   return fParameters->add(*this);
 }
@@ -359,9 +359,9 @@ VstParam<T> Parameters::add(VstParamDefBuilder<T> const &iBuilder)
 // Parameters::add (called by the builder)
 //------------------------------------------------------------------------
 template<typename T>
-SerParam<T> Parameters::add(Parameters::SerParamDefBuilder<T> const &iBuilder)
+JmbParam<T> Parameters::add(Parameters::JmbParamDefBuilder<T> const &iBuilder)
 {
-  auto param = std::make_shared<SerParamDef<T>>(iBuilder.fParamID,
+  auto param = std::make_shared<JmbParamDef<T>>(iBuilder.fParamID,
                                                 iBuilder.fTitle,
                                                 iBuilder.fOwner,
                                                 iBuilder.fTransient,
@@ -379,7 +379,7 @@ SerParam<T> Parameters::add(Parameters::SerParamDefBuilder<T> const &iBuilder)
     DLOG_F(WARNING, "No serializer defined for parameter [%d] (won't be able to be shared with peer)", iBuilder.fParamID);
   }
 
-  if(addSerParamDef(param) == kResultOk)
+  if(addJmbParamDef(param) == kResultOk)
     return param;
   else
     return nullptr;
@@ -407,21 +407,21 @@ Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::v
 }
 
 //------------------------------------------------------------------------
-// Parameters::serFromType
+// Parameters::jmbFromType
 //------------------------------------------------------------------------
 template<typename T>
-Parameters::SerParamDefBuilder<T> Parameters::serFromType(ParamID iParamID, const TChar *iTitle)
+Parameters::JmbParamDefBuilder<T> Parameters::jmbFromType(ParamID iParamID, const TChar *iTitle)
 {
-  return Parameters::SerParamDefBuilder<T>(this, iParamID, iTitle);
+  return Parameters::JmbParamDefBuilder<T>(this, iParamID, iTitle);
 }
 
 //------------------------------------------------------------------------
-// Parameters::ser
+// Parameters::jmb
 //------------------------------------------------------------------------
 template<typename ParamSerializer>
-Parameters::SerParamDefBuilder<typename ParamSerializer::ParamType> Parameters::ser(ParamID iParamID, const TChar *iTitle)
+Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::jmb(ParamID iParamID, const TChar *iTitle)
 {
-  auto builder = serFromType<typename ParamSerializer::ParamType>(iParamID, iTitle);
+  auto builder = jmbFromType<typename ParamSerializer::ParamType>(iParamID, iTitle);
   builder.template serializer<ParamSerializer>();
   return builder;
 }
@@ -436,7 +436,7 @@ tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iPara
 
   auto iter = fVstParams.find(iParamID);
   if(fVstParams.find(iParamID) != fVstParams.cend() ||
-     fSerParams.find(iParamID) != fSerParams.cend())
+     fJmbParams.find(iParamID) != fJmbParams.cend())
   {
     iParamIDs.emplace_back(iParamID);
   }

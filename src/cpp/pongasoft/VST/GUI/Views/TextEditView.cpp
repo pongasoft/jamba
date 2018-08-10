@@ -38,7 +38,7 @@ void TextEditView::registerParameters()
 
   auto paramID = static_cast<ParamID>(getTag());
 
-  fText = registerSerParam<UTF8String>(paramID);
+  fText = registerJmbParam<UTF8String>(paramID);
   if(fText.exists())
   {
     setText(fText);

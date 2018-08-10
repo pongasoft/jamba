@@ -59,7 +59,7 @@ set(JAMBA_sources_h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTProcessor.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTSerParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTJmbParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTState.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCx.h
@@ -67,7 +67,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxMgr.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamSerializers.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawVstParameter.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUISerParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIJmbParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIVstParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/VstParameters.h
 

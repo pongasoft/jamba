@@ -31,19 +31,19 @@ namespace GUI {
 namespace Params {
 
 /**
- * Base class for a Serializable (Ser) GUI parameter. This type of parameter is used when it cannot be mapped to a
+ * Base class for a Jamba (Jmb) GUI parameter. This type of parameter is used when it cannot be mapped to a
  * Vst parameter whose internal representation must be a value in the range [0.0, 1.0]. For example a string (like
  * a user input label to name a component) does not fit in the Vst parameter category. By implementating
  * the serializable api (readFromStream/writeToStream), any type can be part of the state.
  */
-class IGUISerParameter : public IMessageHandler
+class IGUIJmbParameter : public IMessageHandler
 {
 public:
   // Constructor
-  explicit IGUISerParameter(std::shared_ptr<ISerParamDef> iParamDef) : fParamDef{std::move(iParamDef)} {}
+  explicit IGUIJmbParameter(std::shared_ptr<IJmbParamDef> iParamDef) : fParamDef{std::move(iParamDef)} {}
 
   // getParamDef
-  std::shared_ptr<ISerParamDef> const &getParamDef() const { return fParamDef; }
+  std::shared_ptr<IJmbParamDef> const &getParamDef() const { return fParamDef; }
 
   // getParamID
   ParamID getParamID() const { return fParamDef->fParamID; }
@@ -64,7 +64,7 @@ public:
   tresult handleMessage(Message const &iMessage) override { return readFromMessage(iMessage); }
 
 protected:
-  std::shared_ptr<ISerParamDef> fParamDef;
+  std::shared_ptr<IJmbParamDef> fParamDef;
 };
 
 /**
@@ -72,23 +72,23 @@ protected:
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class GUISerParameter : public IGUISerParameter, public FObject
+class GUIJmbParameter : public IGUIJmbParameter, public FObject
 {
 public:
-  using SerParamType = T;
+  using ParamType = T;
 
   // Constructor
-  explicit GUISerParameter(std::shared_ptr<SerParamDef<T>> iParamDef) :
-    IGUISerParameter(iParamDef),
+  explicit GUIJmbParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
+    IGUIJmbParameter(iParamDef),
     FObject(),
-    fSerParamDef{std::move(iParamDef)},
-    fValue{fSerParamDef->fDefaultValue}
+    fJmbParamDef{std::move(iParamDef)},
+    fValue{fJmbParamDef->fDefaultValue}
   {}
 
-  // getSerParamDef (correct type for this subclass)
-  inline std::shared_ptr<SerParamDef<T>> const &getSerParamDef() const
+  // getJmbParamDef (correct type for this subclass)
+  inline std::shared_ptr<JmbParamDef<T>> const &getJmbParamDef() const
   {
-    return fSerParamDef;
+    return fJmbParamDef;
   }
 
   /**
@@ -96,7 +96,7 @@ public:
    *
    * @return true if the value was actually updated, false if it is the same
    */
-  bool update(SerParamType const &iValue)
+  bool update(ParamType const &iValue)
   {
     if(fValue != iValue)
     {
@@ -108,10 +108,10 @@ public:
   }
 
   /**
-   * Sets the value. The difference with update is that it does not check for equality (case when SerParamType is
+   * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
    * not comparable)
    */
-  void setValue(SerParamType const &iValue)
+  void setValue(ParamType const &iValue)
   {
     fValue = iValue;
     changed();
@@ -120,7 +120,7 @@ public:
   // readFromStream
   tresult readFromStream(IBStreamer &iStreamer) override
   {
-    tresult res = fSerParamDef->readFromStream(iStreamer, fValue);
+    tresult res = fJmbParamDef->readFromStream(iStreamer, fValue);
     if(res == kResultOk)
       changed();
     return res;
@@ -129,13 +129,13 @@ public:
   // writeToStream
   tresult writeToStream(IBStreamer &oStreamer) const override
   {
-    return fSerParamDef->writeToStream(fValue, oStreamer);
+    return fJmbParamDef->writeToStream(fValue, oStreamer);
   }
 
   // readFromMessage
   tresult readFromMessage(Message const &iMessage) override
   {
-    tresult res = fSerParamDef->readFromMessage(iMessage, fValue);
+    tresult res = fJmbParamDef->readFromMessage(iMessage, fValue);
     if(res == kResultOk)
       changed();
     return res;
@@ -144,11 +144,11 @@ public:
   // writeToMessage
   tresult writeToMessage(Message &oMessage) const override
   {
-    return fSerParamDef->writeToMessage(fValue, oMessage);
+    return fJmbParamDef->writeToMessage(fValue, oMessage);
   }
 
   // getValue
-  inline SerParamType const &getValue() { return fValue; }
+  inline ParamType const &getValue() { return fValue; }
 
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
@@ -159,13 +159,13 @@ public:
   }
 
 protected:
-  std::shared_ptr<SerParamDef<T>> fSerParamDef;
-  SerParamType fValue;
+  std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
+  ParamType fValue;
 };
 
 
 //------------------------------------------------------------------------
-// GUISerParam - wrapper to make writing the code much simpler and natural
+// GUIJmbParam - wrapper to make writing the code much simpler and natural
 //------------------------------------------------------------------------
 /**
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
@@ -174,10 +174,10 @@ protected:
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class GUISerParam
+class GUIJmbParam
 {
 public:
-  GUISerParam(GUISerParameter<T> *iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
+  GUIJmbParam(GUIJmbParameter<T> *iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
     fPtr{iPtr}
   {}
 
@@ -211,7 +211,7 @@ public:
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }
 
 private:
-  GUISerParameter<T> *fPtr;
+  GUIJmbParameter<T> *fPtr;
 };
 
 }

@@ -23,7 +23,7 @@
 #include <pongasoft/VST/MessageProducer.h>
 
 #include "RTParameter.h"
-#include "RTSerParameter.h"
+#include "RTJmbParameter.h"
 
 #include <map>
 
@@ -54,7 +54,7 @@ public:
    * This method should be called to add an rt outbound ser parameter
    */
   template<typename T>
-  RTSerOutParam<T> addSerOut(SerParam<T> iParamDef);
+  RTJmbOutParam<T> addJmbOut(JmbParam<T> iParamDef);
 
   /**
    * Call this method after adding all the parameters. If using the RT processor, it will happen automatically. */
@@ -93,11 +93,11 @@ public:
   virtual tresult writeLatestState(IBStreamer &oStreamer);
 
   /**
-   * @return true if messaging is enabled (which at this moment is whether any SerParam was added) */
+   * @return true if messaging is enabled (which at this moment is whether any JmbParam was added) */
   bool isMessagingEnabled() const { return !fOutboundMessagingParameters.empty(); }
 
   /**
-   * Called (from a GUI timer) to send the messages to the GUI (SerParam for the moment) */
+   * Called (from a GUI timer) to send the messages to the GUI (JmbParam for the moment) */
   virtual tresult sendPendingMessages(IMessageProducer *iMessageProducer);
 
 protected:
@@ -108,13 +108,13 @@ protected:
   std::map<ParamID, std::unique_ptr<RTRawVstParameter>> fVstParameters{};
 
   // contains all the registered message parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::unique_ptr<IRTSerParameter>> fOutboundMessagingParameters{};
+  std::map<ParamID, std::unique_ptr<IRTJmbParameter>> fOutboundMessagingParameters{};
 
   // add raw parameter to the structures
   tresult addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter);
 
   // add messaging parameter to the structures
-  tresult addOutboundMessagingParameter(std::unique_ptr<IRTSerParameter> iParameter);
+  tresult addOutboundMessagingParameter(std::unique_ptr<IRTJmbParameter> iParameter);
 
   /**
    * Called from the RT thread from beforeProcessing to set the new state. Can be overridden
@@ -169,14 +169,14 @@ RTVstParam<T> RTState::add(VstParam<T> iParamDef)
 }
 
 //------------------------------------------------------------------------
-// RTState::addSerOut
+// RTState::addJmbOut
 //------------------------------------------------------------------------
 template<typename T>
-RTSerOutParam<T> RTState::addSerOut(SerParam<T> iParamDef)
+RTJmbOutParam<T> RTState::addJmbOut(JmbParam<T> iParamDef)
 {
   // YP Impl note: see add for similar impl note
-  auto rawPtr = new RTSerParameter<T>(iParamDef);
-  std::unique_ptr<IRTSerParameter> rtParam{rawPtr};
+  auto rawPtr = new RTJmbParameter<T>(iParamDef);
+  std::unique_ptr<IRTJmbParameter> rtParam{rawPtr};
   addOutboundMessagingParameter(std::move(rtParam));
   return rawPtr;
 }
