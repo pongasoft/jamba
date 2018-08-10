@@ -34,7 +34,7 @@ using namespace Steinberg::Vst;
  * (state loading/saving in a thread safe manner, setting up GUI thread if messaging to the GUI is required, etc...) so
  * that the actual processor code deals mostly with business logic.
  */
-class RTProcessor : public AudioEffect
+class RTProcessor : public AudioEffect, public IMessageProducer
 {
 public:
   explicit RTProcessor(Steinberg::FUID const &iControllerUID);
@@ -65,7 +65,6 @@ public:
   tresult PLUGIN_API getState(IBStream *state) override;
 
 protected:
-
   /**
    * @return true if you can handle 32 bits (true buy default) */
   virtual bool canProcess32Bits() const { return true; }
@@ -104,27 +103,50 @@ protected:
    */
   void enableGUITimer(uint32 iUIFrameRateMs);
 
+  /**
+   * Called (from a GUI timer) to send the messages to the GUI (SerParam for the moment) */
+   virtual void sendPendingMessages() { getRTState()->sendPendingMessages(this); }
+
+protected:
+  // interval for gui message timer (can be changed by subclass BEFORE calling initialize)
+  uint32 fGUIMessageTimerIntervalMs;
+
+public:
+  // allocateMessage
+  IPtr<IMessage> allocateMessage() override;
+
+  // sendMessage
+  tresult sendMessage(IPtr<IMessage> iMessage) override;
+
 private:
-  // Simple wrapper to hide ITimerCallback
-  template<typename T>
+  using RTProcessorCallback = void (RTProcessor::*)();
+
+  // wrapper class to dispatch the callback
+  template<RTProcessorCallback Callback>
   class GUITimerCallback : public ITimerCallback
   {
   public:
-    GUITimerCallback(T *iTarget) : fTarget{iTarget} {}
+    explicit GUITimerCallback(RTProcessor *iProcessor) : fProcessor{iProcessor} {}
 
     void onTimer(Timer *timer) override
     {
-      fTarget->onGUITimer();
+      (fProcessor->*Callback)();
     }
   private:
-    T *fTarget;
+    RTProcessor *fProcessor;
   };
 
-private:
-  GUITimerCallback<RTProcessor> fGUITimerCallback;
 
+
+private:
+  // the generic gui timer (enabled with enableGUITimer)
+  GUITimerCallback<&RTProcessor::onGUITimer> fGUITimerCallback;
   uint32 fGUITimerIntervalMs;
   std::unique_ptr<AutoReleaseTimer> fGUITimer;
+
+  // the timer that will handle sending messages (enabled when there are messages to handle)
+  GUITimerCallback<&RTProcessor::sendPendingMessages> fGUIMessageTimerCallback;
+  std::unique_ptr<AutoReleaseTimer> fGUIMessageTimer;
 
   bool fActive;
 

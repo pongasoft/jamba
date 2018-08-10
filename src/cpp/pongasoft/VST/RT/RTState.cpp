@@ -33,17 +33,63 @@ RTState::RTState(Parameters const &iParameters) :
 }
 
 //------------------------------------------------------------------------
-// RTState::RTState
+// RTState::addRawParameter
 //------------------------------------------------------------------------
-void RTState::addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter)
+tresult RTState::addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter)
 {
+  if(!iParameter)
+    return kInvalidArgument;
+
   ParamID paramID = iParameter->getParamID();
+  if(fVstParameters.find(paramID) != fVstParameters.cend() ||
+     fOutboundMessagingParameters.find(paramID) != fOutboundMessagingParameters.cend())
+  {
+    DLOG_F(ERROR, "duplicate paramID [%d]", paramID);
+    return kInvalidArgument;
+  }
 
-  DCHECK_F(iParameter != nullptr);
-  DCHECK_F(fParameters.find(paramID) == fParameters.cend(), "duplicate paramID [%d]", paramID);
-  DCHECK_F(!iParameter->getParamDef()->fUIOnly, "only RT parameter allowed");
+  if(iParameter->getParamDef()->fOwner == IParamDef::Owner::kGUI)
+  {
+    DLOG_F(ERROR, "only RT parameter allowed [%d] (owned by GUI)", paramID);
+    return kInvalidArgument;
+  }
 
-  fParameters[paramID] = std::move(iParameter);
+  fVstParameters[paramID] = std::move(iParameter);
+
+  return kResultOk;
+}
+
+//------------------------------------------------------------------------
+// RTState::addOutboundMessagingParameter
+//------------------------------------------------------------------------
+tresult RTState::addOutboundMessagingParameter(std::unique_ptr<IRTSerParameter> iParameter)
+{
+  if(!iParameter)
+    return kInvalidArgument;
+
+  ParamID paramID = iParameter->getParamID();
+  if(fVstParameters.find(paramID) != fVstParameters.cend() ||
+     fOutboundMessagingParameters.find(paramID) != fOutboundMessagingParameters.cend())
+  {
+    DLOG_F(ERROR, "duplicate paramID [%d]", paramID);
+    return kInvalidArgument;
+  }
+
+  if(iParameter->getParamDef()->fOwner == IParamDef::Owner::kGUI)
+  {
+    DLOG_F(ERROR, "only RT parameter allowed [%d] (owned by GUI)", paramID);
+    return kInvalidArgument;
+  }
+
+  if(!iParameter->getParamDef()->fShared)
+  {
+    DLOG_F(ERROR, "param [%d] must be shared", paramID);
+    return kInvalidArgument;
+  }
+
+  fOutboundMessagingParameters[paramID] = std::move(iParameter);
+
+  return kResultOk;
 }
 
 //------------------------------------------------------------------------
@@ -69,8 +115,8 @@ bool RTState::applyParameterChanges(IParameterChanges &inputParameterChanges)
       // we read the "last" point (ignoring multiple changes for now)
       if(paramQueue->getPoint(numPoints - 1, sampleOffset, value) == kResultOk)
       {
-        auto item = fParameters.find(paramQueue->getParameterId());
-        if(item != fParameters.cend())
+        auto item = fVstParameters.find(paramQueue->getParameterId());
+        if(item != fVstParameters.cend())
         {
           stateChanged |= item->second->updateNormalizedValue(value);
         }
@@ -91,7 +137,7 @@ void RTState::computeLatestState(NormalizedState *oLatestState) const
   for(int i = 0; i < oLatestState->getCount(); i++)
   {
     auto paramID = saveOrder->fOrder[i];
-    oLatestState->set(i, fParameters.at(paramID)->getNormalizedValue());
+    oLatestState->set(i, fVstParameters.at(paramID)->getNormalizedValue());
   }
 }
 
@@ -171,7 +217,7 @@ bool RTState::onNewState(NormalizedState const *iLatestState)
 
   for(int i = 0; i < iLatestState->getCount(); i ++)
   {
-    res |= fParameters.at(saveOrder->fOrder[i])->updateNormalizedValue(iLatestState->fValues[i]);
+    res |= fVstParameters.at(saveOrder->fOrder[i])->updateNormalizedValue(iLatestState->fValues[i]);
   }
 
   return res;
@@ -195,12 +241,47 @@ void RTState::afterProcessing()
 bool RTState::resetPreviousValues()
 {
   bool stateChanged = false;
-  for(auto &iter : fParameters)
+  for(auto &iter : fVstParameters)
   {
     stateChanged |= iter.second->resetPreviousValue();
   }
 
   return stateChanged;
+}
+
+//------------------------------------------------------------------------
+// RTState::sendPendingMessages
+//------------------------------------------------------------------------
+tresult RTState::sendPendingMessages(IMessageProducer *iMessageProducer)
+{
+  tresult res = kResultOk;
+
+  for(auto &p : fOutboundMessagingParameters)
+  {
+    std::unique_ptr<IRTSerParameter> &param = p.second;
+    if(param->hasOutboundUpdate())
+    {
+      auto message = iMessageProducer->allocateMessage();
+
+      if(message)
+      {
+        Message m{message.get()};
+
+        // sets the message ID
+        m.setMessageID(param->getParamID());
+
+        // serialize the content
+        if(param->writeToMessage(m) == kResultOk)
+          res |= iMessageProducer->sendMessage(message);
+        else
+          res = kResultFalse;
+      }
+      else
+        res = kResultFalse;
+    }
+  }
+
+  return res;
 }
 
 //------------------------------------------------------------------------
@@ -213,14 +294,14 @@ tresult RTState::init()
   {
     auto paramID = fNormalizedStateRT->fSaveOrder->fOrder[i];
     // param exist
-    if(fParameters.find(paramID) == fParameters.cend())
+    if(fVstParameters.find(paramID) == fVstParameters.cend())
     {
       result = kResultFalse;
       DLOG_F(ERROR,
              "Expected parameter [%d] used in RTSaveStateOrder not registered",
              paramID);
     }
-    if(fParameters.at(paramID)->getParamDef()->fTransient)
+    if(fVstParameters.at(paramID)->getParamDef()->fTransient)
     {
       result = kResultFalse;
       DLOG_F(ERROR,

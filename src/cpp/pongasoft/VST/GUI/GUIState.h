@@ -164,12 +164,17 @@ GUISerParam<T> GUIState::add(SerParam<T> iParamDef)
   auto rawPtr = new GUISerParameter<T>(iParamDef);
   std::unique_ptr<IGUISerParameter> guiParam{rawPtr};
   addSerParam(std::move(guiParam));
-  if(iParamDef->fEnabledForMessaging)
+  if(iParamDef->fShared)
   {
-    if(iParamDef->fSerializer)
-      fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);
+    if(iParamDef->fOwner == ISerParamDef::Owner::kRT)
+    {
+      if(iParamDef->fSerializer)
+        fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);
+    }
     else
-      DLOG_F(WARNING, "param [%d] is marked enabledForMessaging but does not define a serializer", iParamDef->fParamID);
+    {
+      DLOG_F(WARNING, "NOT implemented: Currently GUI owned parameter cannot be shared");
+    }
   }
   return rawPtr;
 }

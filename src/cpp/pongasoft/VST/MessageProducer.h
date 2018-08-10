@@ -18,38 +18,29 @@
 
 #pragma once
 
-#include "Messaging.h"
-
-#include <map>
+#include <memory>
+#include <pluginterfaces/vst/ivstmessage.h>
 
 namespace pongasoft {
 namespace VST {
 
-/**
- * Interface defining a message handler */
-class IMessageHandler
-{
-public:
-  virtual ~IMessageHandler() = default;
-  virtual tresult handleMessage(Message const &iMessage) = 0;
-};
+using namespace Steinberg;
+using namespace Steinberg::Vst;
 
 /**
- * Simple implementation of IMessageHandler which will delegate the message handling based on MessageID */
-class MessageHandler : public IMessageHandler
+ * Abstraction for allocating and sending a message
+ */
+class IMessageProducer
 {
 public:
-  // handleMessage
-  tresult handleMessage(Message const &iMessage) override;
+  virtual ~IMessageProducer() = default;
 
-  // registerHandler
-  void registerHandler(MessageID iMessageID, IMessageHandler *iMessageHandler);
+  /** Allocates a message instance */
+  virtual IPtr<IMessage> allocateMessage() = 0;
 
-private:
-  // map of messageID to a handler
-  std::map<MessageID, IMessageHandler *> fHandlers{};
+  /** Sends the given message to the peer. */
+  virtual tresult sendMessage(IPtr<IMessage> iMessage) = 0;
 };
 
 }
 }
-

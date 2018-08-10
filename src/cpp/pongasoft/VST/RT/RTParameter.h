@@ -185,7 +185,7 @@ void RTVstParameter<T>::update(const ParamType &iNewValue)
 //------------------------------------------------------------------------
 /**
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
- * as well as redefine a couple of iterators which helps in writing simpler and natural code (the param
+ * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
  * behaves like T in many ways).
  *
  * @tparam T the underlying type of the param */

@@ -42,20 +42,26 @@ using namespace Steinberg::Vst;
 class IParamDef
 {
 public:
+  enum class Owner
+  {
+    kRT,
+    kGUI
+  };
+public:
   IParamDef(ParamID const iParamID,
-                       TChar const *const iTitle,
-                       bool const iUIOnly,
-                       bool const iTransient) :
+            TChar const *const iTitle,
+            Owner const iOwner,
+            bool const iTransient) :
     fParamID{iParamID},
     fTitle{iTitle},
-    fUIOnly{iUIOnly},
+    fOwner{iOwner},
     fTransient{iTransient}
   {}
 
 public:
   const ParamID fParamID;
   const TChar *const fTitle;
-  const bool fUIOnly; // not used in RT (saved in the UI stream)
+  const Owner fOwner; // who owns the parameter (and which stream will it be saved if non transient)
   const bool fTransient; // not saved in the stream
 };
 
@@ -75,9 +81,9 @@ public:
                  UnitID const iUnitID,
                  TChar const *const iShortTitle,
                  int32 const iPrecision,
-                 bool const iUIOnly,
+                 Owner const iOwner,
                  bool const iTransient) :
-    IParamDef(iParamID, iTitle, iUIOnly, iTransient),
+    IParamDef(iParamID, iTitle, iOwner, iTransient),
     fUnits{iUnits},
     fDefaultValue{iDefaultNormalizedValue},
     fStepCount{iStepCount},
@@ -130,7 +136,7 @@ public:
               UnitID const iUnitID,
               TChar const *const iShortTitle,
               int32 const iPrecision,
-              bool const iUIOnly,
+              Owner const iOwner,
               bool const iTransient,
               std::shared_ptr<IParamConverter<ParamType>> iConverter) :
     RawVstParamDef(iParamID,
@@ -142,7 +148,7 @@ public:
                    iUnitID,
                    iShortTitle,
                    iPrecision,
-                   iUIOnly,
+                   iOwner,
                    iTransient),
     fDefaultValue{iDefaultValue},
     fConverter{std::move(iConverter)}
@@ -188,11 +194,19 @@ public:
 class ISerParamDef : public IParamDef
 {
 public:
-  ISerParamDef(const ParamID iParamID, const TChar *const iTitle, const bool iUIOnly, const bool iTransient)
-    : IParamDef(iParamID, iTitle, iUIOnly, iTransient)
+  ISerParamDef(const ParamID iParamID,
+               const TChar *const iTitle,
+               Owner const iOwner,
+               bool const iTransient,
+               bool const iShared)
+    : IParamDef(iParamID, iTitle, iOwner, iTransient),
+      fShared{iShared}
   {}
 
   virtual ~ISerParamDef() = default;
+
+public:
+  bool const fShared;
 };
 
 /**
@@ -207,14 +221,13 @@ public:
 
   SerParamDef(ParamID const iParamID,
               TChar const *const iTitle,
-              bool const iUIOnly,
+              Owner const iOwner,
               bool const iTransient,
+              bool const iShared,
               ParamType const &iDefaultValue,
-              bool const iEnabledForMessaging,
               std::shared_ptr<IParamSerializer<ParamType>> iSerializer) :
-    ISerParamDef(iParamID, iTitle, iUIOnly, iTransient),
+    ISerParamDef(iParamID, iTitle, iOwner, iTransient, iShared),
     fDefaultValue{iDefaultValue},
-    fEnabledForMessaging{iEnabledForMessaging},
     fSerializer{std::move(iSerializer)}
   {}
 
@@ -229,7 +242,7 @@ public:
   tresult readFromMessage(Message const &iMessage, ParamType &oValue) const;
 
   // writeToMessage
-  inline tresult writeToMessage(ParamType const &iValue, Message &oMessage) const;
+  tresult writeToMessage(ParamType const &iValue, Message &oMessage) const;
 
   // computeMessageAttrID
   std::string computeMessageAttrID() const
@@ -239,7 +252,6 @@ public:
 
 public:
   const ParamType fDefaultValue;
-  const bool fEnabledForMessaging;
   const std::shared_ptr<IParamSerializer<ParamType>> fSerializer;
 };
 
@@ -288,7 +300,10 @@ tresult SerParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) co
 template<typename T>
 tresult SerParamDef<T>::readFromMessage(Message const &iMessage, ParamType &oValue) const
 {
-  return iMessage.getSerializableValue(computeMessageAttrID().c_str(), *this, oValue);
+  if(fSerializer)
+    return iMessage.getSerializableValue(computeMessageAttrID().c_str(), *this, oValue);
+  else
+    return kResultFalse;
 }
 
 //------------------------------------------------------------------------
@@ -297,7 +312,10 @@ tresult SerParamDef<T>::readFromMessage(Message const &iMessage, ParamType &oVal
 template<typename T>
 tresult SerParamDef<T>::writeToMessage(const ParamType &iValue, Message &oMessage) const
 {
-  return oMessage.setSerializableValue(computeMessageAttrID().c_str(), *this, iValue);
+  if(fSerializer)
+    return oMessage.setSerializableValue(computeMessageAttrID().c_str(), *this, iValue);
+  else
+    return kResultFalse;
 }
 
 //------------------------------------------------------------------------

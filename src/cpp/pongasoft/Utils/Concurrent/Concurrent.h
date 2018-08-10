@@ -159,6 +159,19 @@ public:
   {}
 
   /**
+   * Note that although this api is thread safe, it will only report the state of the queue at the moment it is called.
+   * You should not assume that because isEmpty() returns false, then pop will return true!
+   *
+   * @return true if the queue is empty
+   */
+  bool isEmpty() const
+  {
+    auto &spinLock = const_cast<SpinLock &>(fSpinLock);
+    auto lock = spinLock.acquire();
+    return fIsEmpty;
+  }
+
+  /**
    * Returns the single element in the queue if there is one
    *
    * @param oElement this will be populated with the value of the element in the queue or left untouched if there

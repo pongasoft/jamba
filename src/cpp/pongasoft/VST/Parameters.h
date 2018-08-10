@@ -61,7 +61,8 @@ public:
     VstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
     VstParamDefBuilder &shortTitle(const TChar *iShortTitle) { fShortTitle = iShortTitle; return *this; }
     VstParamDefBuilder &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
-    VstParamDefBuilder &uiOnly(bool iUIOnly = true) { fUIOnly = iUIOnly; return *this; }
+    VstParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
+    VstParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
     VstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
     VstParamDefBuilder &converter(std::shared_ptr<IParamConverter<T>> iConverter) { fConverter = std::move(iConverter); return *this; }
     template<typename ParamConverter>
@@ -80,7 +81,7 @@ public:
     UnitID fUnitID = kRootUnitId;
     const TChar *fShortTitle = nullptr;
     int32 fPrecision = 4;
-    bool fUIOnly = false;
+    IParamDef::Owner fOwner = IParamDef::Owner::kRT;
     bool fTransient = false;
     std::shared_ptr<IParamConverter<T>> fConverter{};
 
@@ -102,9 +103,10 @@ public:
   {
     // builder methods
     SerParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
-    SerParamDefBuilder &uiOnly(bool iUIOnly = true) { fUIOnly = iUIOnly; return *this; }
     SerParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
-    SerParamDefBuilder &enableForMessaging(bool iEnabledForMessaging = true) { fEnabledForMessaging = iEnabledForMessaging; return *this; }
+    SerParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
+    SerParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
+    SerParamDefBuilder &shared(bool iShared = true) { fShared = iShared; return *this; }
     SerParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
     template<typename ParamSerializer>
     SerParamDefBuilder &serializer() { fSerializer = std::move(createParamSerializer<ParamSerializer>()); return *this; }
@@ -116,9 +118,9 @@ public:
     ParamID fParamID;
     const TChar *fTitle;
     T fDefaultValue{};
-    bool fUIOnly = false;
+    IParamDef::Owner fOwner = IParamDef::Owner::kGUI;
     bool fTransient = false;
-    bool fEnabledForMessaging = false;
+    bool fShared = false;
     std::shared_ptr<IParamSerializer<T>> fSerializer{};
 
     friend class Parameters;
@@ -130,7 +132,6 @@ public:
   private:
     Parameters *fParameters;
   };
-
 
 public:
   // Constructor
@@ -237,7 +238,7 @@ public:
   std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const;
 
   // getSerParamDef - nullptr when not found
-  std::shared_ptr<IParamDef> getSerParamDef(ParamID iParamID) const;
+  std::shared_ptr<ISerParamDef> getSerParamDef(ParamID iParamID) const;
 
 protected:
   // internally called by the builder
@@ -249,10 +250,10 @@ protected:
   SerParam<T> add(SerParamDefBuilder<T> const &iBuilder);
 
   // addVstParamDef
-  void addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef);
+  tresult addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef);
 
   // addSerParamDef
-  void addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef);
+  tresult addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef);
 
 private:
   // contains all the registered (raw type) parameters (unique ID, will be checked on add)
@@ -339,7 +340,7 @@ VstParam<T> Parameters::add(VstParamDefBuilder<T> const &iBuilder)
                                                 iBuilder.fUnitID,
                                                 iBuilder.fShortTitle,
                                                 iBuilder.fPrecision,
-                                                iBuilder.fUIOnly,
+                                                iBuilder.fOwner,
                                                 iBuilder.fTransient,
                                                 iBuilder.fConverter);
 
@@ -348,9 +349,10 @@ VstParam<T> Parameters::add(VstParamDefBuilder<T> const &iBuilder)
     DLOG_F(WARNING, "No converter defined for non transient parameter [%d]", iBuilder.fParamID);
   }
 
-  addVstParamDef(param);
-
-  return param;
+  if(addVstParamDef(param) == kResultOk)
+    return param;
+  else
+    return nullptr;
 }
 
 //------------------------------------------------------------------------
@@ -361,20 +363,26 @@ SerParam<T> Parameters::add(Parameters::SerParamDefBuilder<T> const &iBuilder)
 {
   auto param = std::make_shared<SerParamDef<T>>(iBuilder.fParamID,
                                                 iBuilder.fTitle,
-                                                iBuilder.fUIOnly,
+                                                iBuilder.fOwner,
                                                 iBuilder.fTransient,
+                                                iBuilder.fShared,
                                                 iBuilder.fDefaultValue,
-                                                iBuilder.fEnabledForMessaging,
                                                 iBuilder.fSerializer);
 
   if(!iBuilder.fTransient && !iBuilder.fSerializer)
   {
-    DLOG_F(WARNING, "No serializer defined for non transient parameter [%d]", iBuilder.fParamID);
+    DLOG_F(WARNING, "No serializer defined for parameter [%d] (won't be able to be saved)", iBuilder.fParamID);
   }
 
-  addSerParamDef(param);
+  if(iBuilder.fShared && !iBuilder.fSerializer)
+  {
+    DLOG_F(WARNING, "No serializer defined for parameter [%d] (won't be able to be shared with peer)", iBuilder.fParamID);
+  }
 
-  return param;
+  if(addSerParamDef(param) == kResultOk)
+    return param;
+  else
+    return nullptr;
 }
 
 

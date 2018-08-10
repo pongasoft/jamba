@@ -40,9 +40,7 @@ class IGUISerParameter : public IMessageHandler
 {
 public:
   // Constructor
-  explicit IGUISerParameter(std::shared_ptr<ISerParamDef> iParamDef) :
-    fParamDef{std::move(iParamDef)}
-  {}
+  explicit IGUISerParameter(std::shared_ptr<ISerParamDef> iParamDef) : fParamDef{std::move(iParamDef)} {}
 
   // getParamDef
   std::shared_ptr<ISerParamDef> const &getParamDef() const { return fParamDef; }
@@ -56,8 +54,14 @@ public:
   // writeToStream
   virtual tresult writeToStream(IBStreamer &oStreamer) const = 0;
 
+  // readFromMessage
+  virtual tresult readFromMessage(Message const &iMessage) = 0;
+
+  // writeToMessage
+  virtual tresult writeToMessage(Message &oMessage) const = 0;
+
   // handleMessage
-  tresult handleMessage(Message const &iMessage) override = 0;
+  tresult handleMessage(Message const &iMessage) override { return readFromMessage(iMessage); }
 
 protected:
   std::shared_ptr<ISerParamDef> fParamDef;
@@ -129,7 +133,7 @@ public:
   }
 
   // readFromMessage
-  inline tresult readFromMessage(Message const &iMessage)
+  tresult readFromMessage(Message const &iMessage) override
   {
     tresult res = fSerParamDef->readFromMessage(iMessage, fValue);
     if(res == kResultOk)
@@ -138,13 +142,10 @@ public:
   }
 
   // writeToMessage
-  inline tresult writeToMessage(Message &oMessage) const
+  tresult writeToMessage(Message &oMessage) const override
   {
     return fSerParamDef->writeToMessage(fValue, oMessage);
   }
-
-  // handleMessage
-  tresult handleMessage(Message const &iMessage) override { return readFromMessage(iMessage); }
 
   // getValue
   inline SerParamType const &getValue() { return fValue; }
@@ -168,7 +169,7 @@ protected:
 //------------------------------------------------------------------------
 /**
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
- * as well as redefine a couple of iterators which helps in writing simpler and natural code (the param
+ * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
  * behaves like T in many ways).
  *
  * @tparam T the underlying type of the param */
@@ -205,18 +206,6 @@ public:
 
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
   inline T const *operator->() const { return &fPtr->getValue(); }
-
-  // readFromStream
-  inline tresult readFromStream(IBStreamer &iStreamer) { return fPtr->readFromStream(iStreamer); };
-
-  // writeToStream
-  inline tresult writeToStream(IBStreamer &oStreamer) const { return fPtr->writeToStream(oStreamer); };
-
-  // readFromMessage
-  inline tresult readFromMessage(Message const &iMessage) { return fPtr->readFromMessage(iMessage); }
-
-  // writeToMessage
-  inline tresult writeToMessage(Message &oMessage) const { return fPtr->writeToMessage(oMessage);}
 
   // connect
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }

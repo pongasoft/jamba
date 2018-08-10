@@ -47,6 +47,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioUtils.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageHandler.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageProducer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Messaging.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/NormalizedState.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/ParamConverters.h
@@ -58,6 +59,7 @@ set(JAMBA_sources_h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTProcessor.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTSerParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTState.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCx.h

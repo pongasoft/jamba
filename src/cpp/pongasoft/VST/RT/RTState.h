@@ -17,11 +17,13 @@
  */
 #pragma once
 
-#include "RTParameter.h"
-
 #include <pongasoft/Utils/Concurrent/Concurrent.h>
 #include <pongasoft/VST/Parameters.h>
 #include <pongasoft/VST/NormalizedState.h>
+#include <pongasoft/VST/MessageProducer.h>
+
+#include "RTParameter.h"
+#include "RTSerParameter.h"
 
 #include <map>
 
@@ -47,6 +49,12 @@ public:
    */
   template<typename T>
   RTVstParam<T> add(VstParam<T> iParamDef);
+
+  /**
+   * This method should be called to add an rt outbound ser parameter
+   */
+  template<typename T>
+  RTSerOutParam<T> addSerOut(SerParam<T> iParamDef);
 
   /**
    * Call this method after adding all the parameters. If using the RT processor, it will happen automatically. */
@@ -84,15 +92,29 @@ public:
    */
   virtual tresult writeLatestState(IBStreamer &oStreamer);
 
+  /**
+   * @return true if messaging is enabled (which at this moment is whether any SerParam was added) */
+  bool isMessagingEnabled() const { return !fOutboundMessagingParameters.empty(); }
+
+  /**
+   * Called (from a GUI timer) to send the messages to the GUI (SerParam for the moment) */
+  virtual tresult sendPendingMessages(IMessageProducer *iMessageProducer);
+
 protected:
   // the parameters
   Parameters const &fPluginParameters;
 
-  // contains all the registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::unique_ptr<RTRawVstParameter>> fParameters{};
+  // contains all the registered vst parameters (unique ID, will be checked on add)
+  std::map<ParamID, std::unique_ptr<RTRawVstParameter>> fVstParameters{};
+
+  // contains all the registered message parameters (unique ID, will be checked on add)
+  std::map<ParamID, std::unique_ptr<IRTSerParameter>> fOutboundMessagingParameters{};
 
   // add raw parameter to the structures
-  void addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter);
+  tresult addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter);
+
+  // add messaging parameter to the structures
+  tresult addOutboundMessagingParameter(std::unique_ptr<IRTSerParameter> iParameter);
 
   /**
    * Called from the RT thread from beforeProcessing to set the new state. Can be overridden
@@ -135,7 +157,7 @@ private:
 template<typename T>
 RTVstParam<T> RTState::add(VstParam<T> iParamDef)
 {
-  // YP Impl note: this method exports the raw pointer on purpose. The map fParameters is storing unique_ptr so that
+  // YP Impl note: this method exports the raw pointer on purpose. The map fVstParameters is storing unique_ptr so that
   // when the map gets deleted, all the parameters get deleted as well. The raw pointer is wrapped inside the RTVstParam
   // wrapper and the normal usage is that it will not outlive the map. Using shared_ptr would be the safest approach
   // but in the RT code, we want to make sure that we do not pay the penalty of managing a ref counter (which may
@@ -143,6 +165,19 @@ RTVstParam<T> RTState::add(VstParam<T> iParamDef)
   auto rawPtr = new RTVstParameter<T>(iParamDef);
   std::unique_ptr<RTRawVstParameter> rtParam{rawPtr};
   addRawParameter(std::move(rtParam));
+  return rawPtr;
+}
+
+//------------------------------------------------------------------------
+// RTState::addSerOut
+//------------------------------------------------------------------------
+template<typename T>
+RTSerOutParam<T> RTState::addSerOut(SerParam<T> iParamDef)
+{
+  // YP Impl note: see add for similar impl note
+  auto rawPtr = new RTSerParameter<T>(iParamDef);
+  std::unique_ptr<IRTSerParameter> rtParam{rawPtr};
+  addOutboundMessagingParameter(std::move(rtParam));
   return rawPtr;
 }
 

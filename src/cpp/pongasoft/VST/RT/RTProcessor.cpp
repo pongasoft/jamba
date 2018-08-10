@@ -28,7 +28,10 @@ RTProcessor::RTProcessor(Steinberg::FUID const &iControllerUID) :
   AudioEffect(),
   fGUITimerCallback{this},
   fGUITimerIntervalMs{0},
-  fGUITimer{nullptr},
+  fGUITimer{},
+  fGUIMessageTimerCallback{this},
+  fGUIMessageTimerIntervalMs{10}, // by default 10ms
+  fGUIMessageTimer{},
   fActive{false}
 {
   setControllerClass(iControllerUID);
@@ -41,16 +44,28 @@ tresult RTProcessor::setActive(TBool iState)
 {
   fActive = iState;
   fGUITimer = nullptr;
+  fGUIMessageTimer = nullptr;
 
-  // when the processor is activated, start the GUI thread
-  if(fActive && fGUITimerIntervalMs > 0)
+  // when the processor is activated, start the GUI timer(s)
+  if(fActive)
   {
+    if(fGUITimerIntervalMs > 0)
+    {
 #ifdef JAMBA_DEBUG_LOGGING
-    DLOG_F(INFO, "RTProcessor::setActive - Enabling GUI timer - interval [%d]", fGUITimerIntervalMs);
+      DLOG_F(INFO, "RTProcessor::setActive - Enabling GUI timer - interval [%d]", fGUITimerIntervalMs);
 #endif
-    fGUITimer = AutoReleaseTimer::create(&fGUITimerCallback, fGUITimerIntervalMs);
+      fGUITimer = AutoReleaseTimer::create(&fGUITimerCallback, fGUITimerIntervalMs);
+    }
+
+    if(getRTState()->isMessagingEnabled())
+    {
+#ifdef JAMBA_DEBUG_LOGGING
+      DLOG_F(INFO, "RTProcessor::setActive - Enabling GUI messaging timer - interval [%d]", fGUIMessageTimerIntervalMs);
+#endif
+      fGUIMessageTimer = AutoReleaseTimer::create(&fGUIMessageTimerCallback, fGUIMessageTimerIntervalMs);
+    }
   }
-  
+
   return kResultOk;
 }
 
@@ -169,6 +184,22 @@ tresult RTProcessor::initialize(FUnknown *context)
     return result;
 
   return getRTState()->init();
+}
+
+//------------------------------------------------------------------------
+// RTProcessor::allocateMessage
+//------------------------------------------------------------------------
+IPtr<IMessage> RTProcessor::allocateMessage()
+{
+  return owned(AudioEffect::allocateMessage());
+}
+
+//------------------------------------------------------------------------
+// RTProcessor::sendMessage
+//------------------------------------------------------------------------
+tresult RTProcessor::sendMessage(IPtr<IMessage> iMessage)
+{
+  return AudioEffect::sendMessage(iMessage);
 }
 
 

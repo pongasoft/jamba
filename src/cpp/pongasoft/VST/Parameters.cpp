@@ -146,7 +146,7 @@ std::shared_ptr<RawVstParamDef> Parameters::getRawVstParamDef(ParamID iParamID) 
 //------------------------------------------------------------------------
 // Parameters::getSerParamDef
 //------------------------------------------------------------------------
-std::shared_ptr<IParamDef> Parameters::getSerParamDef(ParamID iParamID) const
+std::shared_ptr<ISerParamDef> Parameters::getSerParamDef(ParamID iParamID) const
 {
   auto iter = fSerParams.find(iParamID);
   if(iter == fSerParams.cend())
@@ -158,22 +158,24 @@ std::shared_ptr<IParamDef> Parameters::getSerParamDef(ParamID iParamID) const
 //------------------------------------------------------------------------
 // Parameters::addVstParamDef
 //------------------------------------------------------------------------
-void Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
+tresult Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
 {
   ParamID paramID = iParamDef->fParamID;
 
   if(fVstParams.find(paramID) != fVstParams.cend())
   {
-    ABORT_F("Parameter [%d] already registered", paramID);
+    DLOG_F(ERROR, "Parameter [%d] already registered", paramID);
+    return kInvalidArgument;
   }
 
   if(fSerParams.find(paramID) != fSerParams.cend())
   {
-    ABORT_F("Parameter [%d] already registered", paramID);
+    DLOG_F(ERROR, "Parameter [%d] already registered", paramID);
+    return kInvalidArgument;
   }
 
 #ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "Parameters::addVstParamDef{%d, \"%s\", \"%s\", %f, %d, %d, %d, \"%s\", %d%s%s}",
+  DLOG_F(INFO, "Parameters::addVstParamDef{%d, \"%s\", \"%s\", %f, %d, %d, %d, \"%s\", %d, %s%s}",
          paramID,
          String(iParamDef->fTitle).text8(),
          String(iParamDef->fUnits).text8(),
@@ -183,7 +185,7 @@ void Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
          iParamDef->fUnitID,
          String(iParamDef->fShortTitle).text8(),
          iParamDef->fPrecision,
-         iParamDef->fUIOnly ? ", uiOnly" : "",
+         iParamDef->fOwner == IParamDef::Owner::kGUI ? "guiOwned" : "rtOwned",
          iParamDef->fTransient ? ", transient" : "");
 #endif
 
@@ -193,39 +195,49 @@ void Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
 
   if(!iParamDef->fTransient)
   {
-    if(iParamDef->fUIOnly)
+    if(iParamDef->fOwner == IParamDef::Owner::kGUI)
       fGUISaveStateOrder.fOrder.emplace_back(paramID);
     else
       fRTSaveStateOrder.fOrder.emplace_back(paramID);
   }
+
+  return kResultOk;
 }
 
 //------------------------------------------------------------------------
 // Parameters::addSerParamDef
 //------------------------------------------------------------------------
-void Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
+tresult Parameters::addSerParamDef(std::shared_ptr<ISerParamDef> iParamDef)
 {
   ParamID paramID = iParamDef->fParamID;
   
   if(fVstParams.find(paramID) != fVstParams.cend())
   {
-    ABORT_F("Parameter [%d] already registered", paramID);
+    DLOG_F(ERROR, "Parameter [%d] already registered", paramID);
+    return kInvalidArgument;
   }
 
   if(fSerParams.find(paramID) != fSerParams.cend())
   {
-    ABORT_F("Parameter [%d] already registered", paramID);
+    DLOG_F(ERROR, "Parameter [%d] already registered", paramID);
+    return kInvalidArgument;
   }
 
 #ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "Parameters::addSerParamDef{%d, \"%s\", %s%s}",
+  DLOG_F(INFO, "Parameters::addSerParamDef{%d, \"%s\", %s%s%s}",
          paramID,
          String(iParamDef->fTitle).text8(),
-         iParamDef->fUIOnly ? ", uiOnly" : "",
-         iParamDef->fTransient ? ", transient" : "");
+         iParamDef->fOwner == IParamDef::Owner::kGUI ? "guiOwned" : "rtOwned",
+         iParamDef->fTransient ? ", transient" : "",
+         iParamDef->fShared ? ", shared" : "");
 #endif
 
   fSerParams[paramID] = iParamDef;
+
+  if(iParamDef->fOwner == IParamDef::Owner::kGUI)
+    fGUISaveStateOrder.fOrder.emplace_back(paramID);
+
+  return kResultOk;
 }
 
 //------------------------------------------------------------------------
@@ -262,11 +274,11 @@ tresult Parameters::setRTSaveStateOrder(NormalizedState::SaveOrder const &iSaveO
                id);
       }
 
-      if(param->fUIOnly)
+      if(param->fOwner == IParamDef::Owner::kGUI)
       {
         paramOk = kResultFalse;
         DLOG_F(ERROR,
-               "Param [%d] cannot be used for RTSaveStateOrder as it is defined UIOnly",
+               "Param [%d] cannot be used for RTSaveStateOrder as it is owned by the GUI",
                id);
 
       }
@@ -283,7 +295,7 @@ tresult Parameters::setRTSaveStateOrder(NormalizedState::SaveOrder const &iSaveO
   for(auto p : fVstParams)
   {
     auto param = p.second;
-    if(!param->fUIOnly && !param->fTransient)
+    if(param->fOwner == IParamDef::Owner::kRT && !param->fTransient)
     {
       if(std::find(newIds.cbegin(), newIds.cend(), p.first) == newIds.cend())
       {
@@ -341,11 +353,11 @@ tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSave
                id);
       }
 
-      if(!param->fUIOnly)
+      if(param->fOwner == IParamDef::Owner::kRT)
       {
         paramOk = kResultFalse;
         DLOG_F(ERROR,
-               "Param [%d] cannot be used for GUISaveStateOrder as it is not defined UIOnly",
+               "Param [%d] cannot be used for GUISaveStateOrder as it is owned by RT",
                id);
 
       }
@@ -363,7 +375,7 @@ tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSave
   for(auto &&p : allParams)
   {
     auto param = p.second;
-    if(param->fUIOnly && !param->fTransient)
+    if(param->fOwner == IParamDef::Owner::kGUI && !param->fTransient)
     {
       if(std::find(newIds.cbegin(), newIds.cend(), p.first) == newIds.cend())
       {
