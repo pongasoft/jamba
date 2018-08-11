@@ -138,6 +138,14 @@ public:
   }
 
   /**
+   * @return the current value of the parameter as a normalized value
+   */
+  ParamValue getNormalizedValue() const
+  {
+    return fRawParameter->getValue();
+  }
+
+  /**
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
@@ -226,6 +234,11 @@ public:
   inline T getValue() const { return fPtr->getValue(); }
 
   /**
+   * @return the current value of the parameter as a normalized value
+   */
+  inline ParamValue getNormalizedValue() const { return fPtr->getNormalizedValue(); }
+
+  /**
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
@@ -258,6 +271,12 @@ public:
 
   // allow to write param = 3 instead of param.setValue(3)
   inline void operator=(T const &iValue) { fPtr->setValue(iValue); }
+
+  // allow to write param1 == param2
+  inline bool operator==(const GUIVstParam<T> &rhs) const { return fPtr->getNormalizedValue() == rhs.fPtr->getNormalizedValue(); }
+
+  // allow to write param1 != param2
+  inline bool operator!=(const GUIVstParam &rhs) const { return fPtr->getNormalizedValue() != rhs.fPtr->getNormalizedValue(); }
 
 private:
   std::unique_ptr<GUIVstParameter<T>> fPtr;

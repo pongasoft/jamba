@@ -262,9 +262,20 @@ public:
   // allow to write param = 3 instead of param.setValue(3)
   inline void operator=(ParamValue const &iValue) { fPtr->setValue(iValue); }
 
+  // allow to write param1 == param2
+  inline bool operator==(const GUIRawVstParam &rhs) const { return fPtr->getValue() == rhs.fPtr->getValue(); }
+
+  // allow to write param1 != param2
+  inline bool operator!=(const GUIRawVstParam &rhs) const { return fPtr->getValue() != rhs.fPtr->getValue(); }
+
 private:
   std::unique_ptr<GUIRawVstParameter> fPtr;
 };
+
+//------------------------------------------------------------------------
+// shortcut notations
+//------------------------------------------------------------------------
+using GUIRawVstParamEditor = std::unique_ptr<GUIRawVstParameter::Editor>;
 
 }
 }
