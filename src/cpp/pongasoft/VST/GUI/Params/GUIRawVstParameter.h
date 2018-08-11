@@ -193,6 +193,78 @@ private:
   VstParametersSPtr fVstParameters{};
 };
 
+//-------------------------------------------------------------------------------
+// GUIRawVstParam - wrapper to make writing the code much simpler and natural
+//-------------------------------------------------------------------------------
+/**
+ * This is the main class that the plugin should use as it exposes only the necessary methods of the param
+ * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
+ * behaves like T in many ways). */
+class GUIRawVstParam
+{
+public:
+  GUIRawVstParam() : fPtr{nullptr} {}
+
+  // move constructor
+  explicit GUIRawVstParam(std::unique_ptr<GUIRawVstParameter> &&iPtr) : fPtr{std::move(iPtr)} {}
+
+  // delete copy constructor
+  GUIRawVstParam(GUIRawVstParam &iPtr) = delete;
+
+  // move copy constructor
+  GUIRawVstParam(GUIRawVstParam &&iPtr) noexcept : fPtr{std::move(iPtr.fPtr)} {}
+
+  // move assignment constructor
+  GUIRawVstParam &operator=(GUIRawVstParam &&iPtr) noexcept { fPtr = std::move(iPtr.fPtr); return *this; }
+
+  // exists
+  inline bool exists() const { return (bool) fPtr; }
+
+  // getParamID
+  inline ParamID getParamID() const { return fPtr->getParamID(); }
+
+  /**
+   * @return the current value of the parameter as a T (using the Denormalizer)
+   */
+  inline ParamValue getValue() const { return fPtr->getValue(); }
+
+  /**
+   * Sets the value of this parameter. Note that this is "transactional" and if you want to make
+   * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
+   */
+  tresult setValue(ParamValue const &iValue) { return fPtr->setValue(iValue); }
+
+  /**
+   * Populates the oString with a string representation of this parameter
+   */
+  void toString(String128 oString) { fPtr->toString(oString); }
+
+  /**
+   * Returns a string representation of this parameter
+   */
+  String toString() { return fPtr->toString(); }
+
+  /**
+   * @return an editor to modify the parameter (see Editor)
+   */
+  std::unique_ptr<GUIRawVstParameter::Editor> edit() { return fPtr->edit(); }
+
+  /**
+   * Shortcut to create an editor and set the value to it
+   *
+   * @return an editor to modify the parameter (see Editor)
+   */
+  std::unique_ptr<GUIRawVstParameter::Editor> edit(ParamValue const &iValue) { return fPtr->edit(iValue); }
+
+  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
+  inline operator ParamValue() const { return fPtr->getValue(); } // NOLINT
+
+  // allow to write param = 3 instead of param.setValue(3)
+  inline void operator=(ParamValue const &iValue) { fPtr->setValue(iValue); }
+
+private:
+  std::unique_ptr<GUIRawVstParameter> fPtr;
+};
 
 }
 }

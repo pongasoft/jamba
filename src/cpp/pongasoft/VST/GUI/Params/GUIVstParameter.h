@@ -67,7 +67,7 @@ public:
     /**
      * Change the value of the parameter. Note that nothing happens if you have called commit or rollback already
      */
-    inline tresult setValue(ParamType iValue)
+    inline tresult setValue(ParamType const &iValue)
     {
       return fRawEditor->setValue(fVstParamDef->normalize(iValue));
     }
@@ -86,7 +86,7 @@ public:
      * Call when you are done with the modifications.
      * This has no effect if rollback() has already been called
      */
-    inline tresult commit(ParamType iValue)
+    inline tresult commit(ParamType const &iValue)
     {
       setValue(iValue);
       return commit();
@@ -141,7 +141,7 @@ public:
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
-  tresult setValue(ParamType iValue)
+  tresult setValue(ParamType const &iValue)
   {
     return fRawParameter->setValue(fVstParamDef->normalize(iValue));
   }
@@ -188,16 +188,89 @@ private:
 };
 
 //------------------------------------------------------------------------
+// GUIVstParam - wrapper to make writing the code much simpler and natural
+//------------------------------------------------------------------------
+/**
+ * This is the main class that the plugin should use as it exposes only the necessary methods of the param
+ * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
+ * behaves like T in many ways).
+ *
+ * @tparam T the underlying type of the param */
+template<typename T>
+class GUIVstParam
+{
+public:
+  GUIVstParam() : fPtr{nullptr} {}
+
+  // move constructor
+  explicit GUIVstParam(std::unique_ptr<GUIVstParameter<T>> &&iPtr) : fPtr{std::move(iPtr)} {}
+
+  // delete copy constructor
+  GUIVstParam(GUIVstParam<T> &iPtr) = delete;
+
+  // move copy constructor
+  GUIVstParam(GUIVstParam<T> &&iPtr) noexcept : fPtr{std::move(iPtr.fPtr)} {}
+
+  // move assignment constructor
+  GUIVstParam<T> &operator=(GUIVstParam<T> &&iPtr) { fPtr = std::move(iPtr.fPtr); return *this; }
+
+  // exists
+  inline bool exists() const { return (bool) fPtr; }
+
+  // getParamID
+  inline ParamID getParamID() const { return fPtr->getParamID(); }
+
+  /**
+   * @return the current value of the parameter as a T (using the Denormalizer)
+   */
+  inline T getValue() const { return fPtr->getValue(); }
+
+  /**
+   * Sets the value of this parameter. Note that this is "transactional" and if you want to make
+   * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
+   */
+  tresult setValue(T const &iValue) { return fPtr->setValue(iValue); }
+
+  /**
+   * Populates the oString with a string representation of this parameter
+   */
+  void toString(String128 oString) { fPtr->toString(oString); }
+
+  /**
+   * Returns a string representation of this parameter
+   */
+  String toString() { return fPtr->toString(); }
+
+  /**
+   * @return an editor to modify the parameter (see Editor)
+   */
+  std::unique_ptr<typename GUIVstParameter<T>::Editor> edit() { return fPtr->edit(); }
+
+  /**
+   * Shortcut to create an editor and set the value to it
+   *
+   * @return an editor to modify the parameter (see Editor)
+   */
+  std::unique_ptr<typename GUIVstParameter<T>::Editor> edit(T const &iValue) { return fPtr->edit(iValue); }
+
+  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
+  inline operator T() const { return fPtr->getValue(); } // NOLINT
+
+  // allow to write param = 3 instead of param.setValue(3)
+  inline void operator=(T const &iValue) { fPtr->setValue(iValue); }
+
+private:
+  std::unique_ptr<GUIVstParameter<T>> fPtr;
+};
+
+//------------------------------------------------------------------------
 // shortcut notations
 //------------------------------------------------------------------------
 template<typename T>
-using GUIVstParam = std::unique_ptr<GUIVstParameter<T>>;
-
-template<typename T>
 using GUIVstParamEditor = std::unique_ptr<typename GUIVstParameter<T>::Editor>;
 
-using GUIVstBooleanParam = std::unique_ptr<GUIVstParameter<bool>>;
-using GUIVstPercentParam = std::unique_ptr<GUIVstParameter<Percent>>;
+using GUIVstBooleanParam = GUIVstParam<bool>;
+using GUIVstPercentParam = GUIVstParam<Percent>;
 
 }
 }

@@ -48,8 +48,8 @@ public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  std::unique_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID,
-                                                          Parameters::IChangeListener *iChangeListener = nullptr);
+  GUIRawVstParam registerRawVstParam(ParamID iParamID,
+                                     Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
    * Register a vst parameter simply given its id
@@ -102,6 +102,13 @@ protected:
     DCHECK_F(fGUIState != nullptr);
   }
 
+  /**
+   * Registers a raw parameter (no conversion)
+   */
+  std::unique_ptr<GUIRawVstParameter> registerRawVstParameter(ParamID iParamID,
+                                                              Parameters::IChangeListener *iChangeListener = nullptr);
+
+
 private:
   // the gui state
   GUIState *fGUIState;
@@ -118,12 +125,12 @@ template<typename T>
 GUIVstParam<T> GUIParamCxMgr::registerVstParam(VstParam<T> iParamDef,
                                                Parameters::IChangeListener *iChangeListener)
 {
-  auto param = registerRawVstParam(iParamDef->fParamID, iChangeListener);
+  auto param = registerRawVstParameter(iParamDef->fParamID, iChangeListener);
 
   if(param)
-    return std::make_unique<GUIVstParameter<T>>(std::move(param), iParamDef);
+    return GUIVstParam<T>{std::make_unique<GUIVstParameter<T>>(std::move(param), iParamDef)};
   else
-    return nullptr;
+    return GUIVstParam<T>{};
 }
 
 //------------------------------------------------------------------------
@@ -133,12 +140,12 @@ template<typename T>
 GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
                                                Parameters::IChangeListener *iChangeListener)
 {
-  auto param = registerRawVstParam(iParamID, iChangeListener);
+  auto param = registerRawVstParameter(iParamID, iChangeListener);
 
   if(!param)
   {
     DLOG_F(WARNING, "vst param [%d] not found", iParamID);
-    return nullptr;
+    return GUIVstParam<T>{};
   }
 
   auto rawParamDef = fGUIState->getRawVstParamDef(iParamID);
@@ -152,13 +159,12 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
     else
       unregisterParam(iParamID);
 
-    return std::make_unique<GUIVstParameter<T>>(std::move(param), paramDef);
+    return GUIVstParam<T>{std::make_unique<GUIVstParameter<T>>(std::move(param), paramDef)};
   }
 
   DLOG_F(WARNING, "vst param [%d] is not of the requested type", iParamID);
   unregisterParam(iParamID);
-  return nullptr;
-
+  return GUIVstParam<T>{};
 }
 
 //------------------------------------------------------------------------
@@ -192,7 +198,6 @@ GUIJmbParam<T> GUIParamCxMgr::registerJmbParam(ParamID iParamID,
 
   return res;
 }
-
 
 }
 }

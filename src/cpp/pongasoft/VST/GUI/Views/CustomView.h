@@ -278,7 +278,8 @@ class PluginCustomViewAdapter : public CustomViewAdapter<TView>
 {
 public:
   // Constructor
-  explicit PluginCustomViewAdapter(const CRect &iSize) : CustomViewAdapter<TView>(iSize) {}
+  template<typename... Args>
+  explicit PluginCustomViewAdapter(const CRect &iSize, Args... args) : CustomViewAdapter<TView>(iSize, args...) {}
 
 protected:
   // initState - overridden to extract fParams

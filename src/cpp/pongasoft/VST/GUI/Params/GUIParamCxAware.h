@@ -33,7 +33,7 @@ public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  std::shared_ptr<GUIRawVstParameter> registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
+  GUIRawVstParam registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   // shortcut for BooleanParameter
   GUIVstParam<bool> registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
@@ -51,7 +51,7 @@ public:
     if(fParamCxMgr)
       return fParamCxMgr->registerVstParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
     else
-      return nullptr;
+      return GUIVstParam<T>{};
   }
 
   /**
@@ -64,7 +64,7 @@ public:
     if(fParamCxMgr)
       return fParamCxMgr->registerVstParam(iParamDef, iSubscribeToChanges ? this : nullptr);
     else
-      return nullptr;
+      return GUIVstParam<T>{};
   }
 
   /**

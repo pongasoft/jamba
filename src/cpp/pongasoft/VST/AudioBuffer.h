@@ -124,6 +124,12 @@ public:
     return isSilent();
   }
 
+  // getSilenceFlags
+  inline uint64 getSilenceFlags() const { return fBuffer.silenceFlags; }
+
+  // setSilenceFlags
+  inline void setSilenceFlags(uint64 iFlags) const { fBuffer.silenceFlags = iFlags; }
+
   /**
    * Sets a single channel silence flag
    */
@@ -147,18 +153,12 @@ public:
   /**
    * @return the left channel (using the fact that the left channel is 0)
    */
-  inline Channel getLeftChannel()
-  {
-    return getAudioChannel(DEFAULT_LEFT_CHANNEL);
-  }
+  inline Channel getLeftChannel() { return getAudioChannel(DEFAULT_LEFT_CHANNEL); }
 
   /**
    * @return the right channel (using the fact that the left channel is 1)
    */
-  inline Channel getRightChannel()
-  {
-    return getAudioChannel(DEFAULT_RIGHT_CHANNEL);
-  }
+  inline Channel getRightChannel() { return getAudioChannel(DEFAULT_RIGHT_CHANNEL); }
 
   // returns the underlying buffer
   inline SampleType **getBuffer() const;
@@ -166,20 +166,17 @@ public:
   /**
    * @return number of channels (2 for stereo) of the underlying buffer
    */
-  inline int32 getNumChannels() const
-  { return fBuffer.numChannels; }
+  inline int32 getNumChannels() const { return fBuffer.numChannels; }
 
   /**
    * @return number of samples in the buffer
    */
-  inline int32 getNumSamples() const
-  { return fNumSamples; }
+  inline int32 getNumSamples() const { return fNumSamples; }
 
   /**
    * Copy the content of THIS buffer to the provided buffer (up to num samples)
    */
-  inline tresult copyTo(class_type &toBuffer) const
-  { return toBuffer.copyFrom(*this); };
+  inline tresult copyTo(class_type &toBuffer) const { return toBuffer.copyFrom(*this); };
 
   /**
    * Copy the content of the provided buffer to THIS buffer (up to num samples)
@@ -242,12 +239,10 @@ private:
 };
 
 template<>
-inline Sample32 **AudioBuffers<Sample32>::getBuffer() const
-{ return fBuffer.channelBuffers32; }
+inline Sample32 **AudioBuffers<Sample32>::getBuffer() const { return fBuffer.channelBuffers32; }
 
 template<>
-inline Sample64 **AudioBuffers<Sample64>::getBuffer() const
-{ return fBuffer.channelBuffers64; }
+inline Sample64 **AudioBuffers<Sample64>::getBuffer() const { return fBuffer.channelBuffers64; }
 
 typedef AudioBuffers<Sample32> AudioBuffers32;
 typedef AudioBuffers<Sample64> AudioBuffers64;

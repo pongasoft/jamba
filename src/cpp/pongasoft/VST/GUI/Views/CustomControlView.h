@@ -105,12 +105,12 @@ template<typename T>
 T TCustomControlView<T>::getControlValue() const
 {
 #if EDITOR_MODE
-  if(fControlParameter)
-    return fControlParameter->getValue();
+  if(fControlParameter.exists())
+    return fControlParameter;
   else
     return fControlValue;
 #else
-  return fControlParameter->getValue();
+  return fControlParameter;
 #endif
 }
 
@@ -122,10 +122,10 @@ void TCustomControlView<T>::setControlValue(T const &iControlValue)
 {
 #if EDITOR_MODE
   fControlValue = iControlValue;
-  if(fControlParameter)
-    fControlParameter->setValue(fControlValue);
+  if(fControlParameter.exists())
+    fControlParameter.setValue(fControlValue);
 #else
-  fControlParameter->setValue(iControlValue);
+  fControlParameter.setValue(iControlValue);
 #endif
 }
 
@@ -144,8 +144,8 @@ void TCustomControlView<T>::registerParameters()
   fControlParameter = registerVstParam<T>(paramID);
 
 #if EDITOR_MODE
-  if(fControlParameter)
-    fControlValue = fControlParameter->getValue();
+  if(fControlParameter.exists())
+    fControlValue = fControlParameter;
 #else
   if(!fControlParameter)
     ABORT_F("Could not find parameter for control tag [%d]", paramID);

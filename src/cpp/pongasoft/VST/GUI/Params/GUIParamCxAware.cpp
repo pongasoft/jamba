@@ -25,10 +25,10 @@ namespace Params {
 ///////////////////////////////////////////
 // GUIParamCxAware::registerRawVstParam
 ///////////////////////////////////////////
-std::shared_ptr<GUIRawVstParameter> GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges)
+GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges)
 {
   if(!fParamCxMgr)
-    return nullptr;
+    return GUIRawVstParam{};
 
   return fParamCxMgr->registerRawVstParam(iParamID, iSubscribeToChanges ? this : nullptr);
 }
