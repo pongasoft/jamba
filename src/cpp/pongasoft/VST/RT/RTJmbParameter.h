@@ -70,15 +70,34 @@ public:
 
   explicit RTJmbParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
     IRTJmbParameter(iParamDef),
-    fJmbParamDef{std::move(iParamDef)}
-  {}
+    fJmbParamDef{std::move(iParamDef)},
+    fValue{fJmbParamDef->fDefaultValue}
+    {}
+
+  // getValue
+  inline ParamType const &getValue() const { return fValue; }
+
+  // getValue (non const / direct access)
+  inline ParamType &getValue() { return fValue; }
+
+  // setValue
+  inline void setValue(ParamType const &iValue) { fValue = iValue; }
 
   /**
    * This is a call that enqueues the value to be delivered to the GUI. Note that this call returns right away. The
    * packaging and delivery will happen in a GUI thread. This method is called by RT thread.
-   * @param iValue
    */
-  inline void enqueueUpdate(T const &iValue) { fOutboundQueue.push(iValue); }
+  inline void enqueueUpdate(ParamType const &iValue)
+  {
+    setValue(iValue);
+    enqueueUpdate();
+  }
+
+  /**
+   * This is a call that enqueues the value to be delivered to the GUI. Note that this call returns right away. The
+   * packaging and delivery will happen in a GUI thread. This method is called by RT thread.
+   */
+  inline void enqueueUpdate() { fOutboundQueue.push(fValue); }
 
   // hasOutboundUpdate
   bool hasOutboundUpdate() const override { return !fOutboundQueue.isEmpty(); }
@@ -88,6 +107,7 @@ public:
 
 protected:
   std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
+  ParamType fValue;
 
 private:
   Concurrent::WithSpinLock::SingleElementQueue<T> fOutboundQueue{};
@@ -126,8 +146,32 @@ public:
   // getParamID
   inline ParamID getParamID() const { return fPtr->getParamID(); }
 
-  // enqueUpdate
+  // getValue
+  inline T const &getValue() const { return fPtr->getValue(); }
+
+  // getValue (non const / direct access)
+  inline T &getValue() { return fPtr->getValue(); }
+
+  // setValue
+  inline void setValue(T const &iValue) { fPtr->setValue(); }
+
+  // enqueueUpdate
   inline void enqueueUpdate(T const &iValue) { fPtr->enqueueUpdate(iValue); }
+
+  // enqueUpdate
+  inline void enqueueUpdate() { fPtr->enqueueUpdate(); }
+
+  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
+  inline operator T const &() const { return fPtr->getValue(); } // NOLINT
+
+  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
+  inline operator T &() { return fPtr->getValue(); } // NOLINT
+
+  // allow writing param->xxx to access the underlying type directly (if not a primitive)
+  inline T const *operator->() const { return &fPtr->getValue(); }
+
+  // allow writing param->xxx to access the underlying type directly (if not a primitive)
+  inline T *operator->() { return &fPtr->getValue(); }
 
 private:
   RTJmbParameter<T> *fPtr;
