@@ -78,15 +78,36 @@ inline static std::unique_ptr<StaticParamSerializer<ParamSerializer>> createPara
  * IBStreamHelper - Helper functions
  */
 namespace IBStreamHelper {
-  // readDouble - contrary to IBStreamer.readDouble, this method does NOT modify oValue if cannot be read
-  inline tresult readDouble(IBStreamer &iStreamer, double &oValue)
-  {
-    double value;
-    if(!iStreamer.readDouble(value))
-      return kResultFalse;
-    oValue = value;
-    return kResultOk;
-  }
+
+// readDouble - contrary to IBStreamer.readDouble, this method does NOT modify oValue if cannot be read
+inline tresult readDouble(IBStreamer &iStreamer, double &oValue)
+{
+  double value;
+  if(!iStreamer.readDouble(value))
+    return kResultFalse;
+  oValue = value;
+  return kResultOk;
+}
+
+// readInt64 - contrary to IBStreamer.readInt64, this method does NOT modify oValue if cannot be read
+inline tresult readInt64(IBStreamer &iStreamer, int64 &oValue)
+{
+  int64 value;
+  if(!iStreamer.readInt64(value))
+    return kResultFalse;
+  oValue = value;
+  return kResultOk;
+}
+
+// readInt32 - contrary to IBStreamer.readInt32, this method does NOT modify oValue if cannot be read
+inline tresult readInt32(IBStreamer &iStreamer, int32 &oValue)
+{
+  int32 value;
+  if(!iStreamer.readInt32(value))
+    return kResultFalse;
+  oValue = value;
+  return kResultOk;
+}
 
 // readBool - contrary to IBStreamer.readBool, this method does NOT modify oValue if cannot be read
 inline tresult readBool(IBStreamer &iStreamer, bool &oValue)
