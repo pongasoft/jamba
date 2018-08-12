@@ -120,7 +120,40 @@ public:
    *
    * @return true if the param was present, false otherwise
    */
-  bool unregisterParam(ParamID iParamID) { return fParamCxMgr->unregisterParam(iParamID); }
+  bool unregisterParam(ParamID iParamID);
+
+  /**
+   * Removes the registration of the provided param (closing the connection/stopping to listen)
+   *
+   * @return an empty param so that you can write param = unregisterParam(param)
+   */
+  GUIRawVstParam unregisterParam(GUIRawVstParam const &iParam);
+
+  /**
+   * Removes the registration of the provided param (closing the connection/stopping to listen)
+   *
+   * @return an empty param so that you can write param = unregisterParam(param)
+   */
+  template<typename T>
+  GUIVstParam<T> unregisterParam(GUIVstParam<T> const &iParam)
+  {
+    if(iParam.exists())
+      fParamCxMgr->unregisterParam(iParam.getParamID());
+    return GUIVstParam<T>{};
+  }
+
+  /**
+ * Removes the registration of the provided param (closing the connection/stopping to listen)
+ *
+ * @return an empty param so that you can write param = unregisterParam(param)
+ */
+  template<typename T>
+  GUIJmbParam<T> unregisterParam(GUIJmbParam<T> const &iParam)
+  {
+    if(iParam.exists())
+      fParamCxMgr->unregisterParam(iParam.getParamID());
+    return GUIJmbParam<T>{};
+  }
 
   /**
    * Callback when a parameter changes. Empty default implementation

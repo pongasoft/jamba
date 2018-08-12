@@ -235,6 +235,11 @@ public:
   tresult setValue(ParamValue const &iValue) { return fPtr->setValue(iValue); }
 
   /**
+   * Shortcut to copy the value from another param to this one.
+   */
+  tresult copyValueFrom(GUIRawVstParam const &iParam) { return setValue(iParam.getValue()); }
+
+  /**
    * Populates the oString with a string representation of this parameter
    */
   void toString(String128 oString) { fPtr->toString(oString); }

@@ -155,6 +155,15 @@ public:
   }
 
   /**
+   * Sets the value of this parameter as a normalized value. Note that this is "transactional" and if you want to make
+   * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
+   */
+  tresult setNormalizedValue(ParamValue const &iNormalizedValue)
+  {
+    return fRawParameter->setValue(iNormalizedValue);
+  }
+
+  /**
    * Populates the oString with a string representation of this parameter
    */
   void toString(String128 oString)
@@ -243,6 +252,18 @@ public:
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
   tresult setValue(T const &iValue) { return fPtr->setValue(iValue); }
+
+  /**
+   * Sets the value of this parameter as a normalized value. Note that this is "transactional" and if you want to make
+   * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
+   */
+  tresult setNormalizedValue(ParamValue const &iNormalizedValue) { return fPtr->setNormalizedValue(iNormalizedValue); }
+
+  /**
+   * Shortcut to copy the value from another param to this one. Implementation note: uses normalized value as this
+   * is faster and avoid math precision loss in normalize/denormalize
+   */
+  tresult copyValueFrom(GUIVstParam<T> const &iParam) { return setNormalizedValue(iParam.getNormalizedValue()); }
 
   /**
    * Populates the oString with a string representation of this parameter
