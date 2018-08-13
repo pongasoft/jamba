@@ -23,6 +23,7 @@
 #include <vstgui4/vstgui/lib/cframe.h>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include <pongasoft/VST/GUI/GUIState.h>
+#include <pongasoft/VST/MessageProducer.h>
 #include "pongasoft/VST/MessageHandler.h"
 
 namespace pongasoft {
@@ -36,7 +37,7 @@ using namespace Params;
  * (state loading/saving in a thread safe manner, registering VST parameters...) so
  * that the actual controller code deals mostly with business logic.
  */
-class GUIController : public EditController
+class GUIController : public EditController, public IMessageProducer
 {
 public:
   // Constructor
@@ -71,6 +72,13 @@ protected:
 
   /** Called to handle a message (coming from RT) */
   tresult PLUGIN_API notify(IMessage *message) SMTG_OVERRIDE;
+
+public:
+  // allocateMessage - API adapter
+  IPtr<IMessage> allocateMessage() override;
+
+  // sendMessage - API adapter
+  tresult sendMessage(IPtr<IMessage> iMessage) override;
 
 protected:
   // the name of the xml file (relative) which contains the ui description

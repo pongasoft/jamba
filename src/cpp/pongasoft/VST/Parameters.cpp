@@ -234,7 +234,7 @@ tresult Parameters::addJmbParamDef(std::shared_ptr<IJmbParamDef> iParamDef)
 
   fJmbParams[paramID] = iParamDef;
 
-  if(iParamDef->fOwner == IParamDef::Owner::kGUI)
+  if(!iParamDef->fTransient && iParamDef->fOwner == IParamDef::Owner::kGUI)
     fGUISaveStateOrder.fOrder.emplace_back(paramID);
 
   return kResultOk;

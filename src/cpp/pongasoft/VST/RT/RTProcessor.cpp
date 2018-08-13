@@ -70,6 +70,19 @@ tresult RTProcessor::setActive(TBool iState)
 }
 
 //------------------------------------------------------------------------
+// RTProcessor::notify
+//------------------------------------------------------------------------
+tresult RTProcessor::notify(IMessage *message)
+{
+  if(!message)
+    return kInvalidArgument;
+
+  Message m{message};
+
+  return getRTState()->handleMessage(m);
+}
+
+//------------------------------------------------------------------------
 // RTProcessor::process
 //------------------------------------------------------------------------
 tresult RTProcessor::process(ProcessData &data)

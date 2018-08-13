@@ -54,7 +54,7 @@ public:
   CLASS_METHODS_NOCOPY(StringTextEditView, CustomViewAdapter<CTextEdit>)
 
 protected:
-  // the underlying ser parameter of type UTF8String
+  // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fText{};
 
 public:

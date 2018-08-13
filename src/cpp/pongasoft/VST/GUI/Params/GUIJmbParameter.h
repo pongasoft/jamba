@@ -23,6 +23,7 @@
 #include <pongasoft/VST/Parameters.h>
 #include <pongasoft/VST/Messaging.h>
 #include <pongasoft/VST/MessageHandler.h>
+#include <pongasoft/VST/MessageProducer.h>
 #include "GUIParamCx.h"
 
 namespace pongasoft {
@@ -63,8 +64,15 @@ public:
   // handleMessage
   tresult handleMessage(Message const &iMessage) override { return readFromMessage(iMessage); }
 
+  // broadcast
+  tresult broadcast() const;
+
+  // setMessageProducer
+  void setMessageProducer(IMessageProducer *iMessageProducer) { fMessageProducer = iMessageProducer; }
+
 protected:
   std::shared_ptr<IJmbParamDef> fParamDef;
+  IMessageProducer *fMessageProducer{};
 };
 
 /**
@@ -194,7 +202,7 @@ public:
   inline bool update(T const &iNewValue) { return fPtr->update(iNewValue); }
 
   /**
-   * The difference with update is that it does not check for equality (case when SerParamType is not comparable)
+   * The difference with update is that it does not check for equality (case when T is not comparable)
    */
   inline void setValue(T const &iNewValue) { fPtr->setValue(iNewValue); }
 
@@ -206,6 +214,16 @@ public:
 
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
   inline T const *operator->() const { return &fPtr->getValue(); }
+
+  // broadcast
+  inline tresult broadcast() const { return fPtr->broadcast(); }
+
+  // broadcast
+  inline void broadcast(T const &iValue)
+  {
+    setValue(iValue);
+    broadcast();
+  }
 
   // connect
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }

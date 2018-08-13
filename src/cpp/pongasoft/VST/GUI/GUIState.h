@@ -22,6 +22,7 @@
 #include <pongasoft/VST/GUI/Params/VstParameters.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
+#include <pongasoft/VST/MessageProducer.h>
 
 namespace pongasoft {
 namespace VST {
@@ -33,7 +34,7 @@ namespace Params {
 class GUIParamCxMgr;
 }
 
-class GUIState
+class GUIState : public IMessageProducer
 {
 public:
   explicit GUIState(Parameters const &iPluginParameters) :
@@ -42,7 +43,7 @@ public:
 
   /**
    * Called by the GUIController. */
-  virtual tresult init(VstParametersSPtr iVstParameters);
+  virtual tresult init(VstParametersSPtr iVstParameters, IMessageProducer *iMessageProducer);
 
   // getPluginParameters
   Parameters const &getPluginParameters() const { return fPluginParameters; }
@@ -110,7 +111,7 @@ public:
   std::unique_ptr<GUIParamCxMgr> createParamCxMgr();
 
   /**
-   * Handle an incoming message => will forward to JmbParam marked enabledForMessaging
+   * Handle an incoming message => will forward to JmbParam marked shared by rtOwner
    */
   tresult handleMessage(Message const &iMessage) { return fMessageHandler.handleMessage(iMessage); }
 
@@ -118,20 +119,30 @@ protected:
   // the parameters
   Parameters const &fPluginParameters;
 
-  // setParamNormalized
-  tresult setParamNormalized(NormalizedState const *iNormalizedState);
-
-protected:
+  // vst parameters
   VstParametersSPtr fVstParameters{};
 
-  // handles messages for
-  MessageHandler fMessageHandler;
+  // message producer (to send messages)
+  IMessageProducer *fMessageProducer{};
+
+  // handles messages (receive messages)
+  MessageHandler fMessageHandler{};
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
   std::map<ParamID, std::unique_ptr<IGUIJmbParameter>> fJmbParams{};
 
+protected:
+  // setParamNormalized
+  tresult setParamNormalized(NormalizedState const *iNormalizedState);
+
   // add serializable parameter to the structures
   void addJmbParam(std::unique_ptr<IGUIJmbParameter> iParameter);
+
+  // allocateMessage
+  IPtr<IMessage> allocateMessage() override;
+
+  // sendMessage
+  tresult sendMessage(IPtr<IMessage> iMessage) override;
 };
 
 /**
@@ -164,16 +175,22 @@ GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
   auto rawPtr = new GUIJmbParameter<T>(iParamDef);
   std::unique_ptr<IGUIJmbParameter> guiParam{rawPtr};
   addJmbParam(std::move(guiParam));
-  if(iParamDef->fShared)
+  if(iParamDef->fShared && iParamDef->fSerializer)
   {
-    if(iParamDef->fOwner == IJmbParamDef::Owner::kRT)
+    switch(iParamDef->fOwner)
     {
-      if(iParamDef->fSerializer)
+      case IJmbParamDef::Owner::kRT:
         fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);
-    }
-    else
-    {
-      DLOG_F(WARNING, "NOT implemented: Currently GUI owned parameter cannot be shared");
+        break;
+
+      case IJmbParamDef::Owner::kGUI:
+        rawPtr->setMessageProducer(this);
+        break;
+
+      default:
+        // not reached
+        DLOG_F(ERROR, "not reached");
+        break;
     }
   }
   return rawPtr;

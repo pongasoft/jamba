@@ -203,13 +203,38 @@ public:
 };
 
 /**
+ * This class can be used to get access to the plugin GUI state and parameters
+ *
+ * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+ */
+template<typename TGUIPluginState>
+class PluginAccessor
+{
+public:
+  // initState
+  void initState(GUIState *iGUIState)
+  {
+    fState = dynamic_cast<TGUIPluginState *>(iGUIState);
+    if(fState)
+      fParams = &fState->fParams;
+  }
+
+public:
+  // direct access to state (ex: fState->fLabelA)
+  TGUIPluginState *fState{};
+
+  // direct access to parameters (ex: fParams->fBypassParam)
+  typename TGUIPluginState::PluginParameters const *fParams{};
+};
+
+/**
  * When implementing a CustomView specific to a given plugin, you can use this class instead to get direct
  * access to the state and parameters registered with the plugin via the fState/fParams member.
  *
  * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
  */
 template<typename TGUIPluginState>
-class PluginCustomView : public CustomView
+class PluginCustomView : public CustomView, public PluginAccessor<TGUIPluginState>
 {
 public:
   // Constructor
@@ -220,19 +245,8 @@ protected:
   void initState(GUIState *iGUIState) override
   {
     CustomView::initState(iGUIState);
-    if(fParamCxMgr)
-    {
-      fState = dynamic_cast<TGUIPluginState *>(fParamCxMgr->getGUIState());
-      fParams = &fState->fParams;
-    }
+    PluginAccessor<TGUIPluginState>::initState(iGUIState);
   }
-
-public:
-  // direct access to state (ex: fState->fLabelA)
-  TGUIPluginState *fState{};
-
-  // direct access to parameters (ex: fParams->fBypassParam)
-  typename TGUIPluginState::PluginParameters const *fParams{};
 };
 
 /**
@@ -274,7 +288,7 @@ public:
  * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
  */
 template<typename TView, typename TGUIPluginState>
-class PluginCustomViewAdapter : public CustomViewAdapter<TView>
+class PluginCustomViewAdapter : public CustomViewAdapter<TView>, public PluginAccessor<TGUIPluginState>
 {
 public:
   // Constructor
@@ -286,19 +300,8 @@ protected:
   void initState(GUIState *iGUIState) override
   {
     GUIParamCxAware::initState(iGUIState);
-    if(GUIParamCxAware::fParamCxMgr)
-    {
-      fState = dynamic_cast<TGUIPluginState *>(GUIParamCxAware::fParamCxMgr->getGUIState());
-      fParams = &fState->fParams;
-    }
+    PluginAccessor<TGUIPluginState>::initState(iGUIState);
   }
-
-public:
-  // direct access to state (ex: fState->fLabelA)
-  TGUIPluginState *fState{};
-
-  // direct access to parameters (ex: fParams->fBypassParam)
-  typename TGUIPluginState::PluginParameters const *fParams{};
 };
 
 //------------------------------------------------------------------------

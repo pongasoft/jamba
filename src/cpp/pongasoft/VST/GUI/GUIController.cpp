@@ -65,7 +65,7 @@ tresult GUIController::initialize(FUnknown *context)
   // initializing the state
   auto guiState = getGUIState();
 
-  guiState->init(vstParameters);
+  guiState->init(vstParameters, this);
 
   // making sure that the knob mode is set to the default specified
   CFrame::kDefaultKnobMode = fDefaultKnobMode;
@@ -159,6 +159,21 @@ tresult GUIController::notify(IMessage *message)
   return getGUIState()->handleMessage(m);
 }
 
+//------------------------------------------------------------------------
+// GUIController::allocateMessage
+//------------------------------------------------------------------------
+IPtr<IMessage> GUIController::allocateMessage()
+{
+  return Steinberg::owned(EditController::allocateMessage());
+}
+
+//------------------------------------------------------------------------
+// GUIController::sendMessage
+//------------------------------------------------------------------------
+tresult GUIController::sendMessage(IPtr<IMessage> iMessage)
+{
+  return EditController::sendMessage(iMessage);
+}
 
 }
 }

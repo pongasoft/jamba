@@ -141,5 +141,35 @@ public:
   }
 };
 
+/**
+ * A parameter backed by a C type string (char[size]). No memory allocation happens in this case.
+ *
+ * @tparam size of the string saved/restored
+ */
+template<int size = 128>
+class CStringParamSerializer
+{
+public:
+  using ParamType = char[size];
+
+  // readFromStream
+  inline static tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
+  {
+    if(iStreamer.readRaw(static_cast<void*>(oValue), size) == size)
+      return kResultOk;
+    else
+      return kResultFalse;
+  }
+
+  // writeToStream
+  inline static tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer)
+  {
+    if(oStreamer.writeRaw(static_cast<void const *>(iValue), size) == size)
+      return kResultOk;
+    else
+      return kResultFalse;
+  }
+};
+
 }
 }

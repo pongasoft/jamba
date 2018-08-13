@@ -192,7 +192,7 @@ GUIJmbParam<T> GUIParamCxMgr::registerJmbParam(ParamID iParamID,
   }
   else
   {
-    DLOG_F(WARNING, "ser param [%d] is not of the requested type", iParamID);
+    DLOG_F(WARNING, "jmb param [%d] is not of the requested type", iParamID);
     unregisterParam(iParamID);
   }
 

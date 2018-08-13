@@ -33,7 +33,7 @@ public:
   explicit CustomControlView(const CRect &iSize) : CustomView(iSize) {}
 
   // get/setControlTag
-  void setControlTag (int32_t iTag) { fControlTag = iTag; };
+  virtual void setControlTag (int32_t iTag) { fControlTag = iTag; };
   int32_t getControlTag () const { return fControlTag; }
 
 public:
@@ -67,23 +67,24 @@ public:
   explicit TCustomControlView(const CRect &iSize) : CustomControlView(iSize) {}
 
 public:
-  CLASS_METHODS_NOCOPY(CustomControlView, TCustomControlView)
+  CLASS_METHODS_NOCOPY(TCustomControlView, CustomControlView)
+
+  // when the control tag changes we need to handle it
+  void setControlTag(int32_t iTag) override;
 
   // set/getControlValue
   T getControlValue() const;
-  void setControlValue(T const &iControlValue);
+  virtual void setControlValue(T const &iControlValue);
 
   // registerParameters
   void registerParameters() override;
 
 protected:
-  // the gui parameter tied to the control
-  GUIVstParam<T> fControlParameter{nullptr};
+  // the gui parameter tied to the control (optional)
+  GUIVstParam<T> fControlParameter{};
 
-#if EDITOR_MODE
-  // the value (in sync with control parameter but may exist on its own in editor mode)
+  // the value when the control parameter is not assigned
   T fControlValue{};
-#endif
 
 public:
   class Creator : public CustomViewCreator<TCustomControlView<T>, CustomControlView>
@@ -104,14 +105,10 @@ public:
 template<typename T>
 T TCustomControlView<T>::getControlValue() const
 {
-#if EDITOR_MODE
   if(fControlParameter.exists())
-    return fControlParameter;
+    return fControlParameter.getValue();
   else
     return fControlValue;
-#else
-  return fControlParameter;
-#endif
 }
 
 ///////////////////////////////////////////
@@ -120,13 +117,10 @@ T TCustomControlView<T>::getControlValue() const
 template<typename T>
 void TCustomControlView<T>::setControlValue(T const &iControlValue)
 {
-#if EDITOR_MODE
-  fControlValue = iControlValue;
   if(fControlParameter.exists())
-    fControlParameter.setValue(fControlValue);
-#else
-  fControlParameter.setValue(iControlValue);
-#endif
+    fControlParameter.setValue(iControlValue);
+  else
+    fControlValue = iControlValue;
 }
 
 ///////////////////////////////////////////
@@ -140,16 +134,24 @@ void TCustomControlView<T>::registerParameters()
   if(!fParamCxMgr || getControlTag() < 0)
     return; // not set yet
 
+  if(fControlParameter.exists())
+  {
+    fControlValue = fControlParameter.getValue();
+    fControlParameter = unregisterParam(fControlParameter);
+  }
+
   auto paramID = static_cast<ParamID>(getControlTag());
   fControlParameter = registerVstParam<T>(paramID);
+}
 
-#if EDITOR_MODE
-  if(fControlParameter.exists())
-    fControlValue = fControlParameter;
-#else
-  if(!fControlParameter)
-    ABORT_F("Could not find parameter for control tag [%d]", paramID);
-#endif
+//------------------------------------------------------------------------
+// TCustomControlView<T>::setControlTag
+//------------------------------------------------------------------------
+template<typename T>
+void TCustomControlView<T>::setControlTag(int32_t iTag)
+{
+  CustomControlView::setControlTag(iTag);
+  registerParameters();
 }
 
 }

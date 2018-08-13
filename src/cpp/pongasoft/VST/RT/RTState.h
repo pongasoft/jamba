@@ -23,7 +23,8 @@
 #include <pongasoft/VST/MessageProducer.h>
 
 #include "RTParameter.h"
-#include "RTJmbParameter.h"
+#include "RTJmbOutParameter.h"
+#include "RTJmbInParameter.h"
 
 #include <map>
 
@@ -38,7 +39,7 @@ using namespace Utils;
  * Combined with the RTProcessor class, everything will be handled for you (reading/writing the state, updating previous
  * value, etc...).
  */
-class RTState
+class RTState : public IMessageHandler
 {
 public:
   explicit RTState(Parameters const &iParameters);
@@ -55,6 +56,12 @@ public:
    */
   template<typename T>
   RTJmbOutParam<T> addJmbOut(JmbParam<T> iParamDef);
+
+  /**
+ * This method should be called to add an rt outbound ser parameter
+ */
+  template<typename T>
+  RTJmbInParam<T> addJmbIn(JmbParam<T> iParamDef);
 
   /**
    * Call this method after adding all the parameters. If using the RT processor, it will happen automatically. */
@@ -100,6 +107,11 @@ public:
    * Called (from a GUI timer) to send the messages to the GUI (JmbParam for the moment) */
   virtual tresult sendPendingMessages(IMessageProducer *iMessageProducer);
 
+  /**
+   * Called by the UI thread (from RTProcessor) to handle messages.
+   */
+  tresult handleMessage(Message const &iMessage) override;
+
 protected:
   // the parameters
   Parameters const &fPluginParameters;
@@ -107,20 +119,35 @@ protected:
   // contains all the registered vst parameters (unique ID, will be checked on add)
   std::map<ParamID, std::unique_ptr<RTRawVstParameter>> fVstParameters{};
 
-  // contains all the registered message parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::unique_ptr<IRTJmbParameter>> fOutboundMessagingParameters{};
+  // contains all the registered outbound message parameters (unique ID, will be checked on add)
+  std::map<ParamID, std::unique_ptr<IRTJmbOutParameter>> fOutboundMessagingParameters{};
 
+  // contains all the registered inbound message parameters (unique ID, will be checked on add)
+  std::map<ParamID, std::unique_ptr<IRTJmbInParameter>> fInboundMessagingParameters{};
+
+  // handles messages (receive messages)
+  MessageHandler fMessageHandler{};
+
+protected:
   // add raw parameter to the structures
   tresult addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter);
 
-  // add messaging parameter to the structures
-  tresult addOutboundMessagingParameter(std::unique_ptr<IRTJmbParameter> iParameter);
+  // add outbound messaging parameter
+  tresult addOutboundMessagingParameter(std::unique_ptr<IRTJmbOutParameter> iParameter);
+
+  // add inbound messaging parameter
+  tresult addInboundMessagingParameter(std::unique_ptr<IRTJmbInParameter> iParameter);
 
   /**
    * Called from the RT thread from beforeProcessing to set the new state. Can be overridden
    * @return true if the state has changed, false otherwise
    */
   virtual bool onNewState(NormalizedState const *iLatestState);
+
+  /**
+   * Called from the RT thread from beforeProcessing to process any pending inbound updates. Can be overridden
+   * @return true if the state has changed, false otherwise */
+  virtual bool processPendingInboundUpdates();
 
   /**
    * Called from the RT thread from afterProcessing to reset previous values (copy current value to previous).
@@ -175,9 +202,23 @@ template<typename T>
 RTJmbOutParam<T> RTState::addJmbOut(JmbParam<T> iParamDef)
 {
   // YP Impl note: see add for similar impl note
-  auto rawPtr = new RTJmbParameter<T>(iParamDef);
-  std::unique_ptr<IRTJmbParameter> rtParam{rawPtr};
+  auto rawPtr = new RTJmbOutParameter<T>(iParamDef);
+  std::unique_ptr<IRTJmbOutParameter> rtParam{rawPtr};
   addOutboundMessagingParameter(std::move(rtParam));
+  return rawPtr;
+}
+
+//------------------------------------------------------------------------
+// RTState::addJmbIn
+//------------------------------------------------------------------------
+template<typename T>
+RTJmbInParam<T> RTState::addJmbIn(JmbParam<T> iParamDef)
+{
+  // YP Impl note: see add for similar impl note
+  auto rawPtr = new RTJmbInParameter<T>(iParamDef);
+  std::unique_ptr<IRTJmbInParameter> rtParam{rawPtr};
+  addInboundMessagingParameter(std::move(rtParam));
+  fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);
   return rawPtr;
 }
 

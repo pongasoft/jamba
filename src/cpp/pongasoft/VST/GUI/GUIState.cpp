@@ -183,9 +183,10 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
 //------------------------------------------------------------------------
 // GUIState::init
 //------------------------------------------------------------------------
-tresult GUIState::init(VstParametersSPtr iVstParameters)
+tresult GUIState::init(VstParametersSPtr iVstParameters, IMessageProducer *iMessageProducer)
 {
   fVstParameters = std::move(iVstParameters);
+  fMessageProducer = iMessageProducer;
   return kResultOk;
 }
 
@@ -206,6 +207,28 @@ IGUIJmbParameter *GUIState::getJmbParameter(ParamID iParamID) const
   if(iter == fJmbParams.cend())
     return nullptr;
   return iter->second.get();
+}
+
+//------------------------------------------------------------------------
+// GUIState::allocateMessage
+//------------------------------------------------------------------------
+IPtr<IMessage> GUIState::allocateMessage()
+{
+  if(fMessageProducer)
+    return fMessageProducer->allocateMessage();
+  else
+    return IPtr<IMessage>();
+}
+
+//------------------------------------------------------------------------
+// GUIState::sendMessage
+//------------------------------------------------------------------------
+tresult GUIState::sendMessage(IPtr<IMessage> iMessage)
+{
+  if(fMessageProducer)
+    return fMessageProducer->sendMessage(iMessage);
+  else
+    return kResultFalse;
 }
 
 }

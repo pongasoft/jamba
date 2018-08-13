@@ -28,13 +28,13 @@ namespace RT {
 using namespace Utils;
 
 /**
- * Base (non templated) class for RT Jamba parameters
+ * Base (non templated) class for RT Jamba (Outbound) parameters
  */
-class IRTJmbParameter
+class IRTJmbOutParameter
 {
 public:
   // Constructor
-  explicit IRTJmbParameter(std::shared_ptr<IJmbParamDef> iParamDef) : fParamDef{std::move(iParamDef)} {}
+  explicit IRTJmbOutParameter(std::shared_ptr<IJmbParamDef> iParamDef) : fParamDef{std::move(iParamDef)} {}
 
   // getParamDef
   std::shared_ptr<IJmbParamDef> const &getParamDef() const { return fParamDef; }
@@ -43,10 +43,10 @@ public:
   ParamID getParamID() const { return fParamDef->fParamID; }
 
   // destructor
-  virtual ~IRTJmbParameter() = default;
+  virtual ~IRTJmbOutParameter() = default;
 
-  // hasOutboundUpdate
-  virtual bool hasOutboundUpdate() const = 0;
+  // hasUpdate
+  virtual bool hasUpdate() const = 0;
 
   // writeToMessage
   virtual tresult writeToMessage(Message &oMessage) = 0;
@@ -63,13 +63,13 @@ protected:
  * @tparam T
  */
 template<typename T>
-class RTJmbParameter : public IRTJmbParameter
+class RTJmbOutParameter : public IRTJmbOutParameter
 {
 public:
   using ParamType = T;
 
-  explicit RTJmbParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
-    IRTJmbParameter(iParamDef),
+  explicit RTJmbOutParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
+  IRTJmbOutParameter(iParamDef),
     fJmbParamDef{std::move(iParamDef)},
     fValue{fJmbParamDef->fDefaultValue}
     {}
@@ -84,23 +84,25 @@ public:
   inline void setValue(ParamType const &iValue) { fValue = iValue; }
 
   /**
-   * This is a call that enqueues the value to be delivered to the GUI. Note that this call returns right away. The
-   * packaging and delivery will happen in a GUI thread. This method is called by RT thread.
+   * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
+   * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
+   * This method is called by RT thread.
    */
-  inline void enqueueUpdate(ParamType const &iValue)
+  inline void broadcast(ParamType const &iValue)
   {
     setValue(iValue);
-    enqueueUpdate();
+    broadcast();
   }
 
   /**
-   * This is a call that enqueues the value to be delivered to the GUI. Note that this call returns right away. The
-   * packaging and delivery will happen in a GUI thread. This method is called by RT thread.
+   * Enqueues the current value to be delivered to the GUI (or whoever is listening to messages).
+   * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
+   * This method is called by RT thread.
    */
-  inline void enqueueUpdate() { fOutboundQueue.push(fValue); }
+  inline void broadcast() { fUpdateQueue.push(fValue); }
 
-  // hasOutboundUpdate
-  bool hasOutboundUpdate() const override { return !fOutboundQueue.isEmpty(); }
+  // hasUpdate
+  bool hasUpdate() const override { return !fUpdateQueue.isEmpty(); }
 
   // writeToMessage - called to package and add the value to the message
   tresult writeToMessage(Message &oMessage) override;
@@ -110,17 +112,17 @@ protected:
   ParamType fValue;
 
 private:
-  Concurrent::WithSpinLock::SingleElementQueue<T> fOutboundQueue{};
+  Concurrent::WithSpinLock::SingleElementQueue<T> fUpdateQueue{};
 };
 
 //------------------------------------------------------------------------
-// RTJmbParameter::writeToMessage
+// RTJmbOutParameter::writeToMessage
 //------------------------------------------------------------------------
 template<typename T>
-tresult RTJmbParameter<T>::writeToMessage(Message &oMessage)
+tresult RTJmbOutParameter<T>::writeToMessage(Message &oMessage)
 {
   ParamType update;
-  if(fOutboundQueue.pop(update))
+  if(fUpdateQueue.pop(update))
   {
     return fJmbParamDef->writeToMessage(update, oMessage);
   }
@@ -141,7 +143,7 @@ template<typename T>
 class RTJmbOutParam
 {
 public:
-  RTJmbOutParam(RTJmbParameter<T> *iPtr) : fPtr{iPtr} {} // NOLINT (not marked explicit on purpose)
+  RTJmbOutParam(RTJmbOutParameter<T> *iPtr) : fPtr{iPtr} {} // NOLINT (not marked explicit on purpose)
 
   // getParamID
   inline ParamID getParamID() const { return fPtr->getParamID(); }
@@ -155,11 +157,11 @@ public:
   // setValue
   inline void setValue(T const &iValue) { fPtr->setValue(); }
 
-  // enqueueUpdate
-  inline void enqueueUpdate(T const &iValue) { fPtr->enqueueUpdate(iValue); }
+  // broadcast
+  inline void broadcast(T const &iValue) { fPtr->broadcast(iValue); }
 
-  // enqueUpdate
-  inline void enqueueUpdate() { fPtr->enqueueUpdate(); }
+  // broadcast
+  inline void broadcast() { fPtr->broadcast(); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
   inline operator T const &() const { return fPtr->getValue(); } // NOLINT
@@ -174,7 +176,7 @@ public:
   inline T *operator->() { return &fPtr->getValue(); }
 
 private:
-  RTJmbParameter<T> *fPtr;
+  RTJmbOutParameter<T> *fPtr;
 };
 
 }

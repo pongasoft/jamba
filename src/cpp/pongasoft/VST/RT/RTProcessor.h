@@ -64,6 +64,9 @@ public:
   /** Called to save the state (before saving a preset or project) */
   tresult PLUGIN_API getState(IBStream *state) override;
 
+  /** Called to handle a message (coming from GUI) */
+  tresult PLUGIN_API notify(IMessage *message) SMTG_OVERRIDE;
+
 protected:
   /**
    * @return true if you can handle 32 bits (true buy default) */

@@ -39,7 +39,6 @@ class UTF8StringParamSerializer
 public:
   using ParamType = UTF8String;
 
-
   // readFromStream
   inline static tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
   {
