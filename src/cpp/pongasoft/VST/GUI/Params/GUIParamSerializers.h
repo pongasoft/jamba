@@ -34,25 +34,30 @@ using namespace VSTGUI;
  * @tparam size max size of the string saved/restored
  */
 template<int size = 128>
-class UTF8StringParamSerializer
+class UTF8StringParamSerializer : public IParamSerializer<UTF8String>
 {
 public:
-  using ParamType = UTF8String;
-
   // readFromStream
-  inline static tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue)
+  inline tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
   {
     char8 str[size];
     iStreamer.readString8(str, size);
+    str[size - 1] = 0; // making sure it is null terminated....
     oValue = UTF8String{str};
     return kResultOk;
   }
 
   // writeToStream
-  inline static tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer)
+  inline tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const override
   {
     oStreamer.writeString8(iValue, true);
     return kResultOk;
+  }
+
+  // writeToStream
+  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
+  {
+    oStream << iValue;
   }
 };
 

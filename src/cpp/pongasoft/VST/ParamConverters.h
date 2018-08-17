@@ -47,55 +47,32 @@ class IParamConverter
 {
 public:
   using ParamType = T;
+  virtual int getStepCount() const { return 0; }
   virtual ParamValue normalize(ParamType const &iValue) const = 0;
   virtual ParamType denormalize(ParamValue iNormalizedValue) const = 0;
-  virtual void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const = 0;
+  virtual void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const
+  {
+  }
 };
-
-
-/**
- * Wrapper/convenient class using a class containing static method instead.
- *
- * @tparam ParamConverter the type of the static class
- */
-template<typename ParamConverter>
-class StaticParamConverter : public IParamConverter<typename ParamConverter::ParamType>
-{
-public:
-  using ParamType = typename ParamConverter::ParamType;
-  inline ParamValue normalize(ParamType const &iValue) const override { return ParamConverter::normalize(iValue); }
-  inline ParamType denormalize(ParamValue iNormalizedValue) const override { return ParamConverter::denormalize(iNormalizedValue); }
-  inline void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const override { return ParamConverter::toString(iValue, iString, iPrecision); }
-};
-
-/**
- * Simple function to create a param converter from a class with static methods
- */
-template<typename ParamConverter>
-inline static std::unique_ptr<StaticParamConverter<ParamConverter>> createParamConverter()
-{
-  return std::make_unique<StaticParamConverter<ParamConverter>>();
-}
 
 /**
  * This parameter is just a no-op wrapper to the ParamValue to adapt it to the use of the ParamConverter concept
  */
-class RawParamConverter
+class RawParamConverter : public IParamConverter<ParamValue>
 {
 public:
-  using ParamType = ParamValue;
 
-  inline static ParamValue normalize(ParamValue const &iValue)
+  inline ParamValue normalize(ParamValue const &iValue) const override
   {
     return Utils::clamp(iValue, 0.0, 1.0);
   }
 
-  inline static ParamValue denormalize(ParamValue iNormalizedValue)
+  inline ParamValue denormalize(ParamValue iNormalizedValue) const override
   {
     return Utils::clamp(iNormalizedValue, 0.0, 1.0);;
   }
 
-  inline static void toString(ParamValue const &iValue, String128 oString, int32 iPrecision)
+  inline void toString(ParamValue const &iValue, String128 oString, int32 iPrecision) const override
   {
     Steinberg::UString wrapper(oString, str16BufferSize (String128));
     if(!wrapper.printFloat(iValue, iPrecision))
@@ -108,22 +85,22 @@ public:
  * implementation uses false for [0.0, 0.5[ and true for [0.5, 1.0] so that it matches a DiscreteValueParamConverter
  * with a step count of 1.
  */
-class BooleanParamConverter
+class BooleanParamConverter : public IParamConverter<bool>
 {
 public:
-  using ParamType = bool;
+  inline int getStepCount() const override { return 1; }
 
-  inline static ParamValue normalize(bool const &iValue)
+  inline ParamValue normalize(bool const &iValue) const override
   {
     return iValue ? 1.0 : 0;
   }
 
-  inline static bool denormalize(ParamValue iNormalizedValue)
+  inline bool denormalize(ParamValue iNormalizedValue) const override
   {
     return iNormalizedValue >= 0.5;
   }
 
-  inline static void toString(bool const &iValue, String128 oString, int32 /* iPrecision */)
+  inline void toString(bool const &iValue, String128 oString, int32 /* iPrecision */) const override
   {
     Steinberg::UString wrapper(oString, str16BufferSize(String128));
     if(iValue)
@@ -142,22 +119,21 @@ using Percent = double;
  * A trivial percent converter. The toString method returns the value as a percentage (precision is used to adjust
  * how many digits to use for display)
  */
-class PercentParamConverter
+class PercentParamConverter : IParamConverter<Percent>
 {
 public:
-  using ParamType = Percent;
 
-  inline static ParamValue normalize(double const &iValue)
+  inline ParamValue normalize(double const &iValue) const override
   {
     return Utils::clamp(iValue, 0.0, 1.0);
   }
 
-  inline static double denormalize(ParamValue iNormalizedValue)
+  inline double denormalize(ParamValue iNormalizedValue) const override
   {
     return Utils::clamp(iNormalizedValue, 0.0, 1.0);
   }
 
-  inline static void toString(ParamType const &iValue, String128 oString, int32 iPrecision)
+  inline void toString(ParamType const &iValue, String128 oString, int32 iPrecision) const override
   {
     Steinberg::UString wrapper(oString, str16BufferSize (String128));
     wrapper.printFloat(iValue * 100, iPrecision);
@@ -170,20 +146,20 @@ public:
  * documentation.
  */
 template<int StepCount>
-class DiscreteValueParamConverter
+class DiscreteValueParamConverter : IParamConverter<int>
 {
 public:
   using ParamType = int;
 
-  static inline int getStepCount() { return StepCount; }
+  inline int getStepCount() const override { return StepCount; }
 
-  static inline ParamValue normalize(int const &iDiscreteValue)
+  inline ParamValue normalize(int const &iDiscreteValue) const override
   {
     auto value = Utils::clamp(iDiscreteValue, 0, StepCount);
     return value / static_cast<double>(StepCount);
   }
 
-  static inline int denormalize(ParamValue iNormalizedValue)
+  inline int denormalize(ParamValue iNormalizedValue) const override
   {
     // ParamValue must remain within its bounds
     auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
@@ -191,7 +167,7 @@ public:
                                                 value * (StepCount + 1))));
   }
 
-  inline static void toString(ParamType const &iValue, String128 oString, int32 /* iPrecision */)
+  void toString(ParamType const &iValue, String128 oString, int32 /* iPrecision */) const override
   {
     Steinberg::UString wrapper(oString, str16BufferSize (String128));
     if(!wrapper.printInt(iValue))

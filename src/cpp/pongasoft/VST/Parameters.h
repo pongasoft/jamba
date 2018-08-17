@@ -58,7 +58,6 @@ public:
     // builder methods
     VstParamDefBuilder &units(const TChar *iUnits) { fUnits = iUnits; return *this; }
     VstParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
-    VstParamDefBuilder &stepCount(int32 iStepCount) { fStepCount = iStepCount; return *this; }
     VstParamDefBuilder &flags(int32 iFlags) { fFlags = iFlags; return *this; }
     VstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
     VstParamDefBuilder &shortTitle(const TChar *iShortTitle) { fShortTitle = iShortTitle; return *this; }
@@ -68,7 +67,7 @@ public:
     VstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
     VstParamDefBuilder &converter(std::shared_ptr<IParamConverter<T>> iConverter) { fConverter = std::move(iConverter); return *this; }
     template<typename ParamConverter>
-    VstParamDefBuilder &converter() { fConverter = std::move(createParamConverter<ParamConverter>()); return *this; }
+    VstParamDefBuilder &converter() { fConverter = std::make_shared<ParamConverter>(); return *this; }
 
     // parameter factory method
     VstParam<T> add() const;
@@ -78,7 +77,6 @@ public:
     const TChar *fTitle;
     const TChar *fUnits = nullptr;
     T fDefaultValue{};
-    int32 fStepCount = 0;
     int32 fFlags = ParameterInfo::kCanAutomate;
     UnitID fUnitID = kRootUnitId;
     const TChar *fShortTitle = nullptr;
@@ -111,7 +109,7 @@ public:
     JmbParamDefBuilder &shared(bool iShared = true) { fShared = iShared; return *this; }
     JmbParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
     template<typename ParamSerializer>
-    JmbParamDefBuilder &serializer() { fSerializer = std::move(createParamSerializer<ParamSerializer>()); return *this; }
+    JmbParamDefBuilder &serializer() { fSerializer = std::make_shared<ParamSerializer>(); return *this; }
 
     // parameter factory method
     JmbParam<T> add() const;
@@ -349,7 +347,6 @@ VstParam<T> Parameters::add(VstParamDefBuilder<T> const &iBuilder)
                                                 iBuilder.fTitle,
                                                 iBuilder.fUnits,
                                                 iBuilder.fDefaultValue,
-                                                iBuilder.fStepCount,
                                                 iBuilder.fFlags,
                                                 iBuilder.fUnitID,
                                                 iBuilder.fShortTitle,
@@ -484,15 +481,6 @@ tresult Parameters::setGUISaveStateOrder(int16 iVersion, Args... args)
   buildParamIDs(ids, args...);
   return setGUISaveStateOrder({iVersion, ids});
 }
-
-//------------------------------------------------------------------------
-// Parameters::build - specialization for BooleanParamConverter
-//------------------------------------------------------------------------
-template<>
-Parameters::VstParamDefBuilder<bool> Parameters::vstFromType(ParamID iParamID, const TChar *iTitle);
-
-// TODO should handle DiscreteValueParamConverter (because it is templated, it doesn't seem that I can do like BooleanParamConverter)
-// check https://stackoverflow.com/questions/87372/check-if-a-class-has-a-member-function-of-a-given-signature
 
 }
 }

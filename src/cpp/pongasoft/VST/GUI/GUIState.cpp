@@ -157,7 +157,7 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
     if(iter == fJmbParams.cend())
     {
       ParamValue value = fVstParameters->getParamNormalized(paramID);
-      res |= RawParamSerializer::writeToStream(value, oStreamer);
+      oStreamer.writeDouble(value);
 
 #ifdef JAMBA_DEBUG_LOGGING
       state << ", " << paramID << "=" << value;

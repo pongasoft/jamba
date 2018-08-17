@@ -100,7 +100,7 @@ public:
     ParamValue res = fDefaultValue;
 
     ParamValue value;
-    if(RawParamSerializer::readFromStream(iStreamer, value) == kResultOk)
+    if(IBStreamHelper::readDouble(iStreamer, value) == kResultOk)
       res = value;
 
     return res;
@@ -131,7 +131,6 @@ public:
               TChar const *const iTitle,
               TChar const *const iUnits,
               ParamType const iDefaultValue,
-              int32 const iStepCount,
               int32 const iFlags,
               UnitID const iUnitID,
               TChar const *const iShortTitle,
@@ -143,7 +142,7 @@ public:
                    iTitle,
                    iUnits,
                    iConverter ? iConverter->normalize(iDefaultValue) : 0,
-                   iStepCount,
+                   iConverter ? iConverter->getStepCount() : 0,
                    iFlags,
                    iUnitID,
                    iShortTitle,
