@@ -51,6 +51,9 @@ public:
   // writeToMessage
   virtual tresult writeToMessage(Message &oMessage) = 0;
 
+  // writeToStream
+  virtual void writeToStream(std::ostream &oStream) const = 0;
+
 protected:
   std::shared_ptr<IJmbParamDef> fParamDef;
 };
@@ -107,6 +110,9 @@ public:
   // writeToMessage - called to package and add the value to the message
   tresult writeToMessage(Message &oMessage) override;
 
+  // writeToStream
+  void writeToStream(std::ostream &oStream) const override;
+
 protected:
   std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
   ParamType fValue;
@@ -128,6 +134,15 @@ tresult RTJmbOutParameter<T>::writeToMessage(Message &oMessage)
   }
 
   return kResultFalse;
+}
+
+//------------------------------------------------------------------------
+// RTJmbInParameter::writeToStream
+//------------------------------------------------------------------------
+template<typename T>
+void RTJmbOutParameter<T>::writeToStream(std::ostream &oStream) const
+{
+  fJmbParamDef->writeToStream(fValue, oStream);
 }
 
 //------------------------------------------------------------------------

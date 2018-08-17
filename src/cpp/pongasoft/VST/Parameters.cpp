@@ -55,7 +55,7 @@ private:
 //------------------------------------------------------------------------
 void Parameters::registerVstParameters(Vst::ParameterContainer &iParameterContainer) const
 {
-  for(auto paramID : fPluginOrder)
+  for(auto paramID : fVstRegistrationOrder)
   {
     // YP Note: ParameterContainer is expecting a pointer and then assumes ownership
     iParameterContainer.addParameter(new VstParameterImpl(fVstParams.at(paramID)));
@@ -174,24 +174,10 @@ tresult Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
     return kInvalidArgument;
   }
 
-#ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "Parameters::addVstParamDef{%d, \"%s\", \"%s\", %f, %d, %d, %d, \"%s\", %d, %s%s}",
-         paramID,
-         String(iParamDef->fTitle).text8(),
-         String(iParamDef->fUnits).text8(),
-         iParamDef->fDefaultValue,
-         iParamDef->fStepCount,
-         iParamDef->fFlags,
-         iParamDef->fUnitID,
-         String(iParamDef->fShortTitle).text8(),
-         iParamDef->fPrecision,
-         iParamDef->fOwner == IParamDef::Owner::kGUI ? "guiOwned" : "rtOwned",
-         iParamDef->fTransient ? ", transient" : "");
-#endif
-
   fVstParams[paramID] = iParamDef;
 
-  fPluginOrder.emplace_back(paramID);
+  fVstRegistrationOrder.emplace_back(paramID);
+  fAllRegistrationOrder.emplace_back(paramID);
 
   if(!iParamDef->fTransient)
   {
@@ -223,16 +209,9 @@ tresult Parameters::addJmbParamDef(std::shared_ptr<IJmbParamDef> iParamDef)
     return kInvalidArgument;
   }
 
-#ifdef JAMBA_DEBUG_LOGGING
-  DLOG_F(INFO, "Parameters::addJmbParamDef{%d, \"%s\", %s%s%s}",
-         paramID,
-         String(iParamDef->fTitle).text8(),
-         iParamDef->fOwner == IParamDef::Owner::kGUI ? "guiOwned" : "rtOwned",
-         iParamDef->fTransient ? ", transient" : "",
-         iParamDef->fShared ? ", shared" : "");
-#endif
-
   fJmbParams[paramID] = iParamDef;
+
+  fAllRegistrationOrder.emplace_back(paramID);
 
   if(!iParamDef->fTransient && iParamDef->fOwner == IParamDef::Owner::kGUI)
     fGUISaveStateOrder.fOrder.emplace_back(paramID);

@@ -205,6 +205,9 @@ public:
 
   virtual ~IJmbParamDef() = default;
 
+  // writeDefaultValue
+  virtual void writeDefaultValue(std::ostream &oStreamer) const = 0;
+
 public:
   bool const fShared;
 };
@@ -237,6 +240,12 @@ public:
 
   // writeToStream
   tresult writeToStream(ParamType const &iValue, IBStreamer &oStreamer) const override;
+
+  // writeToStream
+  void writeToStream(ParamType const &iValue, std::ostream &oStreamer) const override;
+
+  // writeDefaultValue
+  void writeDefaultValue(std::ostream &oStreamer) const override;
 
   // readFromMessage
   tresult readFromMessage(Message const &iMessage, ParamType &oValue) const;
@@ -292,6 +301,25 @@ tresult JmbParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) co
     return fSerializer->writeToStream(iValue, oStreamer);
   else
     return kResultFalse;
+}
+
+//------------------------------------------------------------------------
+// JmbParamDef::writeToStream
+//------------------------------------------------------------------------
+template<typename T>
+void JmbParamDef<T>::writeToStream(const ParamType &iValue, std::ostream &oStreamer) const
+{
+  if(fSerializer)
+    fSerializer->writeToStream(iValue, oStreamer);
+}
+
+//------------------------------------------------------------------------
+// JmbParamDef::writeDefaultValue
+//------------------------------------------------------------------------
+template<typename T>
+void JmbParamDef<T>::writeDefaultValue(std::ostream &oStreamer) const
+{
+  writeToStream(fDefaultValue, oStreamer);
 }
 
 //------------------------------------------------------------------------

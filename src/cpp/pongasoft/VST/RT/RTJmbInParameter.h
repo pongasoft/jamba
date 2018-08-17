@@ -58,6 +58,9 @@ public:
   // handleMessage
   tresult handleMessage(Message const &iMessage) override { return readFromMessage(iMessage); }
 
+  // writeToStream
+  virtual void writeToStream(std::ostream &oStream) const = 0;
+
 protected:
   std::shared_ptr<IJmbParamDef> fParamDef;
 };
@@ -107,6 +110,9 @@ public:
   // readFromMessage - called to extract the value from the message
   tresult readFromMessage(Message const &iMessage) override;
 
+  // writeToStream
+  void writeToStream(std::ostream &oStream) const override;
+
 protected:
   std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
   ParamType fValue;
@@ -139,6 +145,15 @@ bool RTJmbInParameter<T>::applyUpdate()
 {
   fChanged = fUpdateQueue.pop(fValue);
   return fChanged;
+}
+
+//------------------------------------------------------------------------
+// RTJmbInParameter::writeToStream
+//------------------------------------------------------------------------
+template<typename T>
+void RTJmbInParameter<T>::writeToStream(std::ostream &oStream) const
+{
+  fJmbParamDef->writeToStream(fValue, oStream);
 }
 
 //------------------------------------------------------------------------

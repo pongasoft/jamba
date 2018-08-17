@@ -41,8 +41,11 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Clock/Clock.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Collection/CircularBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Concurrent/Concurrent.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Reflection/Reflection.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Lerp.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Misc.h
+
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamTable.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioUtils.h
@@ -89,6 +92,8 @@ set(JAMBA_sources_h
 
 set(JAMBA_sources_cpp
     ${LOGURU_IMPL}
+
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamTable.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageHandler.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Parameters.cpp

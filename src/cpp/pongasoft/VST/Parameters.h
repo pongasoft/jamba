@@ -30,6 +30,8 @@
 namespace pongasoft {
 namespace VST {
 
+namespace Debug { class ParamTable; }
+
 /**
  * This is the class which maintains all the registered parameters
  * TODO provide example on how to use this class
@@ -240,6 +242,15 @@ public:
   // getJmbParamDef - nullptr when not found
   std::shared_ptr<IJmbParamDef> getJmbParamDef(ParamID iParamID) const;
 
+  // getVstRegistrationOrder
+  std::vector<ParamID> const &getVstRegistrationOrder() const { return fVstRegistrationOrder; }
+
+  // getAllRegistrationOrder
+  std::vector<ParamID> const &getAllRegistrationOrder() const { return fAllRegistrationOrder; }
+
+  // gives access for debug
+  friend class Debug::ParamTable;
+
 protected:
   // internally called by the builder
   template<typename T>
@@ -262,8 +273,11 @@ private:
   // contains all the registered (serializable type) parameters (unique ID, will be checked on add)
   std::map<ParamID, std::shared_ptr<IJmbParamDef>> fJmbParams{};
 
-  // order in which the parameters will be registered in the plugin
-  std::vector<ParamID> fPluginOrder{};
+  // order in which the parameters will be registered in the vst world
+  std::vector<ParamID> fVstRegistrationOrder{};
+
+  // order in which the parameters were registered
+  std::vector<ParamID> fAllRegistrationOrder{};
 
   // TODO: Handle multiple versions with upgrade
   NormalizedState::SaveOrder fRTSaveStateOrder{};

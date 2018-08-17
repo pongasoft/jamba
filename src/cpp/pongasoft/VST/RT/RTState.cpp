@@ -56,6 +56,7 @@ tresult RTState::addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter)
   }
 
   fVstParameters[paramID] = std::move(iParameter);
+  fAllRegistrationOrder.emplace_back(paramID);
 
   return kResultOk;
 }
@@ -90,6 +91,7 @@ tresult RTState::addOutboundMessagingParameter(std::unique_ptr<IRTJmbOutParamete
   }
 
   fOutboundMessagingParameters[paramID] = std::move(iParameter);
+  fAllRegistrationOrder.emplace_back(paramID);
 
   return kResultOk;
 }
@@ -124,6 +126,7 @@ tresult RTState::addInboundMessagingParameter(std::unique_ptr<IRTJmbInParameter>
   }
 
   fInboundMessagingParameters[paramID] = std::move(iParameter);
+  fAllRegistrationOrder.emplace_back(paramID);
 
   return kResultOk;
 }

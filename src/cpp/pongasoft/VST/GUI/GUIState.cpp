@@ -36,6 +36,7 @@ void GUIState::addJmbParam(std::unique_ptr<IGUIJmbParameter> iParameter)
   DCHECK_F(fJmbParams.find(paramID) == fJmbParams.cend(), "duplicate paramID [%d]", paramID);
 
   fJmbParams[paramID] = std::move(iParameter);
+  fAllRegistrationOrder.emplace_back(paramID);
 }
 
 //------------------------------------------------------------------------

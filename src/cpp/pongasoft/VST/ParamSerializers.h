@@ -17,9 +17,13 @@
  */
 #pragma once
 
+#include <pongasoft/Utils/Reflection/Reflection.h>
 #include <pluginterfaces/vst/vsttypes.h>
 #include <base/source/fstreamer.h>
+#include <string>
+#include <iostream>
 #include <memory>
+#include <sstream>
 
 namespace pongasoft {
 namespace VST {
@@ -42,7 +46,72 @@ public:
   using ParamType = T;
   virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const = 0;
   virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const = 0;
+  // by default does nothing -- subclasses can override
+  virtual void writeToStream(ParamType const &iValue, std::ostream &oStream) const {}
+  virtual std::string toString(ParamType const &iValue, int32 iPrecision) const
+  {
+    std::ostringstream s;
+    s.precision(iPrecision);
+    s.setf(std::ios::fixed);
+    writeToStream(iValue, s);
+    return s.str();
+  }
 };
+
+
+//------------------------------------------------------------------------
+// Implementation (not exposed) details
+// YP Note: this is quite convoluted but I could not really find a better
+// way
+//------------------------------------------------------------------------
+namespace Impl
+{
+// represents the api void T::writeToStream(const ParamType &iValue, IBStreamer &oStreamer)
+template <typename T>
+using writeToStream_t = decltype(T::writeToStream(std::declval<typename T::ParamType const &>(), std::declval<std::ostream &>()));
+
+// this will be "true" if T has the writeToStream API
+template <typename T>
+using has_writeToStream = Utils::Reflection::detect<T, writeToStream_t>;
+
+
+//------------------------------------------------------------------------
+// Defining OStreamer type: only 1 will be defined based on condition
+//------------------------------------------------------------------------
+namespace StaticParamSerializer {
+// this is the empty implementation when there is no ParamSerializer::writeToStream method or
+// ostream << ParamSerializer::ParamType method
+template<typename ParamSerializer, class Enable = void>
+struct OStreamer
+{
+  inline static void writeToStream(typename ParamSerializer::ParamType const &iValue, std::ostream &oStream)
+  {
+  }
+};
+
+// this is the one that will delegate to ParamSerializer::writeToStream (note that it takes precedence over ostream)
+template<typename ParamSerializer>
+struct OStreamer<ParamSerializer, typename std::enable_if_t<has_writeToStream<ParamSerializer>::value>>
+{
+  inline static void writeToStream(typename ParamSerializer::ParamType const &iValue, std::ostream &oStream)
+  {
+    ParamSerializer::writeToStream(iValue, oStream);
+  }
+};
+
+// this is the one that will delegate to ostream << ParamSerializer::ParamType
+template<typename ParamSerializer>
+struct OStreamer<ParamSerializer, typename std::enable_if_t<Utils::Reflection::has_ostream<typename ParamSerializer::ParamType>::value &&
+                                                            !has_writeToStream<ParamSerializer>::value>>
+{
+  inline static void writeToStream(typename ParamSerializer::ParamType const &iValue, std::ostream &oStream)
+  {
+    oStream << iValue;
+  }
+};
+}
+
+}
 
 /**
  * Wrapper/convenient class using a class containing static method instead.
@@ -54,14 +123,24 @@ class StaticParamSerializer : public IParamSerializer<typename ParamSerializer::
 {
 public:
   using ParamType = typename ParamSerializer::ParamType;
-  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const
+
+  // readFromStream
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
   {
     return ParamSerializer::readFromStream(iStreamer, oValue);
   }
 
-  virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const
+  // writeToStream
+  tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const override
   {
     return ParamSerializer::writeToStream(iValue, oStreamer);
+  }
+
+  // writeToStream
+  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
+  {
+    // delegate to the conditional OStreamer
+    Impl::StaticParamSerializer::OStreamer<ParamSerializer>::writeToStream(iValue, oStream);
   }
 };
 

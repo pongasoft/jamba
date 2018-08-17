@@ -61,6 +61,9 @@ public:
   // writeToMessage
   virtual tresult writeToMessage(Message &oMessage) const = 0;
 
+  // writeToStream
+  virtual void writeToStream(std::ostream &oStream) const = 0;
+
   // handleMessage
   tresult handleMessage(Message const &iMessage) override { return readFromMessage(iMessage); }
 
@@ -138,6 +141,12 @@ public:
   tresult writeToStream(IBStreamer &oStreamer) const override
   {
     return fJmbParamDef->writeToStream(fValue, oStreamer);
+  }
+
+  // writeToStream
+  void writeToStream(std::ostream &oStream) const override
+  {
+    fJmbParamDef->writeToStream(fValue, oStream);
   }
 
   // readFromMessage

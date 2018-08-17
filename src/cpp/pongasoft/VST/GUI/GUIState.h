@@ -26,6 +26,7 @@
 
 namespace pongasoft {
 namespace VST {
+namespace Debug { class ParamTable; }
 namespace GUI {
 
 using namespace Params;
@@ -57,7 +58,7 @@ public:
   /**
    * @return true if there is a vst param with the provided ID
    */
-  inline bool existsVst(ParamID iParamID) const { return fVstParameters->exists(iParamID); }
+  inline bool existsVst(ParamID iParamID) const { return fVstParameters && fVstParameters->exists(iParamID); }
 
   /**
    * @return true if there is a ser param with the provided ID
@@ -115,6 +116,12 @@ public:
    */
   tresult handleMessage(Message const &iMessage) { return fMessageHandler.handleMessage(iMessage); }
 
+  // getAllRegistrationOrder
+  std::vector<ParamID> const &getAllRegistrationOrder() const { return fAllRegistrationOrder; }
+
+  // gives access for debug
+  friend class Debug::ParamTable;
+
 protected:
   // the parameters
   Parameters const &fPluginParameters;
@@ -130,6 +137,9 @@ protected:
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
   std::map<ParamID, std::unique_ptr<IGUIJmbParameter>> fJmbParams{};
+
+  // order in which the parameters were registered
+  std::vector<ParamID> fAllRegistrationOrder{};
 
 protected:
   // setParamNormalized

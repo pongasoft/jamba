@@ -57,10 +57,10 @@ public:
   virtual bool updateNormalizedValue(ParamValue iNormalizedValue);
 
   // getNormalizedValue
-  inline ParamValue const &getNormalizedValue() { return fNormalizedValue; }
+  inline ParamValue const &getNormalizedValue() const { return fNormalizedValue; }
 
   // getPreviousNormalizedValue
-  inline ParamValue const &getPreviousNormalizedValue() { return fPreviousNormalizedValue; }
+  inline ParamValue const &getPreviousNormalizedValue() const { return fPreviousNormalizedValue; }
 
   /**
    * Add the current normalized value as an output parameter changes
