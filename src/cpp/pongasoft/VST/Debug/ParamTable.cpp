@@ -77,7 +77,13 @@ std::vector<std::string> ParamTable::rows() const
   ParamMap paramMap = fParamDisplay.getParamMap();
 
   std::map<Key, std::string::size_type> sizes{};
-  computeSizes(header, paramMap, sizes);
+  std::string::size_type totalSize = computeSizes(header, paramMap, sizes);
+
+  std::string cellStart = !fDisplayCellSeparation ? "" : "| ";
+  std::string cellEnd = " ";
+  std::string lineEnd = !fDisplayCellSeparation ? "" : "|";
+
+  std::string::size_type separationLineSize = totalSize + (cellStart.size() + cellEnd.size()) * fParamDisplay.keys().size() + lineEnd.size();
 
   if(fDisplayHeader)
   {
@@ -85,15 +91,15 @@ std::vector<std::string> ParamTable::rows() const
 
     for(auto key: fParamDisplay.keys())
     {
-      s << "| " << std::left << std::setw(static_cast<int>(sizes.at(key))) << std::setfill(' ')
-        << header.at(key) << " ";
+      s << cellStart << std::left << std::setw(static_cast<int>(sizes.at(key))) << std::setfill(' ')
+        << header.at(key) << cellEnd;
     }
-    s << "|";
+    s << lineEnd;
 
     res.emplace_back(s.str());
 
     if(fDisplayHeaderSeparation)
-      res.emplace_back(std::string(s.str().size(), '-'));
+      res.emplace_back(separationLineSize, '-');
   }
 
   for(auto paramID : fParamDisplay.ids())
@@ -104,12 +110,15 @@ std::vector<std::string> ParamTable::rows() const
 
     for(auto key: fParamDisplay.keys())
     {
-      s << "| " << std::left << std::setw(static_cast<int>(sizes.at(key))) << std::setfill(' ') << param.at(key)
-        << " ";
+      s << cellStart << std::left << std::setw(static_cast<int>(sizes.at(key))) << std::setfill(' ') << param.at(key)
+        << cellEnd;
     }
-    s << "|";
+    s << lineEnd;
 
     res.emplace_back(s.str());
+
+    if(fDisplayLineSeparation)
+      res.emplace_back(separationLineSize, '-');
   }
 
   return res;
@@ -133,10 +142,12 @@ ParamDisplay::ValueMap ParamTable::computeHeader() const
 //------------------------------------------------------------------------
 // ParamTable::computeSizes
 //------------------------------------------------------------------------
-void ParamTable::computeSizes(ValueMap const &iHeader,
-                              ParamMap const &iParams,
-                              std::map<Key, std::string::size_type> &oSizes) const
+std::string::size_type ParamTable::computeSizes(ValueMap const &iHeader,
+                                                ParamMap const &iParams,
+                                                std::map<Key, std::string::size_type> &oSizes) const
 {
+  std::string::size_type totalSize = 0;
+
   for(auto key : fParamDisplay.keys())
   {
     std::string::size_type size = iHeader.empty() ? 0 : iHeader.at(key).size();
@@ -147,7 +158,10 @@ void ParamTable::computeSizes(ValueMap const &iHeader,
 
     }
     oSizes[key] = size;
+    totalSize += size;
   }
+
+  return totalSize;
 }
 
 }
