@@ -148,6 +148,10 @@ tresult GUIState::init(VstParametersSPtr iVstParameters, IMessageProducer *iMess
 {
   fVstParameters = std::move(iVstParameters);
   fMessageProducer = iMessageProducer;
+  if(fPluginParameters.getGUISaveStateOrder().fVersion == 0)
+  {
+    DLOG_F(WARNING, "GUI Save State version is using the default entry order. Use Parameters::setGUISaveStateOrder to set explicitely.");
+  }
   return kResultOk;
 }
 

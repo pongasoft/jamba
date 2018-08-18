@@ -383,6 +383,11 @@ tresult RTState::init()
     computeLatestState();
   }
 
+  if(fPluginParameters.getRTSaveStateOrder().fVersion == 0)
+  {
+    DLOG_F(WARNING, "RT Save State version is using the default entry order. Use Parameters::setRTSaveStateOrder to set explicitely.");
+  }
+
   return result;
 }
 
