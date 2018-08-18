@@ -201,9 +201,7 @@ tresult RTState::readNewState(IBStreamer &iStreamer)
 
   if(normalizedState)
   {
-#ifdef JAMBA_DEBUG_LOGGING
-    DLOG_F(INFO, "RTState::readNewState - %s", normalizedState->toString().c_str());
-#endif
+    afterReadNewState(normalizedState.get());
 
     // atomically copy it for access later by RT thread in before processing
     fStateUpdate.push(normalizedState.get());
@@ -223,15 +221,9 @@ tresult RTState::writeLatestState(IBStreamer &oStreamer)
 
   fLatestState.get(normalizedState.get());
 
-  tresult res = fPluginParameters.writeRTState(normalizedState.get(), oStreamer);
+  beforeWriteNewState(normalizedState.get());
 
-  if(res == kResultOk)
-  {
-#ifdef JAMBA_DEBUG_LOGGING
-    DLOG_F(INFO, "RTState::writeLatestState - %s", normalizedState->toString().c_str());
-#endif
-  }
-  return res;
+  return fPluginParameters.writeRTState(normalizedState.get(), oStreamer);
 }
 
 //------------------------------------------------------------------------
@@ -389,9 +381,6 @@ tresult RTState::init()
   if(result == kResultOk)
   {
     computeLatestState();
-#ifdef JAMBA_DEBUG_LOGGING
-    DLOG_F(INFO, "RT Init State - %s", fNormalizedStateRT->toString().c_str());
-#endif
   }
 
   return result;

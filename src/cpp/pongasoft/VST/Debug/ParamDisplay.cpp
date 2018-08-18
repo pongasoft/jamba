@@ -48,6 +48,23 @@ ParamDisplay::Value ParamDisplay::getValue(ParamID iParamID, Key iKey) const
 }
 
 //------------------------------------------------------------------------
+// ParamDisplay::getValue
+//------------------------------------------------------------------------
+std::shared_ptr<RawVstParamDef> ParamDisplay::getRawVstParamDef(ParamID iParamID) const
+{
+  if(fParameters)
+    return fParameters->getRawVstParamDef(iParamID);
+
+  if(fRTState)
+    return fRTState->fPluginParameters.getRawVstParamDef(iParamID);
+
+  if(fGUIState)
+    return fGUIState->fPluginParameters.getRawVstParamDef(iParamID);
+
+  return nullptr;
+}
+
+//------------------------------------------------------------------------
 // ParamDisplay::getValues
 //------------------------------------------------------------------------
 ParamDisplay::ValueMap ParamDisplay::getValues(ParamID iParamID, std::vector<Key> const &iKeys) const
@@ -75,6 +92,50 @@ ParamDisplay::ParamMap ParamDisplay::getParamMap(const std::vector<ParamID> &iPa
 
   for(auto paramID : paramIDs)
     map[paramID] = getValues(paramID);
+
+  return map;
+}
+
+//------------------------------------------------------------------------
+// ParamDisplay::getParamMap
+//------------------------------------------------------------------------
+ParamDisplay::ParamMap ParamDisplay::getParamMap(NormalizedState const &iNormalizedState) const
+{
+  ParamMap map{};
+
+  for(int i = 0; i < iNormalizedState.getCount(); i++)
+  {
+    auto paramID = iNormalizedState.fSaveOrder->fOrder[i];
+    auto value = iNormalizedState.fValues[i];
+    auto valueMap = getValues(paramID);
+
+    for(auto key : keys())
+    {
+      switch(key)
+      {
+        case Key::kNormalizedValue:
+          valueMap[key] = getValue(value);
+          break;
+
+        case Key::kValue:
+        {
+          auto paramDef = getRawVstParamDef(paramID);
+          if(paramDef)
+          {
+            String128 s;
+            paramDef->toString(value, s);
+            valueMap[key] = String(s).text8();
+          }
+          break;
+        }
+
+        default:
+          break;
+      }
+    }
+
+    map[paramID] = valueMap;
+  }
 
   return map;
 }
@@ -160,9 +221,9 @@ std::string ParamDisplay::getValue(std::shared_ptr<RawVstParamDef> const &iParam
       return iParamDef->fOwner == IParamDef::Owner::kGUI ? "ui" : "rt";
     case Key::kTransient:
       return iParamDef->fTransient ? "x" : "";
-    case Key::kDefault:
+    case Key::kNormalizedDefault:
       return getValue(iParamDef->fDefaultValue);
-    case Key::kDefaultAsString:
+    case Key::kDefault:
     {
       String128 s;
       iParamDef->toString(iParamDef->fDefaultValue, s);
@@ -192,10 +253,10 @@ std::string ParamDisplay::getValue(std::unique_ptr<RT::RTRawVstParameter> const 
 {
   switch(iKey)
   {
-    case Key::kValue:
+    case Key::kNormalizedValue:
       return getValue(iParam->getNormalizedValue());
 
-    case Key::kValueAsString:
+    case Key::kValue:
     {
       String128 s;
       iParam->getParamDef()->toString(iParam->getNormalizedValue(), s);
@@ -214,7 +275,7 @@ std::string ParamDisplay::getValue(std::unique_ptr<RT::IRTJmbInParameter> const 
 {
   switch(iKey)
   {
-    case Key::kValueAsString:
+    case Key::kValue:
     {
       std::ostringstream s;
       iParam->writeToStream(s);
@@ -233,7 +294,7 @@ std::string ParamDisplay::getValue(std::unique_ptr<RT::IRTJmbOutParameter> const
 {
   switch(iKey)
   {
-    case Key::kValueAsString:
+    case Key::kValue:
     {
       std::ostringstream s;
       iParam->writeToStream(s);
@@ -262,7 +323,7 @@ std::string ParamDisplay::getValue(std::shared_ptr<IJmbParamDef> const &iParamDe
       return iParamDef->fOwner == IParamDef::Owner::kGUI ? "ui" : "rt";
     case Key::kTransient:
       return iParamDef->fTransient ? "x" : "";
-    case Key::kDefaultAsString:
+    case Key::kDefault:
     {
       std::ostringstream s;
       iParamDef->writeDefaultValue(s);
@@ -284,10 +345,10 @@ std::string ParamDisplay::getValue(std::unique_ptr<GUI::GUIRawVstParameter> cons
 {
   switch(iKey)
   {
-    case Key::kValue:
+    case Key::kNormalizedValue:
       return getValue(iParam->getValue());
 
-    case Key::kValueAsString:
+    case Key::kValue:
     {
       String128 s;
       iParameters->getRawVstParamDef(iParam->getParamID())->toString(iParam->getValue(), s);
@@ -306,7 +367,7 @@ std::string ParamDisplay::getValue(GUI::IGUIJmbParameter const &iParam, Key iKey
 {
   switch(iKey)
   {
-    case Key::kValueAsString:
+    case Key::kValue:
     {
       std::ostringstream s;
       iParam.writeToStream(s);
@@ -336,13 +397,13 @@ std::string ParamDisplay::getValue(Key iKey) const
       return "OW";
     case Key::kTransient:
       return "TRS";
+    case Key::kNormalizedDefault:
+      return "DEF.N";
     case Key::kDefault:
-      return "DEF.V";
-    case Key::kDefaultAsString:
       return "DEF.S";
+    case Key::kNormalizedValue:
+      return "VAL.N";
     case Key::kValue:
-      return "VAL.V";
-    case Key::kValueAsString:
       return "VAL.S";
     case Key::kSteps:
       return "STP";
@@ -377,26 +438,12 @@ ParamDisplay::Value ParamDisplay::getValue(ParamValue iValue) const
   return s.str();
 }
 
-using Key = ParamDisplay::Key;
-
-std::vector<Key> DEFAULT_VST_KEYS { // NOLINT
-  Key::kID, Key::kTitle, Key::kType, Key::kOwner, Key::kTransient, Key::kShared,
-  Key::kDefault, Key::kDefaultAsString,
-  Key::kSteps, Key::kFlags, Key::kShortTitle,
-  Key::kPrecision, Key::kUnitID, Key::kUnits
-};
-
-std::vector<Key> DEFAULT_STATE_KEYS { // NOLINT
-  Key::kID, Key::kTitle, Key::kValue, Key::kValueAsString
-};
-
 //------------------------------------------------------------------------
 // ParamDisplay::from
 //------------------------------------------------------------------------
 ParamDisplay ParamDisplay::from(Parameters const &iParams)
 {
   return ParamDisplay{iParams}
-    .keys(DEFAULT_VST_KEYS)
     .ids(iParams.getAllRegistrationOrder())
     ;
 }
@@ -407,7 +454,6 @@ ParamDisplay ParamDisplay::from(Parameters const &iParams)
 ParamDisplay ParamDisplay::from(RT::RTState const *iState, bool iSaveStateOnly)
 {
   return ParamDisplay{iState}
-    .keys(DEFAULT_STATE_KEYS)
     .ids(iSaveStateOnly ? iState->fPluginParameters.getRTSaveStateOrder().fOrder : iState->getAllRegistrationOrder())
     ;
 }
@@ -430,12 +476,9 @@ ParamDisplay ParamDisplay::from(GUI::GUIState const *iState, bool iSaveStateOnly
   }
 
   return ParamDisplay{iState}
-    .keys(DEFAULT_STATE_KEYS)
     .ids(ids)
     ;
 }
-
-
 
 }
 }

@@ -64,9 +64,6 @@ tresult GUIState::readRTState(IBStreamer &iStreamer)
 
   if(normalizedState)
   {
-#ifdef JAMBA_DEBUG_LOGGING
-    DLOG_F(INFO, "GUIState::readRTState - %s", normalizedState->toString().c_str());
-#endif
     return setParamNormalized(normalizedState.get());
   }
 
@@ -93,11 +90,6 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
     }
   }
 
-#ifdef JAMBA_DEBUG_LOGGING
-  std::ostringstream state{};
-  state << "{v=" << saveOrder.fVersion;
-#endif
-
   tresult res = kResultOk;
 
   for(int i = 0; i < saveOrder.getCount(); i++)
@@ -109,26 +101,12 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
       // not found => regular parameter
       ParamValue value = fPluginParameters.readNormalizedValue(paramID, iStreamer);
       fVstParameters->setParamNormalized(paramID, value);
-      
-#ifdef JAMBA_DEBUG_LOGGING
-      state << ", " << paramID << "=" << value;
-#endif
     }
-    
     else
     {
       res |= iter->second->readFromStream(iStreamer);
-
-#ifdef JAMBA_DEBUG_LOGGING
-      state << ", " << paramID;
-#endif
     }
   }
-
-#ifdef JAMBA_DEBUG_LOGGING
-  state << "}";
-  DLOG_F(INFO, "GUIState::readGUIState - %s", state.str().c_str());
-#endif
 
   return res;
 }
@@ -143,11 +121,6 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
   if(saveOrder.fVersion >= 0)
     oStreamer.writeInt16u(static_cast<uint16>(saveOrder.fVersion));
 
-#ifdef JAMBA_DEBUG_LOGGING
-  std::ostringstream state{};
-  state << "{v=" << saveOrder.fVersion;
-#endif
-
   tresult res = kResultOk;
 
   for(int i = 0; i < saveOrder.getCount(); i++)
@@ -158,25 +131,12 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
     {
       ParamValue value = fVstParameters->getParamNormalized(paramID);
       oStreamer.writeDouble(value);
-
-#ifdef JAMBA_DEBUG_LOGGING
-      state << ", " << paramID << "=" << value;
-#endif
     }
     else
     {
       res |= iter->second->writeToStream(oStreamer);
-
-      #ifdef JAMBA_DEBUG_LOGGING
-      state << ", " << paramID;
-#endif
     }
   }
-
-#ifdef JAMBA_DEBUG_LOGGING
-  state << "}";
-  DLOG_F(INFO, "GUIState::writeGUIState - %s", state.str().c_str());
-#endif
 
   return res;
 }

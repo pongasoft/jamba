@@ -1,5 +1,3 @@
-#include <utility>
-
 /*
  * Copyright (c) 2018 pongasoft
  *
@@ -30,7 +28,8 @@ namespace VST {
 namespace Debug {
 
 /**
- * This helper class is used to display the parameters (vst/jmb) */
+ * This helper class is used to display the parameters (vst/jmb)
+ * WARNING: this class is allocating memory and as a result should be used in RT only during development! */
 class ParamDisplay
 {
 public:
@@ -41,10 +40,10 @@ public:
     kTitle,
     kOwner,
     kTransient,
+    kNormalizedDefault,
     kDefault,
-    kDefaultAsString,
+    kNormalizedValue,
     kValue,
-    kValueAsString,
     kSteps,
     kFlags,
     kShortTitle,
@@ -66,7 +65,7 @@ public:
 
   // builder pattern to initialize the display
   ParamDisplay &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
-  ParamDisplay &keys(std::vector<Key> const &iColumns) { fKeys = iColumns; return *this; };
+  ParamDisplay &keys(std::vector<Key> const &iKeys) { fKeys = iKeys; return *this; };
   ParamDisplay &key(Key iKey) { fKeys.emplace_back(iKey); return *this; }
   ParamDisplay &ids(std::vector<ParamID> const &iParamIDs) { fParamIDs = iParamIDs; return *this; };
   ParamDisplay &id(ParamID iParamID) { fParamIDs.emplace_back(iParamID); return *this; };
@@ -75,6 +74,7 @@ public:
   Value getValue(ParamID iParamID, Key iKey) const;
   ValueMap getValues(ParamID iParamID, std::vector<Key> const &iKeys = {}) const;
   ParamMap getParamMap(std::vector<ParamID> const &iParamIDs = {}) const;
+  ParamMap getParamMap(NormalizedState const &iNormalizedState) const;
 
   std::vector<Key> const &keys() const { return fKeys; }
   std::vector<ParamID> const &ids() const { return fParamIDs; }
@@ -95,19 +95,25 @@ protected:
   // convenient call which uses the precision to render the raw value
   Value getValue(ParamValue iValue) const;
 
+  // getRawVstParamDef (nullptr if not found)
+  std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const;
+
 public:
   /**
-   * Shortcut to create a table for all registered parameter (definition not current value)
+   * Shortcut to create a table for all registered parameter (definition not current value). Use all registered
+   * parameters
    */
   static ParamDisplay from(Parameters const &iParams);
 
   /**
-   * Shortcut to create a table for the RTState (current values)
+   * Shortcut to create a table for the RTState (current values). Use all registered parameters or the one used
+   * in save state only.
    */
   static ParamDisplay from(RT::RTState const *iState, bool iSaveStateOnly = false);
 
   /**
-   * Shortcut to create a table for the GUIState (current values)
+   * Shortcut to create a table for the GUIState (current values). Use all registered parameters or the one used
+   * in save state only.
    */
   static ParamDisplay from(GUI::GUIState const *iState, bool iSaveStateOnly = false);
 

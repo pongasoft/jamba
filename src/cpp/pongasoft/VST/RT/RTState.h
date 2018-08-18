@@ -66,7 +66,7 @@ public:
 
   /**
    * Call this method after adding all the parameters. If using the RT processor, it will happen automatically. */
-  tresult init();
+  virtual tresult init();
 
   /**
    * This method should be call at the beginning of the process(ProcessData &data) method before doing anything else.
@@ -170,6 +170,14 @@ protected:
    * Called from the RT thread from afterProcessing to compute the latest state. Can be overridden
    */
   virtual void computeLatestState(NormalizedState *oLatestState) const;
+
+  /**
+   * Gives a chance to subclasses to tweak and/or display the state after being read */
+  virtual void afterReadNewState(NormalizedState *iState) {};
+
+  /**
+ * Gives a chance to subclasses to tweak and/or display the state before being written */
+  virtual void beforeWriteNewState(NormalizedState *iState) {};
 
 private:
   // need to allocate memory only at creation time for RT!

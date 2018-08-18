@@ -43,9 +43,11 @@ std::string ParamTable::toString() const
 
   std::ostringstream s;
 
-  for(auto &row : rowsVector)
+  for(int i = 0; i < rowsVector.size(); i++)
   {
-    s << row << std::endl;
+    if(i > 0)
+      s << std::endl;
+    s << rowsVector[i];
   }
 
   return s.str();
@@ -54,9 +56,12 @@ std::string ParamTable::toString() const
 //------------------------------------------------------------------------
 // ParamTable::print
 //------------------------------------------------------------------------
-void ParamTable::print() const
+void ParamTable::print(std::string const &iFirstLine) const
 {
   auto rowsVector = rows();
+
+  if(!iFirstLine.empty())
+    DLOG_F(INFO, "%s", iFirstLine.c_str());
 
   for(auto &row : rowsVector)
   {
@@ -64,20 +69,17 @@ void ParamTable::print() const
   }
 }
 
-
 //------------------------------------------------------------------------
 // ParamTable::rows
 //------------------------------------------------------------------------
-std::vector<std::string> ParamTable::rows() const
+std::vector<std::string> ParamTable::rows(ParamDisplay::ParamMap const &iParamMap) const
 {
   std::vector<std::string> res{};
 
   ValueMap header = fDisplayHeader ? computeHeader() : ValueMap{};
 
-  ParamMap paramMap = fParamDisplay.getParamMap();
-
   std::map<Key, std::string::size_type> sizes{};
-  std::string::size_type totalSize = computeSizes(header, paramMap, sizes);
+  std::string::size_type totalSize = computeSizes(header, iParamMap, sizes);
 
   std::string cellStart = !fDisplayCellSeparation ? "" : "| ";
   std::string cellEnd = " ";
@@ -104,7 +106,7 @@ std::vector<std::string> ParamTable::rows() const
 
   for(auto paramID : fParamDisplay.ids())
   {
-    auto const &param = paramMap.at(paramID);
+    auto const &param = iParamMap.at(paramID);
 
     std::ostringstream s;
 
@@ -122,6 +124,57 @@ std::vector<std::string> ParamTable::rows() const
   }
 
   return res;
+}
+
+//------------------------------------------------------------------------
+// ParamTable::rows
+//------------------------------------------------------------------------
+std::vector<std::string> ParamTable::rows() const
+{
+  return rows(fParamDisplay.getParamMap());
+}
+
+//------------------------------------------------------------------------
+// ParamTable::rows
+//------------------------------------------------------------------------
+std::vector<std::string> ParamTable::rows(NormalizedState const &iNormalizedState) const
+{
+  return rows(fParamDisplay.getParamMap(iNormalizedState));
+}
+
+//------------------------------------------------------------------------
+// ParamTable::toString
+//------------------------------------------------------------------------
+std::string ParamTable::toString(NormalizedState const &iNormalizedState) const
+{
+  auto rowsVector = rows(iNormalizedState);
+
+  std::ostringstream s;
+
+  for(int i = 0; i < rowsVector.size(); i++)
+  {
+    if(i > 0)
+      s << std::endl;
+    s << rowsVector[i];
+  }
+
+  return s.str();
+}
+
+//------------------------------------------------------------------------
+// ParamTable::print
+//------------------------------------------------------------------------
+void ParamTable::print(NormalizedState const &iNormalizedState, std::string const &iFirstLine) const
+{
+  auto rowsVector = rows(iNormalizedState);
+
+  if(!iFirstLine.empty())
+    DLOG_F(INFO, "%s", iFirstLine.c_str());
+
+  for(auto &row : rowsVector)
+  {
+    DLOG_F(INFO, "%s", row.c_str());
+  }
 }
 
 //------------------------------------------------------------------------
@@ -162,6 +215,44 @@ std::string::size_type ParamTable::computeSizes(ValueMap const &iHeader,
   }
 
   return totalSize;
+}
+
+using Key = ParamDisplay::Key;
+
+std::vector<Key> DEFAULT_VST_KEYS { // NOLINT
+  Key::kID, Key::kTitle, Key::kType, Key::kOwner, Key::kTransient, Key::kShared,
+  Key::kNormalizedDefault, Key::kDefault,
+  Key::kSteps, Key::kFlags, Key::kShortTitle,
+  Key::kPrecision, Key::kUnitID, Key::kUnits
+};
+
+std::vector<Key> DEFAULT_STATE_KEYS { // NOLINT
+  Key::kID, Key::kTitle, Key::kNormalizedValue, Key::kValue
+};
+
+
+//------------------------------------------------------------------------
+// ParamTable::from
+//------------------------------------------------------------------------
+ParamTable ParamTable::from(Parameters const &iParams)
+{
+  return ParamTable(ParamDisplay::from(iParams).keys(DEFAULT_VST_KEYS));
+}
+
+//------------------------------------------------------------------------
+// ParamTable::from
+//------------------------------------------------------------------------
+ParamTable ParamTable::from(RT::RTState const *iState, bool iSaveStateOnly)
+{
+  return ParamTable(ParamDisplay::from(iState, iSaveStateOnly).keys(DEFAULT_STATE_KEYS));
+}
+
+//------------------------------------------------------------------------
+// ParamTable::from
+//------------------------------------------------------------------------
+ParamTable ParamTable::from(GUI::GUIState const *iState, bool iSaveStateOnly)
+{
+  return ParamTable(ParamDisplay::from(iState, iSaveStateOnly).keys(DEFAULT_STATE_KEYS));
 }
 
 }

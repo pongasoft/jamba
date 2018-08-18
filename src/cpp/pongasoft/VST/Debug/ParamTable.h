@@ -1,7 +1,3 @@
-#include <utility>
-
-#include <utility>
-
 /*
  * Copyright (c) 2018 pongasoft
  *
@@ -35,7 +31,8 @@ namespace VST {
 namespace Debug {
 
 /**
- * This helper class is used to display the parameters (vst/jmb) */
+ * This helper class is used to display the parameters (vst/jmb) in a table
+ * WARNING: this class is allocating memory and as a result should be used in RT only during development! */
 class ParamTable
 {
 public:
@@ -44,6 +41,10 @@ public:
 public:
   // builder pattern to initialize the table
   ParamTable &precision(int32 iPrecision) { fParamDisplay.precision(iPrecision); return *this; }
+  ParamTable &keys(std::vector<ParamDisplay::Key> const &iKeys) { fParamDisplay.keys(iKeys); return *this; };
+  ParamTable &key(ParamDisplay::Key iKey) { fParamDisplay.key(iKey); return *this; }
+  ParamTable &ids(std::vector<ParamID> const &iParamIDs) { fParamDisplay.ids(iParamIDs); return *this; };
+  ParamTable &id(ParamID iParamID) { fParamDisplay.id(iParamID); return *this; };
   ParamTable &header(bool iDisplayHeader = true) { fDisplayHeader = iDisplayHeader; return *this; };
   ParamTable &showHeader() { return header(true); };
   ParamTable &hideHeader() { return header(false); };
@@ -60,14 +61,23 @@ public:
   ParamTable &compact() { return hideHeaderSeparation().hideLineSeparation().hideCellSeparation(); };
   ParamTable &full() { return showHeaderSeparation().showLineSeparation().showCellSeparation(); };
 
-  // returns a tabular representation of the table
-  std::string toString() const;
-
   // returns the table as a vector of rows
   std::vector<std::string> rows() const;
 
+  // returns a tabular representation of the params
+  std::string toString() const;
+
   // print the table
-  void print() const;
+  void print(std::string const &iFirstLine = "") const;
+
+  // returns the table as a vector of rows
+  std::vector<std::string> rows(NormalizedState const &iNormalizedState) const;
+
+  // returns a tabular representation of the params
+  std::string toString(NormalizedState const &iNormalizedState) const;
+
+  // print the table
+  void print(NormalizedState const &iNormalizedState, std::string const &iFirstLine = "") const;
 
 protected:
   // computeSizes
@@ -78,27 +88,24 @@ protected:
   // computeHeader
   ParamDisplay::ValueMap computeHeader() const;
 
+  // returns the table as a vector of rows
+  std::vector<std::string> rows(ParamDisplay::ParamMap const &iParamMap) const;
+
 public:
   /**
    * Shortcut to create a table for all registered parameter (definition not current value)
    */
-  static ParamTable from(Parameters const &iParams) { return ParamTable{ParamDisplay::from(iParams)}; };
+  static ParamTable from(Parameters const &iParams);
 
   /**
    * Shortcut to create a table for the RTState (current values)
    */
-  static ParamTable from(RT::RTState const *iState, bool iSaveStateOnly = false)
-  {
-    return ParamTable{ParamDisplay::from(iState, iSaveStateOnly)};
-  };
+  static ParamTable from(RT::RTState const *iState, bool iSaveStateOnly = false);
 
   /**
    * Shortcut to create a table for the GUIState (current values)
    */
-  static ParamTable from(GUI::GUIState const *iState, bool iSaveStateOnly = false)
-  {
-    return ParamTable{ParamDisplay::from(iState, iSaveStateOnly)};
-  }
+  static ParamTable from(GUI::GUIState const *iState, bool iSaveStateOnly = false);
 
 private:
   bool fDisplayHeader{true};
