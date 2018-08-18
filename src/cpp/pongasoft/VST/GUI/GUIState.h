@@ -26,7 +26,7 @@
 
 namespace pongasoft {
 namespace VST {
-namespace Debug { class ParamTable; }
+namespace Debug { class ParamDisplay; }
 namespace GUI {
 
 using namespace Params;
@@ -120,7 +120,7 @@ public:
   std::vector<ParamID> const &getAllRegistrationOrder() const { return fAllRegistrationOrder; }
 
   // gives access for debug
-  friend class Debug::ParamTable;
+  friend class Debug::ParamDisplay;
 
 protected:
   // the parameters

@@ -30,7 +30,7 @@
 namespace pongasoft {
 namespace VST {
 
-namespace Debug { class ParamTable; }
+namespace Debug { class ParamDisplay; }
 
 /**
  * This is the class which maintains all the registered parameters
@@ -247,7 +247,7 @@ public:
   std::vector<ParamID> const &getAllRegistrationOrder() const { return fAllRegistrationOrder; }
 
   // gives access for debug
-  friend class Debug::ParamTable;
+  friend class Debug::ParamDisplay;
 
 protected:
   // internally called by the builder

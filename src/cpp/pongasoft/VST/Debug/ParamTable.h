@@ -1,5 +1,7 @@
 #include <utility>
 
+#include <utility>
+
 /*
  * Copyright (c) 2018 pongasoft
  *
@@ -23,6 +25,9 @@
 #include <pongasoft/VST/Parameters.h>
 #include <pongasoft/VST/RT/RTState.h>
 #include <pongasoft/VST/GUI/GUIState.h>
+
+#include "ParamDisplay.h"
+
 #include <string>
 
 namespace pongasoft {
@@ -34,42 +39,13 @@ namespace Debug {
 class ParamTable
 {
 public:
-  enum class Column
-  {
-    kID,
-    kType,
-    kTitle,
-    kOwner,
-    kTransient,
-    kDefault,
-    kDefaultAsString,
-    kValue,
-    kValueAsString,
-    kSteps,
-    kFlags,
-    kShortTitle,
-    kPrecision,
-    kUnitID,
-    kUnits,
-    kShared
-  };
+  explicit ParamTable(ParamDisplay iParamDisplay) : fParamDisplay{std::move(iParamDisplay)} {}
 
 public:
-  using Row = std::map<Column, std::string>;
-  using Rows = std::vector<Row>;
-
   // builder pattern to initialize the table
-  ParamTable &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
-  ParamTable &columns(std::vector<Column> const &iColumns) { fColumns = iColumns; return *this; };
-  ParamTable &column(Column iColumn) { fColumns.emplace_back(iColumn); return *this; }
+  ParamTable &precision(int32 iPrecision) { fParamDisplay.precision(iPrecision); return *this; }
   ParamTable &header(bool iDisplayHeader = true) { fDisplayHeader = iDisplayHeader; return *this; };
   ParamTable &headerSeparation(bool iDisplayHeaderSeparation = true) { fDisplayHeaderSeparation = iDisplayHeaderSeparation; return *this; };
-  ParamTable &ids(std::vector<ParamID> const &iParamIDs) { fParamIDs = iParamIDs; return *this; };
-  ParamTable &id(ParamID iParamID) { fParamIDs.emplace_back(iParamID); return *this; };
-  ParamTable &rows(Parameters const &iParams) { fParameters = &iParams; return *this; }
-  ParamTable &rows(Parameters const *iParams) { fParameters = iParams; return *this; }
-  ParamTable &rows(RT::RTState const *iState) { fRTState = iState; return *this; };
-  ParamTable &rows(GUI::GUIState const *iState) { fGUIState = iState; return *this; };
 
   // returns a tabular representation of the table
   std::string toString() const;
@@ -80,60 +56,42 @@ public:
   // print the table
   void print() const;
 
-  // retrieve each cell value
-  std::string getHeaderName(Column iColumn) const;
-  std::string getValue(std::shared_ptr<RawVstParamDef> const &iParamDef, Column iColumn) const;
-  std::string getValue(std::shared_ptr<IJmbParamDef> const &iParamDef, Column iColumn) const;
-  std::string getValue(std::unique_ptr<RT::RTRawVstParameter> const &iParam, Column iColumn) const;
-  std::string getValue(std::unique_ptr<RT::IRTJmbInParameter> const &iParam, Column iColumn) const;
-  std::string getValue(std::unique_ptr<RT::IRTJmbOutParameter> const &iParam, Column iColumn) const;
-  std::string getValue(std::unique_ptr<GUI::GUIRawVstParameter> const &iParam, Column iColumn, Parameters const *iParameters) const;
-  std::string getValue(GUI::IGUIJmbParameter const &iParam, Column iColumn) const;
-
 protected:
-  // convenient call which uses the precision to render the raw value
-  std::string toString(ParamValue iValue) const;
-
   // computeSizes
-  void computeSizes(Row const &iHeader, Rows const &iRows, std::map<Column, std::string::size_type> &oSizes) const;
+  void computeSizes(ParamDisplay::ValueMap const &iHeader,
+                    ParamDisplay::ParamMap const &iParams,
+                    std::map<ParamDisplay::Key, std::string::size_type> &oSizes) const;
 
   // computeHeader
-  Row computeHeader() const;
-
-  // generic call to iterate over all columns
-  template<typename T, typename... Args>
-  void computeParamRow(T const &iParam, Row &oRow, Args... args) const;
-
-  void computeRows(Parameters const *iParams, Rows &oRows) const;
-  void computeRows(RT::RTState const *iState, Rows &oRows) const;
-  void computeRows(GUI::GUIState const *iState, Rows &oRows) const;
+  ParamDisplay::ValueMap computeHeader() const;
 
 public:
   /**
    * Shortcut to create a table for all registered parameter (definition not current value)
    */
-  static ParamTable from(Parameters const &iParams);
+  static ParamTable from(Parameters const &iParams) { return ParamTable{ParamDisplay::from(iParams)}; };
 
   /**
    * Shortcut to create a table for the RTState (current values)
    */
-  static ParamTable from(RT::RTState const *iState, bool iSaveStateOnly = false);
+  static ParamTable from(RT::RTState const *iState, bool iSaveStateOnly = false)
+  {
+    return ParamTable{ParamDisplay::from(iState, iSaveStateOnly)};
+  };
 
   /**
    * Shortcut to create a table for the GUIState (current values)
    */
-  static ParamTable from(GUI::GUIState const *iState, bool iSaveStateOnly = false);
+  static ParamTable from(GUI::GUIState const *iState, bool iSaveStateOnly = false)
+  {
+    return ParamTable{ParamDisplay::from(iState, iSaveStateOnly)};
+  }
 
 private:
   bool fDisplayHeader{true};
   bool fDisplayHeaderSeparation{true};
-  std::vector<Column> fColumns{};
-  std::vector<ParamID> fParamIDs{};
-  int32 fPrecision{3};
 
-  Parameters const *fParameters{};
-  RT::RTState const *fRTState{};
-  GUI::GUIState const *fGUIState{};
+  ParamDisplay fParamDisplay;
 };
 
 }
