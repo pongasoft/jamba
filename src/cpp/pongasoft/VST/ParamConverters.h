@@ -88,6 +88,12 @@ public:
 class BooleanParamConverter : public IParamConverter<bool>
 {
 public:
+  explicit BooleanParamConverter(char16 const *iFalseString = STR16("Off"),
+                                 char16 const *iTrueString = STR16("On")) :
+    fFalseString{iFalseString},
+    fTrueString{iTrueString}
+  {}
+
   inline int getStepCount() const override { return 1; }
 
   inline ParamValue normalize(bool const &iValue) const override
@@ -104,10 +110,14 @@ public:
   {
     Steinberg::UString wrapper(oString, str16BufferSize(String128));
     if(iValue)
-      wrapper.assign(STR16("On"));
+      wrapper.assign(fTrueString);
     else
-      wrapper.assign(STR16("Off"));
+      wrapper.assign(fFalseString);
   }
+
+protected:
+  char16 const *fFalseString;
+  char16 const *fTrueString;
 };
 
 /**
@@ -119,7 +129,7 @@ using Percent = double;
  * A trivial percent converter. The toString method returns the value as a percentage (precision is used to adjust
  * how many digits to use for display)
  */
-class PercentParamConverter : IParamConverter<Percent>
+class PercentParamConverter : public IParamConverter<Percent>
 {
 public:
 
@@ -146,7 +156,7 @@ public:
  * documentation.
  */
 template<int StepCount>
-class DiscreteValueParamConverter : IParamConverter<int>
+class DiscreteValueParamConverter : public IParamConverter<int>
 {
 public:
   using ParamType = int;
