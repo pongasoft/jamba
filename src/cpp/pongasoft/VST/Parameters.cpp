@@ -174,8 +174,6 @@ tresult Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
     return kInvalidArgument;
   }
 
-  fVstParams[paramID] = iParamDef;
-
   fVstRegistrationOrder.emplace_back(paramID);
   fAllRegistrationOrder.emplace_back(paramID);
 
@@ -186,6 +184,8 @@ tresult Parameters::addVstParamDef(std::shared_ptr<RawVstParamDef> iParamDef)
     else
       fRTSaveStateOrder.fOrder.emplace_back(paramID);
   }
+
+  fVstParams[paramID] = std::move(iParamDef);
 
   return kResultOk;
 }
@@ -209,12 +209,12 @@ tresult Parameters::addJmbParamDef(std::shared_ptr<IJmbParamDef> iParamDef)
     return kInvalidArgument;
   }
 
-  fJmbParams[paramID] = iParamDef;
-
   fAllRegistrationOrder.emplace_back(paramID);
 
   if(!iParamDef->fTransient && iParamDef->fOwner == IParamDef::Owner::kGUI)
     fGUISaveStateOrder.fOrder.emplace_back(paramID);
+
+  fJmbParams[paramID] = std::move(iParamDef);
 
   return kResultOk;
 }
@@ -366,6 +366,45 @@ tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSave
   fGUISaveStateOrder = {iSaveOrder.fVersion, newIds};
 
   return res;
+}
+
+//------------------------------------------------------------------------
+// Parameters::RawVstParamDefBuilder::add
+//------------------------------------------------------------------------
+RawVstParam Parameters::RawVstParamDefBuilder::add() const
+{
+  return fParameters->add(*this);
+}
+
+//------------------------------------------------------------------------
+// Parameters::add
+//------------------------------------------------------------------------
+RawVstParam Parameters::add(RawVstParamDefBuilder const &iBuilder)
+{
+  auto param = std::make_shared<RawVstParamDef>(iBuilder.fParamID,
+                                                iBuilder.fTitle,
+                                                iBuilder.fUnits,
+                                                iBuilder.fDefaultValue,
+                                                iBuilder.fStepCount,
+                                                iBuilder.fFlags,
+                                                iBuilder.fUnitID,
+                                                iBuilder.fShortTitle,
+                                                iBuilder.fPrecision,
+                                                iBuilder.fOwner,
+                                                iBuilder.fTransient);
+
+  if(addVstParamDef(param) == kResultOk)
+    return param;
+  else
+    return nullptr;
+}
+
+//------------------------------------------------------------------------
+// Parameters::raw
+//------------------------------------------------------------------------
+Parameters::RawVstParamDefBuilder Parameters::raw(ParamID iParamID, const TChar *iTitle)
+{
+  return Parameters::RawVstParamDefBuilder(this, iParamID, iTitle);
 }
 
 }

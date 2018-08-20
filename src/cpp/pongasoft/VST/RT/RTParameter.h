@@ -207,6 +207,9 @@ public:
   // getValue
   inline T const &getValue() const { return fPtr->getValue(); }
 
+  // value -- synonym
+  inline T const &value() const { return fPtr->getValue(); }
+
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
    * the change needs to be propagated to the VST sdk (using addToOutput). Use this version of the call if you want to
@@ -240,11 +243,67 @@ public:
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
   inline ParamType const *operator->() const { return &fPtr->getValue(); }
 
-  // getPreviousValue
+  // previous
   inline ParamType const &previous() const { return fPtr->getPreviousValue(); }
 
 private:
   RTVstParameter<T> *fPtr;
+};
+
+//------------------------------------------------------------------------
+// RTRawVstParam - wrapper to make writing the code much simpler and natural
+//------------------------------------------------------------------------
+/**
+ * This is the main class that the plugin should use as it exposes only the necessary methods of the param
+ * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
+ * behaves like T in many ways). */
+class RTRawVstParam
+{
+public:
+  RTRawVstParam(RTRawVstParameter *iPtr) : fPtr{iPtr}
+  {}
+
+  // getValue
+  inline ParamValue const &getValue() const { return fPtr->getNormalizedValue(); }
+
+  // value - synonym
+  inline ParamValue const &value() const { return fPtr->getNormalizedValue(); }
+
+  /**
+   * This method is typically called during the processing method when the plugin needs to update the value. In general
+   * the change needs to be propagated to the VST sdk (using addToOutput). Use this version of the call if you want to
+   * control when the update actually happens.
+   */
+  inline void update(ParamValue const &iNewValue) { fPtr->updateNormalizedValue(iNewValue); }
+
+  /**
+   * This method is typically called during the processing method when the plugin needs to update the value.
+   * This version will automatically propagate the change to the the VST sdk.
+   */
+  inline void update(ParamValue const &iNewValue, ProcessData &oData)
+  {
+    update(iNewValue);
+    addToOutput(oData);
+  }
+
+  /**
+   * @return true if the parameter has changed within the frame (previous and current are different)
+   */
+  inline bool hasChanged() const { return fPtr->hasChanged(); }
+
+  /**
+   * Add the current normalized value as an output parameter changes which propagates the change to the vst sdk
+   */
+  inline tresult addToOutput(ProcessData &oData) { return fPtr->addToOutput(oData); }
+
+  // allow to use the param as the ParamValue
+  inline operator ParamValue const &() const { return fPtr->getNormalizedValue(); }
+
+  // previous
+  inline ParamValue const &previous() const { return fPtr->getPreviousNormalizedValue(); }
+
+private:
+  RTRawVstParameter *fPtr;
 };
 
 }

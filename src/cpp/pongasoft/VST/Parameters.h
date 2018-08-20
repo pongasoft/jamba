@@ -50,6 +50,48 @@ public:
 
 public:
   /**
+   * Implements the builder pattern for ease of build. */
+  struct RawVstParamDefBuilder
+  {
+    // builder methods
+    RawVstParamDefBuilder &units(const TChar *iUnits) { fUnits = iUnits; return *this; }
+    RawVstParamDefBuilder &defaultValue(ParamValue iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
+    RawVstParamDefBuilder &stepCount(int32 iStepCount) { fStepCount = iStepCount; return *this;}
+    RawVstParamDefBuilder &flags(int32 iFlags) { fFlags = iFlags; return *this; }
+    RawVstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
+    RawVstParamDefBuilder &shortTitle(const TChar *iShortTitle) { fShortTitle = iShortTitle; return *this; }
+    RawVstParamDefBuilder &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
+    RawVstParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
+    RawVstParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
+    RawVstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+
+    // parameter factory method
+    RawVstParam add() const;
+
+    // fields
+    ParamID fParamID;
+    const TChar *fTitle;
+    const TChar *fUnits = nullptr;
+    ParamValue fDefaultValue{};
+    int32 fStepCount{0};
+    int32 fFlags = ParameterInfo::kCanAutomate;
+    UnitID fUnitID = kRootUnitId;
+    const TChar *fShortTitle = nullptr;
+    int32 fPrecision = 4;
+    IParamDef::Owner fOwner = IParamDef::Owner::kRT;
+    bool fTransient = false;
+
+    friend class Parameters;
+
+  protected:
+    RawVstParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
+      fParameters{iParameters}, fParamID{iParamID}, fTitle{iTitle} {}
+
+  private:
+    Parameters *fParameters;
+  };
+
+  /**
    * Implements the builder pattern for ease of build.
    * @tparam T the underlying type of the param */
   template<typename T>
@@ -139,6 +181,12 @@ public:
 
   // Ensure the class is polymorphinc
   virtual ~Parameters() = default;
+
+
+  /**
+   * Used from derived classes to build a parameter backed by a raw VST parameter
+   */
+  RawVstParamDefBuilder raw(ParamID iParamID, const TChar *iTitle);
 
   /**
    * Used from derived classes to build a parameter backed by a VST parameter
@@ -250,6 +298,9 @@ public:
   friend class Debug::ParamDisplay;
 
 protected:
+  // internally called by the builder
+  RawVstParam add(RawVstParamDefBuilder const &iBuilder);
+
   // internally called by the builder
   template<typename T>
   VstParam<T> add(VstParamDefBuilder<T> const &iBuilder);

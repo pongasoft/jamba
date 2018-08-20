@@ -85,7 +85,7 @@ public:
                  bool const iTransient) :
     IParamDef(iParamID, iTitle, iOwner, iTransient),
     fUnits{iUnits},
-    fDefaultValue{iDefaultNormalizedValue},
+    fDefaultValue{Utils::clampE(iDefaultNormalizedValue, 0.0, 1.0)},
     fStepCount{iStepCount},
     fFlags{iFlags},
     fUnitID{iUnitID},
@@ -106,7 +106,11 @@ public:
     return res;
   }
 
-  virtual void toString(ParamValue iNormalizedValue, String128 iString) const = 0;
+  // toString
+  virtual void toString(ParamValue iNormalizedValue, String128 iString) const
+  {
+    RawParamConverter::staticToString(iNormalizedValue, iString, fPrecision);
+  }
 
 public:
   const TChar *const fUnits;
@@ -174,12 +178,14 @@ public:
   }
 
   /**
-   * Using ParamConverter::toString
+   * Using fConverter::toString
    */
   void toString(ParamValue iNormalizedValue, String128 iString) const override
   {
     if(fConverter)
       fConverter->toString(fConverter->denormalize(iNormalizedValue), iString, fPrecision);
+    else
+      RawVstParamDef::toString(iNormalizedValue, iString);
   }
 
 public:
@@ -350,6 +356,7 @@ tresult JmbParamDef<T>::writeToMessage(const ParamType &iValue, Message &oMessag
 //------------------------------------------------------------------------
 template<typename T>
 using VstParam = std::shared_ptr<VstParamDef<T>>;
+using RawVstParam = std::shared_ptr<RawVstParamDef>;
 
 //------------------------------------------------------------------------
 // JmbParam - define shortcut notation

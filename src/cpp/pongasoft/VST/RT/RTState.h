@@ -49,18 +49,24 @@ public:
    * This method is called for each parameter managed by RTState. The order in which this method is called is
    * important and reflects the order that will be used when reading/writing state to the stream
    */
+  RTRawVstParam add(RawVstParam iParamDef);
+
+  /**
+   * This method is called for each parameter managed by RTState. The order in which this method is called is
+   * important and reflects the order that will be used when reading/writing state to the stream
+   */
   template<typename T>
   RTVstParam<T> add(VstParam<T> iParamDef);
 
   /**
-   * This method should be called to add an rt outbound ser parameter
+   * This method should be called to add an rt outbound jmb parameter
    */
   template<typename T>
   RTJmbOutParam<T> addJmbOut(JmbParam<T> iParamDef);
 
   /**
- * This method should be called to add an rt outbound ser parameter
- */
+   * This method should be called to add an rt inbound jmb parameter
+   */
   template<typename T>
   RTJmbInParam<T> addJmbIn(JmbParam<T> iParamDef);
 
@@ -207,7 +213,7 @@ RTVstParam<T> RTState::add(VstParam<T> iParamDef)
   // wrapper and the normal usage is that it will not outlive the map. Using shared_ptr would be the safest approach
   // but in the RT code, we want to make sure that we do not pay the penalty of managing a ref counter (which may
   // use a lock...)
-  auto rawPtr = new RTVstParameter<T>(iParamDef);
+  auto rawPtr = new RTVstParameter<T>(std::move(iParamDef));
   std::unique_ptr<RTRawVstParameter> rtParam{rawPtr};
   addRawParameter(std::move(rtParam));
   return rawPtr;
@@ -220,7 +226,7 @@ template<typename T>
 RTJmbOutParam<T> RTState::addJmbOut(JmbParam<T> iParamDef)
 {
   // YP Impl note: see add for similar impl note
-  auto rawPtr = new RTJmbOutParameter<T>(iParamDef);
+  auto rawPtr = new RTJmbOutParameter<T>(std::move(iParamDef));
   std::unique_ptr<IRTJmbOutParameter> rtParam{rawPtr};
   addOutboundMessagingParameter(std::move(rtParam));
   return rawPtr;

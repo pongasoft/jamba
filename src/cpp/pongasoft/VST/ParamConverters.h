@@ -74,7 +74,12 @@ public:
 
   inline void toString(ParamValue const &iValue, String128 oString, int32 iPrecision) const override
   {
-    Steinberg::UString wrapper(oString, str16BufferSize (String128));
+    staticToString(iValue, oString, iPrecision);
+  }
+
+  static inline void staticToString(ParamValue const &iValue, String128 oString, int32 iPrecision)
+  {
+    Steinberg::UString wrapper(oString, str16BufferSize(String128));
     if(!wrapper.printFloat(iValue, iPrecision))
       oString[0] = 0;
   }

@@ -77,6 +77,10 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
 {
   auto const &saveOrder = fPluginParameters.getGUISaveStateOrder();
 
+  // nothing to read ?
+  if(saveOrder.getCount() == 0)
+    return kResultOk;
+
   if(saveOrder.fVersion >= 0)
   {
     uint16 stateVersion;
@@ -118,6 +122,10 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
 {
   auto const &saveOrder = fPluginParameters.getGUISaveStateOrder();
 
+  // nothing saved when there is nothing to save
+  if(saveOrder.getCount() == 0)
+    return kResultOk;
+
   if(saveOrder.fVersion >= 0)
     oStreamer.writeInt16u(static_cast<uint16>(saveOrder.fVersion));
 
@@ -148,9 +156,10 @@ tresult GUIState::init(VstParametersSPtr iVstParameters, IMessageProducer *iMess
 {
   fVstParameters = std::move(iVstParameters);
   fMessageProducer = iMessageProducer;
-  if(fPluginParameters.getGUISaveStateOrder().fVersion == 0)
+  auto const &saveOrder = fPluginParameters.getGUISaveStateOrder();
+  if(saveOrder.getCount() > 0 && saveOrder.fVersion == 0)
   {
-    DLOG_F(WARNING, "GUI Save State version is using the default entry order. Use Parameters::setGUISaveStateOrder to set explicitely.");
+    DLOG_F(WARNING, "GUI Save State version is using the default entry order. Use Parameters::setGUISaveStateOrder to set explicitly.");
   }
   return kResultOk;
 }

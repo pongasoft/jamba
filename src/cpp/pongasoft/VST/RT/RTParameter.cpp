@@ -48,6 +48,8 @@ tresult RTRawVstParameter::addToOutput(ProcessData &oData)
 //------------------------------------------------------------------------
 bool RTRawVstParameter::updateNormalizedValue(ParamValue iNormalizedValue)
 {
+  iNormalizedValue = Utils::clamp(iNormalizedValue, 0.0, 1.0);
+
   if(fNormalizedValue != iNormalizedValue)
   {
     fNormalizedValue = iNormalizedValue;

@@ -33,6 +33,22 @@ RTState::RTState(Parameters const &iParameters) :
 }
 
 //------------------------------------------------------------------------
+// RTState::add
+//------------------------------------------------------------------------
+RTRawVstParam RTState::add(RawVstParam iParamDef)
+{
+  // YP Impl note: this method exports the raw pointer on purpose. The map fVstParameters is storing unique_ptr so that
+  // when the map gets deleted, all the parameters get deleted as well. The raw pointer is wrapped inside the RTRawVstParam
+  // wrapper and the normal usage is that it will not outlive the map. Using shared_ptr would be the safest approach
+  // but in the RT code, we want to make sure that we do not pay the penalty of managing a ref counter (which may
+  // use a lock...)
+  auto rawPtr = new RTRawVstParameter(std::move(iParamDef));
+  std::unique_ptr<RTRawVstParameter> rtParam{rawPtr};
+  addRawParameter(std::move(rtParam));
+  return rawPtr;
+}
+
+//------------------------------------------------------------------------
 // RTState::addRawParameter
 //------------------------------------------------------------------------
 tresult RTState::addRawParameter(std::unique_ptr<RTRawVstParameter> iParameter)
@@ -390,7 +406,6 @@ tresult RTState::init()
 
   return result;
 }
-
 
 }
 }
