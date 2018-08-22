@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cmake --build . --target ${target}
+cmake --build . --target editor
+./bin/editorhost.app/Contents/MacOS/editorhost VST3/${target}.vst3

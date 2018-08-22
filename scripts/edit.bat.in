@@ -1,0 +1,6 @@
+@Echo OFF
+
+cmake --build . --config Debug --target ${target}
+cmake --build . --config Debug --target editor
+./bin/editorhost.app/Contents/MacOS/editorhost VST3/${target}.vst3
+

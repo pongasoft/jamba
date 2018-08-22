@@ -99,6 +99,7 @@ add_subdirectory(${VST3_SDK_ROOT}/base vst3-sdk/base)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk vst3-sdk/public)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/source/vst/interappaudio vst3-sdk/interappaudio)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/validator vst3-sdk/validator)
+add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)
 
 #---Add Wrappers (AU, AAX)-----------------------
 if (SMTG_COREAUDIO_SDK_PATH)

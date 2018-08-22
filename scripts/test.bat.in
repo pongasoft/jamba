@@ -1,0 +1,7 @@
+@Echo OFF
+
+set CONFIG=Debug
+IF not [%1]==[] set CONFIG=%1
+
+cmake --build . --config %CONFIG% --target ${target}_test
+ctest -C %CONFIG%

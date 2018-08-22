@@ -23,11 +23,13 @@
 #include <pluginterfaces/vst/vsttypes.h>
 #include <pluginterfaces/vst/ivstparameterchanges.h>
 #include <pluginterfaces/base/ustring.h>
+#include <base/source/fstring.h>
 #include <pluginterfaces/base/ftypes.h>
 
 #include <cmath>
 #include <algorithm>
 #include <memory>
+#include <string>
 
 namespace pongasoft {
 namespace VST {
@@ -50,8 +52,12 @@ public:
   virtual int getStepCount() const { return 0; }
   virtual ParamValue normalize(ParamType const &iValue) const = 0;
   virtual ParamType denormalize(ParamValue iNormalizedValue) const = 0;
-  virtual void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const
+  virtual void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const { }
+  virtual std::string toString(ParamType const &iValue, int32 iPrecision) const
   {
+    String128 s;
+    toString(iValue, s, iPrecision);
+    return String(s).text8();
   }
 };
 

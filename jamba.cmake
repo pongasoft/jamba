@@ -221,20 +221,32 @@ endfunction()
 ###################################################
 function(jamba_dev_scripts target)
   if(MAC)
-    configure_file(${JAMBA_ROOT}/scripts/build-dev.sh.in ${CMAKE_BINARY_DIR}/build-dev.sh)
-    configure_file(${JAMBA_ROOT}/scripts/install-dev.sh.in ${CMAKE_BINARY_DIR}/install-dev.sh)
-    configure_file(${JAMBA_ROOT}/scripts/test-dev.sh.in ${CMAKE_BINARY_DIR}/test-dev.sh)
+    configure_file(${JAMBA_ROOT}/scripts/build.sh.in ${CMAKE_BINARY_DIR}/build.sh)
+    configure_file(${JAMBA_ROOT}/scripts/edit.sh.in ${CMAKE_BINARY_DIR}/edit.sh)
+    configure_file(${JAMBA_ROOT}/scripts/install.sh.in ${CMAKE_BINARY_DIR}/install.sh)
+    configure_file(${JAMBA_ROOT}/scripts/test.sh.in ${CMAKE_BINARY_DIR}/test.sh)
+    configure_file(${JAMBA_ROOT}/scripts/validate.sh.in ${CMAKE_BINARY_DIR}/validate.sh)
   endif()
+  if (WIN)
+    configure_file(${JAMBA_ROOT}/scripts/build.bat.in ${CMAKE_BINARY_DIR}/build.bat)
+    configure_file(${JAMBA_ROOT}/scripts/edit.bat.in ${CMAKE_BINARY_DIR}/edit.bat)
+    configure_file(${JAMBA_ROOT}/scripts/test.bat.in ${CMAKE_BINARY_DIR}/test.bat)
+    configure_file(${JAMBA_ROOT}/scripts/validate.bat.in ${CMAKE_BINARY_DIR}/validate.bat)
+  endif()
+
 endfunction()
 
 ###################################################
-# jamba_add_test - Testing
+# Testing
 ###################################################
 # Download and unpack googletest at configure time
 include(${CMAKE_CURRENT_LIST_DIR}/gtest.cmake)
 enable_testing()
 include(GoogleTest)
 
+###################################################
+# jamba_add_test - Testing
+###################################################
 function(jamba_add_test PROJECT_TEST_NAME TEST_CASES_FILES TEST_SOURCES TEST_LIBS)
   message(STATUS "Adding target ${PROJECT_TEST_NAME} for test cases: ${TEST_CASES_FILES}" )
 
