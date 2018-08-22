@@ -125,30 +125,31 @@ private:
   using RTProcessorCallback = void (RTProcessor::*)();
 
   // wrapper class to dispatch the callback
-  template<RTProcessorCallback Callback>
   class GUITimerCallback : public ITimerCallback
   {
   public:
-    explicit GUITimerCallback(RTProcessor *iProcessor) : fProcessor{iProcessor} {}
+    explicit GUITimerCallback(RTProcessor *iProcessor,
+                              RTProcessorCallback iCallback) : fProcessor{iProcessor}, fCallback{iCallback} {}
 
     void onTimer(Timer *timer) override
     {
-      (fProcessor->*Callback)();
+      (fProcessor->*fCallback)();
     }
   private:
     RTProcessor *fProcessor;
+    RTProcessorCallback fCallback;
   };
 
 
 
 private:
   // the generic gui timer (enabled with enableGUITimer)
-  GUITimerCallback<&RTProcessor::onGUITimer> fGUITimerCallback;
+  GUITimerCallback fGUITimerCallback{this, &RTProcessor::onGUITimer};
   uint32 fGUITimerIntervalMs;
   std::unique_ptr<AutoReleaseTimer> fGUITimer;
 
   // the timer that will handle sending messages (enabled when there are messages to handle)
-  GUITimerCallback<&RTProcessor::sendPendingMessages> fGUIMessageTimerCallback;
+  GUITimerCallback fGUIMessageTimerCallback{this, &RTProcessor::sendPendingMessages};
   std::unique_ptr<AutoReleaseTimer> fGUIMessageTimer;
 
   bool fActive;

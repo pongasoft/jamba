@@ -26,10 +26,8 @@ namespace RT {
 //------------------------------------------------------------------------
 RTProcessor::RTProcessor(Steinberg::FUID const &iControllerUID) :
   AudioEffect(),
-  fGUITimerCallback{this},
   fGUITimerIntervalMs{0},
   fGUITimer{},
-  fGUIMessageTimerCallback{this},
   fGUIMessageTimerIntervalMs{10}, // by default 10ms
   fGUIMessageTimer{},
   fActive{false}
