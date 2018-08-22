@@ -45,17 +45,8 @@ include(UniversalBinary)
 include(AddVST3Options)
 
 # Run the validator after building
-message(STATUS "Redefining smtg_run_vst_validator to fix VST3.6.9 version.")
+message(STATUS "Redefining smtg_run_vst_validator to do nothing.")
 function(smtg_run_vst_validator target)
-  add_dependencies(${target} validator)
-  if(WIN)
-    set(TARGET_PATH $<TARGET_FILE:${target}>)
-  elseif(XCODE)
-    set(TARGET_PATH "${VST3_OUTPUT_DIR}/${CMAKE_BUILD_TYPE}/${target}.vst3")
-  else()
-    set(TARGET_PATH "${VST3_OUTPUT_DIR}/${target}.vst3")
-  endif()
-  add_custom_command(TARGET ${target} POST_BUILD COMMAND $<TARGET_FILE:validator> "${TARGET_PATH}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 endfunction()
 
 #-------------------------------------------------------------------------------

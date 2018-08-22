@@ -21,6 +21,14 @@ message(STATUS "jamba git version - ${JAMBA_GIT_VERSION}")
 option(JAMBA_DEBUG_LOGGING "Enable debug logging for jamba framework" OFF)
 
 #-------------------------------------------------------------------------------
+# Compiler options
+#-------------------------------------------------------------------------------
+if(WIN32)
+  message(STATUS "Adding compiler options")
+  add_compile_options("/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING" "/EHsc")
+endif()
+
+#-------------------------------------------------------------------------------
 # Including VST3 SDK
 #-------------------------------------------------------------------------------
 
@@ -268,5 +276,3 @@ message(STATUS "JAMBA_ROOT=${JAMBA_ROOT}" )
 file(GLOB_RECURSE TEST_SRC_FILES ${JAMBA_ROOT}/test/cpp/*cpp)
 set(test_sources ""
     )
-
-jamba_add_test(jamba_test "${TEST_SRC_FILES}" "${test_sources}" "")

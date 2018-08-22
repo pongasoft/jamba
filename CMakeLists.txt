@@ -8,3 +8,5 @@ cmake_minimum_required (VERSION 3.9)
 # The purpose of this file is so that it can be compiled separately to develop and test
 
 include(jamba.cmake)
+
+jamba_add_test(jamba_test "${TEST_SRC_FILES}" "${test_sources}" "")

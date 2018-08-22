@@ -5,4 +5,4 @@ IF not [%1]==[] set CONFIG=%1
 
 cmake --build . --config %CONFIG% --target ${target}
 cmake --build . --config %CONFIG% --target validator
-./bin/validator VST3/${target}.vst3
+.\bin\%CONFIG%\validator.exe VST3\%CONFIG%\${target}.vst3
