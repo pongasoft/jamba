@@ -52,6 +52,14 @@ public:
   // applyUpdate
   virtual bool applyUpdate() = 0;
 
+  /**
+   * This is typically called by the RT processing at the beginning of processing to check if an update
+   * happened since the last frame. */
+  inline bool hasChanged() {return fChanged; }
+
+  // resetChanged
+  inline void resetChanged() { fChanged = false; }
+
   // readFromMessage
   virtual tresult readFromMessage(Message const &iMessage) = 0;
 
@@ -63,6 +71,7 @@ public:
 
 protected:
   std::shared_ptr<IJmbParamDef> fParamDef;
+  bool fChanged = false;
 };
 
 /**
@@ -92,21 +101,6 @@ public:
   // applyUpdate
   bool applyUpdate() override;
 
-  /**
-   * This is typically called by the RT processing at the beginning of processing to check if an update
-   * happened since the last frame. By default (no argument) it will reset the changed flag because the fact that the
-   * parameter changed is now a known fact. */
-  inline bool hasChanged(bool iReset = true)
-  {
-    bool res = fChanged;
-    if(iReset)
-      resetChanged();
-    return res;
-  }
-
-  // resetChanged
-  inline void resetChanged() { fChanged = false; }
-
   // readFromMessage - called to extract the value from the message
   tresult readFromMessage(Message const &iMessage) override;
 
@@ -116,10 +110,9 @@ public:
 protected:
   std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
   ParamType fValue;
-  bool fChanged = false;
 
 private:
-  Concurrent::WithSpinLock::SingleElementQueue<T> fUpdateQueue{};
+  Concurrent::LockFree::SingleElementQueue<T> fUpdateQueue{};
 };
 
 //------------------------------------------------------------------------
@@ -128,13 +121,11 @@ private:
 template<typename T>
 tresult RTJmbInParameter<T>::readFromMessage(Message const &iMessage)
 {
-  ParamType update;
-  tresult res = fJmbParamDef->readFromMessage(iMessage, update);
-  if(res == kResultOk)
-  {
-    fUpdateQueue.push(update);
-  }
-  return res;
+  bool res = fUpdateQueue.updateAndPushIf([this, &iMessage](auto oUpdate) -> bool {
+    return fJmbParamDef->readFromMessage(iMessage, *oUpdate) == kResultOk;
+  });
+
+  return res ? kResultOk : kResultFalse;
 }
 
 //------------------------------------------------------------------------
@@ -176,18 +167,14 @@ public:
 
   /**
    * This is typically called by the RT processing at the beginning of processing to check if an update
-   * happened since the last frame. By default (no argument) it will reset the changed flag because the fact that the
-   * parameter changed is now a known fact. */
-  inline bool hasChanged(bool iReset = true) const { return fPtr->hasChanged(iReset); }
+   * happened since the last frame. */
+  inline bool hasChanged() const { return fPtr->hasChanged(); }
 
   // resetChanged
   inline void resetChanged() { fPtr->resetChanged(); }
 
   // getValue
   inline T const &getValue() const { return fPtr->getValue(); }
-
-  // setValue
-  inline void setValue(T const &iValue) { fPtr->setValue(); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
   inline operator T const &() const { return fPtr->getValue(); } // NOLINT

@@ -54,8 +54,8 @@ public:
   // Destructor
   ~NormalizedState();
 
-  // No copy constructor allowed
-  NormalizedState(NormalizedState const &other) = delete;
+  // Copy constructor
+  NormalizedState(NormalizedState const &other);
 
   // Copies the content of the array ONLY when same SaveOrder (which is the case internally)
   NormalizedState& operator=(NormalizedState const &other);

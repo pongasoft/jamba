@@ -179,27 +179,24 @@ protected:
 
   /**
    * Gives a chance to subclasses to tweak and/or display the state after being read */
-  virtual void afterReadNewState(NormalizedState *iState) {};
+  virtual void afterReadNewState(NormalizedState const *iState) {};
 
   /**
- * Gives a chance to subclasses to tweak and/or display the state before being written */
-  virtual void beforeWriteNewState(NormalizedState *iState) {};
+   * Gives a chance to subclasses to tweak and/or display the state before being written */
+  virtual void beforeWriteNewState(NormalizedState const *iState) {};
 
 private:
-  // need to allocate memory only at creation time for RT!
-  std::unique_ptr<NormalizedState> fNormalizedStateRT;
-
   // computeLatestState
   void computeLatestState();
 
 private:
   // this queue is used to propagate a Processor::setState call (made from the UI thread) to this state
   // the check happens in beforeProcessing
-  Concurrent::WithSpinLock::SingleElementQueue<NormalizedState> fStateUpdate;
+  Concurrent::LockFree::SingleElementQueue<NormalizedState> fStateUpdate;
 
   // this atomic value always hold the most current (and consistent) version of this state so that the UI thread
   // can access it in Processor::getState. It is updated in afterProcessing.
-  Concurrent::WithSpinLock::AtomicValue<NormalizedState> fLatestState;
+  Concurrent::LockFree::AtomicValue<NormalizedState> fLatestState;
 };
 
 //------------------------------------------------------------------------

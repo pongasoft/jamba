@@ -118,7 +118,7 @@ protected:
   ParamType fValue;
 
 private:
-  Concurrent::WithSpinLock::SingleElementQueue<T> fUpdateQueue{};
+  Concurrent::LockFree::SingleElementQueue<T> fUpdateQueue{};
 };
 
 //------------------------------------------------------------------------
@@ -127,10 +127,10 @@ private:
 template<typename T>
 tresult RTJmbOutParameter<T>::writeToMessage(Message &oMessage)
 {
-  ParamType update;
-  if(fUpdateQueue.pop(update))
+  auto update = fUpdateQueue.pop();
+  if(update)
   {
-    return fJmbParamDef->writeToMessage(update, oMessage);
+    return fJmbParamDef->writeToMessage(*update, oMessage);
   }
 
   return kResultFalse;
@@ -170,7 +170,7 @@ public:
   inline T &getValue() { return fPtr->getValue(); }
 
   // setValue
-  inline void setValue(T const &iValue) { fPtr->setValue(); }
+  inline void setValue(T const &iValue) { fPtr->setValue(iValue); }
 
   // broadcast
   inline void broadcast(T const &iValue) { fPtr->broadcast(iValue); }

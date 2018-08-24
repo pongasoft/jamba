@@ -27,8 +27,7 @@ namespace RT {
 RTState::RTState(Parameters const &iParameters) :
   fPluginParameters{iParameters},
   fStateUpdate{iParameters.newRTState(), true},
-  fLatestState{iParameters.newRTState()},
-  fNormalizedStateRT{iParameters.newRTState()}
+  fLatestState{iParameters.newRTState()}
 {
 }
 
@@ -202,10 +201,9 @@ void RTState::computeLatestState(NormalizedState *oLatestState) const
 //------------------------------------------------------------------------
 void RTState::computeLatestState()
 {
-  computeLatestState(fNormalizedStateRT.get());
-
-  // atomically copy it for access later by GUI thread in writeLatestState
-  fLatestState.set(fNormalizedStateRT.get());
+  fLatestState.update([this](auto iNormalizedStateRT) {
+    this->computeLatestState(iNormalizedStateRT);
+  });
 }
 
 //------------------------------------------------------------------------
@@ -213,18 +211,15 @@ void RTState::computeLatestState()
 //------------------------------------------------------------------------
 tresult RTState::readNewState(IBStreamer &iStreamer)
 {
-  auto normalizedState = fPluginParameters.readRTState(iStreamer);
-
-  if(normalizedState)
-  {
-    afterReadNewState(normalizedState.get());
-
-    // atomically copy it for access later by RT thread in before processing
-    fStateUpdate.push(normalizedState.get());
-    return kResultOk;
-  }
-
-  return kResultFalse;
+  bool res = fStateUpdate.updateAndPushIf([this, &iStreamer](auto oNormalizedState) -> bool {
+    if(fPluginParameters.readRTState(iStreamer, oNormalizedState) == kResultOk)
+    {
+      afterReadNewState(oNormalizedState);
+      return true;
+    }
+    return false;
+  });
+  return res ? kResultOk : kResultFalse;
 }
 
 //------------------------------------------------------------------------
@@ -232,14 +227,11 @@ tresult RTState::readNewState(IBStreamer &iStreamer)
 //------------------------------------------------------------------------
 tresult RTState::writeLatestState(IBStreamer &oStreamer)
 {
-  // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
-  auto normalizedState = fPluginParameters.newRTState();
+  auto normalizedState = fLatestState.get();
 
-  fLatestState.get(normalizedState.get());
+  beforeWriteNewState(normalizedState);
 
-  beforeWriteNewState(normalizedState.get());
-
-  return fPluginParameters.writeRTState(normalizedState.get(), oStreamer);
+  return fPluginParameters.writeRTState(normalizedState, oStreamer);
 }
 
 //------------------------------------------------------------------------
@@ -249,9 +241,10 @@ bool RTState::beforeProcessing()
 {
   bool res = false;
 
-  if(fStateUpdate.pop(fNormalizedStateRT.get()))
+  auto state = fStateUpdate.pop();
+  if(state)
   {
-    res |= onNewState(fNormalizedStateRT.get());
+    res |= onNewState(state);
   }
 
   res |= processPendingInboundUpdates();
@@ -307,6 +300,16 @@ void RTState::afterProcessing()
   if(resetPreviousValues())
   {
     computeLatestState();
+  }
+
+  // we reset the changed flag
+  if(!fInboundMessagingParameters.empty())
+  {
+    for(auto &p : fInboundMessagingParameters)
+    {
+      std::unique_ptr<IRTJmbInParameter> &param = p.second;
+      param->resetChanged();
+    }
   }
 }
 
@@ -373,9 +376,12 @@ tresult RTState::handleMessage(Message const &iMessage)
 tresult RTState::init()
 {
   tresult result = kResultOk;
-  for(int i = 0; i < fNormalizedStateRT->getCount(); i++)
+
+  auto state = fPluginParameters.newRTState();
+
+  for(int i = 0; i < state->getCount(); i++)
   {
-    auto paramID = fNormalizedStateRT->fSaveOrder->fOrder[i];
+    auto paramID = state->fSaveOrder->fOrder[i];
     // param exist
     if(fVstParameters.find(paramID) == fVstParameters.cend())
     {

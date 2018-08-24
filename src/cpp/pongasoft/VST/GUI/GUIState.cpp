@@ -60,14 +60,16 @@ tresult GUIState::setParamNormalized(NormalizedState const *iNormalizedState)
 //------------------------------------------------------------------------
 tresult GUIState::readRTState(IBStreamer &iStreamer)
 {
-  auto normalizedState = fPluginParameters.readRTState(iStreamer);
+  auto normalizedState = fPluginParameters.newRTState();
 
-  if(normalizedState)
+  tresult res = fPluginParameters.readRTState(iStreamer, normalizedState.get());
+
+  if(res == kResultOk)
   {
     return setParamNormalized(normalizedState.get());
   }
 
-  return kResultFalse;
+  return res;
 }
 
 //------------------------------------------------------------------------

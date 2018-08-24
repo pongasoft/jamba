@@ -49,6 +49,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Clock/Clock.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Collection/CircularBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Concurrent/Concurrent.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Concurrent/SpinLock.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Lerp.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Misc.h
 

@@ -266,7 +266,7 @@ public:
 
   /**
    * This method is called to read the RTState from the stream */
-  virtual std::unique_ptr<NormalizedState> readRTState(IBStreamer &iStreamer) const;
+  virtual tresult readRTState(IBStreamer &iStreamer, NormalizedState *oNormalizedState) const;
 
   /**
    * This method is called to write the NormalizedState to the stream */

@@ -84,7 +84,7 @@ uint16 __readStateVersion(IBStreamer &iStreamer)
 //------------------------------------------------------------------------
 // Parameters::readRTState
 //------------------------------------------------------------------------
-std::unique_ptr<NormalizedState> Parameters::readRTState(IBStreamer &iStreamer) const
+tresult Parameters::readRTState(IBStreamer &iStreamer, NormalizedState *oNormalizedState) const
 {
   // ignoring version if negative
   if(fRTSaveStateOrder.fVersion >= 0)
@@ -98,13 +98,7 @@ std::unique_ptr<NormalizedState> Parameters::readRTState(IBStreamer &iStreamer) 
     }
   }
 
-  // YP Implementation note: It is OK to allocate memory here because this method is called by the GUI!!!
-  auto normalizedState = newRTState();
-
-  if(normalizedState->readFromStream(this, iStreamer) == kResultOk)
-    return normalizedState;
-
-  return nullptr;
+  return oNormalizedState->readFromStream(this, iStreamer);
 }
 
 //------------------------------------------------------------------------

@@ -18,7 +18,8 @@
 #ifndef __PONGASOFT_UTILS_CONCURRENT_CONCURRENT_H__
 #define __PONGASOFT_UTILS_CONCURRENT_CONCURRENT_H__
 
-#include <atomic>
+#include "SpinLock.h"
+
 #include <memory>
 
 namespace pongasoft {
@@ -35,99 +36,377 @@ namespace Concurrent {
  * The 2 primitives required are an atomic value (for getState) and a queue with one element (where the element in the
  * queue can be updated if not popped yet) (for setState / timer message)
  *
- * One of the golden rules of real time audio programming is not to use locks. Implementing those primitives without
- * using any locks requires memory allocation which is also another no-no for real time audio programming which then
- * constrains memory allocation to the UI thread only. This makes the code very challenging to write in a thread
- * safe fashion and no solution is provided part of the SDK.
+ * The golden rules of real time audio programming are not to use locks or memory allocation. Here are 2
+ * implementations with different tradeoffs.
  *
- * As a trade-off, I decided to go for a much simpler solution which does use a very lightweight lock: a user space
- * spin lock. The implementation is not allocating any memory in any thread and is relying on the std::atomic_flag
- * concept which is guaranteed to be lock free. It also does not make any system calls.
+ * The LockFree namespace implements a version that does not use locks or allocate memory at runtime (only when
+ * the classes are created). The tradeoff is that it uses more memory (3 instances of T) and it is only thread
+ * safe when there is a single thread calling 'get' (resp 'pop') and another single thread calling 'set' (rep 'push').
  *
- * SingleElementQueue and AtomicValue both use a spin lock and keep the lock only for the duration of copying
- * the Element/Value that each concept encapsulates (of type T). So the worst case scenario from the real time
- * processing should be to wait for the other thread to copy T which seems like a pretty fair trade-off as it is quite
- * constrained (of course the real time processing could theoretically "spin" for a long time but in practice the
- * UI thread is not "banging" on the lock to create this scenario).
+ * The WithSpinLock namespace a version which uses a very lightweight lock: a user space spin lock. The SpinLock
+ * implementation is not allocating any memory in any thread and is relying on the std::atomic_flag concept which is
+ * guaranteed to be lock free. It also does not make any system calls. The tradeoff is that the queue and atomic
+ * value do lock for the duration of the copy of T. The advantages are less memory use and fully multi thread safe.
  */
 
+//------------------------------------------------------------------------
+// Lock Free Implementation of AtomicValue and SingleQueueElement
+//------------------------------------------------------------------------
+namespace LockFree {
 /**
- * A simple implementation of a spin lock using the std::atomic_flag which is guaranteed to be atomic and lock free.
- * The usage is the following:
+ * This (internal) class stores a single element. This implementation is NOT fully thread safe. It is only thread
+ * safe as long as load is called by a single thread and store is called by another single thread as well (if load
+ * and store are called by the same thread it is obviously thread safe since it would be mono thread...)
  *
- * auto lock = spinLock.acquire();
- * ...
- *
- * the lock is released automatically when it exits the scope.
+ * TODO: the implementation somehow assumes that T is a real type, not a primitive.. maybe there is a way to write
+ * a primitive version (if that becomes a necessity)
  */
-
-class SpinLock
+template<typename T>
+class SingleElementStorage
 {
 public:
-
-  class Lock
+  // wraps a unique pointer of type T and whether it is a new value or not
+  struct Element
   {
-  public:
-    /**
-     * This will automatically release the lock
-     */
-    inline ~Lock()
-    {
-      if(fSpinLock != nullptr)
-        fSpinLock->unlock();
-    }
+    explicit Element(std::unique_ptr<T> iElement, bool iNew) noexcept : fElement{std::move(iElement)}, fNew{iNew} {}
 
-    inline Lock(Lock &&iLock) noexcept : fSpinLock{iLock.fSpinLock}
-    {
-      iLock.fSpinLock = nullptr;
-    }
-
-    Lock(Lock const &) = delete;
-    Lock& operator=(Lock const &) = delete;
-
-  private:
-    friend class SpinLock;
-
-    explicit Lock(SpinLock *iSpinLock) : fSpinLock{iSpinLock}
-    {
-    }
-
-
-    SpinLock *fSpinLock;
+    std::unique_ptr<T> fElement;
+    bool fNew;
   };
 
-  SpinLock() : fFlag{false}
+public:
+  // Constructor
+  explicit SingleElementStorage(std::unique_ptr<T> iElement, bool iIsEmpty) noexcept :
+    fSingleElement{new Element(std::move(iElement), !iIsEmpty)}
+  {}
+
+  // Destructor - Deletes the element created in the constructor
+  ~SingleElementStorage()
   {
+    delete fSingleElement.exchange(nullptr);
+  }
+
+  // isEmpty
+  inline bool isEmpty() const
+  {
+    return !fSingleElement.load()->fNew;
   }
 
   /**
-   * @return the lock that will be released when it goes out of scope
+   * Used (from test) to make sure that it is a lock free implementation. Relies on an atomic pointer and in
+   * general the implementation should be lock free but we make sure here.
    */
-  inline Lock acquire()
-  {
-    while(fFlag.test_and_set(std::memory_order_acquire))
-    {
-      // nothing to do => spin
-    }
+  bool __isLockFree() const { return fSingleElement.is_lock_free(); }
 
-    return Lock(this);
+protected:
+  /**
+   * Stores an element in the storage. Replaces the current one if there is one. In order to avoid copy and memory
+   * allocation, the storage assumes ownership of the element provided and as result returns the one it replaces.
+   */
+  std::unique_ptr<Element> store(std::unique_ptr<Element> iElement)
+  {
+    iElement->fNew = true;
+    iElement.reset(fSingleElement.exchange(iElement.release()));
+    return std::move(iElement);
   }
 
+  /**
+   * Loads an element from storage. In order to avoid copy and memory allocation, the api actually takes an element
+   * to replace the one that is returned. The correct usage pattern should be:
+   *
+   * if(!isEmpty())
+   *   myPtr = std::move(load(std::move(myPtr)));
+   *
+   * That way you are guaranteed that what load returns will have a fNew flag set to true...
+   *
+   * @return element with flag fNew set to true if there was a new element, false otherwise
+   */
+  std::unique_ptr<Element> load(std::unique_ptr<Element> iElement)
+  {
+    iElement->fNew = false;
+    iElement.reset(fSingleElement.exchange(iElement.release()));
+    return std::move(iElement);
+  }
 
-  SpinLock(SpinLock const &) = delete;
+  // __newT => create a new T by using copy constructor
+  std::unique_ptr<T> __newT() const { return std::make_unique<T>(*(fSingleElement.load()->fElement)); }
 
-  SpinLock &operator=(SpinLock const &) = delete;
+  // __newElement
+  std::unique_ptr<Element> __newElement() const { return std::make_unique<Element>(std::move(__newT()), false); }
 
 private:
-  friend class Lock;
+  // using a std::atomic on a pointer which should be lock free (check __isLockFree for sanity check!)
+  std::atomic<Element *> fSingleElement;
+};
 
-  inline void unlock()
+/**
+ * This is the lock free version of the SingleElementQueue. Internally it uses a different pointer for push and pop.
+ * As described in the comment for SingleElementStorage, all methods related to 'pop' can be called in one thread
+ * while all methods related to 'push' can be called by another.
+ */
+template<typename T>
+class SingleElementQueue : public SingleElementStorage<T>
+{
+public:
+  // Constructor
+  explicit SingleElementQueue() :
+    SingleElementStorage<T>{std::make_unique<T>(), true},
+    fPopValue{std::move(SingleElementStorage<T>::__newElement())},
+    fPushValue{std::move(SingleElementStorage<T>::__newElement())}
+  {}
+
+  /**
+   * This contructor should be used if T does not provide an empty constructor */
+  explicit SingleElementQueue(std::unique_ptr<T> iElement, bool iIsEmpty = false) :
+    SingleElementStorage<T>{std::move(iElement), iIsEmpty},
+    fPopValue{std::move(SingleElementStorage<T>::__newElement())},
+    fPushValue{std::move(SingleElementStorage<T>::__newElement())}
   {
-    fFlag.clear(std::memory_order_release);
   }
 
-  std::atomic_flag fFlag;
+  //------------------------------------------------------------------------------------------------------------
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //
+  // All the following methods (pop and last) should be called in a single thread
+  //
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //------------------------------------------------------------------------------------------------------------
+  /**
+   * @return the value popped or nullptr if nothing to pop
+   */
+  T const *pop()
+  {
+    if(!this->isEmpty())
+    {
+      fPopValue = std::move(SingleElementStorage<T>::load(std::move(fPopValue)));
+    }
+
+    if(fPopValue->fNew)
+    {
+      fPopValue->fNew = false;
+      return fPopValue->fElement.get();
+    }
+
+    return nullptr;
+  };
+
+  /**
+   * Copy the popped value to oElement and return true when there is a new value otherwise do nothing and return false.
+   */
+  bool pop(T &oElement)
+  {
+    auto element = pop();
+    if(element)
+    {
+      oElement = *element;
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * @return if there is a new value to pop, returns it otherwise return the last value that was popped (never nullptr)
+   */
+  T const *last()
+  {
+    auto element = pop();
+
+    if(element)
+      return element;
+    else
+      return fPopValue->fElement.get();
+  };
+
+
+  /**
+   * Copy either the new value (if there is one) or the last value that was popped to oElement
+   */
+  void last(T &oElement)
+  {
+    oElement = *last();
+  }
+
+  //------------------------------------------------------------------------------------------------------------
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //
+  // All the following methods (push and updateAndPush) should be called in a single thread
+  //
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //------------------------------------------------------------------------------------------------------------
+
+  /**
+   * Pushes (a copy of) iElement in the queue.
+   */
+  void push(T const &iElement)
+  {
+    *(fPushValue->fElement.get()) = iElement;
+    fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+  }
+
+  /**
+   * Pushes (a copy of) *iElement in the queue.
+   */
+  void push(T const *iElement)
+  {
+    *(fPushValue->fElement.get()) = *iElement;
+    fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+  }
+
+  /**
+   * Use this flavor of push to avoid copy. ElementModifier will be called back with the internal pointer to
+   * update it.
+   */
+  template<class ElementModifier>
+  void updateAndPush(ElementModifier const &iElementModifier)
+  {
+    iElementModifier(fPushValue->fElement.get());
+    fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+  }
+
+  /**
+   * Use this flavor of push to avoid copy. ElementModifier will be called back with the internal pointer to
+   * update it. This flavor uses a callback that returns true when the push should happen and false otherwise.
+   */
+  template<class ElementModifier>
+  bool updateAndPushIf(ElementModifier const &iElementModifier)
+  {
+    if(iElementModifier(fPushValue->fElement.get()))
+    {
+      fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+      return true;
+    }
+    return false;
+  }
+
+private:
+  using Element = typename SingleElementStorage<T>::Element;
+
+  std::unique_ptr<Element> fPopValue;
+  std::unique_ptr<Element> fPushValue;
 };
+
+/**
+ * This is the lock free version of the AtomicValue. Internally it uses a different pointer for get and set.
+ * As described in the comment for SingleElementStorage, all methods related to 'get' can be called in one thread
+ * while all methods related to 'set' can be called by another.
+ */
+template<typename T>
+class AtomicValue : public SingleElementStorage<T>
+{
+public:
+  // Constructor - needs a value for initalizing the object
+  explicit AtomicValue(std::unique_ptr<T> iValue) :
+    SingleElementStorage<T>{std::move(iValue), false},
+    fGetValue{std::move(SingleElementStorage<T>::__newElement())},
+    fSetValue{std::move(SingleElementStorage<T>::__newElement())}
+  {}
+
+  //------------------------------------------------------------------------------------------------------------
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //
+  // All the following methods (get) should be called in a single thread
+  //
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //------------------------------------------------------------------------------------------------------------
+
+  /**
+   * @return the value
+   */
+  T const *get()
+  {
+    if(!this->isEmpty())
+    {
+      fGetValue = std::move(SingleElementStorage<T>::load(std::move(fGetValue)));
+    }
+
+    return fGetValue->fElement.get();
+  };
+
+  /**
+   * @return a copy of the value
+   */
+  T getCopy()
+  {
+    return *get();
+  }
+
+  /**
+   * Copy the value to oElement
+   */
+  void get(T &oElement)
+  {
+    oElement = *get();
+  };
+
+  /**
+   * Copy the value to *oElement
+   */
+  void get(T *oElement)
+  {
+    *oElement = *get();
+  };
+
+  //------------------------------------------------------------------------------------------------------------
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //
+  // All the following methods (set / update) should be called in a single thread
+  //
+  // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+  //------------------------------------------------------------------------------------------------------------
+
+  /**
+   * Copy the value to make it accessible to get
+   */
+  void set(T const &iValue)
+  {
+    *(fSetValue->fElement.get()) = iValue;
+    fSetValue = std::move(SingleElementStorage<T>::store(std::move(fSetValue)));
+  }
+
+  /**
+   * Copy the value to make it accessible to get
+   */
+  void set(T const *iValue)
+  {
+    *(fSetValue->fElement.get()) = *iValue;
+    fSetValue = std::move(SingleElementStorage<T>::store(std::move(fSetValue)));
+  }
+
+  /**
+   * Use this flavor to avoid copy. ElementModifier will be called back with the internal pointer to
+   * update it.
+   */
+  template<class ElementModifier>
+  void update(ElementModifier const &iElementModifier)
+  {
+    iElementModifier(fSetValue->fElement.get());
+    fSetValue = std::move(SingleElementStorage<T>::store(std::move(fSetValue)));
+  }
+
+  /**
+   * Use this flavor to avoid copy. ElementModifier will be called back with the internal pointer to
+   * update it.This flavor uses a callback that returns true when the update should happen and false otherwise.
+   */
+  template<class ElementModifier>
+  bool updateIf(ElementModifier const &iElementModifier)
+  {
+    if(iElementModifier(fSetValue->fElement.get()))
+    {
+      fSetValue = std::move(SingleElementStorage<T>::store(std::move(fSetValue)));
+      return true;
+    }
+
+    return false;
+  }
+
+private:
+  using Element = typename SingleElementStorage<T>::Element;
+
+  std::unique_ptr<Element> fGetValue;
+  std::unique_ptr<Element> fSetValue;
+};
+}
 
 /**
  * The purpose of this namespace is to emphasize the fact that the implementation is using a spinlock

@@ -36,6 +36,21 @@ NormalizedState::NormalizedState(SaveOrder const *iSaveOrder) : fSaveOrder{iSave
 }
 
 //------------------------------------------------------------------------
+// NormalizedState::NormalizedState
+//------------------------------------------------------------------------
+NormalizedState::NormalizedState(NormalizedState const &other) : fSaveOrder{other.fSaveOrder}
+{
+  if(getCount() > 0)
+  {
+    fValues = new ParamValue[getCount()];
+    for(int i = 0; i < getCount(); i++)
+    {
+      fValues[i] = other.fValues[i];
+    }
+  }
+}
+
+//------------------------------------------------------------------------
 // NormalizedState::~NormalizedState
 //------------------------------------------------------------------------
 NormalizedState::~NormalizedState()
@@ -109,8 +124,6 @@ std::string NormalizedState::toString() const
   s << "}";
   return s.str();
 }
-
-
 
 }
 }
