@@ -247,8 +247,6 @@ bool RTState::beforeProcessing()
     res |= onNewState(state);
   }
 
-  res |= processPendingInboundUpdates();
-
   return res;
 }
 
@@ -270,28 +268,6 @@ bool RTState::onNewState(NormalizedState const *iLatestState)
 }
 
 //------------------------------------------------------------------------
-// RTState::processPendingInboundUpdates
-//------------------------------------------------------------------------
-bool RTState::processPendingInboundUpdates()
-{
-  if(fInboundMessagingParameters.empty())
-    return false;
-
-  bool res = false;
-
-  for(auto &p : fInboundMessagingParameters)
-  {
-    std::unique_ptr<IRTJmbInParameter> &param = p.second;
-    if(param->hasUpdate())
-    {
-      res |= param->applyUpdate();
-    }
-  }
-
-  return res;
-}
-
-//------------------------------------------------------------------------
 // RTState::afterProcessing
 //------------------------------------------------------------------------
 void RTState::afterProcessing()
@@ -300,16 +276,6 @@ void RTState::afterProcessing()
   if(resetPreviousValues())
   {
     computeLatestState();
-  }
-
-  // we reset the changed flag
-  if(!fInboundMessagingParameters.empty())
-  {
-    for(auto &p : fInboundMessagingParameters)
-    {
-      std::unique_ptr<IRTJmbInParameter> &param = p.second;
-      param->resetChanged();
-    }
   }
 }
 

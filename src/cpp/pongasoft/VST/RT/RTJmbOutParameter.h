@@ -72,37 +72,43 @@ public:
   using ParamType = T;
 
   explicit RTJmbOutParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
-  IRTJmbOutParameter(iParamDef),
+    IRTJmbOutParameter(iParamDef),
     fJmbParamDef{std::move(iParamDef)},
-    fValue{fJmbParamDef->fDefaultValue}
-    {}
-
-  // getValue
-  inline ParamType const &getValue() const { return fValue; }
-
-  // getValue (non const / direct access)
-  inline ParamType &getValue() { return fValue; }
-
-  // setValue
-  inline void setValue(ParamType const &iValue) { fValue = iValue; }
+    fUpdateQueue{std::make_unique<T>(fJmbParamDef->fDefaultValue)}
+  {}
 
   /**
    * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
    * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
    * This method is called by RT thread.
    */
-  inline void broadcast(ParamType const &iValue)
+  inline void broadcastValue(ParamType const &iValue)
   {
-    setValue(iValue);
-    broadcast();
+    fUpdateQueue.push(iValue);
   }
 
   /**
-   * Enqueues the current value to be delivered to the GUI (or whoever is listening to messages).
+   * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
    * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
-   * This method is called by RT thread.
+   * This method is called by RT thread. Use this flavor to avoid copy.
    */
-  inline void broadcast() { fUpdateQueue.push(fValue); }
+  template<class ElementModifier>
+  void broadcast(ElementModifier const &iElementModifier)
+  {
+    fUpdateQueue.updateAndPush(iElementModifier);
+  }
+
+  /**
+   * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
+   * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
+   * This method is called by RT thread. Use this flavor to avoid copy. This flavor uses a callback that returns
+   * true when the broadcast should happen and false otherwise.
+   */
+  template<class ElementModifier>
+  bool broadcastIf(ElementModifier const &iElementModifier)
+  {
+    return fUpdateQueue.updateAndPushIf(iElementModifier);
+  }
 
   // hasUpdate
   bool hasUpdate() const override { return !fUpdateQueue.isEmpty(); }
@@ -115,7 +121,6 @@ public:
 
 protected:
   std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
-  ParamType fValue;
 
 private:
   Concurrent::LockFree::SingleElementQueue<T> fUpdateQueue{};
@@ -142,16 +147,14 @@ tresult RTJmbOutParameter<T>::writeToMessage(Message &oMessage)
 template<typename T>
 void RTJmbOutParameter<T>::writeToStream(std::ostream &oStream) const
 {
-  fJmbParamDef->writeToStream(fValue, oStream);
+  fJmbParamDef->writeToStream(*fUpdateQueue.last(), oStream);
 }
 
 //------------------------------------------------------------------------
 // RTJmbOutParam - wrapper to make writing the code much simpler and natural
 //------------------------------------------------------------------------
 /**
- * This is the main class that the plugin should use as it exposes only the necessary methods of the param
- * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
- * behaves like T in many ways).
+ * This is the main class that the plugin should use as it exposes only the necessary methods of the param.
  *
  * @tparam T the underlying type of the param */
 template<typename T>
@@ -163,32 +166,26 @@ public:
   // getParamID
   inline ParamID getParamID() const { return fPtr->getParamID(); }
 
-  // getValue
-  inline T const &getValue() const { return fPtr->getValue(); }
+  /**
+   * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
+   * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
+   * This method is called by RT thread. */
+  inline void broadcast(T const &iValue) { fPtr->broadcastValue(iValue); }
 
-  // getValue (non const / direct access)
-  inline T &getValue() { return fPtr->getValue(); }
+  /**
+   * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
+   * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
+   * This method is called by RT thread. Use this flavor to avoid copy. */
+  template<class ElementModifier>
+  void broadcast(ElementModifier const &iElementModifier) { fPtr->broadcast(iElementModifier); }
 
-  // setValue
-  inline void setValue(T const &iValue) { fPtr->setValue(iValue); }
-
-  // broadcast
-  inline void broadcast(T const &iValue) { fPtr->broadcast(iValue); }
-
-  // broadcast
-  inline void broadcast() { fPtr->broadcast(); }
-
-  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
-  inline operator T const &() const { return fPtr->getValue(); } // NOLINT
-
-  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
-  inline operator T &() { return fPtr->getValue(); } // NOLINT
-
-  // allow writing param->xxx to access the underlying type directly (if not a primitive)
-  inline T const *operator->() const { return &fPtr->getValue(); }
-
-  // allow writing param->xxx to access the underlying type directly (if not a primitive)
-  inline T *operator->() { return &fPtr->getValue(); }
+  /**
+   * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
+   * Note that this call returns right away. The packaging and delivery will happen in a GUI thread.
+   * This method is called by RT thread. Use this flavor to avoid copy. This flavor uses a callback that returns
+   * true when the broadcast should happen and false otherwise. */
+  template<class ElementModifier>
+  bool broadcastIf(ElementModifier const &iElementModifier) { return fPtr->broadcastIf(iElementModifier); }
 
 private:
   RTJmbOutParameter<T> *fPtr;

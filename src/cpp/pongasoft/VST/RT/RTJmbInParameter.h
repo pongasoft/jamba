@@ -49,17 +49,6 @@ public:
   // hasUpdate
   virtual bool hasUpdate() const = 0;
 
-  // applyUpdate
-  virtual bool applyUpdate() = 0;
-
-  /**
-   * This is typically called by the RT processing at the beginning of processing to check if an update
-   * happened since the last frame. */
-  inline bool hasChanged() {return fChanged; }
-
-  // resetChanged
-  inline void resetChanged() { fChanged = false; }
-
   // readFromMessage
   virtual tresult readFromMessage(Message const &iMessage) = 0;
 
@@ -71,7 +60,6 @@ public:
 
 protected:
   std::shared_ptr<IJmbParamDef> fParamDef;
-  bool fChanged = false;
 };
 
 /**
@@ -89,17 +77,20 @@ public:
   explicit RTJmbInParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
     IRTJmbInParameter(iParamDef),
     fJmbParamDef{std::move(iParamDef)},
-    fValue{fJmbParamDef->fDefaultValue}
+    fUpdateQueue{std::make_unique<T>(fJmbParamDef->fDefaultValue)}
   {}
 
-  // getValue
-  inline ParamType const &getValue() const { return fValue; }
+  // pop
+  inline ParamType const *pop() { return fUpdateQueue.pop(); }
+
+  // pop
+  inline ParamType const *last() const { return fUpdateQueue.last(); }
+
+  // popOrLast
+  inline ParamType const *popOrLast() { return fUpdateQueue.popOrLast(); }
 
   // hasUpdate
   bool hasUpdate() const override { return !fUpdateQueue.isEmpty(); }
-
-  // applyUpdate
-  bool applyUpdate() override;
 
   // readFromMessage - called to extract the value from the message
   tresult readFromMessage(Message const &iMessage) override;
@@ -109,7 +100,6 @@ public:
 
 protected:
   std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
-  ParamType fValue;
 
 private:
   Concurrent::LockFree::SingleElementQueue<T> fUpdateQueue{};
@@ -129,22 +119,12 @@ tresult RTJmbInParameter<T>::readFromMessage(Message const &iMessage)
 }
 
 //------------------------------------------------------------------------
-// RTJmbInParameter::applyUpdate
-//------------------------------------------------------------------------
-template<typename T>
-bool RTJmbInParameter<T>::applyUpdate()
-{
-  fChanged = fUpdateQueue.pop(fValue);
-  return fChanged;
-}
-
-//------------------------------------------------------------------------
 // RTJmbInParameter::writeToStream
 //------------------------------------------------------------------------
 template<typename T>
 void RTJmbInParameter<T>::writeToStream(std::ostream &oStream) const
 {
-  fJmbParamDef->writeToStream(fValue, oStream);
+  fJmbParamDef->writeToStream(*last(), oStream);
 }
 
 //------------------------------------------------------------------------
@@ -165,22 +145,29 @@ public:
   // getParamID
   inline ParamID getParamID() const { return fPtr->getParamID(); }
 
-  /**
-   * This is typically called by the RT processing at the beginning of processing to check if an update
-   * happened since the last frame. */
-  inline bool hasChanged() const { return fPtr->hasChanged(); }
+  // pop - nullptr if no update
+  inline T const *pop() { return fPtr->pop(); }
 
-  // resetChanged
-  inline void resetChanged() { fPtr->resetChanged(); }
+  // last - last value popped (does not pop!)
+  inline T const *last() const { return fPtr->last(); }
+
+  // popOrLast - call pop and no new value then call last
+  inline T const *popOrLast() { return fPtr->popOrLast(); }
+
+  // hasUpdate
+  bool hasUpdate() const { return fPtr->hasUpdate(); }
 
   // getValue
-  inline T const &getValue() const { return fPtr->getValue(); }
+  inline T const &getValue() const { return *fPtr->last(); }
+
+  // value - synonym
+  inline T const &value() const { return *fPtr->last(); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
-  inline operator T const &() const { return fPtr->getValue(); } // NOLINT
+  inline operator T const &() const { return *fPtr->last(); } // NOLINT
 
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
-  inline T const *operator->() const { return &fPtr->getValue(); }
+  inline T const *operator->() const { return fPtr->last(); }
 
 private:
   RTJmbInParameter<T> *fPtr;

@@ -161,11 +161,6 @@ protected:
   virtual bool onNewState(NormalizedState const *iLatestState);
 
   /**
-   * Called from the RT thread from beforeProcessing to process any pending inbound updates. Can be overridden
-   * @return true if the state has changed, false otherwise */
-  virtual bool processPendingInboundUpdates();
-
-  /**
    * Called from the RT thread from afterProcessing to reset previous values (copy current value to previous).
    * Can be overridden.
    *

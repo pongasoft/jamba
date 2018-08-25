@@ -206,9 +206,26 @@ public:
   }
 
   /**
-   * @return if there is a new value to pop, returns it otherwise return the last value that was popped (never nullptr)
+   * @return returns the last value that was popped (never nullptr). Does NOT check for new value
    */
-  T const *last()
+  T const *last() const
+  {
+    return fPopValue->fElement.get();
+  };
+
+
+  /**
+   * Copy the last value that was popped to oElement. Does NOT check for new value
+   */
+  void last(T &oElement) const
+  {
+    oElement = *last();
+  }
+
+  /**
+ * @return if there is a new value to pop, returns it otherwise return the last value that was popped (never nullptr)
+ */
+  T const *popOrLast()
   {
     auto element = pop();
 
@@ -222,9 +239,9 @@ public:
   /**
    * Copy either the new value (if there is one) or the last value that was popped to oElement
    */
-  void last(T &oElement)
+  void popOrLast(T &oElement)
   {
-    oElement = *last();
+    oElement = *popOrLast();
   }
 
   //------------------------------------------------------------------------------------------------------------
