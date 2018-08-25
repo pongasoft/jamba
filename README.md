@@ -70,7 +70,7 @@ Using the framework
 
 Check [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) for a good starting point.
 
-2018-08-25 - Status for tag `v1.1.0`
+2018-08-25 - Status for tag `v2.0.0`
 ------------------------------------
 * Introduced Jamba parameters to handle non VST parameters and messaging RT <-> GUI
 * Added Debug::ParamTable and Debug::ParamLine to display parameters => example
