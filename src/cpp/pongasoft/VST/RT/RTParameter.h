@@ -46,7 +46,7 @@ public:
   ParamID getParamID() const { return fParamDef->fParamID; }
 
   // getParamDef
-  std::shared_ptr<RawVstParamDef> const &getParamDef() const { return fParamDef; }
+  inline RawVstParamDef const *getParamDef() const { return fParamDef.get(); }
 
   /**
    * Update the parameter with a new normalized value. This is typically called after the VST parameter managed
@@ -97,23 +97,22 @@ public:
   // Constructor
   explicit RTVstParameter(VstParam<T> iParamDef) :
     RTRawVstParameter(iParamDef),
-    fParamDef{std::move(iParamDef)},
     fValue{denormalize(fNormalizedValue)},
     fPreviousValue{fValue}
   {
   }
 
-  // getParamDef (correct type for this subclass)
-  inline VstParam<T> const &getVstParamDef() const
+  // getParamDef
+  inline VstParamDef<T> const *getParamDefT() const
   {
-    return fParamDef;
+    return static_cast<VstParamDef<T> const *>(getParamDef());
   }
 
   // shortcut to normalize
-  inline ParamValue normalize(ParamType const &iValue) const { return fParamDef->normalize(iValue); }
+  inline ParamValue normalize(ParamType const &iValue) const { return getParamDefT()->normalize(iValue); }
 
   // shortcut to denormalize
-  inline ParamType denormalize(ParamValue iNormalizedValue) const { return fParamDef->denormalize(iNormalizedValue); }
+  inline ParamType denormalize(ParamValue iNormalizedValue) const { return getParamDefT()->denormalize(iNormalizedValue); }
 
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
@@ -135,7 +134,6 @@ protected:
   bool resetPreviousValue() override;
 
 protected:
-  VstParam<T> fParamDef;
   ParamType fValue;
   ParamType fPreviousValue;
 };

@@ -44,7 +44,7 @@ public:
   explicit IGUIJmbParameter(std::shared_ptr<IJmbParamDef> iParamDef) : fParamDef{std::move(iParamDef)} {}
 
   // getParamDef
-  std::shared_ptr<IJmbParamDef> const &getParamDef() const { return fParamDef; }
+  inline IJmbParamDef const *getParamDef() const { return fParamDef.get(); }
 
   // getParamID
   ParamID getParamID() const { return fParamDef->fParamID; }
@@ -92,14 +92,13 @@ public:
   explicit GUIJmbParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
     IGUIJmbParameter(iParamDef),
     FObject(),
-    fJmbParamDef{std::move(iParamDef)},
-    fValue{fJmbParamDef->fDefaultValue}
+    fValue{iParamDef->fDefaultValue}
   {}
 
-  // getJmbParamDef (correct type for this subclass)
-  inline std::shared_ptr<JmbParamDef<T>> const &getJmbParamDef() const
+  // getParamDef
+  inline JmbParamDef<T> const *getParamDefT() const
   {
-    return fJmbParamDef;
+    return static_cast<JmbParamDef<T> const *>(getParamDef());
   }
 
   /**
@@ -131,7 +130,7 @@ public:
   // readFromStream
   tresult readFromStream(IBStreamer &iStreamer) override
   {
-    tresult res = fJmbParamDef->readFromStream(iStreamer, fValue);
+    tresult res = getParamDefT()->readFromStream(iStreamer, fValue);
     if(res == kResultOk)
       changed();
     return res;
@@ -140,19 +139,19 @@ public:
   // writeToStream
   tresult writeToStream(IBStreamer &oStreamer) const override
   {
-    return fJmbParamDef->writeToStream(fValue, oStreamer);
+    return getParamDefT()->writeToStream(fValue, oStreamer);
   }
 
   // writeToStream
   void writeToStream(std::ostream &oStream) const override
   {
-    fJmbParamDef->writeToStream(fValue, oStream);
+    getParamDefT()->writeToStream(fValue, oStream);
   }
 
   // readFromMessage
   tresult readFromMessage(Message const &iMessage) override
   {
-    tresult res = fJmbParamDef->readFromMessage(iMessage, fValue);
+    tresult res = getParamDefT()->readFromMessage(iMessage, fValue);
     if(res == kResultOk)
       changed();
     return res;
@@ -161,7 +160,7 @@ public:
   // writeToMessage
   tresult writeToMessage(Message &oMessage) const override
   {
-    return fJmbParamDef->writeToMessage(fValue, oMessage);
+    return getParamDefT()->writeToMessage(fValue, oMessage);
   }
 
   // getValue
@@ -176,7 +175,6 @@ public:
   }
 
 protected:
-  std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
   ParamType fValue;
 };
 

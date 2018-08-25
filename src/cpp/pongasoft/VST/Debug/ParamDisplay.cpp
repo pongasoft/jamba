@@ -150,11 +150,11 @@ ParamDisplay::Value ParamDisplay::getValue(Parameters const *iParams, ParamID iP
   auto vst = iParams->getRawVstParamDef(iParamID);
 
   if(vst)
-    return getValue(vst, iKey);
+    return getValue(vst.get(), iKey);
 
   auto jmb = iParams->getJmbParamDef(iParamID);
   if(jmb)
-    return getValue(jmb, iKey);
+    return getValue(jmb.get(), iKey);
 
   return Value{};
 }
@@ -207,7 +207,7 @@ ParamDisplay::Value ParamDisplay::getValue(GUI::GUIState const *iState, ParamID 
 //------------------------------------------------------------------------
 // ParamDisplay::getValue - RawVstParamDef
 //------------------------------------------------------------------------
-std::string ParamDisplay::getValue(std::shared_ptr<RawVstParamDef> const &iParamDef, Key iKey) const
+std::string ParamDisplay::getValue(RawVstParamDef const *iParamDef, Key iKey) const
 {
   switch(iKey)
   {
@@ -309,7 +309,7 @@ std::string ParamDisplay::getValue(std::unique_ptr<RT::IRTJmbOutParameter> const
 //------------------------------------------------------------------------
 // ParamDisplay::getValue - IJmbParamDef
 //------------------------------------------------------------------------
-std::string ParamDisplay::getValue(std::shared_ptr<IJmbParamDef> const &iParamDef, Key iKey) const
+std::string ParamDisplay::getValue(IJmbParamDef const *iParamDef, Key iKey) const
 {
   switch(iKey)
   {
@@ -340,8 +340,8 @@ std::string ParamDisplay::getValue(std::shared_ptr<IJmbParamDef> const &iParamDe
 // ParamDisplay::getValue - GUIRawVstParameter
 //------------------------------------------------------------------------
 std::string ParamDisplay::getValue(std::unique_ptr<GUI::GUIRawVstParameter> const &iParam,
-                                 Key iKey,
-                                 Parameters const *iParameters) const
+                                   Key iKey,
+                                   Parameters const *iParameters) const
 {
   switch(iKey)
   {
@@ -356,7 +356,7 @@ std::string ParamDisplay::getValue(std::unique_ptr<GUI::GUIRawVstParameter> cons
     }
 
     default:
-      return getValue(iParameters->getRawVstParamDef(iParam->getParamID()), iKey);
+      return getValue(iParameters->getRawVstParamDef(iParam->getParamID()).get(), iKey);
   }
 }
 

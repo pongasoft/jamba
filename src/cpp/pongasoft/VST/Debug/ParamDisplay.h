@@ -80,8 +80,8 @@ public:
   std::vector<ParamID> const &ids() const { return fParamIDs; }
 
 protected:
-  Value getValue(std::shared_ptr<RawVstParamDef> const &iParamDef, Key iKey) const;
-  Value getValue(std::shared_ptr<IJmbParamDef> const &iParamDef, Key iKey) const;
+  Value getValue(RawVstParamDef const *iParamDef, Key iKey) const;
+  Value getValue(IJmbParamDef const *iParamDef, Key iKey) const;
   Value getValue(std::unique_ptr<RT::RTRawVstParameter> const &iParam, Key iKey) const;
   Value getValue(std::unique_ptr<RT::IRTJmbInParameter> const &iParam, Key iKey) const;
   Value getValue(std::unique_ptr<RT::IRTJmbOutParameter> const &iParam, Key iKey) const;

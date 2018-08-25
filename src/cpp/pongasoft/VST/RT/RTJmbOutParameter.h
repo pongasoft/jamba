@@ -37,7 +37,7 @@ public:
   explicit IRTJmbOutParameter(std::shared_ptr<IJmbParamDef> iParamDef) : fParamDef{std::move(iParamDef)} {}
 
   // getParamDef
-  std::shared_ptr<IJmbParamDef> const &getParamDef() const { return fParamDef; }
+  inline IJmbParamDef const *getParamDef() const { return fParamDef.get(); }
 
   // getParamID
   ParamID getParamID() const { return fParamDef->fParamID; }
@@ -73,9 +73,14 @@ public:
 
   explicit RTJmbOutParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
     IRTJmbOutParameter(iParamDef),
-    fJmbParamDef{std::move(iParamDef)},
-    fUpdateQueue{std::make_unique<T>(fJmbParamDef->fDefaultValue)}
+    fUpdateQueue{std::make_unique<T>(iParamDef->fDefaultValue)}
   {}
+
+  // getParamDef
+  inline JmbParamDef<T> const *getParamDefT() const
+  {
+    return static_cast<JmbParamDef<T> const *>(getParamDef());
+  }
 
   /**
    * Enqueues the value to be delivered to the GUI (or whoever is listening to messages).
@@ -119,9 +124,6 @@ public:
   // writeToStream
   void writeToStream(std::ostream &oStream) const override;
 
-protected:
-  std::shared_ptr<JmbParamDef<T>> fJmbParamDef;
-
 private:
   Concurrent::LockFree::SingleElementQueue<T> fUpdateQueue{};
 };
@@ -135,7 +137,7 @@ tresult RTJmbOutParameter<T>::writeToMessage(Message &oMessage)
   auto update = fUpdateQueue.pop();
   if(update)
   {
-    return fJmbParamDef->writeToMessage(*update, oMessage);
+    return getParamDefT()->writeToMessage(*update, oMessage);
   }
 
   return kResultFalse;
@@ -147,7 +149,7 @@ tresult RTJmbOutParameter<T>::writeToMessage(Message &oMessage)
 template<typename T>
 void RTJmbOutParameter<T>::writeToStream(std::ostream &oStream) const
 {
-  fJmbParamDef->writeToStream(*fUpdateQueue.last(), oStream);
+  getParamDefT()->writeToStream(*fUpdateQueue.last(), oStream);
 }
 
 //------------------------------------------------------------------------
