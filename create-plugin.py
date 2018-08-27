@@ -18,6 +18,7 @@ parser.add_argument("-e", "--email", help="The email for the company")
 parser.add_argument("-n", "--namespace", help="The C++ namespace")
 parser.add_argument("-d", "--directory", help="The directory for the project")
 parser.add_argument("-j", "--project", help="The name of the project")
+parser.add_argument("-g", "--jambagithash", help="The git hash for jamba")
 args = parser.parse_args()
 
 def askUser(msg, default):
@@ -38,9 +39,8 @@ def maybeAskUser(option, msg, default):
 thisScriptRootDir = os.path.dirname(os.path.realpath(sys.argv[0]))
 blankPluginRoot = os.path.join(thisScriptRootDir, 'blank-plugin')
 
-def config():
-  plugin = dict()
-  plugin['name'] = maybeAskUser(args.plugin, "Plugin Name", None)
+def config(plugin):
+  plugin['name'] = maybeAskUser(args.plugin, "Plugin Name (must be a valid C++ class name)", None)
   plugin['filename'] = maybeAskUser(args.filename, "Filename", plugin['name'])
   plugin['company'] = maybeAskUser(args.company, "Company", 'acme')
   plugin['company_url'] =  maybeAskUser(args.url, "Company URL", f'https://www.{plugin["company"]}.com') 
@@ -54,20 +54,29 @@ def config():
   
   print(f'''##################
 Plugin Name     - {plugin["name"]}
-Filename        - {plugin["filename"]}
+Filename        - {plugin["filename"]} (will generate {plugin["filename"]}.vst3)
 Company         - {plugin["company"]}
 Company URL     - {plugin["company_url"]}
 Company Email   - {plugin["company_email"]}
+Jamba git hash  - {plugin["jamba_git_hash"]}
 C++ Namespace   - {plugin["namespace"]}
 Plugin root dir - {plugin["root_dir"]}
 ''')
   confirm = input("Are you sure (Y/n)?")
   if len(confirm.strip()) == 0 or confirm == 'Y':
-    return plugin
+    return
   else:
-    return config()
+    config(plugin)
 
-plugin = config()
+plugin = dict()
+
+if args.jambagithash:
+  plugin['jamba_git_hash'] = args.jambagithash
+else:
+  jambaGitSha = subprocess.run(['git', '--no-pager', 'log', '-1', '--pretty=format:%H'], cwd=blankPluginRoot, capture_output=True, text=True).stdout
+  plugin['jamba_git_hash'] = subprocess.run(['git', 'describe', '--tags', jambaGitSha], cwd=blankPluginRoot, capture_output=True, text=True).stdout.rstrip()
+
+config(plugin)
 
 def generateUUID():
   a = uuid.uuid4().hex
@@ -78,8 +87,7 @@ plugin['namespace_end']  = '\n'.join(list(map(lambda x: '}', plugin['namespace']
 plugin['processor_uuid']  = generateUUID()
 plugin['controller_uuid']  = generateUUID()
 plugin['year'] = datetime.datetime.now().year
-jambaGitSha = subprocess.run(['git', '--no-pager', 'log', '-1', '--pretty=format:%H'], cwd=blankPluginRoot, capture_output=True, text=True).stdout
-plugin['jamba_git_hash'] = subprocess.run(['git', 'describe', '--tags', jambaGitSha], cwd=blankPluginRoot, capture_output=True, text=True).stdout.rstrip()
+
 
 ignoredFiles = ['.DS_Store']
 
@@ -122,11 +130,29 @@ print(f'''You can now configure the plugin:
 
 For macOs:
 ----------
+### configuring
+
 cd <build_folder>
 {plugin['root_dir']}/configure.sh Debug
 
+### building and testing
+cd <build_folder>/build/Debug
+./build.sh # to build
+./test.sh # to run the test
+./validate.sh # to validate the plugin (VST3)
+./edit.sh # to run the editor and edit the UI
+./install.sh # to install locally
+
 For Windows 10:
 ---------------
+### configuring
+
 cd <build_folder>
 {plugin['root_dir']}/configure.bat
-''')
+
+### building and testing
+cd <build_folder>/build
+./build.bat # to build (Debug mode)
+./test.bat # to run the tests (Debug mode)
+./validate.bat # to validate the plugin (VST3) in Debug mode
+./edit.bat # to run the editor and edit the UI''')
