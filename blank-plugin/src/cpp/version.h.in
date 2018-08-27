@@ -1,0 +1,22 @@
+#pragma once
+
+#define MAJOR_VERSION_STR "@PLUGIN_MAJOR_VERSION@"
+#define MAJOR_VERSION_INT @PLUGIN_MAJOR_VERSION@
+
+#define MINOR_VERSION_STR "@PLUGIN_MINOR_VERSION@"
+#define MINOR_VERSION_INT @PLUGIN_MINOR_VERSION@
+
+#define PATCH_NUMBER_STR "@PLUGIN_PATCH_VERSION@"
+#define PATCH_NUMBER_INT @PLUGIN_PATCH_VERSION@
+
+// Version with build number
+#define FULL_VERSION_STR "@PLUGIN_VERSION@"
+
+#define stringOriginalFilename	"[-filename-].vst3"
+#if PLATFORM_64
+#define stringFileDescription	"[-name-] plugin by [-company-] (64Bit)"
+#else
+#define stringFileDescription	"[-name-] plugin by [-company-]"
+#endif
+#define stringCompanyName		"[-company-]\0"
+#define stringLegalCopyright	"© [-year-] [-company-]"
