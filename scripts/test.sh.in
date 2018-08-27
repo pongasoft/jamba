@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cmake --build . --target ${target}_test
+cmake --build . --target ${target}_test -- -j
 ctest
