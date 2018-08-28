@@ -22,6 +22,7 @@ Features
 - easily use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
 - store/read state in a thread safe fashion (includes version)
 - UI views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state)
+- [Generates](#generating-a-blank-plugin) a fully buildable, testable, editable plugin with a simple command
 
 History
 -------
@@ -60,48 +61,108 @@ In order to build both VST2 and VST3 at the same time, you need to run the follo
     cd C:\Users\Public\Documents\Steinberg\VST_SDK.369
     copy_vst2_to_vst3_sdk.bat
 
-Using the framework
--------------------
 
-- After installing/configuring the sdk, simply include `jamba.cmake` in your project.
-- Inherit from `Parameters` to define your parameters
-- Inherit from `RTProcessor` to implement the RT (real time) business logic
-- Inherit from `GUIController` to setup the GUI 
+Generating a blank plugin
+-------------------------
 
-Check [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) for a good starting point.
+- In order to quickly create a jamba enabled blank plugin (simply copy input to output), clone this project and run the following command (requires python3):
 
-2018-08-25 - Status for tag `v2.0.0`
-------------------------------------
+        python3 create-plugin.py
+
+- Follow the prompt (example run)
+
+        > cd /tmp
+        > python3 /Volumes/Development/github/org.pongasoft/jamba/create-plugin.py
+        Plugin Name (must be a valid C++ class name) = Kooza
+        Filename (leave empty for default [Kooza]) = 
+        Company (leave empty for default [acme]) = pongasoft
+        Company URL (leave empty for default [https://www.pongasoft.com]) = 
+        Company Email (leave empty for default [support@pongasoft.com]) = 
+        C++ namespace (leave empty for default [pongasoft::VST::Kooza]) = 
+        Project directory (leave empty for default [/private/tmp]) = 
+        Project Name (leave empty for default [pongasoft-Kooza-plugin]) = 
+        ##################
+        Plugin Name     - Kooza
+        Filename        - Kooza (will generate Kooza.vst3)
+        Company         - pongasoft
+        Company URL     - https://www.pongasoft.com
+        Company Email   - support@pongasoft.com
+        Jamba git hash  - v2.0.1
+        C++ Namespace   - pongasoft::VST::Kooza
+        Plugin root dir - /private/tmp/pongasoft-Kooza-plugin
+
+        Are you sure (Y/n)?
+        Generating Kooza plugin....
+        Kooza plugin generated under /private/tmp/pongasoft-Kooza-plugin
+        You can now configure the plugin:
+
+        For macOs:
+        ----------
+        ### configuring
+
+        cd <build_folder>
+        /private/tmp/pongasoft-Kooza-plugin/configure.sh Debug
+
+        ### building and testing
+        cd <build_folder>/build/Debug
+        ./build.sh # to build
+        ./test.sh # to run the tests
+        ./validate.sh # to validate the plugin (VST3)
+        ./edit.sh # to run the editor and edit the UI
+        ./install.sh # to install locally
+
+        For Windows 10:
+        ---------------
+        ### configuring
+
+        cd <build_folder>
+        /private/tmp/pongasoft-Kooza-plugin/configure.bat
+
+        ### building and testing
+        cd <build_folder>/build
+        ./build.bat # to build (Debug mode)
+        ./test.bat # to run the tests (Debug mode)
+        ./validate.bat # to validate the plugin (VST3) in Debug mode
+        ./edit.bat # to run the editor and edit the UI
+
+Check [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) for documentation and explanation of the concepts.
+
+Release Notes
+-------------
+
+### 2018-08-28 - `v2.0.1`
+* Added ability to create a jamba enabled blank plugin: the plugin simply copies the input to the output and offers all the capabilities of jamba (build, test, edit, validate, install, etc...).
+
+### 2018-08-25 - `v2.0.0`
 * Introduced Jamba parameters to handle non VST parameters and messaging RT <-> GUI
 * Added Debug::ParamTable and Debug::ParamLine to display parameters => example
 
-      | ID   | TITLE      | TYP | OW | TRS | SHA | DEF.N | DEF.S          | STP | FLG   | SHORT  | PRE | UID | UNS |
-      --------------------------------------------------------------------------------------------------------------
-      | 1000 | Bypass     | vst | rt |     |     | 0.000 | Off            | 1   | 65537 | Bypass | 4   | 0   |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 2010 | Left Gain  | vst | rt |     |     | 0.700 | +0.00dB        | 0   | 1     | GainL  | 2   | 0   |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 2011 | Right Gain | vst | rt |     |     | 0.700 | +0.00dB        | 0   | 1     | GainR  | 2   | 0   |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 2012 | Link       | vst | ui |     |     | 1.000 | On             | 1   | 1     | Link   | 4   | 0   |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 2020 | Reset Max  | vst | rt |     |     | 0.000 | Off            | 1   | 1     | Reset  | 4   | 0   |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 2000 | VuPPM      | vst | rt | x   |     | 0.000 | 0.0000         | 0   | 1     | VuPPM  | 4   | 0   |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 3000 | Stats      | jmb | rt | x   | x   |       | -oo            |     |       |        |     |     |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 2030 | Input Text | jmb | ui |     |     |       | Hello from GUI |     |       |        |     |     |     |
-      --------------------------------------------------------------------------------------------------------------
-      | 3010 | UIMessage  | jmb | ui | x   | x   |       |                |     |       |        |     |     |     |
-      --------------------------------------------------------------------------------------------------------------
+        | ID   | TITLE      | TYP | OW | TRS | SHA | DEF.N | DEF.S          | STP | FLG   | SHORT  | PRE | UID | UNS |
+        --------------------------------------------------------------------------------------------------------------
+        | 1000 | Bypass     | vst | rt |     |     | 0.000 | Off            | 1   | 65537 | Bypass | 4   | 0   |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 2010 | Left Gain  | vst | rt |     |     | 0.700 | +0.00dB        | 0   | 1     | GainL  | 2   | 0   |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 2011 | Right Gain | vst | rt |     |     | 0.700 | +0.00dB        | 0   | 1     | GainR  | 2   | 0   |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 2012 | Link       | vst | ui |     |     | 1.000 | On             | 1   | 1     | Link   | 4   | 0   |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 2020 | Reset Max  | vst | rt |     |     | 0.000 | Off            | 1   | 1     | Reset  | 4   | 0   |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 2000 | VuPPM      | vst | rt | x   |     | 0.000 | 0.0000         | 0   | 1     | VuPPM  | 4   | 0   |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 3000 | Stats      | jmb | rt | x   | x   |       | -oo            |     |       |        |     |     |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 2030 | Input Text | jmb | ui |     |     |       | Hello from GUI |     |       |        |     |     |     |
+        --------------------------------------------------------------------------------------------------------------
+        | 3010 | UIMessage  | jmb | ui | x   | x   |       |                |     |       |        |     |     |     |
+        --------------------------------------------------------------------------------------------------------------
 
 * Implemented lock free, memory allocation free and copy free version of SingleElementQueue and AtomicValue
 * Generate build, test, validate, edit and install scripts
 * Added [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) documentation project
 
-2018-08-05 - Status for tag `v1.0.0`
-------------------------------------
+### 2018-08-05 - `v1.0.0`
 * first public release / free / open source
 
 Misc
