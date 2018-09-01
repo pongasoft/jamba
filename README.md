@@ -139,17 +139,31 @@ After generating the plugin, the script gives you instructions on the various co
 
 Note: once the plugin is generated, feel free to edit/modify any file you want as the generating phase is only meant to be run once in order to quickly get a plugin with all the pieces (and boilerplate code) in place.
 
-### Step 6. Next
+### Step 6. Add your own files
+
+- If you add new source files, add them to the `CMakeLists.txt` file in the `vst_sources` section (feel free to change the `CMakeLists.txt` to your liking, for example if you want to include all files without having to explicitely add them this is possible... refer to `cmake` for more info).
+- If you add new tests files, they are added automatically as long as they are located under `test/cpp`
+- If you add new resources for the GUI (images for example), they need to be added in 2 places:
+
+    - In the `CMakeLists.txt` for macOS (see the example commented line) 
+
+            # smtg_add_vst3_resource(${target} "resource/background.png")
+    
+    - In the `resource/<Name>.rc` file for Windows (see the example commented line) 
+      
+            //background.png           PNG   "background.png"
+
+### Step 7. Next
 
 Here are some recommended steps:
 
 - If you have never written a VST3 plugin I would suggest reading the VST3 documentation that comes with the SDK (you can find more information on the concepts, how the editor works, etc...). At the end of the day you are still writing a VST3 plugin not a Jamba plugin! Simply open the `index.html` file at the root of the SDK.
 - Check [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) for documentation and explanation of the Jamba concepts.
 - In particular:
-   - Check _Name_.h which is where you define the Vst (and Jmb) parameters your plugin will use
-   - Check RT/_Name_Processor.cpp which contains the main logic of the plugin
-   - Use the editor to change the UI of the plugin (which then saves the resource/_Name_.uidesc xml file). You can edit the xml file by hand, but it is definitely recommended to use the editor to do so.
-   - Check _Name_\_VST2.cpp on instructions about how to register the VST2 plugin ID with Steinberg (unfortunately this is a manual process). You don't have to do this right away... only when you are ready to release your plugin.
+   - Check `<Name>.h` which is where you define the Vst (and Jmb) parameters your plugin will use
+   - Check `RT/<Name>Processor.cpp` which contains the main logic of the plugin
+   - Use the editor to change the UI of the plugin (which then saves the `resource/<Name>.uidesc` xml file). You can edit the xml file by hand, but it is definitely recommended to use the editor to do so.
+   - Check `<Name>_VST2.cpp` on instructions about how to register the VST2 plugin ID with Steinberg (unfortunately this is a manual process). You don't have to do this right away... only when you are ready to release your plugin.
 
 Documentation
 -------------
