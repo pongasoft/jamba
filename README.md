@@ -174,6 +174,9 @@ Documentation
 Release Notes
 -------------
 
+### 2018-09-02 - `v2.0.2`
+* Updated license terms
+
 ### 2018-08-28 - `v2.0.1`
 * Added ability to create a jamba enabled blank plugin: the plugin simply copies the input to the output and offers all the capabilities of jamba (build, test, edit, validate, install, etc...).
 
@@ -215,10 +218,13 @@ This project was created to abstract the common patterns and solutions to many q
 
 Misc
 ----
-This project uses [loguru](https://github.com/emilk/loguru) for logging (included under `src/cpp/pongasoft/logging`)
+
+- This project uses [loguru](https://github.com/emilk/loguru) for logging (included under `src/cpp/pongasoft/logging`)
+- This project uses the VST3 SDK by Steinberg Media Technologies GmbH
 
 Licensing
 ---------
-GPL version 3.
 
-Since you are building a VST3 plugin you should check the [Steinberg License](http://www.steinberg.net/sdklicenses_vst3).
+- Apache 2.0 License. Jamba itself can be used according to the terms of the Apache 2.0 license.
+
+- Note that the primary goal of Jamba is to help build a VST3 plugin and as a result you should check the [Steinberg License](http://www.steinberg.net/sdklicenses_vst3) in order to determine under which terms your plugin needs to be licensed.
