@@ -26,7 +26,7 @@ Features
 Quick starting guide
 --------------------
 
-This project is known to work on macOS High Siera 10.13.3 with Xcode 9.2 installed. It also has been tested on Windows 10 64 bits and Visual Studio Build tools (2017). It requires `cmake` version 3.9 at the minimum. Because it uses `cmake` it should work on other platforms but it has not been tested.
+This project is known to work on macOS High Siera 10.13.3 with Xcode 9.2 installed. It also has been tested on Windows 10 64 bits and Visual Studio Build tools (2017). It requires `cmake` version 3.12 at the minimum. Because it uses `cmake` it should work on other platforms but it has not been tested.
 
 ### Step 1. Install the VST3 SDK
 

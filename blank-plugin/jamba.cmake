@@ -1,20 +1,42 @@
-cmake_minimum_required (VERSION 3.9) 
+cmake_minimum_required(VERSION 3.12)
 
-message(STATUS "Downloading jamba.. ${JAMBA_GIT_REPO}@${JAMBA_GIT_TAG}")
-configure_file(${CMAKE_CURRENT_LIST_DIR}/jamba-download.cmake.in ${CMAKE_BINARY_DIR}/jamba-download/CMakeLists.txt)
+include(FetchContent)
 
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result 
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/jamba-download )
-if(result) 
-  message(FATAL_ERROR "Error while setting up jamba download: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/jamba-download )
-if(result)
-  message(FATAL_ERROR "Error while downloading jamba: ${result}")
+if(JAMBA_ROOT_DIR)
+  # instructs FetchContent to not download or update but use the location instead
+  set(FETCHCONTENT_SOURCE_DIR_JAMBA ${JAMBA_ROOT_DIR}) 
 endif()
 
-set(JAMBA_ROOT_DIR ${CMAKE_BINARY_DIR}/jamba)
+set(JAMBA_GIT_REPO "https://github.com/pongasoft/jamba" CACHE STRING "Jamba git repository url" FORCE)
+set(JAMBA_GIT_TAG [-jamba_git_hash-] CACHE STRING "Jamba git tag" FORCE)
 
+FetchContent_Declare(jamba
+      GIT_REPOSITORY    ${JAMBA_GIT_REPO}
+      GIT_TAG           ${JAMBA_GIT_TAG}
+      GIT_CONFIG        advice.detachedHead=false
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/jamba"
+      BINARY_DIR        "${CMAKE_BINARY_DIR}/jamba-build"
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND     ""
+      INSTALL_COMMAND   ""
+      TEST_COMMAND      ""
+      )
+
+FetchContent_GetProperties(jamba)
+
+if(NOT jamba_POPULATED)
+
+  if(FETCHCONTENT_SOURCE_DIR_JAMBA)
+    message(STATUS "Using jamba from local ${FETCHCONTENT_SOURCE_DIR_JAMBA}")
+  else()
+    message(STATUS "Fetching jamba ${JAMBA_GIT_REPO}@${JAMBA_GIT_TAG}")
+  endif()
+
+  FetchContent_Populate(jamba)
+
+endif()
+
+set(JAMBA_ROOT_DIR ${jamba_SOURCE_DIR})
+
+# finally we include jamba itself
+include(${JAMBA_ROOT_DIR}/jamba.cmake)

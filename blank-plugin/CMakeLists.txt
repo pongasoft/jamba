@@ -1,11 +1,8 @@
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required (VERSION 3.12)
 
 # build VST 2 by default
 option(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 option(SMTG_CREATE_VST3_LINK "" OFF)
-
-set(JAMBA_GIT_REPO "https://github.com/pongasoft/jamba" CACHE STRING "Jamba git repository url" FORCE)
-set(JAMBA_GIT_TAG [-jamba_git_hash-] CACHE STRING "Jamba git tag" FORCE)
 
 set(PLUGIN_MAJOR_VERSION 1)
 set(PLUGIN_MINOR_VERSION 0)
@@ -14,14 +11,11 @@ set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PAT
 
 project([-name-])
 
-# for working on the framework at the same time...
-#set(JAMBA_ROOT_DIR ../jamba)
+# To disable download/update, you can set those 2 variables to local folders
+#set(JAMBA_ROOT_DIR ../../pongasoft/jamba)
+#set(GOOGLETEST_ROOT_DIR ../../google/googletest)
 
-if(NOT JAMBA_ROOT_DIR)
-	include(jamba.cmake)
-endif()
-
-include(${JAMBA_ROOT_DIR}/jamba.cmake)
+include(jamba.cmake)
 
 set(CPP_SOURCES src/cpp)
 

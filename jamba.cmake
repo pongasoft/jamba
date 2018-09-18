@@ -277,7 +277,6 @@ endfunction()
 ###################################################
 # Testing - for this framework
 ###################################################
-message(STATUS "JAMBA_ROOT=${JAMBA_ROOT}" )
 file(GLOB_RECURSE TEST_SRC_FILES ${JAMBA_ROOT}/test/cpp/*cpp)
 set(test_sources ""
     )
