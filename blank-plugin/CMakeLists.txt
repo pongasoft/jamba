@@ -11,8 +11,10 @@ set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PAT
 
 project([-name-])
 
-# To disable download/update, you can set those 2 variables to local folders
-#set(JAMBA_ROOT_DIR ../../pongasoft/jamba)
+# To use local jamba install, uncomment the following line (no download)
+#set(JAMBA_ROOT_DIR [-jamba_root_dir-])
+
+# To use local googletest install, uncomment the following line (no download) and modify the path accordingly
 #set(GOOGLETEST_ROOT_DIR ../../google/googletest)
 
 include(jamba.cmake)

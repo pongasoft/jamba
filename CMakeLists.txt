@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.12)
 
+project(jamba)
+
 # In order to use the jamba framework you should include jamba.cmake directly or in other words do
 #    include(<path_to_jamba>/jamba.cmake)
 # instead of

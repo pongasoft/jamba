@@ -67,6 +67,7 @@ def config(plugin):
   projectName = maybeAskUser(args.project, "Project Name", f'{plugin["company"]}-{plugin["name"]}-plugin')
 
   plugin['root_dir'] = os.path.join(os.path.realpath(projectDir), projectName)
+  plugin['jamba_root_dir'] = thisScriptRootDir
   
   print(f'''##################
 Plugin Name     - {plugin["name"]}
@@ -153,11 +154,12 @@ cd <build_folder>
 
 ### building and testing
 cd <build_folder>/build/Debug
-./build.sh # to build
-./test.sh # to run the test
+./build.sh    # to build
+./test.sh     # to run the test
 ./validate.sh # to validate the plugin (VST3)
-./edit.sh # to run the editor and edit the UI
-./install.sh # to install locally
+./edit.sh     # to run the editor and edit the UI
+./install.sh  # to install locally
+./archive.sh  # to build the zip archive
 
 For Windows 10:
 ---------------
@@ -168,7 +170,8 @@ cd <build_folder>
 
 ### building and testing
 cd <build_folder>/build
-./build.bat # to build (Debug mode)
-./test.bat # to run the tests (Debug mode)
-./validate.bat # to validate the plugin (VST3) in Debug mode
-./edit.bat # to run the editor and edit the UI''')
+./build.bat [Debug|Release]    # to build 
+./test.bat [Debug|Release]     # to run the tests
+./validate.bat [Debug|Release] # to validate the plugin (VST3)
+./edit.bat                     # to run the editor and edit the UI (editor not available in Release mode)
+./archive.bat [Debug|Release]  # to build the zip archive''')

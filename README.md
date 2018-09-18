@@ -104,11 +104,12 @@ Follow the prompt (example run)
 
     ### building and testing
     cd <build_folder>/build/Debug
-    ./build.sh # to build
-    ./test.sh # to run the tests
+    ./build.sh    # to build
+    ./test.sh     # to run the test
     ./validate.sh # to validate the plugin (VST3)
-    ./edit.sh # to run the editor and edit the UI
-    ./install.sh # to install locally
+    ./edit.sh     # to run the editor and edit the UI
+    ./install.sh  # to install locally
+    ./archive.sh  # to build the zip archive
 
     For Windows 10:
     ---------------
@@ -119,10 +120,11 @@ Follow the prompt (example run)
 
     ### building and testing
     cd <build_folder>/build
-    ./build.bat # to build (Debug mode)
-    ./test.bat # to run the tests (Debug mode)
-    ./validate.bat # to validate the plugin (VST3) in Debug mode
-    ./edit.bat # to run the editor and edit the UI
+    ./build.bat [Debug|Release]    # to build 
+    ./test.bat [Debug|Release]     # to run the tests
+    ./validate.bat [Debug|Release] # to validate the plugin (VST3)
+    ./edit.bat                     # to run the editor and edit the UI (editor not available in Release mode)
+    ./archive.bat [Debug|Release]  # to build the zip archive
 
 The blank plugin generated is simply copying input to output.
 
@@ -136,6 +138,7 @@ After generating the plugin, the script gives you instructions on the various co
 - `test.sh(.bat)` and `validate.sh(.bat)` will make sure the plugin is valid
 - `edit.sh(.bat)` will start the editor to modify the UI (once started, right click to edit, and then click `Save As` to save the changes in the proper file (see instructions in the UI))
 - `install.sh` will copy the plugin in the proper folder(s) on macOS so you can test it in your DAW (at this time for Windows 10 there does not seem to be a _standard_ folder so you need to copy the generated `.vst3` in its proper location which depends on the DAW)
+- `archive.sh` will generate the zip archive containing the plugin and readme
 
 Note: once the plugin is generated, feel free to edit/modify any file you want as the generating phase is only meant to be run once in order to quickly get a plugin with all the pieces (and boilerplate code) in place.
 
