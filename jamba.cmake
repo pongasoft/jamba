@@ -210,6 +210,15 @@ function(jamba_create_archive target plugin_name)
 endfunction()
 
 ###################################################
+# jamba_add_vst3_resource
+###################################################
+set(JAMBA_VST3_RESOURCES_RC "")
+function(jamba_add_vst3_resource target type filename)
+  smtg_add_vst3_resource(${target} "resource/${filename}")
+  set(JAMBA_VST3_RESOURCES_RC "${JAMBA_VST3_RESOURCES_RC}\n${filename}\t${type}\t\"${filename}\"" PARENT_SCOPE)
+endfunction()
+
+###################################################
 # jamba_fix_vst2
 ###################################################
 function(jamba_fix_vst2 target)

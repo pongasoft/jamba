@@ -3,8 +3,7 @@
 
 #define APSTUDIO_READONLY_SYMBOLS
 
-[-name-].uidesc            DATA  "[-name-].uidesc"
-//background.png           PNG   "background.png"
+${JAMBA_VST3_RESOURCES_RC}
 
 /////////////////////////////////////////////////////////////////////////////
 // Version

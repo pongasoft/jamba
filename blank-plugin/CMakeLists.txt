@@ -53,13 +53,14 @@ smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
 target_include_directories(${target} PUBLIC ${VSTGUI_ROOT}/vstgui4)
 target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
 
-# smtg_add_vst3_resource(${target} "resource/background.png")
-smtg_add_vst3_resource(${target} "resource/[-name-].uidesc")
+jamba_add_vst3_resource(${target} DATA "[-name-].uidesc")
+# jamba_add_vst3_resource(${target} PNG "background.png")
 
 if(MAC)
 	smtg_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist" PREPROCESS)
 elseif(WIN)
-	target_sources(${target} PRIVATE resource/[-name-].rc)
+	configure_file(resource/[-name-].rc.in ${CMAKE_BINARY_DIR}/generated/[-name-].rc)
+	target_sources(${target} PRIVATE ${CMAKE_BINARY_DIR}/generated/[-name-].rc)
 endif()
 
 # fix for vst2
