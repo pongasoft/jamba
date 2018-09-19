@@ -146,16 +146,22 @@ Note: once the plugin is generated, feel free to edit/modify any file you want a
 
 - If you add new source files, add them to the `CMakeLists.txt` file in the `vst_sources` section (feel free to change the `CMakeLists.txt` to your liking, for example if you want to include all files without having to explicitely add them this is possible... refer to `cmake` for more info).
 - If you add new tests files, they are added automatically as long as they are located under `test/cpp`
-- If you add new resources for the GUI (images for example), they need to be added in 2 places:
+- If you add new resources for the GUI (images for example), they need to be added to `CMakeLists.txt`:
 
-    - In the `CMakeLists.txt` for macOS (see the example commented line) 
+        # example (see commented line in CMakeLists.txt)
+        jamba_add_vst3_resource(${target} PNG "background.png")
+        
 
-            # smtg_add_vst3_resource(${target} "resource/background.png")
+    Note: In the UI editor when adding a bitmap and saving the `xxx.uidesc` file, the fullpath of the image might be recorded. Make sure to edit the `xxx.uidesc` and modify it to keep **ONLY** the filename
     
-    - In the `resource/<Name>.rc` file for Windows (see the example commented line) 
-      
-            //background.png           PNG   "background.png"
+        <!-- this is WRONG!!!!! -->
+        <bitmap name="background" path="/private/tmp/pongasoft-Kooza-plugin/resource/background.png"/>
+        
+        <!-- this is right -->
+        <bitmap name="background" path="background.png"/>
 
+Note: `cmake` automatically detects changes to `CMakeLists.txt` so you should not have to do anything special when you make any changes.
+  
 ### Step 7. Next
 
 Here are some recommended steps:

@@ -53,6 +53,9 @@ smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
 target_include_directories(${target} PUBLIC ${VSTGUI_ROOT}/vstgui4)
 target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
 
+###################################################
+# Resources - add your resources here...
+###################################################
 jamba_add_vst3_resource(${target} DATA "[-name-].uidesc")
 # jamba_add_vst3_resource(${target} PNG "background.png")
 
