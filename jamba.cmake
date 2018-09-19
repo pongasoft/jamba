@@ -213,9 +213,21 @@ endfunction()
 # jamba_add_vst3_resource
 ###################################################
 set(JAMBA_VST3_RESOURCES_RC "")
+if(NOT JAMBA_RESOURCE_DIR)
+    set(JAMBA_RESOURCE_DIR "${PROJECT_SOURCE_DIR}/resource")
+endif()
 function(jamba_add_vst3_resource target type filename)
-  smtg_add_vst3_resource(${target} "resource/${filename}")
-  set(JAMBA_VST3_RESOURCES_RC "${JAMBA_VST3_RESOURCES_RC}\n${filename}\t${type}\t\"${filename}\"" PARENT_SCOPE)
+  smtg_add_vst3_resource(${target} "${JAMBA_RESOURCE_DIR}/${filename}")
+  file(TO_NATIVE_PATH "${JAMBA_RESOURCE_DIR}/${filename}" JAMBA_VST3_RESOURCE_PATH)
+  string(REPLACE "\\" "\\\\" JAMBA_VST3_RESOURCE_PATH "${JAMBA_VST3_RESOURCE_PATH}")
+  set(JAMBA_VST3_RESOURCES_RC "${JAMBA_VST3_RESOURCES_RC}\n${filename}\t${type}\t\"${JAMBA_VST3_RESOURCE_PATH}\"" PARENT_SCOPE)
+endfunction()
+
+###################################################
+# jamba_gen_vst3_resource_rc
+###################################################
+function(jamba_gen_vst3_resource_rc filepath)
+  file(WRITE ${filepath} ${JAMBA_VST3_RESOURCES_RC})
 endfunction()
 
 ###################################################

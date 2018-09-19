@@ -12,7 +12,7 @@ set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PAT
 project([-name-])
 
 # To use local jamba install, uncomment the following line (no download)
-#set(JAMBA_ROOT_DIR [-jamba_root_dir-])
+#set(JAMBA_ROOT_DIR "[-jamba_root_dir-]")
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly
 #set(GOOGLETEST_ROOT_DIR ../../google/googletest)
@@ -26,21 +26,21 @@ include_directories(${CMAKE_BINARY_DIR}/generated/)
 
 if (SMTG_CREATE_VST2_VERSION)
 	set(vst2_sources
-			${CPP_SOURCES}/[-name-]_VST2.cpp
-			)
+		${CPP_SOURCES}/[-name-]_VST2.cpp
+	)
 endif()
 
 set(vst_sources
-    ${CPP_SOURCES}/[-name-]_VST3.cpp
+	${CPP_SOURCES}/[-name-]_VST3.cpp
 
     ${CPP_SOURCES}/[-name-].h
     ${CPP_SOURCES}/[-name-]CIDs.h
 
-		${CPP_SOURCES}/RT/[-name-]Processor.h
-		${CPP_SOURCES}/RT/[-name-]Processor.cpp
+	${CPP_SOURCES}/RT/[-name-]Processor.h
+	${CPP_SOURCES}/RT/[-name-]Processor.cpp
 
-		${CPP_SOURCES}/GUI/[-name-]Controller.h
-		${CPP_SOURCES}/GUI/[-name-]Controller.cpp
+	${CPP_SOURCES}/GUI/[-name-]Controller.h
+	${CPP_SOURCES}/GUI/[-name-]Controller.cpp
   )
 
 # VST2 is only defined for macOS and Windows
@@ -59,8 +59,8 @@ jamba_add_vst3_resource(${target} DATA "[-name-].uidesc")
 if(MAC)
 	smtg_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist" PREPROCESS)
 elseif(WIN)
-	configure_file(resource/[-name-].rc.in ${CMAKE_BINARY_DIR}/generated/[-name-].rc)
-	target_sources(${target} PRIVATE ${CMAKE_BINARY_DIR}/generated/[-name-].rc)
+	jamba_gen_vst3_resource_rc("${CMAKE_BINARY_DIR}/generated/vst3_resources.rc")
+	target_sources(${target} PRIVATE resource/[-name-].rc)
 endif()
 
 # fix for vst2

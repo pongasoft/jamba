@@ -3,7 +3,7 @@
 
 #define APSTUDIO_READONLY_SYMBOLS
 
-${JAMBA_VST3_RESOURCES_RC}
+#include "vst3_resources.rc"
 
 /////////////////////////////////////////////////////////////////////////////
 // Version

@@ -67,7 +67,7 @@ def config(plugin):
   projectName = maybeAskUser(args.project, "Project Name", f'{plugin["company"]}-{plugin["name"]}-plugin')
 
   plugin['root_dir'] = os.path.join(os.path.realpath(projectDir), projectName)
-  plugin['jamba_root_dir'] = thisScriptRootDir
+  plugin['jamba_root_dir'] = thisScriptRootDir.replace('\\', '\\\\')
   
   print(f'''##################
 Plugin Name     - {plugin["name"]}
