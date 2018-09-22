@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # build VST 2 by default
-option(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
+option(SMTG_CREATE_VST2_VERSION "Use VST2" [-enable_vst2-])
 option(SMTG_CREATE_VST3_LINK "" OFF)
 
 set(PLUGIN_MAJOR_VERSION 1)
@@ -49,7 +49,7 @@ if (MAC OR WIN)
 endif ()
 
 set(target [-company-]_[-name-])
-smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
+jamba_add_vst3plugin(${target} "${vst_sources}")
 target_include_directories(${target} PUBLIC ${VSTGUI_ROOT}/vstgui4)
 target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
 
@@ -65,9 +65,6 @@ elseif (WIN)
   jamba_gen_vst3_resource_rc("${CMAKE_BINARY_DIR}/generated/vst3_resources.rc")
   target_sources(${target} PRIVATE resource/[-name-].rc)
 endif ()
-
-# fix for vst2
-jamba_fix_vst2(${target})
 
 ###################################################
 # Create archive (.tgz)

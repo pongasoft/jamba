@@ -26,6 +26,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--plugin", help="The name of the plugin")
+parser.add_argument("-2", "--vst2", help="Enable VST2", action="store_true")
 parser.add_argument("-f", "--filename", help="The filename of the plugin")
 parser.add_argument("-c", "--company", help="The name of the company")
 parser.add_argument("-u", "--url", help="The url for the company")
@@ -56,6 +57,22 @@ def maybe_ask_user(option, msg, default):
             return ask_user(f'{msg} = ', default)
 
 
+# confirm_user
+def confirm_user(msg):
+    s = input(msg).strip()
+    if len(s) == 0:
+        return True
+    return s.lower() == 'y'
+
+
+# maybe_confirm_user
+def maybe_confirm_user(option, msg):
+    if option:
+        return option
+    else:
+        return confirm_user(f'{msg} (Y/n)?')
+
+
 this_script_root_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
 blank_plugin_root = os.path.join(this_script_root_dir, 'blank-plugin')
 
@@ -63,6 +80,7 @@ blank_plugin_root = os.path.join(this_script_root_dir, 'blank-plugin')
 # config
 def config(plugin):
     plugin['name'] = maybe_ask_user(args.plugin, "Plugin Name (must be a valid C++ class name)", None)
+    plugin['enable_vst2'] = "ON" if maybe_confirm_user(args.vst2, "Enable VST2") else "OFF"
     plugin['filename'] = maybe_ask_user(args.filename, "Filename", plugin['name'])
     plugin['company'] = maybe_ask_user(args.company, "Company", 'acme')
     plugin['company_url'] = maybe_ask_user(args.url, "Company URL", f'https://www.{plugin["company"]}.com')
@@ -77,6 +95,7 @@ def config(plugin):
 
     print(f'''##################
 Plugin Name     - {plugin["name"]}
+VST2 Enabled    - {plugin["enable_vst2"]}
 Filename        - {plugin["filename"]} (will generate {plugin["filename"]}.vst3)
 Company         - {plugin["company"]}
 Company URL     - {plugin["company_url"]}

@@ -231,19 +231,27 @@ function(jamba_gen_vst3_resource_rc filepath)
 endfunction()
 
 ###################################################
+# jamba_add_vst3plugin
+###################################################
+function(jamba_add_vst3plugin target vst_sources)
+  smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
+  jamba_fix_vst2(${target})
+endfunction()
+
+###################################################
 # jamba_fix_vst2
 ###################################################
 function(jamba_fix_vst2 target)
   if (SMTG_CREATE_VST2_VERSION)
     message(STATUS "${target} will be VST2 compatible")
-    if(MAC)
+    if (MAC)
       # fix missing VSTPluginMain symbol when also building VST 2 version
       smtg_set_exported_symbols(${target} "${JAMBA_ROOT}/mac/macexport_vst2.exp")
-    endif()
+    endif ()
     if (WIN)
       add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    endif()
-  endif()
+    endif ()
+  endif ()
 endfunction()
 
 ###################################################
@@ -251,6 +259,11 @@ endfunction()
 ###################################################
 function(jamba_dev_scripts target)
   if(MAC)
+    if (SMTG_CREATE_VST2_VERSION)
+      set(JAMBA_INSTALL_VST2 "")
+    else()
+      set(JAMBA_INSTALL_VST2 "# ")
+    endif()
     configure_file(${JAMBA_ROOT}/scripts/archive.sh.in ${CMAKE_BINARY_DIR}/archive.sh)
     configure_file(${JAMBA_ROOT}/scripts/build.sh.in ${CMAKE_BINARY_DIR}/build.sh)
     configure_file(${JAMBA_ROOT}/scripts/edit.sh.in ${CMAKE_BINARY_DIR}/edit.sh)
