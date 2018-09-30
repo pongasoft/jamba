@@ -1,6 +1,6 @@
 @Echo OFF
 
-cmake --build . --config Debug --target ${target} -- /m
+cmake --build . --config Debug --target @target@ -- /m
 cmake --build . --config Debug --target editorhost
-.\bin\Debug\editorhost.exe VST3\Debug\${target}.vst3
+.\bin\Debug\editorhost.exe VST3\Debug\@target@.vst3
 

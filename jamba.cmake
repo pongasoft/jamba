@@ -172,8 +172,6 @@ function(jamba_create_archive target plugin_name)
   set(ARCHIVE_NAME ${target}-${ARCHITECTURE}-${PLUGIN_VERSION})
   set(ARCHIVE_PATH ${CMAKE_BINARY_DIR}/archive/${ARCHIVE_NAME})
 
-  message(STATUS "Archive path ${ARCHIVE_PATH}.zip")
-
   add_custom_command(OUTPUT ${ARCHIVE_PATH}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${ARCHIVE_PATH}
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/LICENSE.txt ${ARCHIVE_PATH}
@@ -182,8 +180,8 @@ function(jamba_create_archive target plugin_name)
 
   if(MAC)
     add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/${target}.${VST3_EXTENSION} ${ARCHIVE_PATH}/${plugin_name}.vst3
-        DEPENDS ${target}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION} ${ARCHIVE_PATH}/${plugin_name}.vst3
+        DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION}
         DEPENDS ${ARCHIVE_PATH}
         WORKING_DIRECTORY archive
         )
@@ -196,17 +194,16 @@ function(jamba_create_archive target plugin_name)
         )
   endif()
 
-  if(MAC OR WIN)
-    add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-        COMMAND ${CMAKE_COMMAND} -E tar cvf ${ARCHIVE_NAME}.zip --format=zip ${ARCHIVE_PATH}
-        COMMAND ${CMAKE_COMMAND} -E remove_directory ${ARCHIVE_PATH}
-        APPEND
-        )
+  add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
+      COMMAND ${CMAKE_COMMAND} -E tar cvf ${ARCHIVE_NAME}$<$<CONFIG:Debug>:_Debug>.zip --format=zip ${ARCHIVE_PATH}
+      COMMAND ${CMAKE_COMMAND} -E remove_directory ${ARCHIVE_PATH}
+      COMMAND ${CMAKE_COMMAND} -E echo "Archive available under ${CMAKE_BINARY_DIR}/archive/${ARCHIVE_NAME}$<$<CONFIG:Debug>:_Debug>.zip"
+      APPEND
+      )
 
-    add_custom_target(archive
-        DEPENDS ${ARCHIVE_PATH}.zip
-        )
-  endif()
+  add_custom_target(archive
+      DEPENDS ${ARCHIVE_PATH}.zip
+      )
 endfunction()
 
 ###################################################
@@ -236,6 +233,13 @@ endfunction()
 function(jamba_add_vst3plugin target vst_sources)
   smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
   jamba_fix_vst2(${target})
+  if(JAMBA_ENABLE_AUDIO_UNIT)
+    if(NOT SMTG_COREAUDIO_SDK_PATH)
+      set(SMTG_COREAUDIO_SDK_PATH "${JAMBA_ROOT}/audio-unit/CoreAudioSDK/CoreAudio")
+    endif()
+    set(JAMBA_VST3_PLUGIN_TARGET "${target}")
+    add_subdirectory(${JAMBA_ROOT}/audio-unit auwrapper)
+  endif()
 endfunction()
 
 ###################################################
@@ -264,19 +268,22 @@ function(jamba_dev_scripts target)
     else()
       set(JAMBA_INSTALL_VST2 "# ")
     endif()
-    configure_file(${JAMBA_ROOT}/scripts/archive.sh.in ${CMAKE_BINARY_DIR}/archive.sh)
-    configure_file(${JAMBA_ROOT}/scripts/build.sh.in ${CMAKE_BINARY_DIR}/build.sh)
-    configure_file(${JAMBA_ROOT}/scripts/edit.sh.in ${CMAKE_BINARY_DIR}/edit.sh)
-    configure_file(${JAMBA_ROOT}/scripts/install.sh.in ${CMAKE_BINARY_DIR}/install.sh)
-    configure_file(${JAMBA_ROOT}/scripts/test.sh.in ${CMAKE_BINARY_DIR}/test.sh)
-    configure_file(${JAMBA_ROOT}/scripts/validate.sh.in ${CMAKE_BINARY_DIR}/validate.sh)
+    if(NOT JAMBA_DEFAULT_CONFIG)
+      set(JAMBA_DEFAULT_CONFIG "Debug")
+    endif()
+    configure_file(${JAMBA_ROOT}/scripts/archive.sh.in ${CMAKE_BINARY_DIR}/archive.sh @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/build.sh.in ${CMAKE_BINARY_DIR}/build.sh @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/edit.sh.in ${CMAKE_BINARY_DIR}/edit.sh @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/install.sh.in ${CMAKE_BINARY_DIR}/install.sh @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/test.sh.in ${CMAKE_BINARY_DIR}/test.sh @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/validate.sh.in ${CMAKE_BINARY_DIR}/validate.sh @ONLY)
   endif()
   if (WIN)
-    configure_file(${JAMBA_ROOT}/scripts/archive.bat.in ${CMAKE_BINARY_DIR}/archive.bat)
-    configure_file(${JAMBA_ROOT}/scripts/build.bat.in ${CMAKE_BINARY_DIR}/build.bat)
-    configure_file(${JAMBA_ROOT}/scripts/edit.bat.in ${CMAKE_BINARY_DIR}/edit.bat)
-    configure_file(${JAMBA_ROOT}/scripts/test.bat.in ${CMAKE_BINARY_DIR}/test.bat)
-    configure_file(${JAMBA_ROOT}/scripts/validate.bat.in ${CMAKE_BINARY_DIR}/validate.bat)
+    configure_file(${JAMBA_ROOT}/scripts/archive.bat.in ${CMAKE_BINARY_DIR}/archive.bat @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/build.bat.in ${CMAKE_BINARY_DIR}/build.bat @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/edit.bat.in ${CMAKE_BINARY_DIR}/edit.bat @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/test.bat.in ${CMAKE_BINARY_DIR}/test.bat @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/validate.bat.in ${CMAKE_BINARY_DIR}/validate.bat @ONLY)
   endif()
 
 endfunction()

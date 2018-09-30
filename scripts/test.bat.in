@@ -1,7 +1,7 @@
 @Echo OFF
 
-set CONFIG=Debug
+set CONFIG=@JAMBA_DEFAULT_CONFIG@
 IF not [%1]==[] set CONFIG=%1
 
-cmake --build . --config %CONFIG% --target ${target}_test -- /m
+cmake --build . --config %CONFIG% --target @target@_test -- /m
 ctest -C %CONFIG%

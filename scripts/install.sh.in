@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-@JAMBA_INSTALL_VST2@rm -rf ~/Library/Audio/Plug-Ins/VST/${target}.vst
-@JAMBA_INSTALL_VST2@cp -r VST3/${target}.vst3  ~/Library/Audio/Plug-Ins/VST/${target}.vst
+CONFIG=${1:-"@JAMBA_DEFAULT_CONFIG@"}
 
-rm -rf ~/Library/Audio/Plug-Ins/VST3/${target}.vst3
-cp -r VST3/${target}.vst3  ~/Library/Audio/Plug-Ins/VST3
+@JAMBA_INSTALL_VST2@rm -rf ~/Library/Audio/Plug-Ins/VST/@target@.vst
+@JAMBA_INSTALL_VST2@cp -r VST3/${CONFIG}/@target@.vst3  ~/Library/Audio/Plug-Ins/VST/@target@.vst
+
+rm -rf ~/Library/Audio/Plug-Ins/VST3/@target@.vst3
+cp -r VST3/${CONFIG}/@target@.vst3  ~/Library/Audio/Plug-Ins/VST3

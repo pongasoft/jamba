@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-cmake --build . --target ${target} -- -j
-cmake --build . --target archive
+CONFIG=${1:-"@JAMBA_DEFAULT_CONFIG@"}
+
+cmake --build .  --config ${CONFIG} --target @target@
+cmake --build .  --config ${CONFIG} --target archive

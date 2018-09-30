@@ -9,18 +9,14 @@ while [ -h "$SOURCE" ]; do
 done
 BASEDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-case "$1" in
-"Debug") CONFIG="Debug" ;;
-"Release") CONFIG="Release" ;;
-*) echo "Provide Debug or Release"; exit 1 ;;
-esac
+CONFIG=${1:-"Debug"}
 
-mkdir -p build/${CONFIG}
-cd build/${CONFIG}
+mkdir -p build
+cd build
 
 if [ -n "${VST3_SDK_ROOT}" ]; then
   DVST3_SDK_ROOT="-DVST3_SDK_ROOT=${VST3_SDK_ROOT}"
 fi
 
-cmake ${DVST3_SDK_ROOT} -DCMAKE_BUILD_TYPE=${CONFIG} ${BASEDIR}
+cmake -GXcode ${DVST3_SDK_ROOT} -DJAMBA_DEFAULT_CONFIG=${CONFIG} ${BASEDIR}
 

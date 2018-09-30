@@ -38,8 +38,6 @@ include(ExportedSymbols)
 include(PrefixHeader)
 include(PlatformIOS)
 include(PlatformToolset)
-include(CoreAudioSupport)
-include(AAXSupport)
 include(VstGuiSupport)
 include(UniversalBinary)
 include(AddVST3Options)
@@ -68,16 +66,6 @@ endif()
 include_directories(${SDK_ROOT})
 
 #-------------------------------------------------------------------------------
-# From Here this is optional...
-
-#-------------------------------------------------------------------------------
-# CORE AUDIO SDK, AAX SDK
-#-------------------------------------------------------------------------------
-setupCoreAudioSupport()
-setupAaxSupport()
-
-
-#-------------------------------------------------------------------------------
 # Projects
 #-------------------------------------------------------------------------------
 set(SDK_IDE_LIBS_FOLDER FOLDER "Libraries")
@@ -91,16 +79,6 @@ add_subdirectory(${VST3_SDK_ROOT}/public.sdk vst3-sdk/public)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/source/vst/interappaudio vst3-sdk/interappaudio)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/validator vst3-sdk/validator)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)
-
-#---Add Wrappers (AU, AAX)-----------------------
-if (SMTG_COREAUDIO_SDK_PATH)
-  add_subdirectory(${VST3_SDK_ROOT}/public.sdk/source/vst/aaxwrapper vst3-sdk/aaxwrapper)
-endif()
-
-if(SMTG_AAX_SDK_PATH)
-  add_subdirectory(public.sdk/source/vst/aaxwrapper)
-  set_target_properties(aaxwrapper PROPERTIES ${SDK_IDE_LIBS_FOLDER})
-endif()
 
 #-------------------------------------------------------------------------------
 # IDE sorting

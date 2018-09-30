@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 
-# build VST 2 by default
+# build VST 2?
 option(SMTG_CREATE_VST2_VERSION "Use VST2" [-enable_vst2-])
+
+# build Audio Unit?
+option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" ON)
+
 option(SMTG_CREATE_VST3_LINK "" OFF)
 
 set(PLUGIN_MAJOR_VERSION 1)

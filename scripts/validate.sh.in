@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
-cmake --build . --target ${target} -- -j
-cmake --build . --target validator
-./bin/validator VST3/${target}.vst3
+CONFIG=${1:-"@JAMBA_DEFAULT_CONFIG@"}
+
+cmake --build . --config ${CONFIG} --target @target@
+cmake --build . --config ${CONFIG} --target validator
+./bin/${CONFIG}/validator VST3/${CONFIG}/@target@.vst3
