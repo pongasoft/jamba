@@ -12,8 +12,11 @@
 // Version with build number
 #define FULL_VERSION_STR "@PLUGIN_VERSION@"
 
+// Audio Unit version (as an hex int)
+#define AU_VERSION_INT 0x@AU_PLUGIN_VERSION_HEX@
+
 #define stringOriginalFilename	"[-filename-].vst3"
-#if PLATFORM_64
+#ifdef PLATFORM_64
 #define stringFileDescription	"[-name-] plugin by [-company-] (64Bit)"
 #else
 #define stringFileDescription	"[-name-] plugin by [-company-]"

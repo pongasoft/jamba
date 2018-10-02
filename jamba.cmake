@@ -160,6 +160,18 @@ target_include_directories(jamba PUBLIC ${VSTGUI_ROOT}/vstgui4)
 target_compile_definitions(jamba PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
 
 ###################################################
+# Audio Unit
+###################################################
+set(AU_PLUGIN_VERSION_HEX "0")
+
+if(MAC AND JAMBA_ENABLE_AUDIO_UNIT)
+  if(NOT SMTG_COREAUDIO_SDK_PATH)
+    set(SMTG_COREAUDIO_SDK_PATH "${JAMBA_ROOT}/audio-unit/CoreAudioSDK/CoreAudio")
+  endif()
+  execute_process(COMMAND bash -c "echo 'obase=16;${PLUGIN_MAJOR_VERSION}*65536+${PLUGIN_MINOR_VERSION}*256+${PLUGIN_PATCH_VERSION}' | bc" OUTPUT_VARIABLE AU_PLUGIN_VERSION_HEX OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
+###################################################
 # jamba_create_archive - Create archive (.tgz)
 ###################################################
 function(jamba_create_archive target plugin_name)
@@ -234,9 +246,6 @@ function(jamba_add_vst3plugin target vst_sources)
   smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
   jamba_fix_vst2(${target})
   if(JAMBA_ENABLE_AUDIO_UNIT)
-    if(NOT SMTG_COREAUDIO_SDK_PATH)
-      set(SMTG_COREAUDIO_SDK_PATH "${JAMBA_ROOT}/audio-unit/CoreAudioSDK/CoreAudio")
-    endif()
     set(JAMBA_VST3_PLUGIN_TARGET "${target}")
     add_subdirectory(${JAMBA_ROOT}/audio-unit auwrapper)
   endif()

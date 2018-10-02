@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 option(SMTG_CREATE_VST2_VERSION "Use VST2" [-enable_vst2-])
 
 # build Audio Unit?
-option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" ON)
+option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" [-enable_audio_unit-])
 
 option(SMTG_CREATE_VST3_LINK "" OFF)
 
@@ -69,6 +69,13 @@ elseif (WIN)
   jamba_gen_vst3_resource_rc("${CMAKE_BINARY_DIR}/generated/vst3_resources.rc")
   target_sources(${target} PRIVATE resource/[-name-].rc)
 endif ()
+
+###################################################
+# Create audio unit plugin
+###################################################
+if(JAMBA_ENABLE_AUDIO_UNIT)
+  add_subdirectory(audio-unit)
+endif()
 
 ###################################################
 # Create archive (.tgz)

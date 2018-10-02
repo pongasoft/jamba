@@ -27,8 +27,10 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--plugin", help="The name of the plugin")
 parser.add_argument("-2", "--vst2", help="Enable VST2", action="store_true")
+parser.add_argument("-a", "--au", help="Enable Audio Unit", action="store_true")
 parser.add_argument("-f", "--filename", help="The filename of the plugin")
-parser.add_argument("-c", "--company", help="The name of the company")
+parser.add_argument("-C", "--company", help="The name of the company")
+parser.add_argument("-c", "--company4", help="The (4 characters) name of the company")
 parser.add_argument("-u", "--url", help="The url for the company")
 parser.add_argument("-e", "--email", help="The email for the company")
 parser.add_argument("-n", "--namespace", help="The C++ namespace")
@@ -81,8 +83,12 @@ blank_plugin_root = os.path.join(this_script_root_dir, 'blank-plugin')
 def config(plugin):
     plugin['name'] = maybe_ask_user(args.plugin, "Plugin Name (must be a valid C++ class name)", None)
     plugin['enable_vst2'] = "ON" if maybe_confirm_user(args.vst2, "Enable VST2") else "OFF"
+    plugin['enable_audio_unit'] = "ON" if maybe_confirm_user(args.au, "Enable Audio Unit") else "OFF"
     plugin['filename'] = maybe_ask_user(args.filename, "Filename", plugin['name'])
     plugin['company'] = maybe_ask_user(args.company, "Company", 'acme')
+    plugin['company_short_4'] = maybe_ask_user(args.company4,
+                                               "Short Company Name (4 chars / one capital letter)",
+                                               plugin['company'][0:4].capitalize())[0:4]
     plugin['company_url'] = maybe_ask_user(args.url, "Company URL", f'https://www.{plugin["company"]}.com')
     plugin['company_email'] = maybe_ask_user(args.email, "Company Email", f'support@{plugin["company"]}.com')
     plugin['namespace'] = maybe_ask_user(args.namespace, "C++ namespace", f"{plugin['company']}::VST::{plugin['name']}")
@@ -94,15 +100,17 @@ def config(plugin):
     plugin['jamba_root_dir'] = this_script_root_dir.replace('\\', '\\\\')
 
     print(f'''##################
-Plugin Name     - {plugin["name"]}
-VST2 Enabled    - {plugin["enable_vst2"]}
-Filename        - {plugin["filename"]} (will generate {plugin["filename"]}.vst3)
-Company         - {plugin["company"]}
-Company URL     - {plugin["company_url"]}
-Company Email   - {plugin["company_email"]}
-Jamba git hash  - {plugin["jamba_git_hash"]}
-C++ Namespace   - {plugin["namespace"]}
-Plugin root dir - {plugin["root_dir"]}
+Plugin Name        - {plugin["name"]}
+VST2 Enabled       - {plugin["enable_vst2"]}
+Audio Unit Enabled - {plugin["enable_audio_unit"]}
+Filename           - {plugin["filename"]} (will generate {plugin["filename"]}.vst3)
+Company            - {plugin["company"]}
+Company (short)    - {plugin["company_short_4"]}
+Company URL        - {plugin["company_url"]}
+Company Email      - {plugin["company_email"]}
+Jamba git hash     - {plugin["jamba_git_hash"]}
+C++ Namespace      - {plugin["namespace"]}
+Plugin root dir    - {plugin["root_dir"]}
 ''')
     confirm = input("Are you sure (Y/n)?")
     if len(confirm.strip()) == 0 or confirm.upper() == 'Y':
