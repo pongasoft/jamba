@@ -28,6 +28,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--plugin", help="The name of the plugin")
 parser.add_argument("-2", "--vst2", help="Enable VST2", action="store_true")
 parser.add_argument("-a", "--au", help="Enable Audio Unit", action="store_true")
+parser.add_argument("-l", "--local", help="Use local jamba", action="store_true")
 parser.add_argument("-f", "--filename", help="The filename of the plugin")
 parser.add_argument("-C", "--company", help="The name of the company")
 parser.add_argument("-c", "--company4", help="The (4 characters) name of the company")
@@ -98,6 +99,7 @@ def config(plugin):
 
     plugin['root_dir'] = os.path.join(os.path.realpath(project_dir), project_name)
     plugin['jamba_root_dir'] = this_script_root_dir.replace('\\', '\\\\')
+    plugin['local_jamba'] = "" if args.local else "#"
 
     print(f'''##################
 Plugin Name        - {plugin["name"]}

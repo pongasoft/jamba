@@ -1,12 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
 # build VST 2?
-option(SMTG_CREATE_VST2_VERSION "Use VST2" [-enable_vst2-])
+option(JAMBA_ENABLE_VST2 "Use VST2" [-enable_vst2-])
 
 # build Audio Unit?
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" [-enable_audio_unit-])
-
-option(SMTG_CREATE_VST3_LINK "" OFF)
 
 set(PLUGIN_MAJOR_VERSION 1)
 set(PLUGIN_MINOR_VERSION 0)
@@ -16,7 +14,7 @@ set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PAT
 project([-name-])
 
 # To use local jamba install, uncomment the following line (no download)
-#set(JAMBA_ROOT_DIR "[-jamba_root_dir-]")
+[-local_jamba-]set(JAMBA_ROOT_DIR "[-jamba_root_dir-]")
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly
 #set(GOOGLETEST_ROOT_DIR ../../google/googletest)
@@ -28,7 +26,7 @@ set(CPP_SOURCES src/cpp)
 configure_file(${CPP_SOURCES}/version.h.in ${CMAKE_BINARY_DIR}/generated/version.h)
 include_directories(${CMAKE_BINARY_DIR}/generated/)
 
-if (SMTG_CREATE_VST2_VERSION)
+if (JAMBA_ENABLE_VST2)
   set(vst2_sources
       ${CPP_SOURCES}/[-name-]_VST2.cpp
       )

@@ -32,6 +32,11 @@ endif()
 # Including VST3 SDK
 #-------------------------------------------------------------------------------
 
+# options set before including the SDK
+option(SMTG_CREATE_VST2_VERSION "" ${JAMBA_ENABLE_VST2})
+option(SMTG_RUN_VST_VALIDATOR "" OFF) # disable validator (explicit validate step)
+option(SMTG_CREATE_VST3_LINK "" OFF) # disable link (explicit install step)
+
 include(${CMAKE_CURRENT_LIST_DIR}/VST3_SDK.cmake)
 
 #-------------------------------------------------------------------------------
@@ -132,7 +137,7 @@ set(JAMBA_sources_cpp
 
     )
 
-if (SMTG_CREATE_VST2_VERSION)
+if (JAMBA_ENABLE_VST2)
   set(JAMBA_vst2_sources
       ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/eventlist.cpp
@@ -255,7 +260,7 @@ endfunction()
 # jamba_fix_vst2
 ###################################################
 function(jamba_fix_vst2 target)
-  if (SMTG_CREATE_VST2_VERSION)
+  if (JAMBA_ENABLE_VST2)
     message(STATUS "${target} will be VST2 compatible")
     if (MAC)
       # fix missing VSTPluginMain symbol when also building VST 2 version
@@ -272,7 +277,7 @@ endfunction()
 ###################################################
 function(jamba_dev_scripts target)
   if(MAC)
-    if (SMTG_CREATE_VST2_VERSION)
+    if (JAMBA_ENABLE_VST2)
       set(JAMBA_INSTALL_VST2 "")
     else()
       set(JAMBA_INSTALL_VST2 "# ")

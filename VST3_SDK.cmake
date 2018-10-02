@@ -42,11 +42,6 @@ include(VstGuiSupport)
 include(UniversalBinary)
 include(AddVST3Options)
 
-# Run the validator after building
-message(STATUS "Redefining smtg_run_vst_validator to do nothing.")
-function(smtg_run_vst_validator target)
-endfunction()
-
 #-------------------------------------------------------------------------------
 # SDK Project
 #-------------------------------------------------------------------------------
