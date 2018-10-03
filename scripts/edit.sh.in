@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-cmake --build . --config Debug --target @target@
-cmake --build . --config Debug --target editorhost
-./bin/Debug/editorhost.app/Contents/MacOS/editorhost VST3/Debug/@target@.vst3

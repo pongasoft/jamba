@@ -202,7 +202,16 @@ function(jamba_create_archive target plugin_name)
         DEPENDS ${ARCHIVE_PATH}
         WORKING_DIRECTORY archive
         )
-  elseif(WIN)
+    if(JAMBA_ENABLE_AUDIO_UNIT)
+      add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
+          COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component ${ARCHIVE_PATH}/${plugin_name}.component
+          DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component
+          DEPENDS ${ARCHIVE_PATH}
+          WORKING_DIRECTORY archive
+          APPEND
+          )
+    endif()
+    elseif(WIN)
     add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${ARCHIVE_PATH}/${plugin_name}.vst3
         DEPENDS ${target}
@@ -283,20 +292,7 @@ endfunction()
 ###################################################
 function(jamba_dev_scripts target)
   if(MAC)
-    if (JAMBA_ENABLE_VST2)
-      set(JAMBA_INSTALL_VST2 "")
-    else()
-      set(JAMBA_INSTALL_VST2 "# ")
-    endif()
-    if(NOT JAMBA_DEFAULT_CONFIG)
-      set(JAMBA_DEFAULT_CONFIG "Debug")
-    endif()
-    configure_file(${JAMBA_ROOT}/scripts/archive.sh.in ${CMAKE_BINARY_DIR}/archive.sh @ONLY)
-    configure_file(${JAMBA_ROOT}/scripts/build.sh.in ${CMAKE_BINARY_DIR}/build.sh @ONLY)
-    configure_file(${JAMBA_ROOT}/scripts/edit.sh.in ${CMAKE_BINARY_DIR}/edit.sh @ONLY)
-    configure_file(${JAMBA_ROOT}/scripts/install.sh.in ${CMAKE_BINARY_DIR}/install.sh @ONLY)
-    configure_file(${JAMBA_ROOT}/scripts/test.sh.in ${CMAKE_BINARY_DIR}/test.sh @ONLY)
-    configure_file(${JAMBA_ROOT}/scripts/validate.sh.in ${CMAKE_BINARY_DIR}/validate.sh @ONLY)
+    configure_file(${JAMBA_ROOT}/scripts/jamba.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
   endif()
   if (WIN)
     configure_file(${JAMBA_ROOT}/scripts/archive.bat.in ${CMAKE_BINARY_DIR}/archive.bat @ONLY)

@@ -1,0 +1,264 @@
+#!/usr/bin/env bash
+
+# from http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ ${SOURCE} != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+BASEDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+cd ${BASEDIR}
+
+BUILD_CONFIG="Debug"
+BUILD_TARGET="@target@"
+RELEASE_FILENAME="@JAMBA_RELEASE_FILENAME@"
+JAMBA_ENABLE_VST2="@JAMBA_ENABLE_VST2@"
+JAMBA_ENABLE_AUDIO_UNIT="@JAMBA_ENABLE_AUDIO_UNIT@"
+
+BUILD_CONFIG_OVERRIDE=0
+
+###############################################################################
+# Function Name : usage()
+# Arguments     : N/A
+# Return Result : N/A, exit 0
+###############################################################################
+usage()
+{
+  echo "   Usage:  jamba.sh [-hdr] <command>"
+  echo ""
+  echo "     -h : usage help"
+  echo "     -d : use Debug build config (default)"
+  echo "     -r : use Release build config (Debug if not defined)"
+  echo ""
+  echo "   Commands: "
+  echo "     ---- VST Commands ----"
+  echo "     clean    : clean all builds"
+  echo "     build    : build the VST plugin"
+  echo "     edit     : start the GUI editor (Debug only)"
+  echo "     install  : install the VST plugin in their default location"
+  echo "     test     : run the unit tests"
+  echo "     validate : run the VST3 validator"
+  echo "     ---- Audio Unit Commands ----"
+  echo "     build-au   : build the Audio Unit wrapper plugin"
+  echo "     install-au : install the Audio Unit plugin in its default location"
+  echo "     ---- Generic Commands ----"
+  echo "     archive : generate the zip file containing the plugin(s) and README/License"
+  echo "     prod    : run test/validate/archive (Release only)"
+  echo "     ---- CMake target ----"
+  echo "     <target> : invoke cmake with the provided target"
+  echo ""
+  exit 0
+}
+
+###############################################################################
+# Function Name : clean()
+###############################################################################
+clean()
+{
+  cmake --build . --config ${BUILD_CONFIG} --target clean
+}
+
+###############################################################################
+# Function Name : build()
+###############################################################################
+build()
+{
+  cmake --build . --config ${BUILD_CONFIG} --target ${BUILD_TARGET}
+}
+
+###############################################################################
+# Function Name : build_au()
+###############################################################################
+build_au()
+{
+  if [ "${JAMBA_ENABLE_AUDIO_UNIT}" == "ON" ]; then
+    cmake --build . --config ${BUILD_CONFIG} --target ${BUILD_TARGET}_au
+  fi
+}
+
+###############################################################################
+# Function Name : edit()
+###############################################################################
+edit()
+{
+  if [ "${BUILD_CONFIG}" == "Release" ]; then
+    echo "WARNING: edit unavailable in Release mode... switching to Debug"
+    BUILD_CONFIG="Debug"
+  fi
+  build
+  cmake --build . --config Debug --target editorhost
+  ./bin/Debug/editorhost.app/Contents/MacOS/editorhost VST3/Debug/${BUILD_TARGET}.vst3
+}
+
+###############################################################################
+# Function Name : test()
+###############################################################################
+test()
+{
+  cmake --build . --config ${BUILD_CONFIG} --target ${BUILD_TARGET}_test
+  ctest -C ${BUILD_CONFIG}
+}
+
+###############################################################################
+# Function Name : validate()
+###############################################################################
+validate()
+{
+  build
+  cmake --build . --config ${BUILD_CONFIG} --target validator
+  ./bin/${BUILD_CONFIG}/validator VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3
+}
+
+###############################################################################
+# Function Name : archive()
+###############################################################################
+archive()
+{
+  build
+  build_au
+  cmake --build . --config ${BUILD_CONFIG} --target archive
+}
+
+###############################################################################
+# Function Name : install()
+###############################################################################
+install()
+{
+  build
+
+  FILENAME="${BUILD_TARGET}"
+  if [ "${BUILD_CONFIG}" == "Release" ]; then
+    FILENAME=${RELEASE_FILENAME}
+  fi
+  rm -rf ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
+  cp -r VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
+  echo "VST3 plugin installed under ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
+  if [ "${JAMBA_ENABLE_VST2}" == "ON" ]; then
+    rm -rf ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
+    cp -r VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
+    echo "VST2 plugin installed under ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
+  fi
+}
+
+###############################################################################
+# Function Name : install_au()
+###############################################################################
+install_au()
+{
+  if [ "${JAMBA_ENABLE_AUDIO_UNIT}" == "ON" ]; then
+    cmake --build . --config ${BUILD_CONFIG} --target ${BUILD_TARGET}_au
+
+    FILENAME="${BUILD_TARGET}"
+    if [ "${BUILD_CONFIG}" == "Release" ]; then
+      FILENAME=${RELEASE_FILENAME}
+    fi
+    rm -rf ~/Library/Audio/Plug-Ins/Components/${FILENAME}.component
+    cp -r VST3/${BUILD_CONFIG}/${BUILD_TARGET}_au.component  ~/Library/Audio/Plug-Ins/Components/${FILENAME}.component
+    echo "Audio Unit plugin installed under ~/Library/Audio/Plug-Ins/Components/${FILENAME}.component"
+  fi
+}
+
+###############################################################################
+# Function Name : prod()
+###############################################################################
+prod()
+{
+  if [ "${BUILD_CONFIG}" == "Debug" ] && [ ${BUILD_CONFIG_OVERRIDE} -eq 0 ]; then
+    BUILD_CONFIG="Release"
+  fi
+
+  echo "============================================================="
+  echo "==                                                         =="
+  echo "==              Running tests..........                    =="
+  echo "==              -----------------------                    =="
+  echo "============================================================="
+  test
+  if [ $? -eq 0 ]
+  then
+    echo "[Tests ran successfully]"
+  else
+    echo "Failure while running tests... aborting..."
+    exit 1
+  fi
+
+  echo "============================================================="
+  echo "==                                                         =="
+  echo "==              Validating plugin......                    =="
+  echo "==              -----------------------                    =="
+  echo "============================================================="
+  validate
+  if [ $? -eq 0 ]
+  then
+    echo "[Validation ran successfully]"
+  else
+    echo "Failure while validating plugin... aborting..."
+    exit 1
+  fi
+
+  echo "============================================================="
+  echo "==                                                         =="
+  echo "==              Building archive.......                    =="
+  echo "==              -----------------------                    =="
+  echo "============================================================="
+  archive
+
+  echo "[Archive created successfully (${BUILD_CONFIG} mode)]"
+}
+
+# get script options
+while getopts "hdr" opt ; do
+  case $opt in
+    h  ) usage
+         exit 0
+         ;;
+    d  ) BUILD_CONFIG="Debug"
+         BUILD_CONFIG_OVERRIDE=1
+         ;;
+    r  ) BUILD_CONFIG="Release"
+         BUILD_CONFIG_OVERRIDE=1
+         ;;
+    \? ) usage
+         exit 1
+         ;;
+  esac
+done
+
+# correct the index so the command argument is always $1
+shift $(($OPTIND - 1))
+
+# call appropriate function according to the passed command
+case $1 in
+  'clean' ) clean
+            ;;
+
+  'build' ) build
+            ;;
+
+  'build-au' ) build_au
+               ;;
+
+  'edit' ) edit
+           ;;
+
+  'test' ) test
+           ;;
+
+  'validate' ) validate
+               ;;
+
+  'install' ) install
+              ;;
+
+  'install-au' ) install_au
+                 ;;
+
+  'archive' )  archive
+               ;;
+
+  'prod' )  prod
+            ;;
+
+           *)  cmake --build . --config ${BUILD_CONFIG} --target $1
+               ;;
+esac

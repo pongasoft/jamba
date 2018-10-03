@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-CONFIG=${1:-"@JAMBA_DEFAULT_CONFIG@"}
-
-cmake --build . --config ${CONFIG} --target @target@_test
-ctest -C ${CONFIG}

@@ -71,7 +71,8 @@ endif ()
 ###################################################
 # Create archive (.tgz)
 ###################################################
-jamba_create_archive(${target} [-filename-])
+set(JAMBA_RELEASE_FILENAME "[-filename-]")
+jamba_create_archive(${target} ${JAMBA_RELEASE_FILENAME})
 
 ####################################################
 ## Testing

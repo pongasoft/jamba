@@ -14,41 +14,6 @@ echo "==                                                         =="
 echo "==              Generating Makefiles...                    =="
 echo "==              -----------------------                    =="
 echo "============================================================="
-${BASEDIR}/configure.sh Release
+${BASEDIR}/configure.sh
 
-cd build/Release
-
-echo "============================================================="
-echo "==                                                         =="
-echo "==              Running tests..........                    =="
-echo "==              -----------------------                    =="
-echo "============================================================="
-./test.sh
-if [ $? -eq 0 ]
-then
-  echo "[Tests ran successfully]"
-else
-  echo "Failure while running tests... aborting..."
-  exit 1
-fi
-
-echo "============================================================="
-echo "==                                                         =="
-echo "==              Validating plugin......                    =="
-echo "==              -----------------------                    =="
-echo "============================================================="
-./validate.sh
-if [ $? -eq 0 ]
-then
-  echo "[Validation ran successfully]"
-else
-  echo "Failure while validating plugin... aborting..."
-  exit 1
-fi
-
-echo "============================================================="
-echo "==                                                         =="
-echo "==              Building archive.......                    =="
-echo "==              -----------------------                    =="
-echo "============================================================="
-cmake --build . --target archive
+./build/jamba.sh prod
