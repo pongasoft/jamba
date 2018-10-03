@@ -252,7 +252,13 @@ function(jamba_add_vst3plugin target vst_sources)
   jamba_fix_vst2(${target})
   if(JAMBA_ENABLE_AUDIO_UNIT)
     set(JAMBA_VST3_PLUGIN_TARGET "${target}")
-    add_subdirectory(${JAMBA_ROOT}/audio-unit auwrapper)
+    # add the wrapper
+    add_subdirectory(${JAMBA_ROOT}/audio-unit/auwrapper auwrapper)
+    # add the plugin
+    if(NOT AU_PLUGIN_ROOT)
+      set(AU_PLUGIN_ROOT ${PROJECT_SOURCE_DIR}/audio-unit)
+    endif()
+    add_subdirectory(${JAMBA_ROOT}/audio-unit/plugin auplugin)
   endif()
 endfunction()
 

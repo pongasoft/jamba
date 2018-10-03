@@ -69,13 +69,6 @@ elseif (WIN)
 endif ()
 
 ###################################################
-# Create audio unit plugin
-###################################################
-if(JAMBA_ENABLE_AUDIO_UNIT)
-  add_subdirectory(audio-unit)
-endif()
-
-###################################################
 # Create archive (.tgz)
 ###################################################
 jamba_create_archive(${target} [-filename-])
