@@ -154,7 +154,9 @@ private:
 
   bool fActive;
 
+#ifdef JAMBA_DEBUG_LOGGING
   int32 fSymbolicSampleSize = -1;
+#endif
 };
 
 }

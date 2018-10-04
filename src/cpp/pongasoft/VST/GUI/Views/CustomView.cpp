@@ -34,8 +34,8 @@ CustomView::CustomView(const CRect &iSize)
   : CView(iSize),
     GUIParamCxAware(),
     fTag{-1},
-    fBackColor{0, 0, 0},
-    fEditorMode{false}
+    fEditorMode{false},
+    fBackColor{0, 0, 0}
 {
   setWantsFocus(true);
 }

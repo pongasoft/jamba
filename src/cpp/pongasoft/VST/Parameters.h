@@ -85,7 +85,7 @@ public:
 
   protected:
     RawVstParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
-      fParameters{iParameters}, fParamID{iParamID}, fTitle{iTitle} {}
+      fParamID{iParamID}, fTitle{iTitle}, fParameters{iParameters} {}
 
   private:
     Parameters *fParameters;
@@ -131,7 +131,7 @@ public:
 
   protected:
     VstParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
-      fParameters{iParameters}, fParamID{iParamID}, fTitle{iTitle} {}
+      fParamID{iParamID}, fTitle{iTitle}, fParameters{iParameters} {}
 
   private:
     Parameters *fParameters;
@@ -496,7 +496,6 @@ tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iPara
 {
   tresult res = kResultOk;
 
-  auto iter = fVstParams.find(iParamID);
   if(fVstParams.find(iParamID) != fVstParams.cend() ||
      fJmbParams.find(iParamID) != fJmbParams.cend())
   {

@@ -38,7 +38,7 @@ std::unique_ptr<GUIRawVstParameter> GUIParamCxMgr::registerRawVstParameter(Param
 
   if(iChangeListener)
   {
-    fParamCxs[iParamID] = std::move(param->connect(iChangeListener));
+    fParamCxs[iParamID] = param->connect(iChangeListener);
   }
   else
   {

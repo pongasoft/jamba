@@ -88,6 +88,8 @@ class GUIJmbParameter : public IGUIJmbParameter, public FObject
 public:
   using ParamType = T;
 
+  using FObject::update; // fixes overload hiding warning
+
   // Constructor
   explicit GUIJmbParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
     IGUIJmbParameter(iParamDef),

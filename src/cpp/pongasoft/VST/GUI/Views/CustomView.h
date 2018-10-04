@@ -156,6 +156,8 @@ public:
   void afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
 
 protected:
+  using CView::sizeToFit; // fixes overload hiding warning
+
   /**
    * Convenient call to size to fit this view according to the and height provided
    */

@@ -155,7 +155,7 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
   if(paramDef)
   {
     if(iChangeListener)
-      fParamCxs[iParamID] = std::move(param->connect(iChangeListener));
+      fParamCxs[iParamID] = param->connect(iChangeListener);
     else
       unregisterParam(iParamID);
 

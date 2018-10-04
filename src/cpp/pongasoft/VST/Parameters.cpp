@@ -28,7 +28,6 @@ class VstParameterImpl : public Vst::Parameter
 {
 public:
   explicit VstParameterImpl(std::shared_ptr<RawVstParamDef> const &iParamDef) :
-    fParamDef{iParamDef},
     Vst::Parameter(iParamDef->fTitle,
                    iParamDef->fParamID,
                    iParamDef->fUnits,
@@ -36,7 +35,8 @@ public:
                    iParamDef->fStepCount,
                    iParamDef->fFlags,
                    iParamDef->fUnitID,
-                   iParamDef->fShortTitle)
+                   iParamDef->fShortTitle),
+    fParamDef{iParamDef}
   {
     setPrecision(fParamDef->fPrecision);
   }
