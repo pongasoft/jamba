@@ -1,0 +1,193 @@
+@Echo OFF
+
+SETLOCAL
+
+set BASEDIR=%~dp0
+
+cd %BASEDIR%
+
+set BUILD_CONFIG=Debug
+set BUILD_CONFIG_OVERRIDE=0
+set BUILD_TARGET=@target@
+set RELEASE_FILENAME=@JAMBA_RELEASE_FILENAME@
+set JAMBA_ENABLE_VST2=@JAMBA_ENABLE_VST2@
+
+set DRY_RUN=
+
+IF NOT [%1]==[] CALL :parse_arg %1
+IF NOT [%2]==[] CALL :parse_arg %2
+IF NOT [%3]==[] CALL :parse_arg %3
+
+:: End of script (functions to follow...)
+EXIT /B %ERRORLEVEL%
+
+:: clean all builds
+:clean
+%DRY_RUN% cmake --build . --config  %BUILD_CONFIG% --target clean
+EXIT /B %ERRORLEVEL%
+
+:: build the VST plugin
+:build
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target %BUILD_TARGET% -- /m
+EXIT /B %ERRORLEVEL%
+
+:: start the GUI editor (Debug only)
+:edit
+IF "%BUILD_CONFIG%"=="Release" (
+  Echo WARNING: edit unavailable in Release mode... switching to Debug
+  set BUILD_CONFIG=Debug
+)
+CALL :build
+%DRY_RUN% cmake --build . --config Debug --target editorhost
+%DRY_RUN% .\bin\Debug\editorhost.exe VST3\Debug\%BUILD_TARGET%.vst3
+EXIT /B %ERRORLEVEL%
+
+:: run the unit tests
+:test
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target %BUILD_TARGET%_test -- /m
+%DRY_RUN% ctest -C %BUILD_CONFIG%
+EXIT /B %ERRORLEVEL%
+
+:: run the VST3 validator
+:validate
+CALL :build
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target validator
+%DRY_RUN% .\bin\%BUILD_CONFIG%\validator.exe VST3\%BUILD_CONFIG%\%BUILD_TARGET%.vst3
+EXIT /B %ERRORLEVEL%
+
+:: generate the zip file containing the plugin(s) and README/License
+:archive
+CALL :build
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target archive
+EXIT /B %ERRORLEVEL%
+
+:: run test/validate/archive (Release only)
+:prod
+IF "%BUILD_CONFIG%"=="Debug" IF "%BUILD_CONFIG_OVERRIDE%"=="0" set BUILD_CONFIG=Release
+Echo =============================================================
+Echo ==                                                         ==
+Echo ==              Running Tests..........                    ==
+Echo ==              -----------------------                    ==
+Echo =============================================================
+CALL :test
+if %ERRORLEVEL% EQU 0 (
+  Echo [Tests ran successfully]
+) ELSE (
+  Echo Failure while running tests... aborting...
+  EXIT /B 1
+)
+
+Echo =============================================================
+Echo ==                                                         ==
+Echo ==              Validating Plugin......                    ==
+Echo ==              -----------------------                    ==
+Echo =============================================================
+CALL :validate
+if %ERRORLEVEL% EQU 0 (
+  Echo [Validation ran successfully]
+) ELSE (
+  Echo Failure while validating plugin... aborting...
+  EXIT /B 1
+)
+
+Echo =============================================================
+Echo ==                                                         ==
+Echo ==              Building archive.......                    ==
+Echo ==              -----------------------                    ==
+Echo =============================================================
+CALL :archive
+
+Echo [Archive created successfully (%BUILD_CONFIG%) mode)]
+
+EXIT /B %ERRORLEVEL%
+
+:parse_arg
+IF "%1"=="-h" (
+    CALL :usage
+) ELSE (
+    CALL :parse_release %1
+)
+EXIT /B %ERRORLEVEL%
+
+:parse_release
+IF "%1"=="-r" (
+    set BUILD_CONFIG=Release
+    set BUILD_CONFIG_OVERRIDE=1
+) ELSE (
+    CALL :parse_debug %1
+)
+EXIT /B %ERRORLEVEL%
+
+:parse_debug
+IF "%1"=="-d" (
+    set BUILD_CONFIG=Debug
+    set BUILD_CONFIG_OVERRIDE=1
+) ELSE (
+    CALL :parse_dry_run %1
+)
+EXIT /B %ERRORLEVEL%
+
+:parse_dry_run
+IF "%1"=="-n" (
+    set DRY_RUN=Echo
+) ELSE (
+    CALL :parse_command %1
+)
+EXIT /B %ERRORLEVEL%
+
+:parse_command
+IF "%1"=="clean" (
+    CALL :clean
+    EXIT /B %ERRORLEVEL%
+)
+IF "%1"=="build" (
+    CALL :build
+    EXIT /B %ERRORLEVEL%
+)
+IF "%1"=="edit" (
+    CALL :edit
+    EXIT /B %ERRORLEVEL%
+)
+IF "%1"=="test" (
+    CALL :test
+    EXIT /B %ERRORLEVEL%
+)
+IF "%1"=="validate" (
+    CALL :validate
+    EXIT /B %ERRORLEVEL%
+)
+IF "%1"=="archive" (
+    CALL :archive
+    EXIT /B %ERRORLEVEL%
+)
+IF "%1"=="prod" (
+    CALL :prod
+    EXIT /B %ERRORLEVEL%
+)
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target %1%
+EXIT /B %ERRORLEVEL%
+
+:usage
+Echo Usage:  jamba.bat [-hdrn] ^<command^>
+Echo ----
+Echo      -h : usage help
+Echo      -d : use Debug build config (default)
+Echo      -r : use Release build config (Debug if not defined)
+Echo      -n : dry run (prints what it is going to do)
+Echo ----
+Echo    Commands: 
+Echo      ---- VST Commands ----
+Echo      clean    : clean all builds
+Echo      build    : build the VST plugin
+Echo      edit     : start the GUI editor (Debug only)
+Echo      install  : install the VST plugin in their default location
+Echo      test     : run the unit tests
+Echo      validate : run the VST3 validator
+Echo      ---- Generic Commands ----
+Echo      archive : generate the zip file containing the plugin(s) and README/License
+Echo      prod    : run test/validate/archive (Release only)
+Echo      ---- CMake target ----
+Echo      ^<target^> : invoke cmake with the provided target
+Echo ----
+EXIT /B %ERRORLEVEL%
+
