@@ -1,6 +1,7 @@
 @Echo OFF
 
 SETLOCAL
+SETLOCAL enableextensions
 
 set BASEDIR=%~dp0
 
@@ -54,6 +55,53 @@ CALL :build
 %DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target validator
 %DRY_RUN% .\bin\%BUILD_CONFIG%\validator.exe VST3\%BUILD_CONFIG%\%BUILD_TARGET%.vst3
 EXIT /B %ERRORLEVEL%
+
+:: install the VST plugin in its default location
+:install
+CALL :build
+
+set FILENAME=%BUILD_TARGET%
+IF "%BUILD_CONFIG%"=="Release" set FILENAME=%RELEASE_FILENAME%
+
+IF EXIST "C:\Program Files\Common Files\VST3\%FILENAME%.vst3" (
+  %DRY_RUN% del /Q "C:\Program Files\Common Files\VST3\%FILENAME%.vst3"
+  IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
+)
+IF NOT EXIST "C:\Program Files\Common Files\VST3" (
+  %DRY_RUN% md "C:\Program Files\Common Files\VST3"
+  IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
+)
+%DRY_RUN% copy /Y "VST3\%BUILD_CONFIG%\%BUILD_TARGET%.vst3" "C:\Program Files\Common Files\VST3\%FILENAME%.vst3"
+IF %ERRORLEVEL% EQU 0 (
+  Echo VST3 plugin installed under  C:\Program Files\Common Files\VST3\%FILENAME%.vst3
+) ELSE (
+  Echo Failed to install VST3 plugin under C:\Program Files\Common Files\VST3\%FILENAME%.vst3 !!!!
+  GOTO :access_denied
+)
+
+IF "%JAMBA_ENABLE_VST2%"=="ON" (
+  IF EXIST "C:\Program Files\VSTPlugins\%FILENAME%.dll" (
+    %DRY_RUN% del /Q "C:\Program Files\VSTPlugins\%FILENAME%.dll"
+    IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
+  )
+  IF NOT EXIST "C:\Program Files\VSTPlugins" (
+    %DRY_RUN% md "C:\Program Files\VSTPlugins"
+    IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
+  )
+  %DRY_RUN% copy /Y "VST3\%BUILD_CONFIG%\%BUILD_TARGET%.vst3" "C:\Program Files\VSTPlugins\%FILENAME%.dll"
+  IF %ERRORLEVEL% EQU 0 (
+    Echo VST2 plugin installed under C:\Program Files\VSTPlugins\%FILENAME%.dll
+  ) ELSE (
+    Echo Failed to install VST2 plugin under C:\Program Files\VSTPlugins\%FILENAME%.dll !!!!
+    GOTO :access_denied
+  )
+)
+EXIT /B %ERRORLEVEL%
+
+:access_denied
+Echo Failed to execute command... if you see "Access Denied", run the PowerShell as an Administrator
+EXIT /B %ERRORLEVEL%
+
 
 :: generate the zip file containing the plugin(s) and README/License
 :archive
@@ -160,6 +208,10 @@ IF "%1"=="archive" (
     CALL :archive
     EXIT /B %ERRORLEVEL%
 )
+IF "%1"=="install" (
+    CALL :install
+    EXIT /B %ERRORLEVEL%
+)
 IF "%1"=="prod" (
     CALL :prod
     EXIT /B %ERRORLEVEL%
@@ -180,7 +232,7 @@ Echo      ---- VST Commands ----
 Echo      clean    : clean all builds
 Echo      build    : build the VST plugin
 Echo      edit     : start the GUI editor (Debug only)
-Echo      install  : install the VST plugin in their default location
+Echo      install  : install the VST plugin in its default location (admin required)
 Echo      test     : run the unit tests
 Echo      validate : run the VST3 validator
 Echo      ---- Generic Commands ----
