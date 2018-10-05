@@ -169,7 +169,7 @@ public:
 
   protected:
     JmbParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
-      fParameters{iParameters}, fParamID{iParamID}, fTitle{iTitle} {}
+      fParamID{iParamID}, fTitle{iTitle}, fParameters{iParameters} {}
 
   private:
     Parameters *fParameters;
