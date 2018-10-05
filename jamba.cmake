@@ -247,6 +247,22 @@ function(jamba_add_vst3_resource target type filename)
 endfunction()
 
 ###################################################
+# jamba_gen_vst3_resources
+###################################################
+function(jamba_gen_vst3_resources target name)
+  if (MAC)
+    if(NOT JAMBA_VST3_PLUGIN_MAC_INFO_PLIST)
+      set(JAMBA_VST3_PLUGIN_MAC_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist")
+    endif()
+    smtg_set_bundle(${target} INFOPLIST "${JAMBA_VST3_PLUGIN_MAC_INFO_PLIST}" PREPROCESS)
+  elseif (WIN)
+    jamba_gen_vst3_resource_rc("${CMAKE_BINARY_DIR}/generated/vst3_resources.rc")
+    target_sources(${target} PRIVATE resource/${name}.rc)
+  endif ()
+endfunction()
+
+
+###################################################
 # jamba_gen_vst3_resource_rc
 ###################################################
 function(jamba_gen_vst3_resource_rc filepath)

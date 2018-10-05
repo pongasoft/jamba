@@ -61,12 +61,8 @@ target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
 jamba_add_vst3_resource(${target} DATA "[-name-].uidesc")
 # jamba_add_vst3_resource(${target} PNG "background.png")
 
-if (MAC)
-  smtg_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist" PREPROCESS)
-elseif (WIN)
-  jamba_gen_vst3_resource_rc("${CMAKE_BINARY_DIR}/generated/vst3_resources.rc")
-  target_sources(${target} PRIVATE resource/[-name-].rc)
-endif ()
+# this must be called after you are done calling jamba_add_vst3_resource for all resources
+jamba_gen_vst3_resources(${target} "[-name-]")
 
 ###################################################
 # Create archive (.tgz)

@@ -202,28 +202,6 @@ cd <build_folder>
 ### building, testing, etc...
 cd <build_folder>/build
 ./jamba.sh -h
-   Usage:  jamba.sh [-hdr] <command>
-
-     -h : usage help
-     -d : use Debug build config (default)
-     -r : use Release build config (Debug if not defined)
-
-   Commands: 
-     ---- VST Commands ----
-     clean    : clean all builds
-     build    : build the VST plugin
-     edit     : start the GUI editor (Debug only)
-     install  : install the VST plugin in their default location
-     test     : run the unit tests
-     validate : run the VST3 validator
-     ---- Audio Unit Commands ----
-     build-au   : build the Audio Unit wrapper plugin
-     install-au : install the Audio Unit plugin in its default location
-     ---- Generic Commands ----
-     archive : generate the zip file containing the plugin(s) and README/License
-     prod    : run test/validate/archive (Release only)
-     ---- CMake target ----
-     <target> : invoke cmake with the provided target
 
 For Windows 10:
 ---------------
@@ -232,10 +210,6 @@ For Windows 10:
 cd <build_folder>
 {plugin['root_dir']}/configure.bat
 
-### building and testing
+### building, testing, etc... (PowerShell recommended)
 cd <build_folder>/build
-./build.bat [Debug|Release]    # to build 
-./test.bat [Debug|Release]     # to run the tests
-./validate.bat [Debug|Release] # to validate the plugin (VST3)
-./edit.bat                     # to run the editor and edit the UI (editor not available in Release mode)
-./archive.bat [Debug|Release]  # to build the zip archive''')
+./jamba.bat -h''')
