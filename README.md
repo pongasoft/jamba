@@ -77,10 +77,10 @@ Follow the prompt (example run)
     Plugin Name (must be a valid C++ class name) = Kooza
     Enable VST2 (Y/n)?
     Enable Audio Unit (Y/n)?
-    Filename (leave empty for default [Kooza]) = 
+    Audio Unit manufacturer code (4 chars / one capital letter) (leave empty for default [Kooz]) =
+    Filename (leave empty for default [Kooza]) =
     Company (leave empty for default [acme]) = pongasoft
-    Short Company Name (4 chars / one capital letter) (leave empty for default [Pong]) = Psft        
-    Company URL (leave empty for default [https://www.pongasoft.com]) = 
+    Company URL (leave empty for default [https://www.pongasoft.com]) =
     Company Email (leave empty for default [support@pongasoft.com]) = 
     C++ namespace (leave empty for default [pongasoft::VST::Kooza]) = 
     Project directory (leave empty for default [/private/tmp]) = 
@@ -89,9 +89,9 @@ Follow the prompt (example run)
     Plugin Name        - Kooza
     VST2 Enabled       - ON
     Audio Unit Enabled - ON
+    AU Plugin Code     - Kooz
     Filename           - Kooza (will generate Kooza.vst3)
     Company            - pongasoft
-    Company (short)    - Psft
     Company URL        - https://www.pongasoft.com
     Company Email      - support@pongasoft.com
     Jamba git hash     - v2.1.0
@@ -202,6 +202,9 @@ Documentation
 
 Release Notes
 -------------
+
+### 2018-10-06 - `v2.1.1`
+* Fixed #4: Generate AU Plugin Manufacturer code from name instead of company
 
 ### 2018-10-06 - `v2.1.0`
 * Implemented #1: _Eliminate resource declaration duplication_
