@@ -132,7 +132,7 @@ The blank plugin generated is simply copying input to output.
 After generating the plugin, the script gives you instructions on the various commands that you can run:
 
 - You create a build folder outside the generated plugin (or inside if you prefer since the `configure.sh(.bat)` command will create a `build` folder which is excluded in `.gitignore`).
-- Then you run the `configure.sh(.bat)` step to generate the Makefiles and scripts.
+- Then you run the `configure.sh(.bat)` step to generate the project (Xcode or Visual Studio) and main script.
 - Then simply run `jamba.sh(.bat) -h` to get the list of all commands that you can run
 
          > ./jamba.sh -h
@@ -202,6 +202,14 @@ Documentation
 
 Release Notes
 -------------
+
+### 2018-10-06 - `v2.1.0`
+* Implemented #1: _Eliminate resource declaration duplication_
+* Implemented #2: _Optionally generate audio unit wrapper_
+* Implemented #3: _Make VST2 support truly optional_
+* Upgraded to cmake 3.12
+* Consolidated dev scripts into a single `jamba.sh` (resp `jamba.bat`) script
+* Uses `Xcode` as the cmake generator on macOS
 
 ### 2018-09-02 - `v2.0.2`
 * Updated license terms
