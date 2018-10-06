@@ -237,9 +237,8 @@ Echo      test     : run the unit tests
 Echo      validate : run the VST3 validator
 Echo      ---- Generic Commands ----
 Echo      archive : generate the zip file containing the plugin(s) and README/License
-Echo      prod    : run test/validate/archive (Release only)
+Echo      prod    : run test/validate/archive (default to Release, override with -d)
 Echo      ---- CMake target ----
 Echo      ^<target^> : invoke cmake with the provided target
-Echo ----
 EXIT /B %ERRORLEVEL%
 

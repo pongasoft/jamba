@@ -7,11 +7,13 @@ Features
 --------
 
 - generate a fully buildable, testable, editable and deployable plugin with a simple command (see [Quick Starting Guide](#quick-starting-guide))
-- build a self contained plugin that depends on the VST3 SDK (including support for VST2) 
+- build a self contained plugin that depends on the VST3 SDK
+- optionally builds a VST2 compatible plugin
+- optionally wraps the VST3 plugin into an Audio Unit (macOS)
 - easily write unit tests for your project (using googletest)
-- build on macOS and Windows 10 (Linux untested but support could be added)
+- build on macOS and Windows 10
 - package your project as an archive (zip file) for production release
-- run simple scripts to build, test, validate, edit and install the plugin from the command line
+- run a simple script to build, test, validate, edit and install the plugin from the command line
 - pick and choose which feature is useful to you (lots of options to override/change the default behavior)
 - define your VST parameters in one location (inherit from `Parameters`) and use both in real time processing (RT) and GUI code
 - define typed VST parameters (ex: a boolean (`bool`) parameter, a gain (`Gain`) parameter, etc...)
@@ -26,7 +28,7 @@ Features
 Quick starting guide
 --------------------
 
-This project is known to work on macOS High Siera 10.13.3 with Xcode 9.2 installed. It also has been tested on Windows 10 64 bits and Visual Studio Build tools (2017). It requires `cmake` version 3.12 at the minimum. Because it uses `cmake` it should work on other platforms but it has not been tested.
+This project is known to work on macOS High Sierra 10.13.3 with Xcode 9.2 installed. It also has been tested on Windows 10 64 bits and Visual Studio Build tools (2017). It requires `cmake` version 3.12 at the minimum. Linux is currently not supported (could be added if there is demand).
 
 ### Step 1. Install the VST3 SDK
 
@@ -35,7 +37,7 @@ You need to download the VST3 SDK version 3.6.9 from [steinberg](https://downloa
 
 #### Install the SDK
 
-Unpack the SDK to the following location (note how I renamed it with the version number)
+Unpack the SDK to the following location (note how it should be renamed with the version number)
 
 * `/Users/Shared/Steinberg/VST_SDK.369` for macOS
 * `C:\Users\Public\Documents\Steinberg\VST_SDK.369` for windows.
@@ -73,22 +75,28 @@ Follow the prompt (example run)
     > cd /tmp
     > python3 /Volumes/Development/github/org.pongasoft/jamba/create-plugin.py
     Plugin Name (must be a valid C++ class name) = Kooza
+    Enable VST2 (Y/n)?
+    Enable Audio Unit (Y/n)?
     Filename (leave empty for default [Kooza]) = 
     Company (leave empty for default [acme]) = pongasoft
+    Short Company Name (4 chars / one capital letter) (leave empty for default [Pong]) = Psft        
     Company URL (leave empty for default [https://www.pongasoft.com]) = 
     Company Email (leave empty for default [support@pongasoft.com]) = 
     C++ namespace (leave empty for default [pongasoft::VST::Kooza]) = 
     Project directory (leave empty for default [/private/tmp]) = 
     Project Name (leave empty for default [pongasoft-Kooza-plugin]) = 
     ##################
-    Plugin Name     - Kooza
-    Filename        - Kooza (will generate Kooza.vst3)
-    Company         - pongasoft
-    Company URL     - https://www.pongasoft.com
-    Company Email   - support@pongasoft.com
-    Jamba git hash  - v2.0.1
-    C++ Namespace   - pongasoft::VST::Kooza
-    Plugin root dir - /private/tmp/pongasoft-Kooza-plugin
+    Plugin Name        - Kooza
+    VST2 Enabled       - ON
+    Audio Unit Enabled - ON
+    Filename           - Kooza (will generate Kooza.vst3)
+    Company            - pongasoft
+    Company (short)    - Psft
+    Company URL        - https://www.pongasoft.com
+    Company Email      - support@pongasoft.com
+    Jamba git hash     - v2.1.0
+    C++ Namespace      - pongasoft::VST::Kooza
+    Plugin root dir    - /private/tmp/pongasoft-Kooza-plugin
 
     Are you sure (Y/n)?
     Generating Kooza plugin....
@@ -100,16 +108,11 @@ Follow the prompt (example run)
     ### configuring
 
     cd <build_folder>
-    /private/tmp/pongasoft-Kooza-plugin/configure.sh Debug
+    /private/tmp/pongasoft-Kooza-plugin/configure.sh
 
-    ### building and testing
-    cd <build_folder>/build/Debug
-    ./build.sh    # to build
-    ./test.sh     # to run the test
-    ./validate.sh # to validate the plugin (VST3)
-    ./edit.sh     # to run the editor and edit the UI
-    ./install.sh  # to install locally
-    ./archive.sh  # to build the zip archive
+    ### building, testing, etc...
+    cd <build_folder>/build
+    ./jamba.sh -h
 
     For Windows 10:
     ---------------
@@ -118,13 +121,9 @@ Follow the prompt (example run)
     cd <build_folder>
     /private/tmp/pongasoft-Kooza-plugin/configure.bat
 
-    ### building and testing
+    ### building, testing, etc... (PowerShell recommended)
     cd <build_folder>/build
-    ./build.bat [Debug|Release]    # to build 
-    ./test.bat [Debug|Release]     # to run the tests
-    ./validate.bat [Debug|Release] # to validate the plugin (VST3)
-    ./edit.bat                     # to run the editor and edit the UI (editor not available in Release mode)
-    ./archive.bat [Debug|Release]  # to build the zip archive
+    ./jamba.bat -h
 
 The blank plugin generated is simply copying input to output.
 
@@ -132,25 +131,46 @@ The blank plugin generated is simply copying input to output.
 
 After generating the plugin, the script gives you instructions on the various commands that you can run:
 
-- You create a build folder outside the generated plugin (or inside if you prefer since the `configure` command will create a `build` folder which is excluded in `.gitignore`).
+- You create a build folder outside the generated plugin (or inside if you prefer since the `configure.sh(.bat)` command will create a `build` folder which is excluded in `.gitignore`).
 - Then you run the `configure.sh(.bat)` step to generate the Makefiles and scripts.
-- Then you run the `build.sh(.bat)` step to make sure that everything compiles
-- `test.sh(.bat)` and `validate.sh(.bat)` will make sure the plugin is valid
-- `edit.sh(.bat)` will start the editor to modify the UI (once started, right click to edit, and then click `Save As` to save the changes in the proper file (see instructions in the UI))
-- `install.sh` will copy the plugin in the proper folder(s) on macOS so you can test it in your DAW (at this time for Windows 10 there does not seem to be a _standard_ folder so you need to copy the generated `.vst3` in its proper location which depends on the DAW)
-- `archive.sh` will generate the zip archive containing the plugin and readme
+- Then simply run `jamba.sh(.bat) -h` to get the list of all commands that you can run
+
+         > ./jamba.sh -h
+         Usage:  jamba.sh [-hdrn] <command>
+
+           -h : usage help
+           -d : use Debug build config (default)
+           -r : use Release build config (Debug if not defined)
+           -n : dry run (prints what it is going to do)
+
+         Commands: 
+           ---- VST Commands ----
+           clean    : clean all builds
+           build    : build the VST plugin
+           edit     : start the GUI editor (Debug only)
+           install  : install the VST plugin in their default location
+           test     : run the unit tests
+           validate : run the VST3 validator
+           ---- Audio Unit Commands ----
+           build-au   : build the Audio Unit wrapper plugin
+           install-au : install the Audio Unit plugin in its default location
+           ---- Generic Commands ----
+           archive : generate the zip file containing the plugin(s) and README/License
+           prod    : run test/validate/archive (default to Release, override with -d)
+           ---- CMake target ----
+         <target> : invoke cmake with the provided target
 
 Note: once the plugin is generated, feel free to edit/modify any file you want as the generating phase is only meant to be run once in order to quickly get a plugin with all the pieces (and boilerplate code) in place.
 
 ### Step 6. Add your own files
 
-- If you add new source files, add them to the `CMakeLists.txt` file in the `vst_sources` section (feel free to change the `CMakeLists.txt` to your liking, for example if you want to include all files without having to explicitely add them this is possible... refer to `cmake` for more info).
+- If you add new source files, add them to the `CMakeLists.txt` file in the `vst_sources` section (feel free to change the `CMakeLists.txt` to your liking, for example if you want to include all files without having to explicitly add them this is possible... refer to `cmake` for more info).
 - If you add new tests files, they are added automatically as long as they are located under `test/cpp`
 - If you add new resources for the GUI (images for example), they need to be added to `CMakeLists.txt`:
 
         # example (see commented line in CMakeLists.txt)
         jamba_add_vst3_resource(${target} PNG "background.png")
-        
+        ...
 
     Note: In the UI editor when adding a bitmap and saving the `xxx.uidesc` file, the fullpath of the image might be recorded. Make sure to edit the `xxx.uidesc` and modify it to keep **ONLY** the filename
     

@@ -46,7 +46,7 @@ usage()
   echo "     install-au : install the Audio Unit plugin in its default location"
   echo "     ---- Generic Commands ----"
   echo "     archive : generate the zip file containing the plugin(s) and README/License"
-  echo "     prod    : run test/validate/archive (Release only)"
+  echo "     prod    : run test/validate/archive (default to Release, override with -d)"
   echo "     ---- CMake target ----"
   echo "     <target> : invoke cmake with the provided target"
   echo ""
