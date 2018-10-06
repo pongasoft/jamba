@@ -67,8 +67,7 @@ jamba_gen_vst3_resources(${target} "[-name-]")
 ###################################################
 # Create archive (.tgz)
 ###################################################
-set(JAMBA_RELEASE_FILENAME "[-filename-]")
-jamba_create_archive(${target} ${JAMBA_RELEASE_FILENAME})
+jamba_create_archive(${target} "[-filename-]")
 
 ####################################################
 ## Testing

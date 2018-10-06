@@ -186,6 +186,8 @@ function(jamba_create_archive target plugin_name)
     set(ARCHITECTURE "win_64bits")
   endif()
 
+  set(JAMBA_RELEASE_FILENAME "${plugin_name}" PARENT_SCOPE)
+
   set(ARCHIVE_NAME ${target}-${ARCHITECTURE}-${PLUGIN_VERSION})
   set(ARCHIVE_PATH ${CMAKE_BINARY_DIR}/archive/${ARCHIVE_NAME})
 
@@ -307,6 +309,10 @@ endfunction()
 # jamba_dev_scripts
 ###################################################
 function(jamba_dev_scripts target)
+  if(NOT JAMBA_RELEASE_FILENAME)
+    message(WARNING "JAMBA_RELEASE_FILENAME not set... you should call jamba_create_archive first!")
+    set(JAMBA_RELEASE_FILENAME "${target}")
+  endif()
   if(MAC)
     configure_file(${JAMBA_ROOT}/scripts/jamba.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
   endif()
