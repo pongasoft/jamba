@@ -35,6 +35,7 @@ constexpr int32 DEFAULT_RIGHT_CHANNEL = 1;
 
 /**
  * Represents all the buffers (example for a stereo channel there is 2 underlying sample buffers)
+ *
  * @tparam SampleType
  */
 template<typename SampleType>
@@ -46,7 +47,6 @@ public:
   public:
     Channel(AudioBuffers &iBuffers, int32 iChannel) : fBuffers{iBuffers}, fChannel{iChannel}
     {
-      DCHECK_LT_F(fChannel, iBuffers.getNumChannels());
     }
 
     /**
@@ -58,11 +58,17 @@ public:
     }
 
     /**
-     * @return the underlying sample buffer
+     * Note that this pointer is NOT guaranteed to be not null as demonstrated by this piece of logic in
+     * the Audio Unit wrapper code:
+     * ...
+			 processData.inputs[i].channelBuffers32[channel] =
+			   input->IsActive () ? (Sample32*)input->GetBufferList ().mBuffers[channel].mData : 0;
+     * ...
+     * @return the underlying sample buffer or nullptr if not active
      */
     inline SampleType *getBuffer() const
     {
-      return fBuffers.getBuffer()[fChannel];
+      return fChannel < fBuffers.getNumChannels() ? fBuffers.getBuffer()[fChannel] : nullptr;
     }
 
     /**
@@ -71,6 +77,53 @@ public:
     inline void setSilenceFlag(bool iSilent)
     {
       fBuffers.setSilenceFlag(fChannel, iSilent);
+    }
+
+    /**
+     * @return true if this channel is active, meaning
+     */
+    inline bool isActive() const
+    {
+      return fChannel < fBuffers.getNumChannels() && getBuffer() != nullptr;
+    }
+
+    /**
+     * Copy the content of THIS channel to the provided channel (up to num samples)
+     */
+    inline tresult copyTo(Channel &toChannel) const { return toChannel.copyFrom(*this); };
+
+    /**
+     * Copy the content of the provided channel to THIS channel (up to num samples)
+     */
+    tresult copyFrom(Channel const &fromChannel)
+    {
+      int32 numSamples = std::min(getNumSamples(), fromChannel.getNumSamples());
+
+      auto ptrFrom = fromChannel.getBuffer();
+      auto ptrTo = getBuffer();
+
+      // sanity check
+      if(!ptrFrom || !ptrTo)
+        return kResultFalse;
+
+      std::copy(ptrFrom, ptrFrom + numSamples, ptrTo);
+
+      return kResultOk;
+    }
+
+    /**
+     * Clears the channel (and sets the silence flag) */
+    inline void clear()
+    {
+      auto buffer = getBuffer();
+
+      // sanity check
+      if(!buffer)
+        return;
+
+      std::fill(buffer, buffer + getNumSamples(), 0);
+
+      setSilenceFlag(true);
     }
 
   private:
@@ -88,7 +141,7 @@ public:
   // returns true if the buffer is silent (meaning all channels are silent => set to 1)
   inline bool isSilent() const
   {
-    return fBuffer.silenceFlags == (static_cast<uint64>(1) << fBuffer.numChannels) - 1;
+    return fBuffer.numChannels == 0 || fBuffer.silenceFlags == (static_cast<uint64>(1) << fBuffer.numChannels) - 1;
   }
 
   /**
@@ -106,6 +159,9 @@ public:
       bool silent = true;
 
       auto ptr = buffer[channel];
+
+      if(!ptr)
+        continue;
 
       for(int j = 0; j < getNumSamples(); ++j, ptr++)
       {
@@ -135,10 +191,13 @@ public:
    */
   inline void setSilenceFlag(int32 iChannel, bool iSilent)
   {
-    if(iSilent)
-      BIT_SET(fBuffer.silenceFlags, iChannel);
-    else
-      BIT_CLEAR(fBuffer.silenceFlags, iChannel);
+    if(iChannel < getNumChannels())
+    {
+      if(iSilent)
+        BIT_SET(fBuffer.silenceFlags, iChannel);
+      else
+        BIT_CLEAR(fBuffer.silenceFlags, iChannel);
+    }
   }
 
   /**
@@ -146,7 +205,6 @@ public:
    */
   inline Channel getAudioChannel(int32 iChannel)
   {
-    DCHECK_LT_F(iChannel, getNumChannels());
     return Channel{*this, iChannel};
   }
 
@@ -190,6 +248,10 @@ public:
     if(fromSamples == toSamples)
       return kResultOk;
 
+    // sanity check
+    if(!fromSamples || !toSamples)
+      return kResultFalse;
+
     int32 numChannels = std::min(getNumChannels(), fromBuffer.getNumChannels());
     int32 numSamples = std::min(getNumSamples(), fromBuffer.getNumSamples());
 
@@ -198,10 +260,11 @@ public:
       auto ptrFrom = fromSamples[channel];
       auto ptrTo = toSamples[channel];
 
-      for(int i = 0; i < numSamples; ++i, ptrFrom++, ptrTo++)
-      {
-        *ptrTo = *ptrFrom;
-      }
+      // sanity check
+      if(!ptrFrom || !ptrTo)
+        continue;
+
+      std::copy(ptrFrom, ptrFrom + numSamples, ptrTo);
     }
 
     return kResultOk;
@@ -216,9 +279,17 @@ public:
 
     auto buffer = getBuffer();
 
+    // sanity check
+    if(!buffer)
+      return max;
+
     for(int32 channel = 0; channel < getNumChannels(); channel++)
     {
       auto ptr = buffer[channel];
+
+      // sanity check
+      if(!ptr)
+        continue;
 
       for(int j = 0; j < getNumSamples(); ++j, ptr++)
       {
@@ -231,6 +302,31 @@ public:
     }
 
     return max;
+  }
+
+  /**
+   * Clears the buffer (and sets the silence flag) */
+  inline void clear()
+  {
+    auto buffer = getBuffer();
+
+    // sanity check
+    if(!buffer)
+      return;
+
+    for(int32 channel = 0; channel < getNumChannels(); channel++)
+    {
+      auto ptr = buffer[channel];
+
+      // sanity check
+      if(!ptr)
+        continue;
+
+      std::fill(ptr, ptr + getNumSamples(), 0);
+    }
+
+    if(getNumChannels() > 0)
+      fBuffer.silenceFlags == (static_cast<uint64>(1) << getNumChannels()) - 1;
   }
 
 private:
