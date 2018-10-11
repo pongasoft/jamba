@@ -203,6 +203,10 @@ Documentation
 Release Notes
 -------------
 
+### 2018-10-11 - `v2.1.2`
+* `AudioBuffers` now properly handles null buffers
+* Fixed issue with non Xcode build (Xcode generator is only required for audio unit building) and allow building with CLion
+
 ### 2018-10-06 - `v2.1.1`
 * Fixed #4: Generate AU Plugin Manufacturer code from name instead of company
 
