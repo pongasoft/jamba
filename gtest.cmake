@@ -4,7 +4,9 @@ include(FetchContent)
 
 if(GOOGLETEST_ROOT_DIR)
   # instructs FetchContent to not download or update but use the location instead
-  set(FETCHCONTENT_SOURCE_DIR_GOOGLETEST ${GOOGLETEST_ROOT_DIR}) 
+  set(FETCHCONTENT_SOURCE_DIR_GOOGLETEST ${GOOGLETEST_ROOT_DIR})
+else()
+  set(FETCHCONTENT_SOURCE_DIR_GOOGLETEST "")
 endif()
 
 set(googletest_GIT_REPO "https://github.com/google/googletest" CACHE STRING "googletest git repository URL")
