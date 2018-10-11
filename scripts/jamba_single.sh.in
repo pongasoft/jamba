@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+
+# from http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ ${SOURCE} != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+BASEDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+cd ${BASEDIR}
+
+BUILD_CONFIG="@CMAKE_BUILD_TYPE@"
+BUILD_TARGET="@target@"
+RELEASE_FILENAME="@JAMBA_RELEASE_FILENAME@"
+JAMBA_ENABLE_VST2="@JAMBA_ENABLE_VST2@"
+JAMBA_ENABLE_AUDIO_UNIT="@JAMBA_ENABLE_AUDIO_UNIT@"
+
+DRY_RUN=
+
+###############################################################################
+# Function Name : usage()
+# Arguments     : N/A
+# Return Result : N/A, exit 0
+###############################################################################
+usage()
+{
+  echo "   Usage:  jamba.sh [-hn] <command>"
+  echo ""
+  echo "     -h : usage help"
+  echo "     -n : dry run (prints what it is going to do)"
+  echo ""
+  echo "   Commands: [${BUILD_CONFIG}]"
+  echo "     ---- VST Commands ----"
+  echo "     clean    : clean all builds"
+  echo "     build    : build the VST plugin"
+  echo "     edit     : start the GUI editor (Debug only)"
+  echo "     install  : install the VST plugin in their default location"
+  echo "     test     : run the unit tests"
+  echo "     validate : run the VST3 validator"
+  echo "     ---- Generic Commands ----"
+  echo "     archive : generate the zip file containing the plugin(s) and README/License"
+  echo "     prod    : run test/validate/archive"
+  echo "     ---- CMake target ----"
+  echo "     <target> : invoke cmake with the provided target"
+  echo ""
+  exit 0
+}
+
+###############################################################################
+# Function Name : clean()
+###############################################################################
+clean()
+{
+  ${DRY_RUN} cmake --build . --target clean
+}
+
+###############################################################################
+# Function Name : build()
+###############################################################################
+build()
+{
+  ${DRY_RUN} cmake --build . --target ${BUILD_TARGET}
+}
+
+###############################################################################
+# Function Name : edit()
+###############################################################################
+edit()
+{
+  if [ "${BUILD_CONFIG}" == "Release" ]; then
+    echo "ERROR: edit unavailable in Release mode..."
+    exit 1
+  fi
+  build
+  ${DRY_RUN} cmake --build . --target editorhost
+  ${DRY_RUN} ./bin/editorhost.app/Contents/MacOS/editorhost VST3/${BUILD_TARGET}.vst3
+}
+
+###############################################################################
+# Function Name : test()
+###############################################################################
+test()
+{
+  ${DRY_RUN} cmake --build . --target ${BUILD_TARGET}_test
+  ${DRY_RUN} ctest
+}
+
+###############################################################################
+# Function Name : validate()
+###############################################################################
+validate()
+{
+  build
+  ${DRY_RUN} cmake --build . --target validator
+  ${DRY_RUN} ./bin/validator VST3/${BUILD_TARGET}.vst3
+}
+
+###############################################################################
+# Function Name : archive()
+###############################################################################
+archive()
+{
+  build
+  build_au
+  ${DRY_RUN} cmake --build . --target archive
+}
+
+###############################################################################
+# Function Name : install()
+###############################################################################
+install()
+{
+  build
+
+  FILENAME="${BUILD_TARGET}"
+  if [ "${BUILD_CONFIG}" == "Release" ]; then
+    FILENAME=${RELEASE_FILENAME}
+  fi
+  ${DRY_RUN} rm -rf ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
+  ${DRY_RUN} cp -r VST3/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
+  echo "VST3 plugin installed under ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
+
+  if [ "${JAMBA_ENABLE_VST2}" == "ON" ]; then
+    ${DRY_RUN} rm -rf ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
+    ${DRY_RUN} cp -r VST3/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
+    echo "VST2 plugin installed under ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
+  fi
+}
+
+###############################################################################
+# Function Name : prod()
+###############################################################################
+prod()
+{
+  echo "============================================================="
+  echo "==                                                         =="
+  echo "==              Running tests..........                    =="
+  echo "==              -----------------------                    =="
+  echo "============================================================="
+  test
+  if [ $? -eq 0 ]
+  then
+    echo "[Tests ran successfully]"
+  else
+    echo "Failure while running tests... aborting..."
+    exit 1
+  fi
+
+  echo "============================================================="
+  echo "==                                                         =="
+  echo "==              Validating plugin......                    =="
+  echo "==              -----------------------                    =="
+  echo "============================================================="
+  validate
+  if [ $? -eq 0 ]
+  then
+    echo "[Validation ran successfully]"
+  else
+    echo "Failure while validating plugin... aborting..."
+    exit 1
+  fi
+
+  echo "============================================================="
+  echo "==                                                         =="
+  echo "==              Building archive.......                    =="
+  echo "==              -----------------------                    =="
+  echo "============================================================="
+  archive
+
+  echo "[Archive created successfully (${BUILD_CONFIG} mode)]"
+}
+
+# get script options
+while getopts "hdrn" opt ; do
+  case $opt in
+    h  ) usage
+         exit 0
+         ;;
+    n  ) DRY_RUN=echo
+         ;;
+    \? ) usage
+         exit 1
+         ;;
+  esac
+done
+
+# correct the index so the command argument is always $1
+shift $(($OPTIND - 1))
+
+# call appropriate function according to the passed command
+case $1 in
+  'clean' ) clean
+            ;;
+
+  'build' ) build
+            ;;
+
+  'edit' ) edit
+           ;;
+
+  'test' ) test
+           ;;
+
+  'validate' ) validate
+               ;;
+
+  'install' ) install
+              ;;
+
+  'archive' )  archive
+               ;;
+
+  'prod' )  prod
+            ;;
+
+           *)  ${DRY_RUN} cmake --build . --target $1
+               ;;
+esac

@@ -198,22 +198,31 @@ function(jamba_create_archive target plugin_name)
       )
 
   if(MAC)
-    add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION} ${ARCHIVE_PATH}/${plugin_name}.vst3
-        DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION}
-        DEPENDS ${ARCHIVE_PATH}
-        WORKING_DIRECTORY archive
-        )
-    if(JAMBA_ENABLE_AUDIO_UNIT)
+    if(XCODE)
       add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-          COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component ${ARCHIVE_PATH}/${plugin_name}.component
-          DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component
+          COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION} ${ARCHIVE_PATH}/${plugin_name}.vst3
+          DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION}
           DEPENDS ${ARCHIVE_PATH}
           WORKING_DIRECTORY archive
-          APPEND
+          )
+      if(JAMBA_ENABLE_AUDIO_UNIT)
+        add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component ${ARCHIVE_PATH}/${plugin_name}.component
+            DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component
+            DEPENDS ${ARCHIVE_PATH}
+            WORKING_DIRECTORY archive
+            APPEND
+            )
+      endif()
+    else()
+      add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
+          COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/${target}.${VST3_EXTENSION} ${ARCHIVE_PATH}/${plugin_name}.vst3
+          DEPENDS ${VST3_OUTPUT_DIR}/${target}.${VST3_EXTENSION}
+          DEPENDS ${ARCHIVE_PATH}
+          WORKING_DIRECTORY archive
           )
     endif()
-    elseif(WIN)
+  elseif(WIN)
     add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${ARCHIVE_PATH}/${plugin_name}.vst3
         DEPENDS ${target}
@@ -314,7 +323,11 @@ function(jamba_dev_scripts target)
     set(JAMBA_RELEASE_FILENAME "${target}")
   endif()
   if(MAC)
-    configure_file(${JAMBA_ROOT}/scripts/jamba.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
+    if(XCODE)
+      configure_file(${JAMBA_ROOT}/scripts/jamba_multi.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
+    else()
+      configure_file(${JAMBA_ROOT}/scripts/jamba_single.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
+    endif()
   endif()
   if (WIN)
     configure_file(${JAMBA_ROOT}/scripts/jamba.bat.in ${CMAKE_BINARY_DIR}/jamba.bat @ONLY)
