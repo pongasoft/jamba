@@ -4,7 +4,9 @@ include(FetchContent)
 
 if(JAMBA_ROOT_DIR)
   # instructs FetchContent to not download or update but use the location instead
-  set(FETCHCONTENT_SOURCE_DIR_JAMBA ${JAMBA_ROOT_DIR}) 
+  set(FETCHCONTENT_SOURCE_DIR_JAMBA ${JAMBA_ROOT_DIR})
+else()
+  set(FETCHCONTENT_SOURCE_DIR_JAMBA "")
 endif()
 
 set(JAMBA_GIT_REPO "https://github.com/pongasoft/jamba" CACHE STRING "Jamba git repository url" FORCE)
