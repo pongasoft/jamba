@@ -76,7 +76,7 @@ public:
 
   explicit RTJmbInParameter(std::shared_ptr<JmbParamDef<T>> iParamDef) :
     IRTJmbInParameter(iParamDef),
-    fUpdateQueue{std::make_unique<T>(iParamDef->fDefaultValue)}
+    fUpdateQueue{std::make_unique<T>(iParamDef->fDefaultValue), true}
   {}
 
   // getParamDef
