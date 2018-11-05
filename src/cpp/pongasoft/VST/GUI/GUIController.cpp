@@ -75,7 +75,21 @@ tresult GUIController::initialize(FUnknown *context)
 
   fViewFactory = new CustomUIViewFactory(guiState);
 
+  registerParameters(dynamic_cast<GUIParamCxAware *>(this));
+
   return result;
+}
+
+//------------------------------------------------------------------------
+// GUIController::registerParameters
+//------------------------------------------------------------------------
+void GUIController::registerParameters(GUIParamCxAware *iGUIParamCxAware)
+{
+  if(iGUIParamCxAware)
+  {
+    iGUIParamCxAware->initState(getGUIState());
+    iGUIParamCxAware->registerParameters();
+  }
 }
 
 //------------------------------------------------------------------------
@@ -174,6 +188,19 @@ tresult GUIController::sendMessage(IPtr<IMessage> iMessage)
 {
   return EditController::sendMessage(iMessage);
 }
+
+//------------------------------------------------------------------------
+// GUIController::createSubController
+//------------------------------------------------------------------------
+IController *GUIController::createSubController(UTF8StringPtr iName,
+                                                IUIDescription const *iDescription,
+                                                VST3Editor * /* iEditor */)
+{
+  auto customController = createCustomController(iName, iDescription);
+  registerParameters(dynamic_cast<GUIParamCxAware *>(customController));
+  return customController;
+}
+
 
 }
 }

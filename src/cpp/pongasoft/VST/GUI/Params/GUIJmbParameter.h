@@ -129,6 +129,16 @@ public:
     changed();
   }
 
+  /**
+   * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
+   * not comparable)
+   */
+  void setValue(ParamType &&iValue)
+  {
+    fValue = std::move(iValue);
+    changed();
+  }
+
   // readFromStream
   tresult readFromStream(IBStreamer &iStreamer) override
   {
@@ -215,6 +225,11 @@ public:
    */
   inline void setValue(T const &iNewValue) { fPtr->setValue(iNewValue); }
 
+  /**
+   * The difference with update is that it does not check for equality (case when T is not comparable)
+   */
+  inline void setValue(T &&iNewValue) { fPtr->setValue(std::move(iNewValue)); }
+
   // getValue
   inline T const &getValue() const { return fPtr->getValue(); }
 
@@ -231,6 +246,13 @@ public:
   inline void broadcast(T const &iValue)
   {
     setValue(iValue);
+    broadcast();
+  }
+
+  // broadcast
+  inline void broadcast(T &&iValue)
+  {
+    setValue(std::move(iValue));
     broadcast();
   }
 

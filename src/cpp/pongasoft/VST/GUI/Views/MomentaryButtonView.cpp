@@ -33,23 +33,45 @@ void MomentaryButtonView::draw(CDrawContext *iContext)
 {
   CustomView::draw(iContext);
 
+  if(isOn())
+    drawOn(iContext);
+  else
+    drawOff(iContext);
+
+  setDirty(false);
+}
+
+///////////////////////////////////////////
+// MomentaryButtonView::drawOn
+///////////////////////////////////////////
+void MomentaryButtonView::drawOn(CDrawContext *iContext)
+{
   if(fImage)
   {
-    CCoord y = isOn() ? fImage->getHeight() / 2 : 0;
+    CCoord y = fImage->getHeight() / 2;
     fImage->draw(iContext, getViewSize(), CPoint{0, y});
   }
   else
   {
     // no image => simply fill the surface with appropriate color (background and "on" color)
     // so that the button is fully functioning right away
-    if(isOn())
-    {
-      iContext->setFillColor(getOnColor());
-      iContext->drawRect(getViewSize(), kDrawFilled);
-    }
+    iContext->setFillColor(getOnColor());
+    iContext->drawRect(getViewSize(), kDrawFilled);
+  }
+}
+
+///////////////////////////////////////////
+// MomentaryButtonView::drawOff
+///////////////////////////////////////////
+void MomentaryButtonView::drawOff(CDrawContext *iContext)
+{
+  if(fImage)
+  {
+    CCoord y = 0;
+    fImage->draw(iContext, getViewSize(), CPoint{0, y});
   }
 
-  setDirty(false);
+  // when there is no image the background color is drawn (already done)
 }
 
 ///////////////////////////////////////////

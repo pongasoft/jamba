@@ -24,7 +24,9 @@
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include <pongasoft/VST/GUI/GUIState.h>
 #include <pongasoft/VST/MessageProducer.h>
-#include "pongasoft/VST/MessageHandler.h"
+#include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
+#include <pongasoft/VST/MessageHandler.h>
+#include <vstgui4/vstgui/plugin-bindings/vst3editor.h>
 
 namespace pongasoft {
 namespace VST {
@@ -37,7 +39,7 @@ using namespace Params;
  * (state loading/saving in a thread safe manner, registering VST parameters...) so
  * that the actual controller code deals mostly with business logic.
  */
-class GUIController : public EditController, public IMessageProducer
+class GUIController : public EditController, public VSTGUI::VST3EditorDelegate, public IMessageProducer
 {
 public:
   // Constructor
@@ -50,6 +52,12 @@ public:
    * Subclasses must implement this method to return the state
    */
   virtual GUIState *getGUIState() = 0;
+
+  /**
+   * Subclasses should override this method to return the custom controller or nullptr if doesn't match the name
+   */
+  virtual IController *createCustomController(UTF8StringPtr iName,
+                                              IUIDescription const *iDescription) { return nullptr; };
 
 protected:
   /** Called at first after constructor */
@@ -72,6 +80,14 @@ protected:
 
   /** Called to handle a message (coming from RT) */
   tresult PLUGIN_API notify(IMessage *message) SMTG_OVERRIDE;
+
+  /** Called when a sub controller needs to be created */
+  IController *createSubController(UTF8StringPtr iName,
+                                   const IUIDescription *iDescription,
+                                   VST3Editor *iEditor) override;
+
+  // registerParameters (if not nullptr)
+  void registerParameters(GUIParamCxAware *iGUIParamCxAware);
 
 public:
   // allocateMessage - API adapter

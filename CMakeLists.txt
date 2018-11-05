@@ -11,4 +11,6 @@ project(jamba)
 
 include(jamba.cmake)
 
-jamba_add_test(jamba_test "${TEST_SRC_FILES}" "${test_sources}" "")
+set(test_libs base sdk vstgui_support)
+
+jamba_add_test(jamba_test "${TEST_SRC_FILES}" "${test_sources}" "${test_libs}")

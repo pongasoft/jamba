@@ -61,6 +61,12 @@ public:
   // draw => does the actual drawing job
   void draw(CDrawContext *iContext) override;
 
+  // called to display the "on" state
+  virtual void drawOn(CDrawContext *iContext);
+
+  // called to display the "off" state
+  virtual void drawOff(CDrawContext *iContext);
+
   // input events (mouse/keyboard)
   CMouseEventResult onMouseDown(CPoint &where, const CButtonState &buttons) override;
   CMouseEventResult onMouseUp(CPoint &where, const CButtonState &buttons) override;

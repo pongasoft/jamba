@@ -90,12 +90,14 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIVstParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/VstParameters.h
 
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomController.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomControlView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewCreator.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewFactory.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/PluginAccessor.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.h
 

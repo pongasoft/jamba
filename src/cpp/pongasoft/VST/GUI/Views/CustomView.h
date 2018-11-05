@@ -23,6 +23,7 @@
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include "CustomViewCreator.h"
+#include "PluginAccessor.h"
 
 namespace pongasoft {
 namespace VST {
@@ -202,31 +203,6 @@ public:
       registerColorAttribute(UIViewCreator::kAttrBackColor, &CustomView::getBackColor, &CustomView::setBackColor);
     }
   };
-};
-
-/**
- * This class can be used to get access to the plugin GUI state and parameters
- *
- * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
- */
-template<typename TGUIPluginState>
-class PluginAccessor
-{
-public:
-  // initState
-  void initState(GUIState *iGUIState)
-  {
-    fState = dynamic_cast<TGUIPluginState *>(iGUIState);
-    if(fState)
-      fParams = &fState->fParams;
-  }
-
-public:
-  // direct access to state (ex: fState->fLabelA)
-  TGUIPluginState *fState{};
-
-  // direct access to parameters (ex: fParams->fBypassParam)
-  typename TGUIPluginState::PluginParameters const *fParams{};
 };
 
 /**

@@ -116,6 +116,12 @@ public:
    */
   tresult handleMessage(Message const &iMessage) { return fMessageHandler.handleMessage(iMessage); }
 
+  /**
+   * Broadcast a message without requiring the need to instantiate a GUIJmbParam
+   */
+  template<typename T>
+  tresult broadcast(JmbParam<T> const &iParamDef, T const &iMessage);
+
   // getAllRegistrationOrder
   std::vector<ParamID> const &getAllRegistrationOrder() const { return fAllRegistrationOrder; }
 
@@ -204,6 +210,41 @@ GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
     }
   }
   return rawPtr;
+}
+
+//------------------------------------------------------------------------
+// GUIState::broadcast
+//------------------------------------------------------------------------
+template<typename T>
+tresult GUIState::broadcast(JmbParam<T> const &iParamDef, const T &iMessage)
+{
+  if(!iParamDef->fShared)
+  {
+    DLOG_F(WARNING, "broadcast ignored: parameter [%d] is not marked shared", iParamDef->fParamID);
+    return kResultFalse;
+  }
+
+  tresult res = kResultOk;
+
+  auto message = allocateMessage();
+
+  if(message)
+  {
+    Message m{message.get()};
+
+    // sets the message ID
+    m.setMessageID(iParamDef->fParamID);
+
+    // serialize the content
+    if(iParamDef->writeToMessage(iMessage, m) == kResultOk)
+      res |= sendMessage(message);
+    else
+      res = kResultFalse;
+  }
+  else
+    res = kResultFalse;
+
+  return res;
 }
 
 }
