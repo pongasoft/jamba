@@ -68,6 +68,8 @@ class RawParamConverter : public IParamConverter<ParamValue>
 {
 public:
 
+  using IParamConverter<ParamValue>::toString;
+
   inline ParamValue normalize(ParamValue const &iValue) const override
   {
     return Utils::clamp(iValue, 0.0, 1.0);
@@ -99,6 +101,8 @@ public:
 class BooleanParamConverter : public IParamConverter<bool>
 {
 public:
+  using IParamConverter<bool>::toString;
+
   explicit BooleanParamConverter(char16 const *iFalseString = STR16("Off"),
                                  char16 const *iTrueString = STR16("On")) :
     fFalseString{iFalseString},
@@ -144,6 +148,8 @@ class PercentParamConverter : public IParamConverter<Percent>
 {
 public:
 
+  using IParamConverter<Percent>::toString;
+
   inline ParamValue normalize(double const &iValue) const override
   {
     return Utils::clamp(iValue, 0.0, 1.0);
@@ -172,6 +178,8 @@ class DiscreteValueParamConverter : public IParamConverter<int>
 public:
   using ParamType = int;
 
+  using IParamConverter<int>::toString;
+
   inline int getStepCount() const override { return StepCount; }
 
   inline ParamValue normalize(int const &iDiscreteValue) const override
@@ -194,6 +202,39 @@ public:
     if(!wrapper.printInt(iValue))
       oString[0] = 0;
   }
+};
+
+/**
+ * A converter to deal with an enum (assumes that the enum is contiguous, starts at 0 and that MaxValue is the latest
+ * value in the enum)
+ */
+template<typename Enum, Enum MaxValue>
+class EnumParamConverter : public IParamConverter<Enum>
+{
+public:
+  using ParamType = Enum;
+
+  using IParamConverter<Enum>::toString;
+
+  inline int getStepCount() const override { return fConverter.getStepCount(); }
+
+  inline ParamValue normalize(ParamType const &iDiscreteValue) const override
+  {
+    return fConverter.normalize(iDiscreteValue);
+  }
+
+  inline ParamType denormalize(ParamValue iNormalizedValue) const override
+  {
+    return static_cast<ParamType>(fConverter.denormalize(iNormalizedValue));
+  }
+
+  void toString(ParamType const &iValue, String128 oString, int32 iPrecision) const override
+  {
+    fConverter.toString(iValue, oString, iPrecision);
+  }
+
+private:
+  DiscreteValueParamConverter<MaxValue> fConverter;
 };
 
 }

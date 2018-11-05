@@ -73,6 +73,16 @@ inline tresult readDouble(IBStreamer &iStreamer, double &oValue)
   return kResultOk;
 }
 
+// readFloat - contrary to IBStreamer.readFloat, this method does NOT modify oValue if cannot be read
+inline tresult readFloat(IBStreamer &iStreamer, float &oValue)
+{
+  float value;
+  if(!iStreamer.readFloat(value))
+    return kResultFalse;
+  oValue = value;
+  return kResultOk;
+}
+
 // readInt64 - contrary to IBStreamer.readInt64, this method does NOT modify oValue if cannot be read
 inline tresult readInt64(IBStreamer &iStreamer, int64 &oValue)
 {
@@ -109,6 +119,29 @@ inline tresult readBool(IBStreamer &iStreamer, bool &oValue)
  * This parameter handles serializing a raw parameter (ParamValue)
  */
 class RawParamSerializer : public IParamSerializer<ParamValue>
+{
+public:
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
+  {
+    return IBStreamHelper::readDouble(iStreamer, oValue);
+  }
+
+  tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const override
+  {
+    oStreamer.writeDouble(iValue);
+    return kResultOk;
+  }
+
+  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
+  {
+    oStream << iValue;
+  }
+};
+
+/**
+ * This parameter handles serializing a double parameter
+ */
+class DoubleParamSerializer : public IParamSerializer<double>
 {
 public:
   tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
