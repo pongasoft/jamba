@@ -132,6 +132,11 @@ public:
   void draw(CDrawContext *iContext) override;
 
   /**
+   * Draws the back color (if not set to transparent)
+   */
+  virtual void drawBackColor(CDrawContext *iContext);
+
+  /**
    * Called when the draw style is changed (simply marks the view dirty)
    */
   void drawStyleChanged();

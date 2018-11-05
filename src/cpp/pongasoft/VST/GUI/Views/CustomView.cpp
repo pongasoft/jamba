@@ -18,7 +18,7 @@
 #include <vstgui4/vstgui/uidescription/iviewcreator.h>
 #include <vstgui4/vstgui/lib/cdrawcontext.h>
 #include "CustomView.h"
-#include "pongasoft/VST/GUI/Views/CustomViewFactory.h"
+#include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 
 namespace pongasoft {
 namespace VST {
@@ -40,18 +40,26 @@ CustomView::CustomView(const CRect &iSize)
   setWantsFocus(true);
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // CustomView::draw
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 void CustomView::draw(CDrawContext *iContext)
+{
+  drawBackColor(iContext);
+
+  setDirty(false);
+}
+
+//------------------------------------------------------------------------
+// CustomView::drawBackColor
+//------------------------------------------------------------------------
+void CustomView::drawBackColor(CDrawContext *iContext)
 {
   if(getBackColor().alpha != 0)
   {
     iContext->setFillColor(getBackColor());
     iContext->drawRect(getViewSize(), kDrawFilled);
   }
-
-  setDirty(false);
 }
 
 ///////////////////////////////////////////

@@ -124,6 +124,17 @@ public:
     fDrawContext->drawLine(toAbsolutePoint(x1, y1), toAbsolutePoint(x2, y2));
   }
 
+  void drawRect(RelativeCoord x1, RelativeCoord y1, RelativeCoord x2, RelativeCoord y2, CColor const &iStrokeColor)
+  {
+    drawRect(RelativeRect{x1, y1, x2, y2}, iStrokeColor);
+  }
+
+  void drawRect(RelativeRect const &iRect, CColor const &iStrokeColor)
+  {
+    fDrawContext->setFrameColor(iStrokeColor);
+    fDrawContext->drawRect(toAbsoluteRect(iRect), kDrawStroked);
+  }
+
   void fillRect(RelativeCoord x1, RelativeCoord y1, RelativeCoord x2, RelativeCoord y2, CColor const &iColor)
   {
     fillRect(RelativeRect{x1, y1, x2, y2}, iColor);
