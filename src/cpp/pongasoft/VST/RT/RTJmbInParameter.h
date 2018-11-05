@@ -86,9 +86,9 @@ public:
   }
 
   // pop
-  inline ParamType const *pop() { return fUpdateQueue.pop(); }
+  inline ParamType *pop() { return fUpdateQueue.pop(); }
 
-  // pop
+  // last
   inline ParamType const *last() const { return fUpdateQueue.last(); }
 
   // popOrLast
@@ -148,7 +148,7 @@ public:
   inline ParamID getParamID() const { return fPtr->getParamID(); }
 
   // pop - nullptr if no update
-  inline T const *pop() { return fPtr->pop(); }
+  inline T *pop() { return fPtr->pop(); }
 
   // last - last value popped (does not pop!)
   inline T const *last() const { return fPtr->last(); }

@@ -68,7 +68,7 @@ public:
   // wraps a unique pointer of type T and whether it is a new value or not
   struct Element
   {
-    explicit Element(std::unique_ptr<T> iElement, bool iNew) noexcept : fElement{std::move(iElement)}, fNew{iNew} {}
+    Element(std::unique_ptr<T> iElement, bool iNew) noexcept : fElement{std::move(iElement)}, fNew{iNew} {}
 
     std::unique_ptr<T> fElement;
     bool fNew;
@@ -76,7 +76,7 @@ public:
 
 public:
   // Constructor
-  explicit SingleElementStorage(std::unique_ptr<T> iElement, bool iIsEmpty) noexcept :
+  SingleElementStorage(std::unique_ptr<T> iElement, bool iIsEmpty) noexcept :
     fSingleElement{new Element(std::move(iElement), !iIsEmpty)}
   {}
 
@@ -149,14 +149,14 @@ class SingleElementQueue : public SingleElementStorage<T>
 {
 public:
   // Constructor
-  explicit SingleElementQueue() :
+  SingleElementQueue() :
     SingleElementStorage<T>{std::make_unique<T>(), true},
     fPopValue{std::move(SingleElementStorage<T>::__newElement())},
     fPushValue{std::move(SingleElementStorage<T>::__newElement())}
   {}
 
   /**
-   * This contructor should be used if T does not provide an empty constructor */
+   * This constructor should be used if T does not provide an empty constructor */
   explicit SingleElementQueue(std::unique_ptr<T> iElement, bool iIsEmpty = false) :
     SingleElementStorage<T>{std::move(iElement), iIsEmpty},
     fPopValue{std::move(SingleElementStorage<T>::__newElement())},
@@ -174,7 +174,7 @@ public:
   /**
    * @return the value popped or nullptr if nothing to pop
    */
-  T const *pop()
+  T *pop()
   {
     if(!this->isEmpty())
     {
@@ -258,7 +258,7 @@ public:
   void push(T const &iElement)
   {
     *(fPushValue->fElement.get()) = iElement;
-    fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+    pushValue();
   }
 
   /**
@@ -267,7 +267,7 @@ public:
   void push(T const *iElement)
   {
     *(fPushValue->fElement.get()) = *iElement;
-    fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+    pushValue();
   }
 
   /**
@@ -278,7 +278,7 @@ public:
   void updateAndPush(ElementModifier const &iElementModifier)
   {
     iElementModifier(fPushValue->fElement.get());
-    fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+    pushValue();
   }
 
   /**
@@ -290,10 +290,15 @@ public:
   {
     if(iElementModifier(fPushValue->fElement.get()))
     {
-      fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
+      pushValue();
       return true;
     }
     return false;
+  }
+private:
+  void pushValue()
+  {
+    fPushValue = std::move(SingleElementStorage<T>::store(std::move(fPushValue)));
   }
 
 private:
