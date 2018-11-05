@@ -30,6 +30,7 @@ public:
   GUIState *getGUIState() override { return &fState; }
 
 protected:
+  // initialize
   tresult initialize(FUnknown *context) override;
 
 private:

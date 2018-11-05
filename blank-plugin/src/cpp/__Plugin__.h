@@ -30,7 +30,7 @@ constexpr uint16 CONTROLLER_STATE_VERSION = 1;
 class [-name-]Parameters : public Parameters
 {
 public:
-  VstParam<bool> fBypassParam;    // the bypass toggle (bypasses gain multiplication when on/true)
+  VstParam<bool> fBypassParam;    // the bypass toggle (bypasses the processing if Fx)
 
 public:
   [-name-]Parameters()
