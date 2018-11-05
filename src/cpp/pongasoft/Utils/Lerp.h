@@ -45,6 +45,25 @@ public:
     return (iY - fB) / fA;
   }
 
+  /**
+   * Inspired by the map function in Processing language, another way to look at Lerp is to map a range of values
+   * into another range: [iFromMin, iFromHigh] -> [iToMin, iToHigh]
+   */
+  static inline Lerp mapRange(T iFromMin, T iFromHigh, T iToMin, T iToHigh)
+  {
+    return Lerp(iFromMin, iToMin, iFromHigh, iToHigh);
+  }
+
+  /**
+   * Inspired by the map function in Processing language, another way to look at Lerp is to map a range of values
+   * into another range: [iFromMin, iFromHigh] -> [iToMin, iToHigh]. This function then return the iValue mapped from
+   * the first range into the second range.
+   */
+  static inline T mapValue(T iValue, T iFromMin, T iFromHigh, T iToMin, T iToHigh)
+  {
+    return Lerp(iFromMin, iToMin, iFromHigh, iToHigh).computeY(iValue);
+  }
+
 private:
   const T fA;
   const T fB;
