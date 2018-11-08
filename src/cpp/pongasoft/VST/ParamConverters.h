@@ -170,7 +170,8 @@ public:
 
 /**
  * A converter to deal with a discrete value which has StepCount steps. It follows the formulas given in the SDK
- * documentation.
+ * documentation. Note that the number of steps is always -1 from the number of values.
+ * For example for 3 values (0, 1, 2) the number of steps is 2.
  */
 template<int StepCount>
 class DiscreteValueParamConverter : public IParamConverter<int>
@@ -179,6 +180,9 @@ public:
   using ParamType = int;
 
   using IParamConverter<int>::toString;
+
+  // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
+  explicit DiscreteValueParamConverter(int iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
 
   inline int getStepCount() const override { return StepCount; }
 
@@ -199,9 +203,12 @@ public:
   void toString(ParamType const &iValue, String128 oString, int32 /* iPrecision */) const override
   {
     Steinberg::UString wrapper(oString, str16BufferSize (String128));
-    if(!wrapper.printInt(iValue))
+    if(!wrapper.printInt(iValue + fToStringOffset))
       oString[0] = 0;
   }
+
+private:
+  int fToStringOffset;
 };
 
 /**

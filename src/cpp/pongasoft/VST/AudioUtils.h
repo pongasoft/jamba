@@ -29,6 +29,7 @@ using namespace Steinberg::Vst;
 
 #define BIT_SET(a,b) ((a) |= (static_cast<uint64>(1)<<(b)))
 #define BIT_CLEAR(a,b) ((a) &= ~(static_cast<uint64>(1)<<(b)))
+#define BIT_TEST(a,b) (((a) & (static_cast<uint64>(1)<<(b))) != 0)
 
 // defines the threshold of silence
 constexpr Sample32 Sample32SilentThreshold = ((Sample32)2.0e-8);
