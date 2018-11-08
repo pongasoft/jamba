@@ -93,6 +93,16 @@ inline tresult readInt64(IBStreamer &iStreamer, int64 &oValue)
   return kResultOk;
 }
 
+// readInt64 - contrary to IBStreamer.readInt64, this method does NOT modify oValue if cannot be read
+inline tresult readInt64u(IBStreamer &iStreamer, uint64 &oValue)
+{
+  uint64 value;
+  if(!iStreamer.readInt64u(value))
+    return kResultFalse;
+  oValue = value;
+  return kResultOk;
+}
+
 // readInt32 - contrary to IBStreamer.readInt32, this method does NOT modify oValue if cannot be read
 inline tresult readInt32(IBStreamer &iStreamer, int32 &oValue)
 {

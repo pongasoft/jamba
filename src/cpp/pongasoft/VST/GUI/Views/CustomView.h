@@ -211,26 +211,36 @@ public:
 };
 
 /**
+ * When implementing a View specific to a given plugin, you can use this class instead to get direct
+ * access to the state and parameters registered with the plugin via the fState/fParams member.
+ *
+ * @tparam TView the parent view (should be a subclass of GUIParamCxAware
+ * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+ */
+template<typename TView, typename TGUIPluginState>
+class PluginView : public TView, public PluginAccessor<TGUIPluginState>
+{
+public:
+  // Constructor
+  explicit PluginView(const CRect &iSize) : TView(iSize) {}
+
+protected:
+  // initState - overridden to extract fParams
+  void initState(GUIState *iGUIState) override
+  {
+    TView::initState(iGUIState);
+    PluginAccessor<TGUIPluginState>::initState(iGUIState);
+  }
+};
+
+/**
  * When implementing a CustomView specific to a given plugin, you can use this class instead to get direct
  * access to the state and parameters registered with the plugin via the fState/fParams member.
  *
  * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
  */
 template<typename TGUIPluginState>
-class PluginCustomView : public CustomView, public PluginAccessor<TGUIPluginState>
-{
-public:
-  // Constructor
-  explicit PluginCustomView(const CRect &iSize) : CustomView(iSize) {}
-
-protected:
-  // initState - overridden to extract fParams
-  void initState(GUIState *iGUIState) override
-  {
-    CustomView::initState(iGUIState);
-    PluginAccessor<TGUIPluginState>::initState(iGUIState);
-  }
-};
+using PluginCustomView = PluginView<CustomView, TGUIPluginState>;
 
 /**
  * This class can be used to extend VST SDK classes directly while still benefiting from the extensions added by

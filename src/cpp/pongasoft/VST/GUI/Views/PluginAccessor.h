@@ -34,7 +34,7 @@ class PluginAccessor
 {
 public:
   // initState
-  void initState(GUIState *iGUIState)
+  virtual void initState(GUIState *iGUIState)
   {
     fState = dynamic_cast<TGUIPluginState *>(iGUIState);
     if(fState)
