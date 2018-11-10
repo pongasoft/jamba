@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace pongasoft {
 namespace VST {
@@ -184,6 +185,14 @@ public:
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
   explicit DiscreteValueParamConverter(int iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
 
+  // Constructor with printf style format where the parameter (%d) will be (value + offset)
+  explicit DiscreteValueParamConverter(char16 const *iFormat, int iToStringOffset = 0) :
+    fToStringOffset{iToStringOffset}, fFormat{iFormat} {}
+
+  // Constructor with all values defined
+  explicit DiscreteValueParamConverter(char16 const *iToStringValues[StepCount + 1]) :
+    fToStringValues{iToStringValues, iToStringValues + StepCount + 1} {}
+
   inline int getStepCount() const override { return StepCount; }
 
   inline ParamValue normalize(int const &iDiscreteValue) const override
@@ -200,15 +209,34 @@ public:
                                                 value * (StepCount + 1))));
   }
 
+  // toString
   void toString(ParamType const &iValue, String128 oString, int32 /* iPrecision */) const override
   {
     Steinberg::UString wrapper(oString, str16BufferSize (String128));
-    if(!wrapper.printInt(iValue + fToStringOffset))
-      oString[0] = 0;
+    if(fFormat)
+    {
+      String s;
+      s.printf(fFormat, iValue + fToStringOffset);
+      wrapper.assign(s.text());
+    }
+    else
+    {
+      if(fToStringValues.empty())
+      {
+        if(!wrapper.printInt(iValue + fToStringOffset))
+          oString[0] = 0;
+      }
+      else
+      {
+        wrapper.assign(fToStringValues[iValue]);
+      }
+    }
   }
 
 private:
-  int fToStringOffset;
+  int fToStringOffset{};
+  char16 const *fFormat{};
+  std::vector<char16 const *> fToStringValues{};
 };
 
 /**

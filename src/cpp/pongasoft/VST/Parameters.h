@@ -108,8 +108,8 @@ public:
     VstParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
     VstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
     VstParamDefBuilder &converter(std::shared_ptr<IParamConverter<T>> iConverter) { fConverter = std::move(iConverter); return *this; }
-    template<typename ParamConverter>
-    VstParamDefBuilder &converter() { fConverter = std::make_shared<ParamConverter>(); return *this; }
+    template<typename ParamConverter, typename... Args>
+    VstParamDefBuilder &converter(Args... iArgs) { fConverter = std::make_shared<ParamConverter>(iArgs...); return *this; }
 
     // parameter factory method
     VstParam<T> add() const;
@@ -150,8 +150,8 @@ public:
     JmbParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
     JmbParamDefBuilder &shared(bool iShared = true) { fShared = iShared; return *this; }
     JmbParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
-    template<typename ParamSerializer>
-    JmbParamDefBuilder &serializer() { fSerializer = std::make_shared<ParamSerializer>(); return *this; }
+    template<typename ParamSerializer, typename... Args>
+    JmbParamDefBuilder &serializer(Args... iArgs) { fSerializer = std::make_shared<ParamSerializer>(iArgs...); return *this; }
 
     // parameter factory method
     JmbParam<T> add() const;
@@ -192,8 +192,8 @@ public:
    * Used from derived classes to build a parameter backed by a VST parameter
    * TODO add example + don't forget that order is important (define the order in Maschine for example)
    */
-  template<typename ParamConverter>
-  VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, const TChar *iTitle);
+  template<typename ParamConverter, typename... Args>
+  VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, const TChar *iTitle, Args... iConverterArgs);
 
   /**
    * Used from derived classes to build a parameter backed by a VST parameter. Use this version
@@ -205,8 +205,8 @@ public:
   /**
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue)
    */
-  template<typename ParamSerializer>
-  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, const TChar *iTitle);
+  template<typename ParamSerializer, typename... Args>
+  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, const TChar *iTitle, Args... iSerializerArgs);
 
   /**
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue). Use this version
@@ -460,11 +460,13 @@ Parameters::VstParamDefBuilder<T> Parameters::vstFromType(ParamID iParamID, cons
 //------------------------------------------------------------------------
 // Parameters::vst
 //------------------------------------------------------------------------
-template<typename ParamConverter>
-Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::vst(ParamID iParamID, const TChar *iTitle)
+template<typename ParamConverter, typename... Args>
+Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::vst(ParamID iParamID,
+                                                                                   const TChar *iTitle,
+                                                                                   Args... iConverterArgs)
 {
   auto builder = vstFromType<typename ParamConverter::ParamType>(iParamID, iTitle);
-  builder.template converter<ParamConverter>();
+  builder.template converter<ParamConverter>(iConverterArgs...);
   return builder;
 }
 
@@ -480,11 +482,13 @@ Parameters::JmbParamDefBuilder<T> Parameters::jmbFromType(ParamID iParamID, cons
 //------------------------------------------------------------------------
 // Parameters::jmb
 //------------------------------------------------------------------------
-template<typename ParamSerializer>
-Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::jmb(ParamID iParamID, const TChar *iTitle)
+template<typename ParamSerializer, typename... Args>
+Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::jmb(ParamID iParamID,
+                                                                                    const TChar *iTitle,
+                                                                                    Args... iSerializerArgs)
 {
   auto builder = jmbFromType<typename ParamSerializer::ParamType>(iParamID, iTitle);
-  builder.template serializer<ParamSerializer>();
+  builder.template serializer<ParamSerializer>(iSerializerArgs...);
   return builder;
 }
 
