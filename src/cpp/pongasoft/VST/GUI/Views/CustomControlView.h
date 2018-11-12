@@ -120,7 +120,13 @@ void TCustomControlView<T>::setControlValue(T const &iControlValue)
   if(fControlParameter.exists())
     fControlParameter.setValue(iControlValue);
   else
-    fControlValue = iControlValue;
+  {
+    if(fControlValue != iControlValue)
+    {
+      fControlValue = iControlValue;
+      markDirty();
+    }
+  }
 }
 
 ///////////////////////////////////////////
