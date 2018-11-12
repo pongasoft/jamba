@@ -72,6 +72,11 @@ public:
     }
 
     /**
+     * @return true if this channel is silent (according to silenceFlags)
+     */
+    inline bool isSilent() const { return fBuffers.isSilent(fChannel); }
+
+    /**
      * Sets a single channel silence flag
      */
     inline void setSilenceFlag(bool iSilent)
@@ -138,7 +143,7 @@ public:
   AudioBuffers(AudioBusBuffers &buffer, int32 numSamples) : fBuffer(buffer), fNumSamples(numSamples)
   {}
 
-  // returns true if the buffer is silent (meaning all channels are silent => set to 1)
+  // returns true if the buffer is silent (meaning all channels are silent => set to 1) (according to silenceFlags)
   inline bool isSilent() const
   {
     return fBuffer.numChannels == 0 || fBuffer.silenceFlags == (static_cast<uint64>(1) << fBuffer.numChannels) - 1;
@@ -198,6 +203,18 @@ public:
       else
         BIT_CLEAR(fBuffer.silenceFlags, iChannel);
     }
+  }
+
+  /**
+   * @return true if the channel is silent (according to silenceFlags)
+   */
+  inline bool isSilent(int32 iChannel) const
+  {
+    if(iChannel < getNumChannels())
+    {
+      return BIT_TEST(fBuffer.silenceFlags, iChannel);
+    }
+    return true;
   }
 
   /**
