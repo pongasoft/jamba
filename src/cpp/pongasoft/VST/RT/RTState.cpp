@@ -356,12 +356,15 @@ tresult RTState::init()
              "Expected parameter [%d] used in RTSaveStateOrder not registered",
              paramID);
     }
-    if(fVstParameters.at(paramID)->getParamDef()->fTransient)
+    else
     {
-      result = kResultFalse;
-      DLOG_F(ERROR,
-             "Parameter [%d] is marked transient => should not be part of save state order",
-             paramID);
+      if(fVstParameters.at(paramID)->getParamDef()->fTransient)
+      {
+        result = kResultFalse;
+        DLOG_F(ERROR,
+               "Parameter [%d] is marked transient => should not be part of save state order",
+               paramID);
+      }
     }
   }
   DCHECK_F(result == kResultOk, "Issue with parameters... failing in development mode");

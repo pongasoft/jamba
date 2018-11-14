@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
-#include <vector>
+#include <array>
 
 namespace pongasoft {
 namespace VST {
@@ -190,8 +190,8 @@ public:
     fToStringOffset{iToStringOffset}, fFormat{iFormat} {}
 
   // Constructor with all values defined
-  explicit DiscreteValueParamConverter(char16 const *iToStringValues[StepCount + 1]) :
-    fToStringValues{iToStringValues, iToStringValues + StepCount + 1} {}
+  explicit DiscreteValueParamConverter(std::array<String, StepCount + 1> iToStringValues) :
+    fToStringValues{std::move(iToStringValues)} {}
 
   inline int getStepCount() const override { return StepCount; }
 
@@ -228,7 +228,7 @@ public:
       }
       else
       {
-        wrapper.assign(fToStringValues[iValue]);
+        wrapper.assign(fToStringValues[iValue].text());
       }
     }
   }
@@ -236,7 +236,7 @@ public:
 private:
   int fToStringOffset{};
   char16 const *fFormat{};
-  std::vector<char16 const *> fToStringValues{};
+  std::array<String, StepCount + 1> fToStringValues{};
 };
 
 /**
@@ -250,6 +250,15 @@ public:
   using ParamType = Enum;
 
   using IParamConverter<Enum>::toString;
+
+  // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
+  explicit EnumParamConverter(int iToStringOffset = 0) : fConverter{iToStringOffset} {}
+
+  // Constructor with printf style format where the parameter (%d) will be (value + offset)
+  explicit EnumParamConverter(char16 const *iFormat, int iToStringOffset = 0) : fConverter{iFormat, iToStringOffset} {}
+
+  // Constructor with all values defined
+  explicit EnumParamConverter(std::array<String, MaxValue + 1> iToStringValues) : fConverter{std::move(iToStringValues)} {}
 
   inline int getStepCount() const override { return fConverter.getStepCount(); }
 
