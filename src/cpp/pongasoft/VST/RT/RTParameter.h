@@ -196,6 +196,9 @@ public:
   RTVstParam(RTVstParameter<T> *iPtr) : fPtr{iPtr}
   {}
 
+  // getParamID
+  inline ParamID getParamID() const { return fPtr->getParamID(); }
+
   // shortcut to normalize
   inline ParamValue normalize(ParamType const &iValue) const { return fPtr->normalize(iValue); }
 
@@ -260,6 +263,9 @@ class RTRawVstParam
 public:
   RTRawVstParam(RTRawVstParameter *iPtr) : fPtr{iPtr}
   {}
+
+  // getParamID
+  inline ParamID getParamID() const { return fPtr->getParamID(); }
 
   // getValue
   inline ParamValue const &getValue() const { return fPtr->getNormalizedValue(); }

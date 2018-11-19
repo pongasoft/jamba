@@ -176,7 +176,10 @@ public:
   }
 
   // getValue
-  inline ParamType const &getValue() { return fValue; }
+  inline ParamType const &getValue() const { return fValue; }
+
+  // getValue
+  inline ParamType &getValue() { return fValue; }
 
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
@@ -232,6 +235,9 @@ public:
 
   // getValue
   inline T const &getValue() const { return fPtr->getValue(); }
+
+  // getValue
+  inline T &getValue() { return fPtr->getValue(); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
   inline operator T const &() const { return fPtr->getValue(); } // NOLINT

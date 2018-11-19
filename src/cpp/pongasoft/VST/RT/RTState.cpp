@@ -148,7 +148,7 @@ tresult RTState::addInboundMessagingParameter(std::unique_ptr<IRTJmbInParameter>
 
 
 //------------------------------------------------------------------------
-// IRTState::applyParameterChanges
+// RTState::applyParameterChanges
 //------------------------------------------------------------------------
 bool RTState::applyParameterChanges(IParameterChanges &inputParameterChanges)
 {
@@ -180,6 +180,42 @@ bool RTState::applyParameterChanges(IParameterChanges &inputParameterChanges)
   }
 
   return stateChanged;
+}
+
+//------------------------------------------------------------------------
+// RTState::getParamUpdateSampleOffset
+//------------------------------------------------------------------------
+int32 RTState::getParamUpdateSampleOffset(ProcessData &iData, ParamID iParamID)
+{
+  // check for actual changes
+  auto inputParameterChanges = iData.inputParameterChanges;
+  if(!inputParameterChanges)
+    return -1;
+
+  int32 numParamsChanged = inputParameterChanges->getParameterCount();
+  if(numParamsChanged <= 0)
+    return -1;
+
+  int32 offset = -1;
+
+  for(int i = 0; i < numParamsChanged; ++i)
+  {
+    IParamValueQueue *paramQueue = inputParameterChanges->getParameterData(i);
+    if(paramQueue != nullptr && paramQueue->getParameterId() == iParamID)
+    {
+      ParamValue value;
+      int32 sampleOffset;
+      int32 numPoints = paramQueue->getPointCount();
+
+      // we read the "last" point (ignoring multiple changes for now)
+      if(paramQueue->getPoint(numPoints - 1, sampleOffset, value) == kResultOk)
+      {
+        offset = sampleOffset;
+      }
+    }
+  }
+
+  return offset;
 }
 
 //------------------------------------------------------------------------

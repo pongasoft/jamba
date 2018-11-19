@@ -19,6 +19,8 @@
 #pragma once
 
 #include <pongasoft/Utils/Concurrent/Concurrent.h>
+#include <pongasoft/Utils/Disposable.h>
+#include <pongasoft/Utils/Metaprogramming.h>
 #include <pongasoft/VST/ParamDef.h>
 
 namespace pongasoft {
@@ -137,7 +139,14 @@ tresult RTJmbOutParameter<T>::writeToMessage(Message &oMessage)
   auto update = fUpdateQueue.pop();
   if(update)
   {
-    return getParamDefT()->writeToMessage(*update, oMessage);
+    tresult res = getParamDefT()->writeToMessage(*update, oMessage);
+
+    // Implementation note: this method is called from the UI thread so releasing resources is OK!
+    auto disposable = Cast<Disposable *>::dynamic(update);
+    if(disposable)
+      disposable->dispose();
+
+    return res;
   }
 
   return kResultFalse;

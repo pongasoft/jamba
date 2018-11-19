@@ -323,13 +323,13 @@ public:
 
   /**
    * Clears the buffer (and sets the silence flag) */
-  inline void clear()
+  inline tresult clear()
   {
     auto buffer = getBuffer();
 
     // sanity check
     if(!buffer)
-      return;
+      return kResultFalse;
 
     for(int32 channel = 0; channel < getNumChannels(); channel++)
     {
@@ -344,6 +344,8 @@ public:
 
     if(getNumChannels() > 0)
       fBuffer.silenceFlags == (static_cast<uint64>(1) << getNumChannels()) - 1;
+
+    return kResultOk;
   }
 
 private:

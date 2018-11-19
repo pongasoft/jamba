@@ -89,6 +89,14 @@ public:
   virtual bool applyParameterChanges(IParameterChanges &inputParameterChanges);
 
   /**
+   * This uses the same algorithm as when the param value is updated (implemented in applyParameterChanges) for
+   * consistency. If the param changes more than once in a frame, only the last value is taken into account.
+   *
+   * @return the offset at which the param changed (-1 if it did not change)
+   */
+  virtual int32 getParamUpdateSampleOffset(ProcessData &iData, ParamID iParamID);
+
+  /**
    * This method should be called at the end of process(ProcessData &data) method. It will update the previous state
    * to the current one and save the latest changes (if necessary) so that it is accessible via writeLatestState.
    */

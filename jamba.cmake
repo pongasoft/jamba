@@ -55,7 +55,9 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Collection/CircularBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Concurrent/Concurrent.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Concurrent/SpinLock.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Disposable.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Lerp.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Metaprogramming.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Misc.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamDisplay.h
