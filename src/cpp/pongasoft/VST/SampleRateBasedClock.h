@@ -28,11 +28,23 @@ namespace VST {
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 
+/**
+ * The purpose of this class is to deal with timing based on the sample rate and do the proper conversions.
+ */
 class SampleRateBasedClock
 {
 public:
   /**
-   * Keeps track of the time in number of samples processed vs sample rate
+   * Keeps track of the time in number of samples processed vs sample rate. Typical usage is:
+   *
+   * // in setup
+   * rateLimiter = clock.getRateLimiter(250); // 4 times a second
+   *
+   * // in process (every frame)
+   * if(rateLimiter.shouldUpdate(processData.numSamples))
+   * {
+   *   // execute rate limited code (ex: update UI)
+   * }
    */
   class RateLimiter
   {
@@ -60,31 +72,48 @@ public:
     uint32 fSampleCount;
   };
 
+  // Constructor
   explicit SampleRateBasedClock(SampleRate iSampleRate) : fSampleRate{iSampleRate}
   {
 
   }
 
+  // getSampleCountFor: how many samples for iMillis seconds
   uint32 getSampleCountFor(uint32 iMillis) const
   {
     return static_cast<uint32>(ceil(fSampleRate * iMillis / 1000.0));
   }
 
+  // getSampleCountFor1Bar: how many samples for 1 bar (given the tempo and optional time signature)
+  uint32 getSampleCountFor1Bar(double iTempo, int32 iTimeSigNumerator = 4, int32 iTimeSigDenominator = 4) const
+  {
+    auto oneBarInSeconds = 240.0 / iTempo;
+    if(iTimeSigNumerator != iTimeSigDenominator && iTimeSigDenominator != 0)
+    {
+      oneBarInSeconds *= (static_cast<double>(iTimeSigNumerator) / static_cast<double>(iTimeSigDenominator));
+    }
+    return static_cast<uint32>(ceil(fSampleRate * oneBarInSeconds));
+  }
+
+  // getTimeForSampleCount: inverse of getSampleCountFor
   uint32 getTimeForSampleCount(uint32 iSampleCount) const
   {
     return static_cast<uint32>(ceil(iSampleCount * 1000.0 / fSampleRate));
   }
 
+  // getSampleRate
   SampleRate getSampleRate() const
   {
     return fSampleRate;
   }
 
+  // setSampleRate
   void setSampleRate(SampleRate iSampleRate)
   {
     fSampleRate = iSampleRate;
   }
 
+  // getRateLimiter
   RateLimiter getRateLimiter(uint32 iMillis) const
   {
     return RateLimiter{getSampleCountFor(iMillis)};
