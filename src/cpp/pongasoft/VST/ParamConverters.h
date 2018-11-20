@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 #include <array>
+#include <vector>
 
 namespace pongasoft {
 namespace VST {
@@ -190,8 +191,8 @@ public:
     fToStringOffset{iToStringOffset}, fFormat{iFormat} {}
 
   // Constructor with all values defined
-  explicit DiscreteValueParamConverter(std::array<String, StepCount + 1> iToStringValues) :
-    fToStringValues{std::move(iToStringValues)} {}
+  explicit DiscreteValueParamConverter(std::array<ConstString, StepCount + 1> const &iToStringValues) :
+    fToStringValues(iToStringValues.cbegin(), iToStringValues.cend()) {}
 
   inline int getStepCount() const override { return StepCount; }
 
@@ -236,7 +237,7 @@ public:
 private:
   int fToStringOffset{};
   char16 const *fFormat{};
-  std::array<String, StepCount + 1> fToStringValues{};
+  std::vector<ConstString> fToStringValues{};
 };
 
 /**
@@ -258,7 +259,7 @@ public:
   explicit EnumParamConverter(char16 const *iFormat, int iToStringOffset = 0) : fConverter{iFormat, iToStringOffset} {}
 
   // Constructor with all values defined
-  explicit EnumParamConverter(std::array<String, MaxValue + 1> iToStringValues) : fConverter{std::move(iToStringValues)} {}
+  explicit EnumParamConverter(std::array<ConstString, MaxValue + 1> const &iToStringValues) : fConverter{iToStringValues} {}
 
   inline int getStepCount() const override { return fConverter.getStepCount(); }
 
