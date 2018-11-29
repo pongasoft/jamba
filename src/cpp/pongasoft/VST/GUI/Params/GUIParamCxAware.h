@@ -116,6 +116,10 @@ public:
   }
 
   /**
+   * Unregisters all parameters */
+  void unregisterAll();
+
+  /**
    * Removes the registration of the provided param (closing the connection/stopping to listen)
    *
    * @return true if the param was present, false otherwise

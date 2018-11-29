@@ -46,6 +46,10 @@ public:
   bool unregisterParam(ParamID iParamID);
 
   /**
+   * Unregisters all parameters */
+  void unregisterAll();
+
+  /**
    * Registers a raw parameter (no conversion)
    */
   GUIRawVstParam registerRawVstParam(ParamID iParamID,

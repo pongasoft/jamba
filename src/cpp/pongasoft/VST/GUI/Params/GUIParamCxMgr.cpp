@@ -74,6 +74,15 @@ bool GUIParamCxMgr::unregisterParam(ParamID iParamID)
   return fParamCxs.erase(iParamID) == 1;
 }
 
+//------------------------------------------------------------------------
+// GUIParamCxMgr::unregisterAll
+//------------------------------------------------------------------------
+void GUIParamCxMgr::unregisterAll()
+{
+  fParamCxs.clear();
+}
+
+
 }
 }
 }

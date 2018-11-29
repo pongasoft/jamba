@@ -42,7 +42,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/VST3_SDK.cmake)
 #-------------------------------------------------------------------------------
 # Defining files to include to generate the library
 #-------------------------------------------------------------------------------
-
+set(CMAKE_CXX_STANDARD 14)
 set(JAMBA_CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/cpp)
 set(LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.cpp)
 include_directories(${JAMBA_CPP_SOURCES})
@@ -55,6 +55,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Collection/CircularBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Concurrent/Concurrent.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Concurrent/SpinLock.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Constants.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Disposable.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Lerp.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Metaprogramming.h

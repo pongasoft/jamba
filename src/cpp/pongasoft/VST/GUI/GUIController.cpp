@@ -103,6 +103,10 @@ tresult GUIController::terminate()
 
   tresult res = EditController::terminate();
 
+  auto gpa = dynamic_cast<GUIParamCxAware *>(this);
+  if(gpa)
+    gpa->unregisterAll();
+
   delete fViewFactory;
   fViewFactory = nullptr;
 

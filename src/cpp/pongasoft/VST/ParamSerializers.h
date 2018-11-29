@@ -83,6 +83,19 @@ inline tresult readFloat(IBStreamer &iStreamer, float &oValue)
   return kResultOk;
 }
 
+// readFloatArray - contrary to IBStreamer.readFloatArray, this method returns tresult and can use any Int type
+template<typename Int>
+inline tresult readFloatArray(IBStreamer &iStreamer, float *oValue, Int iCount)
+{
+  for(Int i = 0; i < iCount; i++)
+  {
+    if(!iStreamer.readFloat(oValue[i]))
+      return kResultFalse;
+  }
+  return kResultOk;
+}
+
+
 // readInt64 - contrary to IBStreamer.readInt64, this method does NOT modify oValue if cannot be read
 inline tresult readInt64(IBStreamer &iStreamer, int64 &oValue)
 {
