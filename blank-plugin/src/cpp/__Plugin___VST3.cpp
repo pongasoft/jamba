@@ -43,7 +43,7 @@ BEGIN_FACTORY_DEF ("[-company-]",
                    "[-company_url-]",
                    "[-company_email-]")
 
-    // JSGainProcessor processor
+    // [-name-]Processor processor
     DEF_CLASS2 (INLINE_UID_FROM_FUID([-namespace-]::[-name-]ProcessorUID),
                 PClassInfo::kManyInstances,  // cardinality
                 kVstAudioEffectClass,        // the component category (do not changed this)
@@ -54,7 +54,7 @@ BEGIN_FACTORY_DEF ("[-company-]",
                 kVstVersionString,           // the VST 3 SDK version (do not changed this, use always this define)
                 [-namespace-]::RT::[-name-]Processor::createInstance)  // function pointer called when this component should be instantiated
 
-    // JSGainController controller
+    // [-name-]Controller controller
     DEF_CLASS2 (INLINE_UID_FROM_FUID([-namespace-]::[-name-]ControllerUID),
                 PClassInfo::kManyInstances,  // cardinality
                 kVstComponentControllerClass,// the Controller category (do not changed this)
