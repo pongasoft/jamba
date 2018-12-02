@@ -12,6 +12,7 @@ cd ${BASEDIR}
 
 BUILD_CONFIG="@CMAKE_BUILD_TYPE@"
 BUILD_TARGET="@target@"
+BUILD_OPTIONS=""
 RELEASE_FILENAME="@JAMBA_RELEASE_FILENAME@"
 JAMBA_ENABLE_VST2="@JAMBA_ENABLE_VST2@"
 JAMBA_ENABLE_AUDIO_UNIT="@JAMBA_ENABLE_AUDIO_UNIT@"
@@ -25,10 +26,11 @@ DRY_RUN=
 ###############################################################################
 usage()
 {
-  echo "   Usage:  jamba.sh [-hn] <command>"
+  echo "   Usage:  jamba.sh [-hnp] <command>"
   echo ""
   echo "     -h : usage help"
   echo "     -n : dry run (prints what it is going to do)"
+  echo "     -p : build in parallel"
   echo ""
   echo "   Commands: [${BUILD_CONFIG}]"
   echo "     ---- VST Commands ----"
@@ -60,7 +62,7 @@ clean()
 ###############################################################################
 build()
 {
-  ${DRY_RUN} cmake --build . --target ${BUILD_TARGET}
+  ${DRY_RUN} cmake --build . --target ${BUILD_TARGET} ${BUILD_OPTIONS}
 }
 
 ###############################################################################
@@ -73,7 +75,7 @@ edit()
     exit 1
   fi
   build
-  ${DRY_RUN} cmake --build . --target editorhost
+  ${DRY_RUN} cmake --build . --target editorhost ${BUILD_OPTIONS}
   ${DRY_RUN} ./bin/editorhost.app/Contents/MacOS/editorhost VST3/${BUILD_TARGET}.vst3
 }
 
@@ -82,7 +84,7 @@ edit()
 ###############################################################################
 test()
 {
-  ${DRY_RUN} cmake --build . --target ${BUILD_TARGET}_test
+  ${DRY_RUN} cmake --build . --target ${BUILD_TARGET}_test ${BUILD_OPTIONS}
   ${DRY_RUN} ctest
 }
 
@@ -92,7 +94,7 @@ test()
 validate()
 {
   build
-  ${DRY_RUN} cmake --build . --target validator
+  ${DRY_RUN} cmake --build . --target validator ${BUILD_OPTIONS}
   ${DRY_RUN} ./bin/validator VST3/${BUILD_TARGET}.vst3
 }
 
@@ -102,8 +104,7 @@ validate()
 archive()
 {
   build
-  build_au
-  ${DRY_RUN} cmake --build . --target archive
+  ${DRY_RUN} cmake --build . --target archive ${BUILD_OPTIONS}
 }
 
 ###############################################################################
@@ -172,12 +173,14 @@ prod()
 }
 
 # get script options
-while getopts "hdrn" opt ; do
+while getopts "hnp" opt ; do
   case $opt in
     h  ) usage
          exit 0
          ;;
     n  ) DRY_RUN=echo
+         ;;
+    p  ) BUILD_OPTIONS="-j"
          ;;
     \? ) usage
          exit 1
