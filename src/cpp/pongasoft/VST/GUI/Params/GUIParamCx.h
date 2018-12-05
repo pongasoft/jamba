@@ -36,7 +36,11 @@ using namespace Steinberg;
 class GUIParamCx : public FObject
 {
 public:
+  // Constructor with listener
   GUIParamCx(ParamID iParamID, FObject *iParameter, Parameters::IChangeListener *iChangeListener);
+
+  // Constructor with callback
+  GUIParamCx(ParamID iParamID, FObject *iParameter, Parameters::ChangeCallback iChangeCallback);
 
   /**
    * Call to stop listening for changes. Also called automatically from the destructor.
@@ -60,6 +64,7 @@ private:
   ParamID fParamID;
   FObject *fParameter;
   Parameters::IChangeListener *const fChangeListener;
+  Parameters::ChangeCallback fChangeCallback;
   bool fIsConnected;
 };
 

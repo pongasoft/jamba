@@ -48,6 +48,14 @@ public:
     virtual void onParameterChange(ParamID iParamID) = 0;
   };
 
+  /**
+   * A callback that will be invoked for changes. Note that unlike the IChangeListener, there is no
+   * parameter since it is expected to be used like this:
+   *
+   * fMyParam = registerVstParam(myParamId, [this]() { .... ; });
+   */
+  using ChangeCallback = std::function<void()>;
+
 public:
   /**
    * Implements the builder pattern for ease of build. */

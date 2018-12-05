@@ -185,7 +185,19 @@ public:
    */
   std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener)
   {
-    return std::make_unique<GUIParamCx>(fParamID, fVstParameters->getParameterObject(fParamID), iChangeListener);
+    return std::make_unique<GUIParamCx>(fParamID,
+                                        fVstParameters->getParameterObject(fParamID),
+                                        iChangeListener);
+  }
+
+  /**
+   * @return a connection that will listen to parameter changes (see GUIParamCx)
+   */
+  std::unique_ptr<GUIParamCx> connect(Parameters::ChangeCallback iChangeCallback)
+  {
+    return std::make_unique<GUIParamCx>(fParamID,
+                                        fVstParameters->getParameterObject(fParamID),
+                                        std::move(iChangeCallback));
   }
 
 private:

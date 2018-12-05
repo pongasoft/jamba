@@ -189,6 +189,14 @@ public:
     return std::make_unique<GUIParamCx>(getParamID(), this, iChangeListener);
   }
 
+  /**
+   * @return a connection that will listen to parameter changes (see GUIParamCx)
+   */
+  std::unique_ptr<GUIParamCx> connect(Parameters::ChangeCallback iChangeCallback)
+  {
+    return std::make_unique<GUIParamCx>(getParamID(), this, std::move(iChangeCallback));
+  }
+
 protected:
   ParamType fValue;
 };
@@ -264,6 +272,9 @@ public:
 
   // connect
   inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }
+
+  // connect
+  inline std::unique_ptr<GUIParamCx> connect(Parameters::ChangeCallback iChangeCallback) { return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
   GUIJmbParameter<T> *fPtr;

@@ -55,6 +55,19 @@ public:
   }
 
   /**
+ * Register a vst parameter simply given its id
+ * @return nullptr if not found or not proper type
+ */
+  template<typename T>
+  GUIVstParam<T> registerVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+  {
+    if(fParamCxMgr)
+      return fParamCxMgr->registerVstParam<T>(iParamID, std::move(iChangeCallback));
+    else
+      return GUIVstParam<T>{};
+  }
+
+  /**
    * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
    * @return nullptr if not found or not proper type
    */
@@ -63,6 +76,19 @@ public:
   {
     if(fParamCxMgr)
       return fParamCxMgr->registerVstParam(iParamDef, iSubscribeToChanges ? this : nullptr);
+    else
+      return GUIVstParam<T>{};
+  }
+
+  /**
+ * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
+ * @return nullptr if not found or not proper type
+ */
+  template<typename T>
+  GUIVstParam<T> registerVstParam(VstParam<T> const &iParamDef, Parameters::ChangeCallback iChangeCallback)
+  {
+    if(fParamCxMgr)
+      return fParamCxMgr->registerVstParam(iParamDef, std::move(iChangeCallback));
     else
       return GUIVstParam<T>{};
   }
@@ -85,6 +111,23 @@ public:
   }
 
   /**
+   * This method registers this class to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
+   * a wrapper directly accessible from the view and as a result there is no need to call this method unless you
+   * want to subscribe to the changes, hence there isn't a second optional parameter
+   *
+   * @return a copy of iParamDef for convenience and symmetry of the APIs or empty wrapper if initState has not
+   *         been called
+   */
+  template<typename T>
+  GUIJmbParam<T> registerJmbParam(GUIJmbParam<T> &iParamDef, Parameters::ChangeCallback iChangeCallback)
+  {
+    if(fParamCxMgr)
+      return fParamCxMgr->registerJmbParam(iParamDef, std::move(iChangeCallback));
+    else
+      return GUIJmbParam<T>{};
+  }
+
+  /**
    * Registers the ser param only given its id and return the wrapper to the param.
    *
    * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
@@ -95,6 +138,20 @@ public:
   {
     if(fParamCxMgr)
       return fParamCxMgr->registerJmbParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
+    else
+      return GUIJmbParam<T>{};
+  }
+
+  /**
+ * Registers the ser param only given its id and return the wrapper to the param.
+ *
+ * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
+ */
+  template<typename T>
+  GUIJmbParam<T> registerJmbParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+  {
+    if(fParamCxMgr)
+      return fParamCxMgr->registerJmbParam<T>(iParamID, std::move(iChangeCallback));
     else
       return GUIJmbParam<T>{};
   }

@@ -52,24 +52,64 @@ public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  GUIRawVstParam registerRawVstParam(ParamID iParamID,
-                                     Parameters::IChangeListener *iChangeListener = nullptr);
+  inline GUIRawVstParam registerRawVstParam(ParamID iParamID,
+                                            Parameters::IChangeListener *iChangeListener = nullptr)
+  {
+    return __registerRawVstParam(iParamID, iChangeListener);
+  }
+
+  /**
+   * Registers a raw parameter (no conversion)
+   */
+  inline GUIRawVstParam registerRawVstParam(ParamID iParamID,
+                                            Parameters::ChangeCallback iChangeCallback)
+  {
+    return __registerRawVstParam(iParamID, std::move(iChangeCallback));
+  }
 
   /**
    * Register a vst parameter simply given its id
    * @return nullptr if not found or not proper type
    */
   template<typename T>
-  GUIVstParam<T> registerVstParam(ParamID iParamID,
-                                  Parameters::IChangeListener *iChangeListener = nullptr);
+  inline GUIVstParam<T> registerVstParam(ParamID iParamID,
+                                         Parameters::IChangeListener *iChangeListener = nullptr)
+  {
+    return __registerVstParam<T>(iParamID, iChangeListener);
+  }
+
+  /**
+ * Register a vst parameter simply given its id
+ * @return nullptr if not found or not proper type
+ */
+  template<typename T>
+  inline GUIVstParam<T> registerVstParam(ParamID iParamID,
+                                         Parameters::ChangeCallback iChangeCallback)
+  {
+    return __registerVstParam<T>(iParamID, std::move(iChangeCallback));
+  }
 
   /**
    * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
    * @return nullptr if not found or not proper type
    */
   template<typename T>
-  GUIVstParam<T> registerVstParam(VstParam<T> iParamDef,
-                                  Parameters::IChangeListener *iChangeListener = nullptr);
+  inline GUIVstParam<T> registerVstParam(VstParam<T> iParamDef,
+                                         Parameters::IChangeListener *iChangeListener = nullptr)
+  {
+    return __registerVstParam(iParamDef, iChangeListener);
+  }
+
+  /**
+ * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
+ * @return nullptr if not found or not proper type
+ */
+  template<typename T>
+  inline GUIVstParam<T> registerVstParam(VstParam<T> iParamDef,
+                                         Parameters::ChangeCallback iChangeCallback)
+  {
+    return __registerVstParam(iParamDef, std::move(iChangeCallback));
+  }
 
   /**
    * This method registers the listener to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
@@ -87,13 +127,42 @@ public:
   }
 
   /**
+ * This method registers the listener to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
+ * a wrapper directly accessible from the view and as a result there is no need to call this method unless a
+ * listener is provided, hence the listener is required.
+ *
+ * @return a copy of iParamDef for convenience and symmetry of the APIs
+ */
+  template<typename T>
+  GUIJmbParam<T> registerJmbParam(GUIJmbParam<T> &iParamDef, Parameters::ChangeCallback iChangeCallback)
+  {
+    DCHECK_F((bool) iChangeCallback);
+    fParamCxs[iParamDef.getParamID()] = std::move(iParamDef.connect(std::move(iChangeCallback)));
+    return iParamDef;
+  }
+
+  /**
    * Registers the ser param only given its id and return the wrapper to the param.
    *
    * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
    */
   template<typename T>
   GUIJmbParam<T> registerJmbParam(ParamID iParamID,
-                                  Parameters::IChangeListener *iChangeListener = nullptr);
+                                  Parameters::IChangeListener *iChangeListener = nullptr)
+  {
+    return __registerJmbParam<T>(iParamID, iChangeListener);
+  }
+
+  /**
+ * Registers the ser param only given its id and return the wrapper to the param.
+ *
+ * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
+ */
+  template<typename T>
+  GUIJmbParam<T> registerJmbParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+  {
+    return __registerJmbParam<T>(iParamID, std::move(iChangeCallback));
+  }
 
   // getGUIState
   GUIState *getGUIState() const { return fGUIState; };
@@ -107,11 +176,25 @@ protected:
   }
 
   /**
-   * Registers a raw parameter (no conversion)
-   */
-  std::unique_ptr<GUIRawVstParameter> registerRawVstParameter(ParamID iParamID,
-                                                              Parameters::IChangeListener *iChangeListener = nullptr);
+   * Registers a raw parameter (no conversion) */
+  template<typename Listener>
+  std::unique_ptr<GUIRawVstParameter> __registerRawVstParameter(ParamID iParamID, Listener iListener);
 
+  // __registerRawVstParam
+  template<typename Listener>
+  GUIRawVstParam __registerRawVstParam(ParamID iParamID, Listener iListener);
+
+  // __registerVstParam
+  template<typename T, typename Listener>
+  GUIVstParam<T> __registerVstParam(ParamID iParamID, Listener iListener);
+
+  // __registerVstParam
+  template<typename T, typename Listener>
+  GUIVstParam<T> __registerVstParam(VstParam<T> iParamDef, Listener iListener);
+
+  // __registerJmbParam
+  template<typename T, typename Listener>
+  GUIJmbParam<T> __registerJmbParam(ParamID iParamID, Listener iListener);
 
 private:
   // the gui state
@@ -121,15 +204,56 @@ private:
   std::map<ParamID, std::unique_ptr<GUIParamCx>> fParamCxs;
 };
 
+//------------------------------------------------------------------------
+// GUIParamCxMgr::__registerRawVstParameter
+//------------------------------------------------------------------------
+template<typename Listener>
+std::unique_ptr<GUIRawVstParameter> GUIParamCxMgr::__registerRawVstParameter(ParamID iParamID, Listener iListener)
+{
+  auto param = fGUIState->getRawVstParameter(iParamID);
+
+  if(!param)
+  {
+    DLOG_F(WARNING, "vst param [%d] not found", iParamID);
+    return nullptr;
+  }
+
+  if(iListener)
+  {
+    fParamCxs[iParamID] = param->connect(iListener);
+  }
+  else
+  {
+    unregisterParam(iParamID);
+  }
+
+  return param;
+}
 
 //------------------------------------------------------------------------
-// GUIParamCxMgr::registerVstParam
+// GUIParamCxMgr::__registerRawVstParam
 //------------------------------------------------------------------------
-template<typename T>
-GUIVstParam<T> GUIParamCxMgr::registerVstParam(VstParam<T> iParamDef,
-                                               Parameters::IChangeListener *iChangeListener)
+template<typename Listener>
+GUIRawVstParam GUIParamCxMgr::__registerRawVstParam(ParamID iParamID, Listener iListener)
 {
-  auto param = registerRawVstParameter(iParamDef->fParamID, iChangeListener);
+  auto param = __registerRawVstParameter(iParamID, iListener);
+
+  if(!param)
+  {
+    return GUIRawVstParam{};
+  }
+
+  return GUIRawVstParam{std::move(param)};
+}
+
+
+//------------------------------------------------------------------------
+// GUIParamCxMgr::__registerVstParam
+//------------------------------------------------------------------------
+template<typename T, typename Listener>
+GUIVstParam<T> GUIParamCxMgr::__registerVstParam(VstParam<T> iParamDef, Listener iListener)
+{
+  auto param = __registerRawVstParameter(iParamDef->fParamID, iListener);
 
   if(param)
     return GUIVstParam<T>{std::make_unique<GUIVstParameter<T>>(std::move(param), iParamDef)};
@@ -138,13 +262,12 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(VstParam<T> iParamDef,
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxMgr::registerVstParam
+// GUIParamCxMgr::__registerVstParam
 //------------------------------------------------------------------------
-template<typename T>
-GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
-                                               Parameters::IChangeListener *iChangeListener)
+template<typename T, typename Listener>
+GUIVstParam<T> GUIParamCxMgr::__registerVstParam(ParamID iParamID, Listener iListener)
 {
-  auto param = registerRawVstParameter(iParamID, iChangeListener);
+  auto param = fGUIState->getRawVstParameter(iParamID);
 
   if(!param)
   {
@@ -158,8 +281,8 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
 
   if(paramDef)
   {
-    if(iChangeListener)
-      fParamCxs[iParamID] = param->connect(iChangeListener);
+    if(iListener)
+      fParamCxs[iParamID] = param->connect(iListener);
     else
       unregisterParam(iParamID);
 
@@ -172,11 +295,10 @@ GUIVstParam<T> GUIParamCxMgr::registerVstParam(ParamID iParamID,
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxMgr::registerJmbParam
+// GUIParamCxMgr::__registerJmbParam
 //------------------------------------------------------------------------
-template<typename T>
-GUIJmbParam<T> GUIParamCxMgr::registerJmbParam(ParamID iParamID,
-                                               Parameters::IChangeListener *iChangeListener)
+template<typename T, typename Listener>
+GUIJmbParam<T> GUIParamCxMgr::__registerJmbParam(ParamID iParamID, Listener iListener)
 {
   auto param = fGUIState->getJmbParameter(iParamID);
 
@@ -189,8 +311,8 @@ GUIJmbParam<T> GUIParamCxMgr::registerJmbParam(ParamID iParamID,
   auto res = dynamic_cast<GUIJmbParameter<T> *>(param);
   if(res)
   {
-    if(iChangeListener)
-      fParamCxs[iParamID] = std::move(res->connect(iChangeListener));
+    if(iListener)
+      fParamCxs[iParamID] = std::move(res->connect(iListener));
     else
       unregisterParam(iParamID);
   }

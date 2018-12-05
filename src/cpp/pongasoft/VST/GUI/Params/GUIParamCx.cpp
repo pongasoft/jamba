@@ -28,10 +28,27 @@ namespace Params {
 GUIParamCx::GUIParamCx(ParamID iParamID, FObject *iParameter, Parameters::IChangeListener *iChangeListener) :
   fParamID{iParamID},
   fParameter{iParameter},
-  fChangeListener{iChangeListener}
+  fChangeListener{iChangeListener},
+  fChangeCallback{}
 {
   DCHECK_F(fParameter != nullptr);
   DCHECK_F(fChangeListener != nullptr);
+
+  fParameter->addRef();
+  fParameter->addDependent(this);
+  fIsConnected = true;
+}
+
+//------------------------------------------------------------------------
+// GUIParamCx::GUIParamCx
+//------------------------------------------------------------------------
+GUIParamCx::GUIParamCx(ParamID iParamID, FObject *iParameter, Parameters::ChangeCallback iChangeCallback) :
+  fParamID{iParamID},
+  fParameter{iParameter},
+  fChangeListener{},
+  fChangeCallback{std::move(iChangeCallback)}
+{
+  DCHECK_F(fParameter != nullptr);
 
   fParameter->addRef();
   fParameter->addDependent(this);
@@ -58,7 +75,11 @@ void GUIParamCx::update(FUnknown *iChangedUnknown, Steinberg::int32 iMessage)
 {
   if(iMessage == IDependent::kChanged)
   {
-    fChangeListener->onParameterChange(fParamID);
+    if(fChangeListener)
+      fChangeListener->onParameterChange(fParamID);
+
+    if(fChangeCallback)
+      fChangeCallback();
   }
 }
 
