@@ -43,7 +43,8 @@ class GUIController : public EditController, public VSTGUI::VST3EditorDelegate, 
 {
 public:
   // Constructor
-  explicit GUIController(char const *iXmlFileName = "Views.uidesc");
+  explicit GUIController(char const *iXmlFileName = "Views.uidesc",
+                         char const *iMainViewName = "view");
 
   // Destructor
   ~GUIController() override;
@@ -69,6 +70,13 @@ protected:
   /** Create the view */
   IPlugView *PLUGIN_API createView(const char *name) override;
 
+  // didOpen -> track lifecycle of editor (open)
+  void didOpen(VST3Editor *editor) override;
+
+  // willClose -> track lifecycle of editor (close)
+  void willClose(VST3Editor *editor) override;
+
+protected:
   /** Sets the component state (after setting the processor) or after restore */
   tresult PLUGIN_API setComponentState(IBStream *state) override;
 
@@ -89,6 +97,28 @@ protected:
   // registerParameters (if not nullptr)
   void registerParameters(GUIParamCxAware *iGUIParamCxAware);
 
+  /**
+   * This method should be called to display a totally different (root) view.
+   * Example: with xxx.uidesc like this one, you would call switchToView("compact_view");
+   *
+   * <vstgui-ui-description version="1">
+   *   <!-- Main view opened on creation -->
+	 *   <template class="CViewContainer" name="view" ...>
+   *   </template>
+   *   <!-- Secondary view you can switch to -->
+	 *   <template class="CViewContainer" name="compact_view" ...>
+   *   </template>
+   * <vstgui-ui-description
+   *
+   * @return true if switching worked
+   */
+  virtual bool switchToView(char const *iViewName);
+
+  /**
+   * Switch back to the main view
+   */
+  virtual bool switchToMainView() { return switchToView(fMainViewName.c_str()) ; }
+
 public:
   // allocateMessage - API adapter
   IPtr<IMessage> allocateMessage() override;
@@ -106,6 +136,15 @@ protected:
 private:
   // view factory used to give access to GUIState to views
   Views::CustomUIViewFactory *fViewFactory{nullptr};
+
+  // The name of the main view
+  std::string fMainViewName;
+
+  // The name of the current view
+  std::string fCurrentViewName;
+
+  // we keep a reference to the editor to be able to switch views
+  VSTGUI::VST3Editor *fVST3Editor{};
 
 };
 

@@ -29,9 +29,11 @@ using namespace VSTGUI;
 //------------------------------------------------------------------------
 // GUIController::GUIController
 //------------------------------------------------------------------------
-GUIController::GUIController(const char *iXmlFileName) :
+GUIController::GUIController(const char *iXmlFileName, char const *iMainViewName) :
   EditController(),
-  fXmlFileName{iXmlFileName}
+  fXmlFileName{iXmlFileName},
+  fMainViewName{iMainViewName},
+  fCurrentViewName{fMainViewName}
 {
   Views::JambaViews::instance();
 }
@@ -121,9 +123,25 @@ IPlugView *GUIController::createView(const char *name)
   if(name && strcmp(name, ViewType::kEditor) == 0)
   {
     UIDescription *uiDescription = new UIDescription(fXmlFileName, fViewFactory);
-    return new VSTGUI::VST3Editor(uiDescription, this, "view", fXmlFileName);
+    return new VSTGUI::VST3Editor(uiDescription, this, fCurrentViewName.c_str(), fXmlFileName);
   }
   return nullptr;
+}
+
+//------------------------------------------------------------------------
+// GUIController::didOpen
+//------------------------------------------------------------------------
+void GUIController::didOpen(VST3Editor *editor)
+{
+  fVST3Editor = editor;
+}
+
+//------------------------------------------------------------------------
+// GUIController::willClose
+//------------------------------------------------------------------------
+void GUIController::willClose(VST3Editor * /* ignored */)
+{
+  fVST3Editor = nullptr;
 }
 
 //------------------------------------------------------------------------
@@ -205,6 +223,26 @@ IController *GUIController::createSubController(UTF8StringPtr iName,
   return customController;
 }
 
+//------------------------------------------------------------------------
+// GUIController::switchToView
+//------------------------------------------------------------------------
+bool GUIController::switchToView(char const *iViewName)
+{
+
+  std::string newViewName{iViewName};
+
+  if(newViewName != fCurrentViewName && fVST3Editor)
+  {
+
+    #ifdef JAMBA_DEBUG_LOGGING
+    DLOG_F(INFO, "GUIController::switchToView -> %s", iViewName);
+#endif
+
+    fCurrentViewName = newViewName;
+    return fVST3Editor->exchangeView(iViewName);
+  }
+  return false;
+}
 
 }
 }
