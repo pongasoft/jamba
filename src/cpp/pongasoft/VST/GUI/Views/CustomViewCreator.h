@@ -587,6 +587,9 @@ public:
     {
       registerAttribute(attribute.second);
     }
+
+    if(std::string(fBaseViewName) == std::string(VSTGUI::UIViewCreator::kCView))
+      fBaseViewName = iOther.fBaseViewName;
   }
 
   /**

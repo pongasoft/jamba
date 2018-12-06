@@ -101,12 +101,14 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/PluginAccessor.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIController.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/LookAndFeel.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Types.h
     )
 
@@ -133,6 +135,7 @@ set(JAMBA_sources_cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.cpp
 

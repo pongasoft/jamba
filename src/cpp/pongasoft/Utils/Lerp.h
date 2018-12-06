@@ -47,21 +47,22 @@ public:
 
   /**
    * Inspired by the map function in Processing language, another way to look at Lerp is to map a range of values
-   * into another range: [iFromMin, iFromHigh] -> [iToMin, iToHigh]
+   * into another range: [iFromLow, iFromHigh] -> [iToLow, iToHigh]. Note that low can be greater than high: for
+   * example you can map [1, -1] to the range [0, height] (display where 0 is at the top and height is the bottom)
    */
-  static inline Lerp mapRange(T iFromMin, T iFromHigh, T iToMin, T iToHigh)
+  static inline Lerp mapRange(T iFromLow, T iFromHigh, T iToLow, T iToHigh)
   {
-    return Lerp(iFromMin, iToMin, iFromHigh, iToHigh);
+    return Lerp(iFromLow, iToLow, iFromHigh, iToHigh);
   }
 
   /**
    * Inspired by the map function in Processing language, another way to look at Lerp is to map a range of values
-   * into another range: [iFromMin, iFromHigh] -> [iToMin, iToHigh]. This function then return the iValue mapped from
+   * into another range: [iFromLow, iFromHigh] -> [iToLow, iToHigh]. This function then return the iValue mapped from
    * the first range into the second range.
    */
-  static inline T mapValue(T iValue, T iFromMin, T iFromHigh, T iToMin, T iToHigh)
+  static inline T mapValue(T iValue, T iFromLow, T iFromHigh, T iToLow, T iToHigh)
   {
-    return Lerp(iFromMin, iToMin, iFromHigh, iToHigh).computeY(iValue);
+    return Lerp(iFromLow, iToLow, iFromHigh, iToHigh).computeY(iValue);
   }
 
 private:
