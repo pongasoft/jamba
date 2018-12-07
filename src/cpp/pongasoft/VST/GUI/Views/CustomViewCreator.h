@@ -97,6 +97,13 @@ public:
 };
 
 /**
+ * Factory method which creates the actual view. Can be specialized for specific cases
+ * @return the new view
+ */
+template<typename TView>
+inline TView *createCustomView(CRect const &iSize) { return new TView(iSize); }
+
+/**
  * Generic custom view creator base class. Inherit from it and call the various "registerXX" methods in the constructor.
  *
  * In case of inheritance, you do the following:
@@ -672,7 +679,7 @@ public:
     DLOG_F(INFO, "CustomViewCreator<%s>::create()", getViewName());
 #endif
 
-    auto tv = new TView(CRect(0, 0, 0, 0));
+    auto tv = createCustomView<TView>(CRect(0, 0, 0, 0));
 
     auto *cvi = dynamic_cast<CustomViewInitializer *>(tv);
     if(cvi != nullptr)

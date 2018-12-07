@@ -29,14 +29,22 @@ using namespace VSTGUI;
 using namespace Params;
 
 /**
+ * The purpose of this class is to adapt the constructor signature to a single element, required in the framework */
+class TextEdit : public CTextEdit
+{
+public:
+  explicit TextEdit(const CRect &iSize) : CTextEdit(iSize, nullptr, -1) {};
+};
+
+/**
  * Extends the CTextEdit view to tie it to a GUIJmbParam<UTF8String> => multiple views tied to the same paramID (aka Tag)
  * are all synchronized and the text edit value will be saved and restored with the state.
  */
-class TextEditView : public CustomViewAdapter<CTextEdit>
+class TextEditView : public CustomViewAdapter<TextEdit>
 {
 public:
   // Constructor
-  explicit TextEditView(const CRect &iSize) : CustomViewAdapter(iSize, nullptr, -1)
+  explicit TextEditView(const CRect &iSize) : CustomViewAdapter(iSize)
   {}
 
   // setTag => overridden to be able to change the param (in the editor)
@@ -51,18 +59,18 @@ public:
   // onParameterChange
   void onParameterChange(ParamID iParamID) override;
 
-  CLASS_METHODS_NOCOPY(StringTextEditView, CustomViewAdapter<CTextEdit>)
+  CLASS_METHODS_NOCOPY(TextEditView, CustomViewAdapter<TextEdit>)
 
 protected:
   // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fText{};
 
 public:
-  class Creator : public TCustomViewCreator<TextEditView>
+  class Creator : public CustomViewCreator<TextEditView, CustomViewAdapter<TextEdit>>
   {
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
-      TCustomViewCreator(iViewName, iDisplayName, VSTGUI::UIViewCreator::kCTextEdit)
+      CustomViewCreator(iViewName, iDisplayName, VSTGUI::UIViewCreator::kCTextEdit)
     {
     }
   };

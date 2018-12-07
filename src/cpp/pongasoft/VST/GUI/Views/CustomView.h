@@ -254,10 +254,14 @@ class CustomViewAdapter : public TView, public GUIParamCxAware, public CustomVie
 public:
   // Constructor
   template<typename... Args>
-  explicit CustomViewAdapter(const CRect &iSize, Args... args) : TView(iSize, args...) {}
+  explicit CustomViewAdapter(const CRect &iSize, Args... args) : TView(iSize, args...), fTag{-1} {}
 
   // markDirty
   inline void markDirty() { TView::setDirty(true); }
+
+  // setCustomViewTag / getCustomViewTag
+  void setCustomViewTag (int32_t iTag) { fTag = iTag; }
+  int32_t getCustomViewTag () const { return fTag; }
 
   /**
    * Callback when a parameter changes. By default simply marks the view as dirty.
@@ -271,6 +275,20 @@ public:
 
   // afterApply
   void afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
+
+protected:
+  int32_t fTag;
+
+public:
+  class Creator : public TCustomViewCreator<CustomViewAdapter>
+  {
+  public:
+    explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
+      TCustomViewCreator<CustomViewAdapter>(iViewName, iDisplayName)
+    {
+      TCustomViewCreator<CustomViewAdapter>::registerTagAttribute("custom-view-tag", &CustomViewAdapter::getCustomViewTag, &CustomViewAdapter::setCustomViewTag);
+    }
+  };
 };
 
 /**

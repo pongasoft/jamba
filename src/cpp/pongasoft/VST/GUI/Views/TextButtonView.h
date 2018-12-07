@@ -30,7 +30,7 @@ using namespace Params;
 
 /**
  * Extends the CTextButton view to:
- * - have a (potentially) dynamic title tied to a parameter (fText)
+ * - have a (potentially) dynamic title tied to a parameter (fTitle via fTitleTag)
  * - handle click conveniently (either inherit from this class and implement onClick, or provide an onClick listener)
  */
 class TextButtonView : public CustomViewAdapter<CTextButton>
@@ -39,11 +39,11 @@ public:
   using OnClickListener = std::function<void()>;
 
   // Constructor
-  explicit TextButtonView(const CRect &iSize) : CustomViewAdapter(iSize)
-  {}
+  explicit TextButtonView(const CRect &iSize) : CustomViewAdapter(iSize) {}
 
-  // setTag => overridden to be able to change the param (in the editor)
-  void setTag(int32_t val) override;
+  // get/set titleTag to (optionally) tie the title of this text button to a (Jmb) parameter
+  void setTitleTag(int32_t iValue);
+  int32_t getTitleTag() const { return fTitleTag; };
 
   // registerParameters
   void registerParameters() override;
@@ -60,6 +60,9 @@ public:
   CLASS_METHODS_NOCOPY(TextButtonView, CustomViewAdapter<CTextButton>)
 
 protected:
+  // (optionally) tie the title of this text button to a (Jmb) parameter
+  int32_t fTitleTag{-1};
+
   // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fTitle{};
 
@@ -67,12 +70,13 @@ protected:
   OnClickListener fOnClickListener{};
 
 public:
-  class Creator : public TCustomViewCreator<TextButtonView>
+  class Creator : public CustomViewCreator<TextButtonView, CustomViewAdapter<CTextButton>>
   {
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
-      TCustomViewCreator(iViewName, iDisplayName, VSTGUI::UIViewCreator::kCTextButton)
+      CustomViewCreator(iViewName, iDisplayName, VSTGUI::UIViewCreator::kCTextButton)
     {
+      registerTagAttribute("title-tag", &TextButtonView::getTitleTag, &TextButtonView::setTitleTag);
     }
   };
 };

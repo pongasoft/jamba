@@ -30,13 +30,13 @@ using namespace VSTGUI;
 //------------------------------------------------------------------------
 void TextButtonView::registerParameters()
 {
-  if(!fParamCxMgr || getTag() < 0)
+  if(!fParamCxMgr || getTitleTag() < 0)
     return;
 
   if(fTitle.exists())
     unregisterParam(fTitle.getParamID());
 
-  auto paramID = static_cast<ParamID>(getTag());
+  auto paramID = static_cast<ParamID>(getTitleTag());
 
   fTitle = registerJmbParam<UTF8String>(paramID, [this] {
     setTitle(fTitle);
@@ -49,11 +49,11 @@ void TextButtonView::registerParameters()
 }
 
 //------------------------------------------------------------------------
-// TextButtonView::setTag
+// TextButtonView::setTitleTag
 //------------------------------------------------------------------------
-void TextButtonView::setTag(int32_t val)
+void TextButtonView::setTitleTag(int32_t iValue)
 {
-  CTextButton::setTag(val);
+  fTitleTag = iValue;
   registerParameters();
 }
 
