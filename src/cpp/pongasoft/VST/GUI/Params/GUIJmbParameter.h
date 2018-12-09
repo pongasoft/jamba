@@ -120,6 +120,21 @@ public:
   }
 
   /**
+   * Use this flavor of update if you want to modify the value itself. ValueModifier will be called
+   * back with &fValue. The callback should return true when the value was updated, false otherwise
+   */
+  template<class ValueModifier>
+  bool updateIf(ValueModifier const &iValueModifier)
+  {
+    if(iValueModifier(&fValue))
+    {
+      changed();
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
    * not comparable)
    */
@@ -232,6 +247,13 @@ public:
   inline bool update(T const &iNewValue) { return fPtr->update(iNewValue); }
 
   /**
+   * Use this flavor of update if you want to modify the value itself. ValueModifier will be called
+   * back with &fValue. The callback should return true when the value was updated, false otherwise
+   */
+  template<class ValueModifier>
+  inline bool updateIf(ValueModifier const &iValueModifier) { return fPtr->updateIf(iValueModifier); }
+
+  /**
    * The difference with update is that it does not check for equality (case when T is not comparable)
    */
   inline void setValue(T const &iNewValue) { fPtr->setValue(iNewValue); }
@@ -243,9 +265,6 @@ public:
 
   // getValue
   inline T const &getValue() const { return fPtr->getValue(); }
-
-  // getValue
-  inline T &getValue() { return fPtr->getValue(); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
   inline operator T const &() const { return fPtr->getValue(); } // NOLINT
