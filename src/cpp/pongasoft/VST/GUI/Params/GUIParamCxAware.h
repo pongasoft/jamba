@@ -35,6 +35,23 @@ public:
    */
   GUIRawVstParam registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
+  /**
+   * Registers a raw parameter (no conversion)
+   */
+  GUIRawVstParam registerRawVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback);
+
+  /**
+   * Convenient method to register a parameter which is backed by a value when the parameter does not exist.
+   *
+   * IMPORTANT: this api should be considered internal as this is not the right concept... It will be removed!
+   *
+   * @param iParamID -1 when there is no parameter to use
+   * @param oControlValue the reference to the value
+   * @param oGUIRawVstParam the reference to the backed parameter
+   * @return true if a new parameter was registered, false otherwise
+   */
+  bool __internal__registerRawVstControl(int32_t iParamID, ParamValue &oControlValue, GUIRawVstParam &oGUIRawVstParam);
+
   // shortcut for BooleanParameter
   GUIVstParam<bool> registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
@@ -43,7 +60,7 @@ public:
 
   /**
    * Register a vst parameter simply given its id
-   * @return nullptr if not found or not proper type
+   * @return empty param  if not found or not proper type
    */
   template<typename T>
   GUIVstParam<T> registerVstParam(ParamID iParamID, bool iSubscribeToChanges = true)
@@ -55,9 +72,9 @@ public:
   }
 
   /**
- * Register a vst parameter simply given its id
- * @return nullptr if not found or not proper type
- */
+   * Register a vst parameter simply given its id
+   * @return empty param if not found or not proper type
+   */
   template<typename T>
   GUIVstParam<T> registerVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
   {
@@ -68,8 +85,21 @@ public:
   }
 
   /**
+   * Convenient method to register a parameter which is backed by a value when the parameter does not exist.
+   *
+   * IMPORTANT: this api should be considered internal as this is not the right concept... It will be removed!
+   *
+   * @param iParamID -1 when there is no parameter to use
+   * @param oControlValue the reference to the value
+   * @param oGUIVstParam the reference to the backed parameter
+   * @return true if a new parameter was registered, false otherwise
+   */
+  template<typename T>
+  bool __internal__registerVstControl(int32_t iParamID, T &oControlValue, GUIVstParam<T> &oGUIVstParam);
+
+  /**
    * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
-   * @return nullptr if not found or not proper type
+   * @return empty param  if not found or not proper type
    */
   template<typename T>
   GUIVstParam<T> registerVstParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges = true)
@@ -81,9 +111,9 @@ public:
   }
 
   /**
- * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
- * @return nullptr if not found or not proper type
- */
+   * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
+   * @return empty param  if not found or not proper type
+   */
   template<typename T>
   GUIVstParam<T> registerVstParam(VstParam<T> const &iParamDef, Parameters::ChangeCallback iChangeCallback)
   {
@@ -226,6 +256,34 @@ protected:
   std::unique_ptr<GUIParamCxMgr> fParamCxMgr;
 };
 
+//------------------------------------------------------------------------
+// GUIParamCxAware::__internal__registerVstControl
+//------------------------------------------------------------------------
+template<typename T>
+bool GUIParamCxAware::__internal__registerVstControl(int32_t iParamID, T &oControlValue, GUIVstParam<T> &oGUIVstParam)
+{
+  if(!fParamCxMgr)
+    return false; // not set yet
+
+  if(iParamID < 0)
+  {
+    if(oGUIVstParam.exists())
+    {
+      oControlValue = oGUIVstParam.getValue();
+      oGUIVstParam = unregisterParam(oGUIVstParam);
+    }
+  }
+  else
+  {
+    if(!oGUIVstParam.exists() || oGUIVstParam.getParamID() != iParamID)
+    {
+      oGUIVstParam = registerVstParam<T>(static_cast<ParamID>(iParamID));
+      return true;
+    }
+  }
+
+  return false;
+}
 
 }
 }

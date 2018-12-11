@@ -103,6 +103,8 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/PluginAccessor.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ScrollbarView.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ScrollbarView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.h

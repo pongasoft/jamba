@@ -34,6 +34,47 @@ GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubs
 }
 
 //------------------------------------------------------------------------
+// GUIParamCxAware::__internal__registerRawVstControl
+//------------------------------------------------------------------------
+bool GUIParamCxAware::__internal__registerRawVstControl(int32_t iParamID,
+                                                        ParamValue &oControlValue,
+                                                        GUIRawVstParam &oGUIRawVstParam)
+{
+  if(!fParamCxMgr)
+    return false; // not set yet
+
+  if(iParamID < 0)
+  {
+    if(oGUIRawVstParam.exists())
+    {
+      oControlValue = oGUIRawVstParam.getValue();
+      oGUIRawVstParam = unregisterParam(oGUIRawVstParam);
+    }
+  }
+  else
+  {
+    if(!oGUIRawVstParam.exists() || oGUIRawVstParam.getParamID() != iParamID)
+    {
+      oGUIRawVstParam = registerRawVstParam(static_cast<ParamID>(iParamID));
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerRawVstParam
+//------------------------------------------------------------------------
+GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+{
+  if(!fParamCxMgr)
+    return GUIRawVstParam{};
+
+  return fParamCxMgr->registerRawVstParam(iParamID, std::move(iChangeCallback));
+}
+
+//------------------------------------------------------------------------
 // GUIParamCxAware::registerVstBooleanParam
 //------------------------------------------------------------------------
 GUIVstParam<bool> GUIParamCxAware::registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges)

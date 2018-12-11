@@ -137,17 +137,7 @@ void TCustomControlView<T>::registerParameters()
 {
   CustomControlView::registerParameters();
 
-  if(!fParamCxMgr || getControlTag() < 0)
-    return; // not set yet
-
-  if(fControlParameter.exists())
-  {
-    fControlValue = fControlParameter.getValue();
-    fControlParameter = unregisterParam(fControlParameter);
-  }
-
-  auto paramID = static_cast<ParamID>(getControlTag());
-  fControlParameter = registerVstParam<T>(paramID);
+  __internal__registerVstControl(getControlTag(), fControlValue, fControlParameter);
 }
 
 //------------------------------------------------------------------------

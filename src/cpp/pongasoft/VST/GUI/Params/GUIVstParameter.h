@@ -229,7 +229,7 @@ public:
   GUIVstParam(GUIVstParam<T> &&iPtr) noexcept : fPtr{std::move(iPtr.fPtr)} {}
 
   // move assignment constructor
-  GUIVstParam<T> &operator=(GUIVstParam<T> &&iPtr) { fPtr = std::move(iPtr.fPtr); return *this; }
+  GUIVstParam<T> &operator=(GUIVstParam<T> &&iPtr) noexcept { fPtr = std::move(iPtr.fPtr); return *this; }
 
   // exists
   inline bool exists() const { return (bool) fPtr; }

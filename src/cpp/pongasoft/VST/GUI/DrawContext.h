@@ -50,36 +50,37 @@ using AbsoluteRect = CRect;
 class RelativeView
 {
 public:
-  explicit RelativeView(CView const *iView) : fView{iView}
+  explicit RelativeView(CView const *iView) : fRect{iView->getViewSize()}
   {
-    auto viewSize = fView->getViewSize();
-    fOriginX = viewSize.left;
-    fOriginY = viewSize.top;
+  }
+
+  explicit RelativeView(AbsoluteRect const &iRect) : fRect{iRect}
+  {
   }
 
   inline RelativeRect getViewSize() const
   {
-    return RelativeRect(0, 0, fView->getWidth(), fView->getHeight());
+    return RelativeRect(0, 0, fRect.getWidth(), fRect.getHeight());
   }
 
   inline AbsoluteCoord toAbsoluteX(RelativeCoord x) const
   {
-    return x + fOriginX;
+    return x + fRect.left;
   }
 
   inline AbsoluteCoord toAbsoluteY(RelativeCoord y) const
   {
-    return y + fOriginY;
+    return y + fRect.top;
   }
 
   inline RelativeCoord fromAbsoluteX(AbsoluteCoord x) const
   {
-    return x - fOriginX;
+    return x - fRect.left;
   }
 
   inline RelativeCoord fromAbsoluteY(AbsoluteCoord y) const
   {
-    return y - fOriginY;
+    return y - fRect.top;
   }
 
   inline AbsolutePoint toAbsolutePoint(RelativePoint const &iPoint) const
@@ -94,7 +95,7 @@ public:
 
   inline AbsolutePoint toAbsolutePoint(RelativeCoord x, RelativeCoord y) const
   {
-    return CPoint{x + fOriginX, y + fOriginY};
+    return CPoint{x + fRect.left, y + fRect.top};
   }
 
   inline AbsoluteRect toAbsoluteRect(RelativeRect const &iRect) const
@@ -103,9 +104,7 @@ public:
   }
 
 protected:
-  CView const *fView;
-  CCoord fOriginX;
-  CCoord fOriginY;
+  AbsoluteRect const &fRect;
 };
 
 /**
@@ -153,6 +152,35 @@ public:
     fDrawContext->drawRect(toAbsoluteRect(iRect), kDrawFilledAndStroked);
   }
 
+  void drawEllipse(RelativeCoord x1, RelativeCoord y1, RelativeCoord x2, RelativeCoord y2, CColor const &iStrokeColor)
+  {
+    drawEllipse(RelativeRect{x1, y1, x2, y2}, iStrokeColor);
+  }
+
+  void drawEllipse(RelativeRect const &iRect, CColor const &iStrokeColor)
+  {
+    fDrawContext->setFrameColor(iStrokeColor);
+    fDrawContext->drawEllipse(toAbsoluteRect(iRect), kDrawStroked);
+  }
+
+  void fillEllipse(RelativeCoord x1, RelativeCoord y1, RelativeCoord x2, RelativeCoord y2, CColor const &iColor)
+  {
+    fillEllipse(RelativeRect{x1, y1, x2, y2}, iColor);
+  }
+
+  void fillEllipse(RelativeRect const &iRect, CColor const &iColor)
+  {
+    fDrawContext->setFillColor(iColor);
+    fDrawContext->drawEllipse(toAbsoluteRect(iRect), kDrawFilled);
+  }
+
+  void fillAndStrokeEllipse(RelativeRect const &iRect, CColor const &iFillColor, CColor const &iStrokeColor)
+  {
+    fDrawContext->setFillColor(iFillColor);
+    fDrawContext->setFrameColor(iStrokeColor);
+    fDrawContext->drawEllipse(toAbsoluteRect(iRect), kDrawFilledAndStroked);
+  }
+
   void drawString(UTF8String const &iText, RelativeCoord x, RelativeCoord y, RelativeCoord iHeight, StringDrawContext &iSdc)
   {
     CRect size{x, y, fDrawContext->getStringWidth(iText.getPlatformString()), iHeight};
@@ -169,6 +197,38 @@ public:
 protected:
   CDrawContext *fDrawContext;
 };
+
+namespace crect {
+
+// offsetTop
+inline CRect offsetTop(CRect const &iRect, CCoord iTop) {
+  CRect res = iRect;
+  res.top += iTop;
+  return res;
+}
+
+// offsetRight
+inline CRect offsetRight(CRect const &iRect, CCoord iRight) {
+  CRect res = iRect;
+  res.right += iRight;
+  return res;
+}
+
+// offsetLeft
+inline CRect offsetLeft(CRect const &iRect, CCoord iLeft) {
+  CRect res = iRect;
+  res.left += iLeft;
+  return res;
+}
+
+// offsetBottom
+inline CRect offsetBottom(CRect const &iRect, CCoord iBottom) {
+  CRect res = iRect;
+  res.bottom += iBottom;
+  return res;
+}
+
+}
 
 }
 }

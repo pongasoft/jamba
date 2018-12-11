@@ -21,6 +21,7 @@
 #include "MomentaryButtonView.h"
 #include "TextEditView.h"
 #include "TextButtonView.h"
+#include "ScrollbarView.h"
 
 namespace pongasoft {
 namespace VST {
@@ -39,6 +40,7 @@ struct JambaViews : public FObject
   const MomentaryButtonView::Creator fMomentaryButtonCreator{"jamba::MomentaryButton", "Jamba - Momentary Button (on when pressed)"};
   const TextEditView::Creator fTextEditCreator{"jamba::TextEdit", "Jamba - Text Edit (user input string)"};
   const TextButtonView::Creator fTextButtonCreator{"jamba::TextButton", "Jamba - Text Button"};
+  const ScrollbarView::Creator fScrollbarView{"jamba::Scrollbar", "Jamba - Scrollbar"};
 };
 
 }

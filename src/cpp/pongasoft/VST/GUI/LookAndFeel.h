@@ -18,6 +18,7 @@
 #pragma once
 
 #include <vstgui4/vstgui/lib/vstguibase.h>
+#include <vstgui4/vstgui/lib/crect.h>
 
 namespace pongasoft {
 namespace VST {
@@ -41,6 +42,19 @@ struct Margin
   Margin(CCoord iTop, CCoord iRight, CCoord iBottom, CCoord iLeft) noexcept :
     fTop{iTop}, fRight{iRight}, fBottom{iBottom}, fLeft{iLeft} {}
 
+  /**
+   * Apply this margin to the provided rect. Return a new rectangle with adjusted left/top/right/bottom locations.
+   */
+  CRect apply(CRect const &iRect) const {
+    CRect res(iRect);
+    res.top += fTop;
+    res.left += fLeft;
+    res.right -= fRight;
+    res.bottom -= fBottom;
+    return res;
+  }
+
+public:
   CCoord fTop{};
   CCoord fRight{};
   CCoord fBottom{};

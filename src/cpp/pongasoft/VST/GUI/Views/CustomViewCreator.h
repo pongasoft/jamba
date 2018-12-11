@@ -29,6 +29,7 @@
 #include <memory>
 #include <pongasoft/logging/logging.h>
 #include <pongasoft/VST/GUI/Types.h>
+#include <pongasoft/VST/GUI/LookAndFeel.h>
 
 #if VSTGUI_LIVE_EDITING
 #define EDITOR_MODE 1
@@ -267,6 +268,74 @@ private:
       if(tv != nullptr)
       {
         TInt value = (tv->*fGetter)();
+        std::stringstream str;
+        str << value;
+        oStringValue = str.str();
+        return true;
+      }
+      return false;
+    }
+
+  private:
+    Getter fGetter;
+    Setter fSetter;
+  };
+
+  /**
+   * Specialization for an float attribute (which can be a double or a float, etc..).
+   * The view must have getter and setter as defined by the types below.
+   */
+  template<typename TFloat>
+  class FloatAttribute : public ViewAttribute
+  {
+  public:
+    using Getter = TFloat (TView::*)() const;
+    using Setter = void (TView::*)(TFloat);
+
+    FloatAttribute(std::string const &iName,
+                   Getter iGetter,
+                   Setter iSetter) :
+      ViewAttribute(iName),
+      fGetter{iGetter},
+      fSetter{iSetter}
+    {
+    }
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kFloatType;
+    }
+
+    // apply => set the tag value
+    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
+    {
+      auto *tv = dynamic_cast<TView *>(iView);
+      if(tv != nullptr)
+      {
+        auto floatAttr = iAttributes.getAttributeValue(getName());
+        if(floatAttr)
+        {
+          char *endPtr = nullptr;
+          auto value = static_cast<TFloat>(strtod(floatAttr->c_str(), &endPtr));
+          if(endPtr == floatAttr->c_str())
+          {
+            DLOG_F(WARNING, "could not convert <%s> to a float", floatAttr->c_str());
+            return false;
+          }
+          (tv->*fSetter)(value);
+        }
+      }
+      return false;
+    }
+
+    // getAttributeValue => get the float value
+    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
+    {
+      auto *tv = dynamic_cast<TView *>(iView);
+      if(tv != nullptr)
+      {
+        TFloat value = (tv->*fGetter)();
         std::stringstream str;
         str << value;
         oStringValue = str.str();
@@ -543,6 +612,76 @@ private:
     Setter fSetter;
   };
 
+  /**
+   * Specialization for the margin attribute. The view must have getter and setter as defined by the
+   * types below.
+   */
+  class MarginAttribute : public ViewAttribute
+  {
+  public:
+    using Getter = const Margin &(TView::*)() const;
+    using Setter = void (TView::*)(Margin const &);
+
+    MarginAttribute(std::string const &iName,
+                    Getter iGetter,
+                    Setter iSetter) :
+      ViewAttribute(iName),
+      fGetter{iGetter},
+      fSetter{iSetter}
+    {
+    }
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kRectType;
+    }
+
+    // apply => set a color to the view
+    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
+    {
+      auto *tv = dynamic_cast<TView *>(iView);
+      if(tv != nullptr)
+      {
+        CRect rect;
+        if (iAttributes.getRectAttribute(getName(), rect))
+        {
+          // note how the order between rect and margin is different!
+          Margin m{rect.left, rect.top, rect.right, rect.bottom};
+          (tv->*fSetter)(m);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // getAttributeValue => get a color from the view
+    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
+    {
+      auto *tv = dynamic_cast<TView *>(iView);
+      if(tv != nullptr)
+      {
+        auto margin = (tv->*fGetter)();
+
+        std::stringstream str;
+        str << margin.fTop;
+        str << ",";
+        str << margin.fRight;
+        str << ",";
+        str << margin.fBottom;
+        str << ",";
+        str << margin.fLeft;
+        oStringValue = str.str();
+        return true;
+      }
+      return false;
+    }
+
+  private:
+    Getter fGetter;
+    Setter fSetter;
+  };
+
 public:
   // Constructor
   explicit TCustomViewCreator(char const *iViewName = nullptr,
@@ -630,6 +769,16 @@ public:
   }
 
   /**
+   * Registers a margin attribute with the given name and getter/setter
+   */
+  void registerMarginAttribute(std::string const &iName,
+                               typename MarginAttribute::Getter iGetter,
+                               typename MarginAttribute::Setter iSetter)
+  {
+    registerAttribute<MarginAttribute>(iName, iGetter, iSetter);
+  }
+
+  /**
    * Registers a tag attribute with the given name and getter/setter
    */
   void registerTagAttribute(std::string const &iName,
@@ -658,6 +807,26 @@ public:
                             typename IntegerAttribute<int32_t>::Setter iSetter)
   {
     registerIntegerAttribute<int32_t>(iName, iGetter, iSetter);
+  }
+
+  /**
+   * Registers a float attribute with the given name and getter/setter
+   */
+  void registerFloatAttribute(std::string const &iName,
+                              typename FloatAttribute<float>::Getter iGetter,
+                              typename FloatAttribute<float>::Setter iSetter)
+  {
+    registerAttribute<FloatAttribute<float>>(iName, iGetter, iSetter);
+  }
+
+  /**
+   * Registers a double attribute with the given name and getter/setter
+   */
+  void registerDoubleAttribute(std::string const &iName,
+                               typename FloatAttribute<double>::Getter iGetter,
+                               typename FloatAttribute<double>::Setter iSetter)
+  {
+    registerAttribute<FloatAttribute<double>>(iName, iGetter, iSetter);
   }
 
   /**

@@ -17,6 +17,8 @@
  */
 #pragma once
 
+#include "Misc.h"
+
 namespace pongasoft {
 namespace Utils {
 /**
@@ -59,9 +61,35 @@ public:
    * Inspired by the map function in Processing language, another way to look at Lerp is to map a range of values
    * into another range: [iFromLow, iFromHigh] -> [iToLow, iToHigh]. This function then return the iValue mapped from
    * the first range into the second range.
+   *
+   * @param iValue will be constrained to the range [min(iFromLow, iFromHigh), max(iFromLow, iFromHigh)]
    */
   static inline T mapValue(T iValue, T iFromLow, T iFromHigh, T iToLow, T iToHigh)
   {
+    // if the first range is empty, returns iToLow (otherwise computation would be dividing by 0)
+    if(iFromLow == iFromHigh)
+      return iToLow;
+
+    if(iFromLow < iFromHigh)
+      iValue = clamp(iValue, iFromLow, iFromHigh);
+    else
+      iValue = clamp(iValue, iFromHigh, iFromLow);
+
+    return Lerp(iFromLow, iToLow, iFromHigh, iToHigh).computeY(iValue);
+  }
+
+  /**
+   * This is the eXtended version of mapValue which allow iValue to be outside the range. Example:
+   * mapValue(5, 10, 20, 100, 200) returns 100
+   * mapValueX(5, 10, 20, 100, 200) returns 50
+   * @see mapValue
+   */
+  static inline T mapValueX(T iValue, T iFromLow, T iFromHigh, T iToLow, T iToHigh)
+  {
+    // if the first range is empty, returns iToLow (otherwise computation would be dividing by 0)
+    if(iFromLow == iFromHigh)
+      return iToLow;
+
     return Lerp(iFromLow, iToLow, iFromHigh, iToHigh).computeY(iValue);
   }
 

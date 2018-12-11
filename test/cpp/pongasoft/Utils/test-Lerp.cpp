@@ -34,7 +34,15 @@ TEST(Lerp, mapValue)
   ASSERT_EQ(150, Lerp<double>::mapValue(15, 10, 20, 100, 200));
   ASSERT_EQ(200, Lerp<double>::mapValue(20, 10, 20, 100, 200));
 
+  // testing outside the range
+  ASSERT_EQ(100, Lerp<double>::mapValue(5, 10, 20, 100, 200));
+  ASSERT_EQ(50, Lerp<double>::mapValueX(5, 10, 20, 100, 200));
+  ASSERT_EQ(200, Lerp<double>::mapValue(25, 10, 20, 100, 200));
+  ASSERT_EQ(250, Lerp<double>::mapValueX(25, 10, 20, 100, 200));
+
+
   ASSERT_EQ(150, Lerp<double>::mapRange(10, 20, 100, 200).computeY(15));
+
 }
 
 }
