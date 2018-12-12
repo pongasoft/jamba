@@ -41,6 +41,20 @@ public:
   GUIRawVstParam registerRawVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback);
 
   /**
+   * Registers a raw parameter (no conversion)
+   */
+  GUIRawVstParam registerRawVstParam(RawVstParam const &iParamDef, bool iSubscribeToChanges = true) {
+    return registerRawVstParam(iParamDef->fParamID, iSubscribeToChanges);
+  }
+
+  /**
+   * Registers a raw parameter (no conversion)
+   */
+  GUIRawVstParam registerRawVstParam(RawVstParam const &iParamDef, Parameters::ChangeCallback iChangeCallback) {
+    return registerRawVstParam(iParamDef->fParamID, std::move(iChangeCallback));
+  }
+
+  /**
    * Convenient method to register a parameter which is backed by a value when the parameter does not exist.
    *
    * IMPORTANT: this api should be considered internal as this is not the right concept... It will be removed!

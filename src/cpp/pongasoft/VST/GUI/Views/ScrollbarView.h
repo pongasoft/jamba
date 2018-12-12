@@ -81,6 +81,14 @@ public:
   CCoord getZoomHandlesSize() const { return fZoomHandlesSize; }
   void setZoomHandlesSize(CCoord iSize) { fZoomHandlesSize = iSize; needsRecomputing(); }
 
+  // how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging
+  double getShiftDragFactor() const { return fShiftDragFactor; }
+  void setShiftDragFactor(double iShiftDragFactor) { fShiftDragFactor = iShiftDragFactor; }
+
+  // whether to allow double clicking for zoom
+  bool getEnableZoomDoubleClick() const { return fEnableZoomDoubleClick; }
+  void setEnableZoomDoubleClick(bool iEnableZoomDoubleClick) { fEnableZoomDoubleClick = iEnableZoomDoubleClick; }
+
   // offsetPercent accessor
   double getOffsetPercent() const;
   void setOffsetPercent(double iOffsetPercent);
@@ -179,13 +187,23 @@ protected:
     }
 
     // move the box to a specific location
-    void moveTo(RelativeCoord iNewCenter)
+    void moveTo(RelativeCoord const &iNewCenter)
     {
       fCenter = Utils::clamp(iNewCenter, fMinCenter, fMaxCenter);
     }
 
-    // strecth the box by iDeltaX (applied to the left or right)
-    void stretch(CCoord iDeltaX, bool iLeft);
+    /**
+     * stretch the box by iDeltaX (applied to the left or right)
+     *
+     * @return true if the box was stretched, false otherwise
+     */
+    bool stretch(CCoord iDeltaX, bool iLeft);
+
+    // zoom to max and move to specific location
+    void maxZoom(RelativeCoord const &iNewCenter);
+
+    // zoom to minimum (since the box is full, there is no specific location)
+    void minZoom();
   };
 
 protected:
@@ -225,6 +243,10 @@ protected:
   CColor fZoomHandlesColor{kWhiteCColor};
   CCoord fZoomHandlesSize{-1}; // -1 means it will be computed, 0 means no show
 
+  // how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging
+  double fShiftDragFactor{1.0};
+  bool fEnableZoomDoubleClick{true};
+
   // offsetPercent tag/param/value + editor and editor value ("value" is used when no param)
   int32_t fOffsetPercentTag{-1};
   GUIRawVstParam fOffsetPercentParam{};
@@ -258,6 +280,8 @@ public:
       registerDoubleAttribute("scrollbar-gutter-spacing", &ScrollbarView::getScrollbarGutterSpacing, &ScrollbarView::setScrollbarGutterSpacing);
       registerColorAttribute("zoom-handles-color", &ScrollbarView::getZoomHandlesColor, &ScrollbarView::setZoomHandlesColor);
       registerDoubleAttribute("zoom-handles-size", &ScrollbarView::getZoomHandlesSize, &ScrollbarView::setZoomHandlesSize);
+      registerDoubleAttribute("shift-drag-factor", &ScrollbarView::getShiftDragFactor, &ScrollbarView::setShiftDragFactor);
+      registerBooleanAttribute("enable-zoom-double-click", &ScrollbarView::getEnableZoomDoubleClick, &ScrollbarView::setEnableZoomDoubleClick);
     }
   };
 };

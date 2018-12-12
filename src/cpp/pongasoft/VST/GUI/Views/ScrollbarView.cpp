@@ -113,11 +113,11 @@ ScrollbarView::ZoomBox ScrollbarView::computeZoomBox() const
 //------------------------------------------------------------------------
 // ScrollbarView::ZoomBox::stretch
 //------------------------------------------------------------------------
-void ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, bool iLeft)
+bool ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, bool iLeft)
 {
   // nothing to do if no delta
   if(iDeltaX == 0)
-    return;
+    return false;
 
   CCoord newLeft;
   CCoord newRight;
@@ -153,12 +153,44 @@ void ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, bool iLeft)
   }
 
   // we recompute half width fist.
+  auto newHalfWidth = Utils::clamp(newRight - newLeft, fMinWidth, fMaxWidth) / 2.0;
+  if(newHalfWidth == fHalfWidth)
+    return false;
+
   fHalfWidth = Utils::clamp(newRight - newLeft, fMinWidth, fMaxWidth) / 2.0;
 
   // then we can establish the new center
   fMinCenter = fHalfWidth;
   fMaxCenter = fMaxWidth - fHalfWidth;
   fCenter = Utils::clamp((newLeft + newRight) / 2.0, fMinCenter, fMaxCenter);
+
+  return true;
+}
+
+//------------------------------------------------------------------------
+// ScrollbarView::ZoomBox::maxZoom
+//------------------------------------------------------------------------
+void ScrollbarView::ZoomBox::maxZoom(RelativeCoord const &iNewCenter)
+{
+  fHalfWidth = fMinWidth / 2.0;
+
+  // then we can establish the new center
+  fMinCenter = fHalfWidth;
+  fMaxCenter = fMaxWidth - fHalfWidth;
+  fCenter = Utils::clamp(iNewCenter, fMinCenter, fMaxCenter);
+}
+
+//------------------------------------------------------------------------
+// ScrollbarView::ZoomBox::minZoom
+//------------------------------------------------------------------------
+void ScrollbarView::ZoomBox::minZoom()
+{
+  fHalfWidth = fMaxWidth / 2.0;
+
+  // then we can establish the new center
+  fMinCenter = fHalfWidth;
+  fMaxCenter = fHalfWidth;
+  fCenter = fHalfWidth;
 }
 
 //------------------------------------------------------------------------
@@ -347,9 +379,18 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
 
   auto box = computeZoomBox();
 
-  // when the box is completely full we can't really act on it...
   if(box.isFull())
+  {
+    // when enabled, double clicking on the scrollbar when full will make it zoom in to maximum
+    if(getEnableZoomDoubleClick() && buttons.isDoubleClick())
+    {
+      box.maxZoom(x);
+      setOffsetPercent(box.computeOffsetPercent());
+      setZoomPercent(box.computeZoomPercent());
+    }
+    // when the box is completely full we can't really act on it...
     return kMouseEventHandled;
+  }
 
   if(x < box.getLeft())
   {
@@ -365,6 +406,15 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
     }
     else
     {
+      // when enabled, double clicking on the scrollbar when not full will make it zoom in to minimum (make it full)
+      if(getEnableZoomDoubleClick() && buttons.isDoubleClick())
+      {
+        box.minZoom();
+        setOffsetPercent(box.computeOffsetPercent());
+        setZoomPercent(box.computeZoomPercent());
+        return kMouseEventHandled;
+      }
+
       // the scrollbar itself was clicked => beginning of drag gesture...
       if(fOffsetPercentParam.exists())
         fOffsetPercentEditor = fOffsetPercentParam.edit();
@@ -409,11 +459,18 @@ CMouseEventResult ScrollbarView::onMouseMoved(CPoint &where, const CButtonState 
     RelativeView rv(fMargin.apply(getViewSize()));
     RelativeCoord x = rv.fromAbsolutePoint(where).x;
 
+    auto deltaX = x - fDragGestureX;
+
+    if(buttons.getModifierState() == CButton::kShift)
+      deltaX *= getShiftDragFactor();
+
     auto box = computeZoomBox();
-    box.stretch(x - fDragGestureX, fLeftDragHandle);
+    if(box.stretch(deltaX, fLeftDragHandle))
+    {
+      setOffsetPercent(box.computeOffsetPercent());
+      setZoomPercent(box.computeZoomPercent());
+    }
     fDragGestureX = x;
-    setOffsetPercent(box.computeOffsetPercent());
-    setZoomPercent(box.computeZoomPercent());
 
     return kMouseEventHandled;
   }
@@ -424,8 +481,13 @@ CMouseEventResult ScrollbarView::onMouseMoved(CPoint &where, const CButtonState 
     RelativeView rv(fMargin.apply(getViewSize()));
     RelativeCoord x = rv.fromAbsolutePoint(where).x;
 
+    auto deltaX = x - fDragGestureX;
+
+    if(buttons.getModifierState() == CButton::kShift)
+      deltaX *= getShiftDragFactor();
+
     auto box = computeZoomBox();
-    box.move(x - fDragGestureX);
+    box.move(deltaX);
     fDragGestureX = x;
     setOffsetPercent(box.computeOffsetPercent());
 
