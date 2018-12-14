@@ -110,6 +110,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIController.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIUtils.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/LookAndFeel.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Types.h
     )

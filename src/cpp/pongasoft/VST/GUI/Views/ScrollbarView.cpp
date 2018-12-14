@@ -17,6 +17,7 @@
  */
 
 #include "ScrollbarView.h"
+#include <pongasoft/VST/GUI/GUIUtils.h>
 
 namespace pongasoft {
 namespace VST {
@@ -50,7 +51,7 @@ void ScrollbarView::drawLeftHandle(CDrawContext *iContext)
 {
   iContext->setFillColor(fZoomHandlesColor);
   iContext->drawEllipse(fLeftHandleRect, kDrawFilled);
-  iContext->drawRect(crect::offsetLeft(fLeftHandleRect, fLeftHandleRect.getWidth() / 2.0), kDrawFilled);
+  iContext->drawRect(CRectUtils::offsetLeft(fLeftHandleRect, fLeftHandleRect.getWidth() / 2.0), kDrawFilled);
 }
 
 //------------------------------------------------------------------------
@@ -60,7 +61,7 @@ void ScrollbarView::drawRightHandle(CDrawContext *iContext)
 {
   iContext->setFillColor(fZoomHandlesColor);
   iContext->drawEllipse(fRightHandleRect, kDrawFilled);
-  iContext->drawRect(crect::offsetRight(fRightHandleRect, -fRightHandleRect.getWidth() / 2.0), kDrawFilled);
+  iContext->drawRect(CRectUtils::offsetRight(fRightHandleRect, -fRightHandleRect.getWidth() / 2.0), kDrawFilled);
 }
 
 //------------------------------------------------------------------------

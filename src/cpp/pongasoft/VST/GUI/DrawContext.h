@@ -198,38 +198,6 @@ protected:
   CDrawContext *fDrawContext;
 };
 
-namespace crect {
-
-// offsetTop
-inline CRect offsetTop(CRect const &iRect, CCoord iTop) {
-  CRect res = iRect;
-  res.top += iTop;
-  return res;
-}
-
-// offsetRight
-inline CRect offsetRight(CRect const &iRect, CCoord iRight) {
-  CRect res = iRect;
-  res.right += iRight;
-  return res;
-}
-
-// offsetLeft
-inline CRect offsetLeft(CRect const &iRect, CCoord iLeft) {
-  CRect res = iRect;
-  res.left += iLeft;
-  return res;
-}
-
-// offsetBottom
-inline CRect offsetBottom(CRect const &iRect, CCoord iBottom) {
-  CRect res = iRect;
-  res.bottom += iBottom;
-  return res;
-}
-
-}
-
 }
 }
 }
