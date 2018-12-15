@@ -122,6 +122,8 @@ protected:
   CMouseEventResult onMouseCancel() override;
 
 protected:
+  enum class DragType { kNone, kScroll, kZoomLeft, kZoomRight, kStretchLeft, kStretchRight };
+
   /**
    * Represents the box (dimension and position point of view) containing the zoom handles and scrollbar
    */
@@ -142,10 +144,12 @@ protected:
     // left position
     RelativeCoord getLeft() const { return fCenter - fHalfWidth; }
     RelativeCoord getMinLeft() const { return fMinCenter - fHalfWidth; }
+    bool isMinLeft() const { return fCenter == fMinCenter; }
 
     // right position
     RelativeCoord getRight() const { return fCenter + fHalfWidth; }
     RelativeCoord getMaxRight() const { return fMaxCenter + fHalfWidth; }
+    bool isMaxRight() const { return fCenter == fMaxCenter; }
 
     // height of the box
     CCoord getHeight() const { return fViewSize.getHeight(); }
@@ -197,7 +201,7 @@ protected:
      *
      * @return true if the box was stretched, false otherwise
      */
-    bool stretch(CCoord iDeltaX, bool iLeft);
+    bool stretch(CCoord iDeltaX, DragType iDragType);
 
     // zoom to max and move to specific location
     void maxZoom(RelativeCoord const &iNewCenter);
@@ -252,18 +256,16 @@ protected:
   GUIRawVstParam fOffsetPercentParam{};
   double fOffsetPercentValue{};
   GUIRawVstParamEditor fOffsetPercentEditor{nullptr};
-  double fOffsetPercentValueEditor{-1.0};
 
   // zoomPercent tag/param/value + editor and editor value ("value" is used when no param)
   int32_t fZoomPercentTag{-1};
   GUIRawVstParam fZoomPercentParam{};
   double fZoomPercentValue{};
   GUIRawVstParamEditor fZoomPercentEditor{nullptr};
-  double fZoomPercentValueEditor{-1.0};
 
   // used when dragging
-  bool fLeftDragHandle{};
   RelativeCoord fDragGestureX{-1.0};
+  DragType fDragType{DragType::kNone};
 
 public:
   class Creator : public CustomViewCreator<ScrollbarView, CustomView>

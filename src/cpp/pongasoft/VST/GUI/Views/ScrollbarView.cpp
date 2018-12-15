@@ -114,7 +114,7 @@ ScrollbarView::ZoomBox ScrollbarView::computeZoomBox() const
 //------------------------------------------------------------------------
 // ScrollbarView::ZoomBox::stretch
 //------------------------------------------------------------------------
-bool ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, bool iLeft)
+bool ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, DragType iDragType)
 {
   // nothing to do if no delta
   if(iDeltaX == 0)
@@ -123,34 +123,54 @@ bool ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, bool iLeft)
   CCoord newLeft;
   CCoord newRight;
 
-  // which handle is being moved?
-  if(iLeft)
+  switch(iDragType)
   {
-    // we try to move the left side of the box without touching the ride side (thus stretching the box)
-    newLeft = getLeft() + iDeltaX;
-    newRight = getRight();
+    case DragType::kZoomLeft:
+      // we move the left and right in opposite direction
+      newLeft = getLeft() + iDeltaX / 2.0;
+      newRight = getRight() - iDeltaX / 2.0;
+      break;
 
-    const auto minLeft = getMinLeft();
-    if(newLeft < minLeft)
+    case DragType::kStretchLeft:
     {
-      // we are at the limit, need to stretch the other side
-      newRight += minLeft - newLeft;
-      newLeft = minLeft;
-    }
-  }
-  else
-  {
-    // we try to move the right side of the box without touching the left side (thus stretching the box)
-    newRight = getRight() + iDeltaX;
-    newLeft = getLeft();
+      // we try to move the left side of the box without touching the ride side (thus stretching the box)
+      newLeft = getLeft() + iDeltaX;
+      newRight = getRight();
 
-    const auto maxRight = getMaxRight();
-    if(newRight > maxRight)
-    {
-      // we are at the limit, need to stretch the other side
-      newLeft -= newRight - maxRight;
-      newRight = maxRight;
+      const auto minLeft = getMinLeft();
+      if(newLeft < minLeft)
+      {
+        // we are at the limit, need to stretch the other side
+        newRight += minLeft - newLeft;
+        newLeft = minLeft;
+      }
+      break;
     }
+
+    case DragType::kStretchRight:
+    {
+      // we try to move the right side of the box without touching the left side (thus stretching the box)
+      newRight = getRight() + iDeltaX;
+      newLeft = getLeft();
+
+      const auto maxRight = getMaxRight();
+      if(newRight > maxRight)
+      {
+        // we are at the limit, need to stretch the other side
+        newLeft -= newRight - maxRight;
+        newRight = maxRight;
+      }
+      break;
+    }
+
+    case DragType::kZoomRight:
+      // we move the left and right in opposite direction
+      newRight = getRight() + iDeltaX / 2.0;
+      newLeft = getLeft() - iDeltaX / 2.0;
+      break;
+
+    default:
+      return false;
   }
 
   // we recompute half width fist.
@@ -167,6 +187,7 @@ bool ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, bool iLeft)
 
   return true;
 }
+
 
 //------------------------------------------------------------------------
 // ScrollbarView::ZoomBox::maxZoom
@@ -356,6 +377,8 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
   RelativeView rv(fMargin.apply(getViewSize()));
   RelativeCoord x = rv.fromAbsolutePoint(where).x;
 
+  auto box = computeZoomBox();
+
   // first we handle zoom via handles
   if(showHandles())
   {
@@ -363,22 +386,19 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
     {
       if(fZoomPercentParam.exists())
         fZoomPercentEditor = fZoomPercentParam.edit();
-      else
-        fZoomPercentValueEditor = fZoomPercentValue;
 
       // when the size changes, it can also affect the offset
       if(fOffsetPercentParam.exists())
         fOffsetPercentEditor = fOffsetPercentParam.edit();
-      else
-        fOffsetPercentValueEditor = fOffsetPercentValue;
 
-      fLeftDragHandle = fLeftHandleRect.pointInside(where);
+      if(fLeftHandleRect.pointInside(where))
+        fDragType = box.isMaxRight() ? DragType::kStretchLeft : DragType::kZoomLeft;
+      else
+        fDragType = box.isMinLeft() ? DragType::kStretchRight : DragType::kZoomRight;
       fDragGestureX = x;
       return kMouseEventHandled;
     }
   }
-
-  auto box = computeZoomBox();
 
   if(box.isFull())
   {
@@ -395,56 +415,45 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
 
   if(x < box.getLeft())
   {
-    // clicking on the left of the box => moves the box by its width on the left(like a "page")
-    box.move(-box.getWidth());
-  }
-  else
-  {
-    if(x > box.getRight())
-    {
-      // clicking on the right of the box => moves the box by its width on the right (like a "page")
-      box.move(box.getWidth());
-    }
+    // clicking on the left of the box => moves the box by its width on the left (like a "page")
+    if(buttons.getModifierState() == CButton::kShift)
+      box.move(-1);
     else
-    {
-      // when enabled, double clicking on the scrollbar when not full will make it zoom in to minimum (make it full)
-      if(getEnableZoomDoubleClick() && buttons.isDoubleClick())
-      {
-        box.minZoom();
-        setOffsetPercent(box.computeOffsetPercent());
-        setZoomPercent(box.computeZoomPercent());
-        return kMouseEventHandled;
-      }
-
-      // the scrollbar itself was clicked => beginning of drag gesture...
-      if(fOffsetPercentParam.exists())
-        fOffsetPercentEditor = fOffsetPercentParam.edit();
-      else
-        fOffsetPercentValueEditor = fOffsetPercentValue;
-      setOffsetPercent(box.computeOffsetPercent());
-      fDragGestureX = x;
-      return kMouseEventHandled;
-    }
-  }
-
-  // if after move, the cursor is in the handle => allow for drag
-  if(x >= box.getLeft() && x <= box.getRight())
-  {
-    // we try to make it the center (which makes it for a more natural movement)
-    box.moveTo(x);
-
-    // beginning of drag gesture...
-    if(fOffsetPercentParam.exists())
-      fOffsetPercentEditor = fOffsetPercentParam.edit();
-    else
-      fOffsetPercentValueEditor = fOffsetPercentValue;
+      box.move(-box.getWidth());
     setOffsetPercent(box.computeOffsetPercent());
-    fDragGestureX = x;
     return kMouseEventHandled;
   }
 
-  // no drag gesture
-  setOffsetPercent(box.computeOffsetPercent());
+  if(x > box.getRight())
+  {
+    // clicking on the right of the box => moves the box by its width on the right (like a "page")
+    if(buttons.getModifierState() == CButton::kShift)
+      box.move(1);
+    else
+      box.move(box.getWidth());
+    setOffsetPercent(box.computeOffsetPercent());
+    return kMouseEventHandled;
+  }
+
+  // when enabled, double clicking on the scrollbar when not full will make it zoom in to minimum (make it full)
+  if(getEnableZoomDoubleClick() && buttons.isDoubleClick())
+  {
+    box.minZoom();
+    setOffsetPercent(box.computeOffsetPercent());
+    setZoomPercent(box.computeZoomPercent());
+    return kMouseEventHandled;
+  }
+
+  // the scrollbar itself was clicked => beginning of drag gesture...
+  if(fZoomPercentParam.exists())
+    fZoomPercentEditor = fZoomPercentParam.edit();
+
+  // when the size changes, it can also affect the offset
+  if(fOffsetPercentParam.exists())
+    fOffsetPercentEditor = fOffsetPercentParam.edit();
+
+  fDragGestureX = x;
+  fDragType = DragType::kScroll;
 
   return kMouseEventHandled;
 }
@@ -454,30 +463,10 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
 //------------------------------------------------------------------------
 CMouseEventResult ScrollbarView::onMouseMoved(CPoint &where, const CButtonState &buttons)
 {
-  // are we dragging a handle aka zooming?
-  if(fZoomPercentEditor || fZoomPercentValueEditor > -1.0)
-  {
-    RelativeView rv(fMargin.apply(getViewSize()));
-    RelativeCoord x = rv.fromAbsolutePoint(where).x;
+  if(fDragType == DragType::kNone)
+    return kMouseEventNotHandled;
 
-    auto deltaX = x - fDragGestureX;
-
-    if(buttons.getModifierState() == CButton::kShift)
-      deltaX *= getShiftDragFactor();
-
-    auto box = computeZoomBox();
-    if(box.stretch(deltaX, fLeftDragHandle))
-    {
-      setOffsetPercent(box.computeOffsetPercent());
-      setZoomPercent(box.computeZoomPercent());
-    }
-    fDragGestureX = x;
-
-    return kMouseEventHandled;
-  }
-
-  // are we dragging the scrollbar?
-  if(fOffsetPercentEditor || fOffsetPercentValueEditor > -1.0)
+  if(fDragType == DragType::kScroll)
   {
     RelativeView rv(fMargin.apply(getViewSize()));
     RelativeCoord x = rv.fromAbsolutePoint(where).x;
@@ -491,11 +480,27 @@ CMouseEventResult ScrollbarView::onMouseMoved(CPoint &where, const CButtonState 
     box.move(deltaX);
     fDragGestureX = x;
     setOffsetPercent(box.computeOffsetPercent());
+  }
+  else
+  {
+    RelativeView rv(fMargin.apply(getViewSize()));
+    RelativeCoord x = rv.fromAbsolutePoint(where).x;
 
-    return kMouseEventHandled;
+    auto deltaX = x - fDragGestureX;
+
+    if(buttons.getModifierState() == CButton::kShift)
+      deltaX *= getShiftDragFactor();
+
+    auto box = computeZoomBox();
+    if(box.stretch(deltaX, fDragType))
+    {
+      setOffsetPercent(box.computeOffsetPercent());
+      setZoomPercent(box.computeZoomPercent());
+    }
+    fDragGestureX = x;
   }
 
-  return kMouseEventNotHandled;
+  return kMouseEventHandled;
 }
 
 //------------------------------------------------------------------------
@@ -503,39 +508,24 @@ CMouseEventResult ScrollbarView::onMouseMoved(CPoint &where, const CButtonState 
 //------------------------------------------------------------------------
 CMouseEventResult ScrollbarView::onMouseUp(CPoint &where, const CButtonState &buttons)
 {
-  CMouseEventResult res = kMouseEventNotHandled;
+  if(fDragType == DragType::kNone)
+    return kMouseEventNotHandled;
+
+  fDragType = DragType::kNone;
 
   if(fOffsetPercentEditor)
   {
     fOffsetPercentEditor->commit();
     fOffsetPercentEditor = nullptr;
-    fDragGestureX = -1;
-    res = kMouseEventHandled;
   }
 
   if(fZoomPercentEditor)
   {
     fZoomPercentEditor->commit();
     fZoomPercentEditor = nullptr;
-    fDragGestureX = -1;
-    res = kMouseEventHandled;
   }
 
-  if(fOffsetPercentValueEditor > -1.0)
-  {
-    fOffsetPercentValueEditor = -1.0;
-    fDragGestureX = -1;
-    res = kMouseEventHandled;
-  }
-
-  if(fZoomPercentValueEditor > -1.0)
-  {
-    fZoomPercentValueEditor = -1.0;
-    fDragGestureX = -1;
-    res = kMouseEventHandled;
-  }
-
-  return res;
+  return kMouseEventHandled;
 }
 
 //------------------------------------------------------------------------
@@ -543,43 +533,24 @@ CMouseEventResult ScrollbarView::onMouseUp(CPoint &where, const CButtonState &bu
 //------------------------------------------------------------------------
 CMouseEventResult ScrollbarView::onMouseCancel()
 {
-  CMouseEventResult res = kMouseEventNotHandled;
+  if(fDragType == DragType::kNone)
+    return kMouseEventNotHandled;
+
+  fDragType = DragType::kNone;
 
   if(fOffsetPercentEditor)
   {
-    fOffsetPercentEditor->rollback();
+    fOffsetPercentEditor->commit();
     fOffsetPercentEditor = nullptr;
-    fDragGestureX = -1;
-    res = kMouseEventHandled;
   }
 
   if(fZoomPercentEditor)
   {
-    fZoomPercentEditor->rollback();
+    fZoomPercentEditor->commit();
     fZoomPercentEditor = nullptr;
-    fDragGestureX = -1;
-    res = kMouseEventHandled;
   }
 
-  if(fOffsetPercentValueEditor > -1.0)
-  {
-    fOffsetPercentValue = fOffsetPercentValueEditor;
-    fOffsetPercentValueEditor = -1.0;
-    fDragGestureX = -1;
-    needsRecomputing();
-    res = kMouseEventHandled;
-  }
-
-  if(fZoomPercentValueEditor > -1.0)
-  {
-    fZoomPercentValue = fZoomPercentValueEditor;
-    fZoomPercentValueEditor = -1.0;
-    fDragGestureX = -1;
-    needsRecomputing();
-    res = kMouseEventHandled;
-  }
-
-  return res;
+  return kMouseEventHandled;
 }
 
 
