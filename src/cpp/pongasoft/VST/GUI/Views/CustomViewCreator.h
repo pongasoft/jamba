@@ -30,6 +30,7 @@
 #include <pongasoft/logging/logging.h>
 #include <pongasoft/VST/GUI/Types.h>
 #include <pongasoft/VST/GUI/LookAndFeel.h>
+#include <pongasoft/Utils/StringUtils.h>
 
 #if VSTGUI_LIVE_EDITING
 #define EDITOR_MODE 1
@@ -135,243 +136,43 @@ class TCustomViewCreator : public ViewCreatorAdapter
 {
 private:
   /**
-   * Specialization for a tag attribute (vst type int32_t). The view must have getter and setter as defined by the
-   * types below.
+   * Generic base class that implements the logic for a ViewAttribute that uses a getter and setter in TView
+   *
+   * @tparam T the type of the attribute
    */
-  class TagAttribute : public ViewAttribute
+  template<typename T, typename TGetter, typename TSetter>
+  class TAttribute : public ViewAttribute
   {
   public:
-    using Getter = int32_t (TView::*)() const;
-    using Setter = void (TView::*)(int32_t);
+    using Getter = TGetter;
+    using Setter = TSetter;
 
-    TagAttribute(std::string const &iName,
-                 Getter iGetter,
-                 Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
+    // Constructor
+    TAttribute(std::string const &iName, Getter iGetter, Setter iSetter) :
+      ViewAttribute(iName), fGetter{iGetter}, fSetter{iSetter} { }
 
     // getType
     IViewCreator::AttrType getType() override
     {
-      return IViewCreator::kTagType;
+      return IViewCreator::kUnknownType;
     }
 
-    // apply => set the tag value
-    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
+    /**
+     * Subclasses need to implement this method to convert a string (iAttributeValue) to a T. Returns true if the
+     * conversion is possible in which case the result is written to oValue, false otherwise.
+     */
+    virtual bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, T &oValue) const
     {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        auto controlTagAttr = iAttributes.getAttributeValue(getName());
-        if(controlTagAttr)
-        {
-          if(controlTagAttr->length() != 0)
-          {
-            int32_t tag = iDescription->getTagForName(controlTagAttr->c_str());
-            if(tag == -1)
-            {
-              char *endPtr = nullptr;
-              tag = (int32_t) strtol(controlTagAttr->c_str(), &endPtr, 10);
-              if(endPtr == controlTagAttr->c_str())
-              {
-                return false;
-              }
-            }
-            (tv->*fSetter)(tag);
-            return true;
-          }
-        }
-      }
       return false;
     }
 
-    // getAttributeValue => get the tag value
-    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
+    /**
+     * Subclasses need to implement this method to convert a T to a string. Returns true if the
+     * conversion is possible in which case the result is written to oStringValue, false otherwise.
+     */
+    virtual bool toString(IUIDescription const *iDescription, T const &iValue, std::string &oStringValue) const
     {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        int32_t tag = (tv->*fGetter)();
-        if(tag != -1)
-        {
-          UTF8StringPtr controlTag = iDescription->lookupControlTagName(tag);
-          if(controlTag)
-          {
-            oStringValue = controlTag;
-            return true;
-          }
-        }
-      }
       return false;
-    }
-
-  private:
-    Getter fGetter;
-    Setter fSetter;
-  };
-
-  /**
-   * Specialization for an Integer attribute (which can be any kind of integer, like short, int32_t, etc..).
-   * The view must have getter and setter as defined by the types below.
-   */
-  template<typename TInt>
-  class IntegerAttribute : public ViewAttribute
-  {
-  public:
-    using Getter = TInt (TView::*)() const;
-    using Setter = void (TView::*)(TInt);
-
-    IntegerAttribute(std::string const &iName,
-                     Getter iGetter,
-                     Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
-
-    // getType
-    IViewCreator::AttrType getType() override
-    {
-      return IViewCreator::kIntegerType;
-    }
-
-    // apply => set the tag value
-    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        auto integerAttr = iAttributes.getAttributeValue(getName());
-        if(integerAttr)
-        {
-          char *endPtr = nullptr;
-          auto value = static_cast<TInt>(strtol(integerAttr->c_str(), &endPtr, 10));
-          if(endPtr == integerAttr->c_str())
-          {
-            DLOG_F(WARNING, "could not convert <%s> to an integer", integerAttr->c_str());
-            return false;
-          }
-          (tv->*fSetter)(value);
-        }
-      }
-      return false;
-    }
-
-    // getAttributeValue => get the integer value
-    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        TInt value = (tv->*fGetter)();
-        std::stringstream str;
-        str << value;
-        oStringValue = str.str();
-        return true;
-      }
-      return false;
-    }
-
-  private:
-    Getter fGetter;
-    Setter fSetter;
-  };
-
-  /**
-   * Specialization for an float attribute (which can be a double or a float, etc..).
-   * The view must have getter and setter as defined by the types below.
-   */
-  template<typename TFloat>
-  class FloatAttribute : public ViewAttribute
-  {
-  public:
-    using Getter = TFloat (TView::*)() const;
-    using Setter = void (TView::*)(TFloat);
-
-    FloatAttribute(std::string const &iName,
-                   Getter iGetter,
-                   Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
-
-    // getType
-    IViewCreator::AttrType getType() override
-    {
-      return IViewCreator::kFloatType;
-    }
-
-    // apply => set the tag value
-    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        auto floatAttr = iAttributes.getAttributeValue(getName());
-        if(floatAttr)
-        {
-          char *endPtr = nullptr;
-          auto value = static_cast<TFloat>(strtod(floatAttr->c_str(), &endPtr));
-          if(endPtr == floatAttr->c_str())
-          {
-            DLOG_F(WARNING, "could not convert <%s> to a float", floatAttr->c_str());
-            return false;
-          }
-          (tv->*fSetter)(value);
-        }
-      }
-      return false;
-    }
-
-    // getAttributeValue => get the float value
-    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        TFloat value = (tv->*fGetter)();
-        std::stringstream str;
-        str << value;
-        oStringValue = str.str();
-        return true;
-      }
-      return false;
-    }
-
-  private:
-    Getter fGetter;
-    Setter fSetter;
-  };
-
-  /**
-   * Specialization for the color attribute. The view must have getter and setter as defined by the
-   * types below.
-   */
-  class ColorAttribute : public ViewAttribute
-  {
-  public:
-    using Getter = const CColor &(TView::*)() const;
-    using Setter = void (TView::*)(CColor const &);
-
-    ColorAttribute(std::string const &iName,
-                   Getter iGetter,
-                   Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
-
-    // getType
-    IViewCreator::AttrType getType() override
-    {
-      return IViewCreator::kColorType;
     }
 
     // apply => set a color to the view
@@ -380,71 +181,11 @@ private:
       auto *tv = dynamic_cast<TView *>(iView);
       if(tv != nullptr)
       {
-        auto colorAttr = iAttributes.getAttributeValue(getName());
-        if(colorAttr)
+        auto attributeValue = iAttributes.getAttributeValue(getName());
+        if(attributeValue)
         {
-          CColor color;
-          if(UIViewCreator::stringToColor(colorAttr, color, iDescription))
-          {
-            (tv->*fSetter)(color);
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    // getAttributeValue => get a color from the view
-    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        return UIViewCreator::colorToString((tv->*fGetter)(), oStringValue, iDescription);
-      }
-      return false;
-    }
-
-  private:
-    Getter fGetter;
-    Setter fSetter;
-  };
-
-  /**
-   * Specialization for the boolean attribute. The view must have getter and setter as defined by the
-   * types below.
-   */
-  class BooleanAttribute : public ViewAttribute
-  {
-  public:
-    using Getter = bool (TView::*)() const;
-    using Setter = void (TView::*)(bool);
-
-    BooleanAttribute(std::string const &iName,
-                   Getter iGetter,
-                   Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
-
-    // getType
-    IViewCreator::AttrType getType() override
-    {
-      return IViewCreator::kBooleanType;
-    }
-
-    // apply => set a color to the view
-    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        if(iAttributes.getAttributeValue(getName()))
-        {
-          bool value;
-          if(iAttributes.getBooleanAttribute(getName(), value))
+          T value;
+          if(fromString(iDescription, *attributeValue, value))
           {
             (tv->*fSetter)(value);
             return true;
@@ -460,8 +201,8 @@ private:
       auto *tv = dynamic_cast<TView *>(iView);
       if(tv != nullptr)
       {
-        oStringValue = (tv->*fGetter)() ? "true" : "false";
-        return true;
+        auto value = (tv->*fGetter)();
+        return toString(iDescription, value, oStringValue);
       }
       return false;
     }
@@ -472,23 +213,258 @@ private:
   };
 
   /**
+   * ByValAttribute defines getter/setter by value (copy)
+   */
+  template<typename T>
+  using ByValAttribute = TAttribute<T, T (TView::*)() const, void (TView::*)(T)>;
+
+  /**
+   * ByRefAttribute defines getter/setter by const reference
+   */
+  template<typename T>
+  using ByRefAttribute = TAttribute<T, T const &(TView::*)() const, void (TView::*)(T const &)>;
+
+  /**
+   * Specialization for a tag attribute (vst type int32_t). The view must have getter and setter as defined by the
+   * types below.
+   */
+  class TagAttribute : public ByValAttribute<int32_t>
+  {
+  public:
+    TagAttribute(std::string const &iName,
+                 typename ByValAttribute<int32_t>::Getter iGetter,
+                 typename ByValAttribute<int32_t>::Setter iSetter) :
+      ByValAttribute<int32_t>(iName, iGetter, iSetter) {}
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kTagType;
+    }
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, int32_t &oValue) const override
+    {
+      if(iAttributeValue.length() != 0)
+      {
+        auto tag = iDescription->getTagForName(iAttributeValue.c_str());
+        if(tag == -1)
+        {
+          char *endPtr = nullptr;
+          tag = (int32_t) strtol(iAttributeValue.c_str(), &endPtr, 10);
+          if(endPtr == iAttributeValue.c_str())
+          {
+            return false;
+          }
+        }
+        oValue = tag;
+        return true;
+      }
+      return false;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription, const int32_t &iValue, std::string &oStringValue) const override
+    {
+      if(iValue != -1)
+      {
+        UTF8StringPtr controlTag = iDescription->lookupControlTagName(iValue);
+        if(controlTag)
+        {
+          oStringValue = controlTag;
+          return true;
+        }
+      }
+
+      return false;
+    }
+  };
+
+  /**
+   * Specialization for an Integer attribute (which can be any kind of integer, like short, int32_t, etc..).
+   * The view must have getter and setter as defined by the types below.
+   */
+  template<typename TInt>
+  class IntegerAttribute : public ByValAttribute<TInt>
+  {
+  public:
+    using Getter = typename ByValAttribute<TInt>::Getter;
+    using Setter = typename ByValAttribute<TInt>::Setter;
+
+    // Constructor
+    IntegerAttribute(std::string const &iName, Getter iGetter, Setter iSetter) :
+      ByValAttribute<TInt>(iName, iGetter, iSetter) {}
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kIntegerType;
+    }
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, TInt &oValue) const override
+    {
+      char *endPtr = nullptr;
+      auto value = static_cast<TInt>(strtol(iAttributeValue.c_str(), &endPtr, 10));
+      if(endPtr == iAttributeValue.c_str())
+      {
+        DLOG_F(WARNING, "could not convert <%s> to an integer", iAttributeValue.c_str());
+        return false;
+      }
+      oValue = value;
+      return true;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription, const TInt &iValue, std::string &oStringValue) const override
+    {
+      std::stringstream str;
+      str << iValue;
+      oStringValue = str.str();
+      return true;
+    }
+  };
+
+  /**
+   * Specialization for an float attribute (which can be a double or a float, etc..).
+   * The view must have getter and setter as defined by the types below.
+   */
+  template<typename TFloat>
+  class FloatAttribute : public ByValAttribute<TFloat>
+  {
+  public:
+    using Getter = typename ByValAttribute<TFloat>::Getter;
+    using Setter = typename ByValAttribute<TFloat>::Setter;
+
+    // Constructor
+    FloatAttribute(std::string const &iName, Getter iGetter, Setter iSetter) :
+      ByValAttribute<TFloat>(iName, iGetter, iSetter) {}
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kFloatType;
+    }
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, TFloat &oValue) const override
+    {
+      TFloat value;
+      if(Utils::stringToFloat<TFloat>(iAttributeValue, value))
+      {
+        oValue = value;
+        return true;
+      }
+      DLOG_F(WARNING, "could not convert <%s> to a float", iAttributeValue.c_str());
+      return false;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription, const TFloat &iValue, std::string &oStringValue) const override
+    {
+      std::stringstream str;
+      str << iValue;
+      oStringValue = str.str();
+      return true;
+    }
+  };
+
+  /**
+   * Specialization for the color attribute. The view must have getter and setter as defined by the
+   * types below.
+   */
+  class ColorAttribute : public ByRefAttribute<CColor>
+  {
+  public:
+
+    // Constructor
+    ColorAttribute(std::string const &iName,
+                   typename ByRefAttribute<CColor>::Getter iGetter,
+                   typename ByRefAttribute<CColor>::Setter iSetter) :
+      ByRefAttribute<CColor>(iName, iGetter, iSetter) {}
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kColorType;
+    }
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, CColor &oValue) const override
+    {
+      CColor color;
+      if(UIViewCreator::stringToColor(&iAttributeValue, color, iDescription))
+      {
+        oValue = color;
+        return true;
+      }
+      return false;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription, const CColor &iValue, std::string &oStringValue) const override
+    {
+      return UIViewCreator::colorToString(iValue, oStringValue, iDescription);
+    }
+  };
+
+  /**
+   * Specialization for the boolean attribute. The view must have getter and setter as defined by the
+   * types below.
+   */
+  class BooleanAttribute : public ByValAttribute<bool>
+  {
+  public:
+    // Constructor
+    BooleanAttribute(std::string const &iName,
+                     typename ByValAttribute<bool>::Getter iGetter,
+                     typename ByValAttribute<bool>::Setter iSetter) :
+      ByValAttribute<bool>(iName, iGetter, iSetter) {}
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kBooleanType;
+    }
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, bool &oValue) const override
+    {
+      if(iAttributeValue == "true")
+      {
+        oValue = true;
+        return true;
+      }
+
+      if(iAttributeValue == "false")
+      {
+        oValue = false;
+        return true;
+      }
+
+      return false;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription, const bool &iValue, std::string &oStringValue) const override
+    {
+      oStringValue = iValue ? "true" : "false";
+      return true;
+    }
+  };
+
+  /**
    * Specialization for a bitmap attribute. The view must have getter and setter as defined by the
    * types below.
    */
-  class BitmapAttribute : public ViewAttribute
+  class BitmapAttribute : public ByValAttribute<BitmapPtr>
   {
   public:
-    using Getter = BitmapPtr(TView::*)() const;
-    using Setter = void (TView::*)(BitmapPtr);
-
+    // Constructor
     BitmapAttribute(std::string const &iName,
-                   Getter iGetter,
-                   Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
+                    typename ByValAttribute<BitmapPtr>::Getter iGetter,
+                    typename ByValAttribute<BitmapPtr>::Setter iSetter) :
+      ByValAttribute<BitmapPtr>(iName, iGetter, iSetter) {}
 
     // getType
     IViewCreator::AttrType getType() override
@@ -496,67 +472,40 @@ private:
       return IViewCreator::kBitmapType;
     }
 
-    // apply => set a bitmap to the view
-    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, BitmapPtr &oValue) const override
     {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
+      BitmapPtr bitmap;
+      if(UIViewCreator::stringToBitmap(&iAttributeValue, bitmap, iDescription))
       {
-        auto bitmapAttr = iAttributes.getAttributeValue(getName());
-        if(bitmapAttr)
-        {
-          CBitmap *bitmap;
-          if(UIViewCreator::stringToBitmap(bitmapAttr, bitmap, iDescription))
-          {
-            (tv->*fSetter)(bitmap);
-            return true;
-          }
-        }
-        else
-        {
-          (tv->*fSetter)(nullptr);
-          return true;
-        }
+        oValue = bitmap;
+        return true;
       }
       return false;
     }
 
-    // getAttributeValue => get a bitmap from the view
-    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
+    // toString
+    bool toString(IUIDescription const *iDescription, BitmapPtr const &iValue, std::string &oStringValue) const override
     {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        auto bitmap = (tv->*fGetter)();
-        if(bitmap)
-          return UIViewCreator::bitmapToString(bitmap, oStringValue, iDescription);
-      }
-      return false;
+      if(iValue)
+        return UIViewCreator::bitmapToString(iValue, oStringValue, iDescription);
+      else
+        return false;
     }
-
-  private:
-    Getter fGetter;
-    Setter fSetter;
   };
 
   /**
- * Specialization for a bitmap attribute. The view must have getter and setter as defined by the
- * types below.
- */
-  class FontAttribute : public ViewAttribute
+   * Specialization for a bitmap attribute. The view must have getter and setter as defined by the
+   * types below.
+   */
+  class FontAttribute : public ByValAttribute<FontPtr>
   {
   public:
-    using Getter = FontPtr(TView::*)() const;
-    using Setter = void (TView::*)(FontPtr);
-
+    // Constructor
     FontAttribute(std::string const &iName,
-                    Getter iGetter,
-                    Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
+                  typename ByValAttribute<FontPtr>::Getter iGetter,
+                  typename ByValAttribute<FontPtr>::Setter iSetter) :
+      ByValAttribute<FontPtr>(iName, iGetter, iSetter) {}
 
     // getType
     IViewCreator::AttrType getType() override
@@ -564,122 +513,141 @@ private:
       return IViewCreator::kFontType;
     }
 
-    // apply => set a font to the view
-    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, FontPtr &oValue) const override
     {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
+      auto font = iDescription->getFont(iAttributeValue.c_str());
+      if(font)
       {
-        auto fontAttr = iAttributes.getAttributeValue(getName());
-        if(fontAttr)
-        {
-          auto font = iDescription->getFont(fontAttr->c_str());
-          if(font)
-          {
-            (tv->*fSetter)(font);
-            return true;
-          }
-        }
-        else
-        {
-          (tv->*fSetter)(nullptr);
-          return true;
-        }
-      }
-      return false;
-    }
-
-    // getAttributeValue => get a font from the view
-    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
-      {
-        auto font = (tv->*fGetter)();
-        if(font)
-        {
-          auto fontName = iDescription->lookupFontName(font);
-          if(fontName)
-            oStringValue = fontName;
-        }
+        oValue = font;
         return true;
       }
       return false;
     }
 
-  private:
-    Getter fGetter;
-    Setter fSetter;
+    // toString
+    bool toString(IUIDescription const *iDescription, FontPtr const &iValue, std::string &oStringValue) const override
+    {
+      if(iValue)
+      {
+        auto fontName = iDescription->lookupFontName(iValue);
+        if(fontName)
+        {
+          oStringValue = fontName;
+          return true;
+        }
+      }
+      return false;
+    }
   };
 
   /**
    * Specialization for the margin attribute. The view must have getter and setter as defined by the
    * types below.
    */
-  class MarginAttribute : public ViewAttribute
+  class MarginAttribute : public ByRefAttribute<Margin>
   {
   public:
-    using Getter = const Margin &(TView::*)() const;
-    using Setter = void (TView::*)(Margin const &);
-
     MarginAttribute(std::string const &iName,
-                    Getter iGetter,
-                    Setter iSetter) :
-      ViewAttribute(iName),
-      fGetter{iGetter},
-      fSetter{iSetter}
-    {
-    }
+                    typename ByRefAttribute<Margin>::Getter iGetter,
+                    typename ByRefAttribute<Margin>::Setter iSetter) :
+      ByRefAttribute<Margin>(iName, iGetter, iSetter) {}
 
-    // getType
-    IViewCreator::AttrType getType() override
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, Margin &oValue) const override
     {
-      return IViewCreator::kRectType;
-    }
+      auto parts = Utils::splitFloats<CCoord>(iAttributeValue, ',');
 
-    // apply => set a color to the view
-    bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
+      if(parts.empty())
+        return false;
+
+      // look for nan in the array
+      if(std::find_if(parts.cbegin(), parts.cend(), [] (auto f) {return std::isnan(f);}) != parts.cend())
+        return false;
+
+      if(parts.size() == 1)
       {
-        CRect rect;
-        if (iAttributes.getRectAttribute(getName(), rect))
-        {
-          // note how the order between rect and margin is different!
-          Margin m{rect.left, rect.top, rect.right, rect.bottom};
-          (tv->*fSetter)(m);
-          return true;
-        }
+        oValue = Margin{parts[0]};
       }
-      return false;
-    }
-
-    // getAttributeValue => get a color from the view
-    bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
-    {
-      auto *tv = dynamic_cast<TView *>(iView);
-      if(tv != nullptr)
+      else
       {
-        auto margin = (tv->*fGetter)();
+        if(parts.size() < 4)
+          return false;
 
-        std::stringstream str;
-        str << margin.fTop;
-        str << ",";
-        str << margin.fRight;
-        str << ",";
-        str << margin.fBottom;
-        str << ",";
-        str << margin.fLeft;
-        oStringValue = str.str();
-        return true;
+        oValue = Margin{parts[0], parts[1], parts[2], parts[3]};
       }
-      return false;
+
+      return true;
     }
 
-  private:
-    Getter fGetter;
-    Setter fSetter;
+    // toString
+    bool toString(IUIDescription const *iDescription, const Margin &iValue, std::string &oStringValue) const override
+    {
+      std::stringstream str;
+      if(iValue.fTop == iValue.fRight && iValue.fTop == iValue.fBottom && iValue.fTop == iValue.fLeft)
+        str << iValue.fTop;
+      else
+      {
+        str << iValue.fTop;
+        str << ",";
+        str << iValue.fRight;
+        str << ",";
+        str << iValue.fBottom;
+        str << ",";
+        str << iValue.fLeft;
+      }
+      oStringValue = str.str();
+      return true;
+    }
+  };
+
+  /**
+   * Specialization for the range attribute. The view must have getter and setter as defined by the
+   * types below.
+   */
+  class RangeAttribute : public ByRefAttribute<Range>
+  {
+  public:
+    RangeAttribute(std::string const &iName,
+                   typename ByRefAttribute<Range>::Getter iGetter,
+                   typename ByRefAttribute<Range>::Setter iSetter) :
+      ByRefAttribute<Range>(iName, iGetter, iSetter) {}
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, Range &oValue) const override
+    {
+      auto parts = Utils::splitFloats<CCoord>(iAttributeValue, ',');
+
+      if(parts.empty())
+        return false;
+
+      // look for nan in the array
+      if(std::find_if(parts.cbegin(), parts.cend(), [] (auto f) {return std::isnan(f);}) != parts.cend())
+        return false;
+
+      if(parts.size() == 1)
+        oValue = Range{parts[0]};
+      else
+        oValue = Range{parts[0], parts[1]};
+
+      return true;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription, const Range &iValue, std::string &oStringValue) const override
+    {
+      std::stringstream str;
+      if(iValue.fFrom == iValue.fTo)
+        str << iValue.fFrom;
+      else
+      {
+        str << iValue.fFrom;
+        str << ",";
+        str << iValue.fTo;
+      }
+      oStringValue = str.str();
+      return true;
+    }
   };
 
 public:
@@ -769,13 +737,23 @@ public:
   }
 
   /**
-   * Registers a margin attribute with the given name and getter/setter
+   * Registers a Margin attribute with the given name and getter/setter
    */
   void registerMarginAttribute(std::string const &iName,
                                typename MarginAttribute::Getter iGetter,
                                typename MarginAttribute::Setter iSetter)
   {
     registerAttribute<MarginAttribute>(iName, iGetter, iSetter);
+  }
+
+  /**
+   * Registers a Range attribute with the given name and getter/setter
+   */
+  void registerRangeAttribute(std::string const &iName,
+                               typename RangeAttribute::Getter iGetter,
+                               typename RangeAttribute::Setter iSetter)
+  {
+    registerAttribute<RangeAttribute>(iName, iGetter, iSetter);
   }
 
   /**

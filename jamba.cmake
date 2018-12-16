@@ -60,6 +60,8 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Lerp.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Metaprogramming.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Misc.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamDisplay.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamLine.h
@@ -378,6 +380,17 @@ endfunction()
 ###################################################
 # Testing - for this framework
 ###################################################
-file(GLOB_RECURSE TEST_SRC_FILES ${JAMBA_ROOT}/test/cpp/*cpp)
-set(test_sources ""
+set(JAMBA_TEST_SOURCES "${JAMBA_ROOT}/test/cpp")
+set(JAMBA_TEST_SRC_FILES
+    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Collection/test-CircularBuffer.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-Lerp.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-StringUtils.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
+    )
+
+set(JAMBA_CPP_FOR_TEST_SOURCES
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
     )

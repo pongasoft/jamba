@@ -82,8 +82,8 @@ public:
   void setZoomHandlesSize(CCoord iSize) { fZoomHandlesSize = iSize; needsRecomputing(); }
 
   // how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging
-  double getShiftDragFactor() const { return fShiftDragFactor; }
-  void setShiftDragFactor(double iShiftDragFactor) { fShiftDragFactor = iShiftDragFactor; }
+  Range const &getShiftDragFactor() const { return fShiftDragFactor; }
+  void setShiftDragFactor(Range const &iShiftDragFactor) { fShiftDragFactor = iShiftDragFactor; }
 
   // whether to allow double clicking for zoom
   bool getEnableZoomDoubleClick() const { return fEnableZoomDoubleClick; }
@@ -163,25 +163,25 @@ protected:
     // compute position from offsetPercent
     RelativeCoord computeCenter(double iOffsetPercent) const
     {
-      return Utils::Lerp<RelativeCoord>::mapValue(iOffsetPercent, 0, 1.0, fMinCenter, fMaxCenter);
+      return Utils::Lerp<RelativeCoord>::mapValue(iOffsetPercent, 0.0, 1.0, fMinCenter, fMaxCenter);
     }
 
     // compute the offsetPercent from the position
     double computeOffsetPercent() const
     {
-      return Utils::Lerp<double>::mapValue(fCenter, fMinCenter, fMaxCenter, 0, 1.0);
+      return Utils::Lerp<double>::mapValue(fCenter, fMinCenter, fMaxCenter, 0.0, 1.0);
     }
 
     // compute size from zoomPercent
     CCoord computeWidth(double iZoomPercent) const
     {
-      return Utils::Lerp<RelativeCoord>::mapValue(iZoomPercent, 1.0, 0, fMinWidth, fMaxWidth);
+      return Utils::Lerp<RelativeCoord>::mapValue(iZoomPercent, 1.0, 0.0, fMinWidth, fMaxWidth);
     }
 
     // compute zoomPercent from size
     double computeZoomPercent() const
     {
-      return Utils::Lerp<double>::mapValue(getWidth(), fMinWidth, fMaxWidth, 1.0, 0);
+      return Utils::Lerp<double>::mapValue(getWidth(), fMinWidth, fMaxWidth, 1.0, 0.0);
     }
 
     // move the box by iDeltaX (can be positive or negative)
@@ -248,7 +248,7 @@ protected:
   CCoord fZoomHandlesSize{-1}; // -1 means it will be computed, 0 means no show
 
   // how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging
-  double fShiftDragFactor{1.0};
+  Range fShiftDragFactor{1.0};
   bool fEnableZoomDoubleClick{true};
 
   // offsetPercent tag/param/value + editor and editor value ("value" is used when no param)
@@ -282,7 +282,7 @@ public:
       registerDoubleAttribute("scrollbar-gutter-spacing", &ScrollbarView::getScrollbarGutterSpacing, &ScrollbarView::setScrollbarGutterSpacing);
       registerColorAttribute("zoom-handles-color", &ScrollbarView::getZoomHandlesColor, &ScrollbarView::setZoomHandlesColor);
       registerDoubleAttribute("zoom-handles-size", &ScrollbarView::getZoomHandlesSize, &ScrollbarView::setZoomHandlesSize);
-      registerDoubleAttribute("shift-drag-factor", &ScrollbarView::getShiftDragFactor, &ScrollbarView::setShiftDragFactor);
+      registerRangeAttribute("shift-drag-factor", &ScrollbarView::getShiftDragFactor, &ScrollbarView::setShiftDragFactor);
       registerBooleanAttribute("enable-zoom-double-click", &ScrollbarView::getEnableZoomDoubleClick, &ScrollbarView::setEnableZoomDoubleClick);
     }
   };

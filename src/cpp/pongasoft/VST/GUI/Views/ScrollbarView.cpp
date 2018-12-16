@@ -474,7 +474,9 @@ CMouseEventResult ScrollbarView::onMouseMoved(CPoint &where, const CButtonState 
     auto deltaX = x - fDragGestureX;
 
     if(buttons.getModifierState() == CButton::kShift)
-      deltaX *= getShiftDragFactor();
+    {
+      deltaX *= Utils::Range<Percent>{1.0, 0.0}.mapValue(getZoomPercent(), getShiftDragFactor());
+    }
 
     auto box = computeZoomBox();
     box.move(deltaX);
@@ -489,7 +491,9 @@ CMouseEventResult ScrollbarView::onMouseMoved(CPoint &where, const CButtonState 
     auto deltaX = x - fDragGestureX;
 
     if(buttons.getModifierState() == CButton::kShift)
-      deltaX *= getShiftDragFactor();
+    {
+      deltaX *= Utils::Range<Percent>{1.0, 0.0}.mapValue(getZoomPercent(), getShiftDragFactor());
+    }
 
     auto box = computeZoomBox();
     if(box.stretch(deltaX, fDragType))

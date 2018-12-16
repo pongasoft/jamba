@@ -64,18 +64,24 @@ public:
    *
    * @param iValue will be constrained to the range [min(iFromLow, iFromHigh), max(iFromLow, iFromHigh)]
    */
-  static inline T mapValue(T iValue, T iFromLow, T iFromHigh, T iToLow, T iToHigh)
+  template<typename U>
+  static U mapValue(T iValue, T iFromLow, T iFromHigh, U iToLow, U iToHigh)
   {
-    // if the first range is empty, returns iToLow (otherwise computation would be dividing by 0)
+    // if the first range is empty (computation would be dividing by 0)
     if(iFromLow == iFromHigh)
+      return iValue <= iFromLow ? iToLow : iToHigh;
+
+    // if the second range is empty, no need for computation
+    if(iToLow == iToHigh)
       return iToLow;
 
     if(iFromLow < iFromHigh)
       iValue = clamp(iValue, iFromLow, iFromHigh);
     else
       iValue = clamp(iValue, iFromHigh, iFromLow);
+    
 
-    return Lerp(iFromLow, iToLow, iFromHigh, iToHigh).computeY(iValue);
+    return static_cast<U>(Lerp(iFromLow, static_cast<T>(iToLow), iFromHigh, static_cast<T>(iToHigh)).computeY(iValue));
   }
 
   /**
@@ -84,18 +90,60 @@ public:
    * mapValueX(5, 10, 20, 100, 200) returns 50
    * @see mapValue
    */
-  static inline T mapValueX(T iValue, T iFromLow, T iFromHigh, T iToLow, T iToHigh)
+  template<typename U>
+  static inline U mapValueX(T iValue, T iFromLow, T iFromHigh, U iToLow, U iToHigh)
   {
-    // if the first range is empty, returns iToLow (otherwise computation would be dividing by 0)
+    // if the first range is empty (computation would be dividing by 0)
     if(iFromLow == iFromHigh)
+      return iValue <= iFromLow ? iToLow : iToHigh;
+
+    // if the second range is empty, no need for computation
+    if(iToLow == iToHigh)
       return iToLow;
 
-    return Lerp(iFromLow, iToLow, iFromHigh, iToHigh).computeY(iValue);
+    return static_cast<U>(Lerp(iFromLow, static_cast<T>(iToLow), iFromHigh, static_cast<T>(iToHigh)).computeY(iValue));
   }
 
 private:
   const T fA;
   const T fB;
 };
+
+/**
+ * Defines a range of values.
+ */
+template<typename T>
+struct Range
+{
+  // Empty constructor (no range)
+  Range() = default;
+
+  // Single value range
+  explicit Range(T iValue) noexcept : fFrom{iValue}, fTo{iValue} {}
+
+  // Constructor
+  Range(T iFrom, T iTo) : fFrom{iFrom}, fTo{iTo} {}
+
+  // return true if the range is a single value (aka degenerate range)
+  bool isSingleValue() const { return fFrom == fTo; }
+
+  /**
+   * Map the value from this range into the provide range
+   *
+   * @param iValue the value from *this* range [fFrom, fTo]
+   * @param iRange the range to map the iValue into
+   * @return the new value
+   */
+  template<typename U>
+  inline U mapValue(T iValue, Range<U> const &iRange)
+  {
+    return Lerp<T>::mapValue(iValue, fFrom, fTo, iRange.fFrom, iRange.fTo);
+  }
+
+public:
+  T fFrom{};
+  T fTo{};
+};
+
 }
 }
