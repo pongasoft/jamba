@@ -163,25 +163,25 @@ protected:
     // compute position from offsetPercent
     RelativeCoord computeCenter(double iOffsetPercent) const
     {
-      return Utils::Lerp<RelativeCoord>::mapValue(iOffsetPercent, 0.0, 1.0, fMinCenter, fMaxCenter);
+      return Utils::DPLerp::mapValue(iOffsetPercent, 0.0, 1.0, fMinCenter, fMaxCenter);
     }
 
     // compute the offsetPercent from the position
     double computeOffsetPercent() const
     {
-      return Utils::Lerp<double>::mapValue(fCenter, fMinCenter, fMaxCenter, 0.0, 1.0);
+      return Utils::DPLerp::mapValue(fCenter, fMinCenter, fMaxCenter, 0.0, 1.0);
     }
 
     // compute size from zoomPercent
     CCoord computeWidth(double iZoomPercent) const
     {
-      return Utils::Lerp<RelativeCoord>::mapValue(iZoomPercent, 1.0, 0.0, fMinWidth, fMaxWidth);
+      return Utils::DPLerp::mapValue(iZoomPercent, 1.0, 0.0, fMinWidth, fMaxWidth);
     }
 
     // compute zoomPercent from size
     double computeZoomPercent() const
     {
-      return Utils::Lerp<double>::mapValue(getWidth(), fMinWidth, fMaxWidth, 1.0, 0.0);
+      return Utils::DPLerp::mapValue(getWidth(), fMinWidth, fMaxWidth, 1.0, 0.0);
     }
 
     // move the box by iDeltaX (can be positive or negative)

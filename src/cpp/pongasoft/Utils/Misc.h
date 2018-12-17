@@ -25,12 +25,28 @@ namespace Utils {
 
 /**
  * Make sure that the value remains within its bounds
+ *
+ * @param iLower the lower bound (must be <= iUpper)
+ * @param iUpper the upper bound (must be >= iLower)
  */
 template <typename T, typename U>
-inline static T clamp(const U &value, const T &lower, const T &upper)
+inline static T clamp(const U &iValue, const T &iLower, const T &iUpper)
 {
-  auto v = static_cast<T>(value);
-  return v < lower ? lower : (v > upper ? upper : value);
+  auto v = static_cast<T>(iValue);
+  return v < iLower ? iLower : (v > iUpper ? iUpper : iValue);
+}
+
+/**
+ * Make sure that the value remains within its bounds. The difference with clamp is that iFrom and iTo do not have
+ * to be provided in any specific order.
+ */
+template <typename T, typename U>
+inline static T clampRange(const U &iValue, const T &iFrom, const T &iTo)
+{
+  if(iFrom < iTo)
+    return clamp(iValue, iFrom, iTo);
+  else
+    return clamp(iValue, iTo, iFrom);
 }
 
 /**

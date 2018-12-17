@@ -19,7 +19,6 @@
 
 #include <vstgui4/vstgui/lib/vstguibase.h>
 #include <vstgui4/vstgui/lib/crect.h>
-#include <pongasoft/Utils/Lerp.h>
 
 namespace pongasoft {
 namespace VST {
@@ -61,11 +60,6 @@ public:
   CCoord fBottom{};
   CCoord fLeft{};
 };
-
-/**
- * Defines a Range
- */
-using Range = Utils::Range<CCoord>;
 
 }
 }

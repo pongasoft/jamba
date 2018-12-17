@@ -19,6 +19,8 @@
 
 #include <vstgui4/vstgui/lib/cdrawcontext.h>
 #include <vstgui4/vstgui/lib/cview.h>
+#include <pongasoft/Utils/Misc.h>
+#include <base/source/fstring.h>
 
 #include "Types.h"
 
@@ -63,6 +65,20 @@ public:
     return RelativeRect(0, 0, fRect.getWidth(), fRect.getHeight());
   }
 
+  inline CCoord getWidth() const
+  {
+    return fRect.getWidth();
+  }
+
+  inline Range getHorizontalRange() const { return Range{0, getWidth()}; }
+
+  inline Range getVerticalRange() const { return Range{0, getHeight()}; }
+
+  inline CCoord getHeight() const
+  {
+    return fRect.getHeight();
+  }
+
   inline AbsoluteCoord toAbsoluteX(RelativeCoord x) const
   {
     return x + fRect.left;
@@ -91,6 +107,18 @@ public:
   inline RelativePoint fromAbsolutePoint(AbsolutePoint const &iPoint) const
   {
     return RelativePoint{fromAbsoluteX(iPoint.x), fromAbsoluteY(iPoint.y)};
+  }
+
+  /**
+   * Convert the absolute point to a relative point while making sure it is clamped (constrained)
+   * within this relative view.
+   */
+  inline RelativePoint clampAbsolutePoint(AbsolutePoint const &iPoint) const
+  {
+    return RelativePoint{
+      Utils::clamp(fromAbsoluteX(iPoint.x), 0.0, fRect.getWidth()),
+      Utils::clamp(fromAbsoluteY(iPoint.y), 0.0, fRect.getHeight())
+    };
   }
 
   inline AbsolutePoint toAbsolutePoint(RelativeCoord x, RelativeCoord y) const
@@ -194,8 +222,63 @@ public:
     drawString(iText, getViewSize(), iSdc);
   }
 
+#if EDITOR_MODE
+  /**
+   * Draw a string containing the formatted string (printf style) at (x,y)
+   *
+   * @param x if -1 means right
+   * @param y if -1 means bottom
+   */
+  template<typename... Args>
+  inline void debugXY(RelativeCoord x, RelativeCoord y, char const *iFormat, Args... iArgs)
+  {
+    // handles strings up to 4k characters so should be fine for debug...
+    auto s = Steinberg::String().printf(iFormat, iArgs...);
+    debugText(x, y, s.text8());
+  }
+
+  // debugTopLeft
+  template<typename... Args>
+  inline void debugTopLeft(char const *iFormat, Args... iArgs) { debugXY(0, 0, iFormat, iArgs...); }
+
+  // debugTopRight
+  template<typename... Args>
+  inline void debugTopRight(char const *iFormat, Args... iArgs) { debugXY(-1, 0, iFormat, iArgs...); }
+
+  // debugBottomLeft
+  template<typename... Args>
+  inline void debugBottomLeft(char const *iFormat, Args... iArgs) { debugXY(0, -1, iFormat, iArgs...); }
+
+  // debugBottomRight
+  template<typename... Args>
+  inline void debugBottomRight(char const *iFormat, Args... iArgs) { debugXY(-1, -1, iFormat, iArgs...); }
+
+  /**
+   * Draw a string containing the formatted string (printf style) at the top of the view (0,0)
+   */
+  template<typename... Args>
+  inline void debug(char const *iFormat, Args... iArgs) { debugTopLeft(iFormat, iArgs...); }
+
+  /**
+   * Draw the text at the top of the view (0,0)
+   */
+  inline void debugText(char const *iText) { debugText(0, 0, iText); }
+
+  /**
+   * Draw the text at the top of the view (x,y)
+   */
+  void debugText(RelativeCoord x, RelativeCoord y, char const *iText);
+
+#endif
+
 protected:
   CDrawContext *fDrawContext;
+
+#if EDITOR_MODE
+public:
+  CColor fDebugStringColor{kGreenCColor};
+  FontPtr fDebugStringFont{kNormalFontVerySmall};
+#endif
 };
 
 }

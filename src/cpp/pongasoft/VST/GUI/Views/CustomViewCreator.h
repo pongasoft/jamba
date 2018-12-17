@@ -32,10 +32,6 @@
 #include <pongasoft/VST/GUI/LookAndFeel.h>
 #include <pongasoft/Utils/StringUtils.h>
 
-#if VSTGUI_LIVE_EDITING
-#define EDITOR_MODE 1
-#endif
-
 namespace pongasoft {
 namespace VST {
 namespace GUI {

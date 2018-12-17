@@ -392,5 +392,6 @@ set(JAMBA_TEST_SRC_FILES
     )
 
 set(JAMBA_CPP_FOR_TEST_SOURCES
+    ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
     )

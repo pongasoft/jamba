@@ -19,6 +19,11 @@
 
 #include <vstgui4/vstgui/lib/cbitmap.h>
 #include <vstgui4/vstgui/lib/cfont.h>
+#include <pongasoft/Utils/Lerp.h>
+
+#if VSTGUI_LIVE_EDITING
+#define EDITOR_MODE 1
+#endif
 
 namespace pongasoft {
 namespace VST {
@@ -33,6 +38,11 @@ using BitmapSPtr = SharedPointer<CBitmap>;
 // Defines a FontSPtr shortcut notation
 using FontPtr = CFontDesc *;
 using FontSPtr = SharedPointer<CFontDesc>;
+
+/**
+ * Defines a Range
+ */
+using Range = Utils::Range<CCoord>;
 
 
 }

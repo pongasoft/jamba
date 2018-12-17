@@ -17,6 +17,7 @@
  */
 #include "DrawContext.h"
 #include <vstgui4/vstgui/lib/controls/ccontrol.h>
+#include <vstgui4/vstgui/lib/platform/iplatformfont.h>
 
 namespace pongasoft {
 namespace VST {
@@ -24,6 +25,9 @@ namespace GUI {
 
 using namespace VSTGUI;
 
+//------------------------------------------------------------------------
+// RelativeDrawContext::drawString
+//------------------------------------------------------------------------
 void RelativeDrawContext::drawString(UTF8String const &fText, RelativeRect const &fSize, StringDrawContext &sdc)
 {
   if(!(sdc.fStyle & kNoTextStyle))
@@ -56,6 +60,52 @@ void RelativeDrawContext::drawString(UTF8String const &fText, RelativeRect const
   }
 
 }
+
+#if EDITOR_MODE
+
+//------------------------------------------------------------------------
+// RelativeDrawContext::debugText
+//------------------------------------------------------------------------
+void RelativeDrawContext::debugText(RelativeCoord x, RelativeCoord y, char const *iText)
+{
+  StringDrawContext sdc{};
+  sdc.fStyle |= kShadowText;
+  sdc.fHorizTxtAlign = kLeftText;
+  sdc.fFont = fDebugStringFont;
+  sdc.fFontColor = fDebugStringColor;
+  sdc.fShadowColor = kBlackCColor;
+
+  CCoord height = 20;
+
+  if(sdc.fFont)
+  {
+    auto platformFont = sdc.fFont->getPlatformFont();
+    if(platformFont && platformFont->getAscent() > 0 && platformFont->getDescent() > 0)
+    {
+      height = platformFont->getAscent() + platformFont->getDescent();
+    }
+  }
+
+  if(x == -1)
+  {
+    sdc.fHorizTxtAlign = kRightText;
+    x = 0;
+  }
+
+  RelativeRect rect;
+  if(y == -1)
+    rect = RelativeRect{x, getHeight() - height, getWidth(), getHeight()};
+  else
+    rect = RelativeRect{x, y, getWidth(), y + height};
+
+
+//  fillRect(rect, fDebugBgColor);
+
+  drawString(iText, rect, sdc);
+}
+
+#endif
+
 }
 }
 }
