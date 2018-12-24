@@ -24,6 +24,16 @@ namespace VST {
 namespace GUI {
 
 //------------------------------------------------------------------------
+// GUIState::GUIState
+//------------------------------------------------------------------------
+GUIState::GUIState(Parameters const &iPluginParameters) :
+  fPluginParameters{iPluginParameters},
+  fGUIVstParameterMgr(this),
+  fViewCxMgr{&fGUIVstParameterMgr}
+{
+}
+
+//------------------------------------------------------------------------
 // GUIState::addJmbParam
 //------------------------------------------------------------------------
 void GUIState::addJmbParam(std::unique_ptr<IGUIJmbParameter> iParameter)

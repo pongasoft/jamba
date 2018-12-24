@@ -181,23 +181,19 @@ public:
   }
 
   /**
-   * @return a connection that will listen to parameter changes (see GUIParamCx)
+   * @return an object maintaining the connection between the parameter and the listener
    */
-  std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener)
+  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const
   {
-    return std::make_unique<GUIParamCx>(fParamID,
-                                        fVstParameters->getParameterObject(fParamID),
-                                        iChangeListener);
+    return fVstParameters->connect(fParamID, iChangeListener);
   }
 
   /**
-   * @return a connection that will listen to parameter changes (see GUIParamCx)
+   * @return an object maintaining the connection between the parameter and the callback
    */
-  std::unique_ptr<GUIParamCx> connect(Parameters::ChangeCallback iChangeCallback)
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const
   {
-    return std::make_unique<GUIParamCx>(fParamID,
-                                        fVstParameters->getParameterObject(fParamID),
-                                        std::move(iChangeCallback));
+    return fVstParameters->connect(fParamID, std::move(iChangeCallback));
   }
 
 private:
@@ -287,6 +283,20 @@ public:
 
 private:
   std::unique_ptr<GUIRawVstParameter> fPtr;
+};
+
+/**
+ * Interface for managing Raw Vst parameters
+ */
+class IGUIRawVstParameterMgr
+{
+public:
+  // getRawVstParamDef
+  virtual std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const = 0;
+
+  /**
+   * @return the raw parameter given its id (or nullptr if doesn't exist) */
+  virtual std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const = 0;
 };
 
 //------------------------------------------------------------------------

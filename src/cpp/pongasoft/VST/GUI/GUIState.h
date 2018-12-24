@@ -19,6 +19,7 @@
 
 #include <pongasoft/VST/Parameters.h>
 #include "pongasoft/VST/MessageHandler.h"
+#include "ViewCxMgr.h"
 #include <pongasoft/VST/GUI/Params/VstParameters.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
@@ -35,12 +36,11 @@ namespace Params {
 class GUIParamCxMgr;
 }
 
-class GUIState : public IMessageProducer
+class GUIState : public IMessageProducer, public IGUIRawVstParameterMgr
 {
 public:
-  explicit GUIState(Parameters const &iPluginParameters) :
-    fPluginParameters{iPluginParameters}
-  {};
+  // Constructor
+  explicit GUIState(Parameters const &iPluginParameters);
 
   /**
    * Called by the GUIController. */
@@ -68,7 +68,7 @@ public:
   /**
    * @return the raw parameter given its id
    */
-  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
+  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const override
   {
     if(existsVst(iParamID))
       return std::make_unique<GUIRawVstParameter>(iParamID, fVstParameters);
@@ -77,9 +77,64 @@ public:
   }
 
   // getRawVstParamDef
-  std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const
+  std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const override
   {
     return fPluginParameters.getRawVstParamDef(iParamID);
+  }
+
+  // getGUIVstParameter
+  template<typename T>
+  inline std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(ParamID iParamID) const
+  {
+    return fGUIVstParameterMgr.getGUIVstParameter<T>(iParamID);
+  }
+
+  // getGUIVstParameter
+  template<typename T>
+  inline std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(VstParam<T> iParamDef) const {
+    return fGUIVstParameterMgr.getGUIVstParameter<T>(std::move(iParamDef));
+  }
+
+  /**
+   * Connects the paramID to the listener. The connection object returned automatically closes the connection
+   * when it gets destroyed
+   *
+   * @return nullptr if the parameter does not exist
+   */
+  std::unique_ptr<FObjectCx> connect(ParamID iParamID, Parameters::IChangeListener *iChangeListener) const
+  {
+    return fVstParameters ? fVstParameters->connect(iParamID, iChangeListener) : nullptr;
+  }
+
+  /**
+   * Connects the paramID to the callback. The connection object returned automatically closes the connection
+   * when it gets destroyed
+   *
+   * @return nullptr if the parameter does not exist
+   */
+  std::unique_ptr<FObjectCx> connect(ParamID iParamID, Parameters::ChangeCallback iChangeCallback) const
+  {
+    return fVstParameters ? fVstParameters->connect(iParamID, std::move(iChangeCallback)) : nullptr;
+  }
+
+  /**
+   * Allow for registering an arbitrary callback on an arbitrary view without having to inherit from the view.
+   * The registration will automatically be discarded when the view is deleted.
+   *
+   * Example usage:
+   *
+   * TextButtonView button = ....;
+   * fState->registerConnectionFor(button).callback<int>(fState->fSelectedPad,
+   *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
+   *   iButton->setMouseEnabled(iParam > 3);
+   * });
+   *
+   * @param TView should be a subclass of VSTGUI::CView
+   * @return a builder to register the callback(s)
+   */
+  template<typename TView>
+  inline ViewCxMgr::ViewCallbackBuilder<TView> registerConnectionFor(TView *iView) {
+    return fViewCxMgr.registerConnectionFor(iView);
   }
 
   /**
@@ -132,8 +187,14 @@ protected:
   // the parameters
   Parameters const &fPluginParameters;
 
-  // vst parameters
+  // raw vst parameters
   VstParametersSPtr fVstParameters{};
+
+  // gui vst parameters manager
+  GUIVstParameterMgr fGUIVstParameterMgr;
+
+  // view connection mgr
+  ViewCxMgr fViewCxMgr;
 
   // message producer (to send messages)
   IMessageProducer *fMessageProducer{};

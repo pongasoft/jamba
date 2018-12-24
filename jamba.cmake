@@ -69,6 +69,7 @@ set(JAMBA_sources_h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioBuffer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/AudioUtils.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/FObjectCx.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageHandler.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageProducer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Messaging.h
@@ -115,6 +116,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIUtils.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/LookAndFeel.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Types.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/ViewCxMgr.h
     )
 
 set(JAMBA_sources_cpp
@@ -124,6 +126,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamLine.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamTable.cpp
 
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/FObjectCx.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/MessageHandler.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Parameters.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/NormalizedState.cpp
@@ -147,6 +150,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIController.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/ViewCxMgr.cpp
 
     )
 

@@ -31,13 +31,17 @@ namespace GUI {
 
 using namespace VSTGUI;
 
-// Defines a BitmapSPtr shortcut notation
+// Defines a Bitmap types shortcut notation
 using BitmapPtr = CBitmap *;
 using BitmapSPtr = SharedPointer<CBitmap>;
 
-// Defines a FontSPtr shortcut notation
+// Defines a Font types shortcut notation
 using FontPtr = CFontDesc *;
 using FontSPtr = SharedPointer<CFontDesc>;
+
+// Defines a Gradient types shortcut notation
+using GradientPtr = CGradient *;
+using GradientSPtr = SharedPointer<CGradient>;
 
 /**
  * Defines a Range

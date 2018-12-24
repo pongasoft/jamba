@@ -405,6 +405,55 @@ private:
   };
 
   /**
+   * Specialization for the color attribute. The view must have getter and setter as defined by the
+   * types below.
+   */
+  class GradientAttribute : public ByValAttribute<GradientPtr>
+  {
+  public:
+
+    // Constructor
+    GradientAttribute(std::string const &iName,
+                   typename ByValAttribute<GradientPtr>::Getter iGetter,
+                   typename ByValAttribute<GradientPtr>::Setter iSetter) :
+      ByValAttribute<GradientPtr>(iName, iGetter, iSetter) {}
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kGradientType;
+    }
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, GradientPtr &oValue) const override
+    {
+      auto gradient = iDescription->getGradient(iAttributeValue.c_str());
+      if(gradient)
+      {
+        oValue = gradient;
+        return true;
+      }
+      return false;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription, GradientPtr const &iValue, std::string &oStringValue) const override
+    {
+      if(iValue)
+      {
+        auto name = iDescription->lookupGradientName(iValue);
+        if(name)
+        {
+          oStringValue = name;
+          return true;
+        }
+
+      }
+      return false;
+    }
+  };
+
+  /**
    * Specialization for the boolean attribute. The view must have getter and setter as defined by the
    * types below.
    */
@@ -710,6 +759,16 @@ public:
                               typename ColorAttribute::Setter iSetter)
   {
     registerAttribute<ColorAttribute>(iName, iGetter, iSetter);
+  }
+
+  /**
+   * Registers a gradient attribute with the given name and getter/setter
+   */
+  void registerGradientAttribute(std::string const &iName,
+                              typename GradientAttribute::Getter iGetter,
+                              typename GradientAttribute::Setter iSetter)
+  {
+    registerAttribute<GradientAttribute>(iName, iGetter, iSetter);
   }
 
   /**

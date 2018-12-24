@@ -38,20 +38,20 @@ public:
   /**
    * Registers a raw parameter (no conversion)
    */
-  GUIRawVstParam registerRawVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback);
+  GUIRawVstParam registerRawVstCallback(ParamID iParamID, Parameters::ChangeCallback iChangeCallback);
 
   /**
    * Registers a raw parameter (no conversion)
    */
-  GUIRawVstParam registerRawVstParam(RawVstParam const &iParamDef, bool iSubscribeToChanges = true) {
+  GUIRawVstParam registerParam(RawVstParam const &iParamDef, bool iSubscribeToChanges = true) {
     return registerRawVstParam(iParamDef->fParamID, iSubscribeToChanges);
   }
 
   /**
    * Registers a raw parameter (no conversion)
    */
-  GUIRawVstParam registerRawVstParam(RawVstParam const &iParamDef, Parameters::ChangeCallback iChangeCallback) {
-    return registerRawVstParam(iParamDef->fParamID, std::move(iChangeCallback));
+  GUIRawVstParam registerCallback(RawVstParam const &iParamDef, Parameters::ChangeCallback iChangeCallback) {
+    return registerRawVstCallback(iParamDef->fParamID, std::move(iChangeCallback));
   }
 
   /**
@@ -73,7 +73,7 @@ public:
   GUIVstParam<Percent> registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
-   * Register a vst parameter simply given its id
+   * Register a Vst parameter simply given its id
    * @return empty param  if not found or not proper type
    */
   template<typename T>
@@ -86,14 +86,14 @@ public:
   }
 
   /**
-   * Register a vst parameter simply given its id
+   * Register a callback for a Vst parameter simply given its id
    * @return empty param if not found or not proper type
    */
   template<typename T>
-  GUIVstParam<T> registerVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+  GUIVstParam<T> registerVstCallback(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
   {
     if(fParamCxMgr)
-      return fParamCxMgr->registerVstParam<T>(iParamID, std::move(iChangeCallback));
+      return fParamCxMgr->registerVstCallback<T>(iParamID, std::move(iChangeCallback));
     else
       return GUIVstParam<T>{};
   }
@@ -112,11 +112,11 @@ public:
   bool __internal__registerVstControl(int32_t iParamID, T &oControlValue, GUIVstParam<T> &oGUIVstParam);
 
   /**
-   * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
+   * Convenient call to register a Vst param simply by using its description. Takes care of the type due to method API
    * @return empty param  if not found or not proper type
    */
   template<typename T>
-  GUIVstParam<T> registerVstParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges = true)
+  GUIVstParam<T> registerParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges = true)
   {
     if(fParamCxMgr)
       return fParamCxMgr->registerVstParam(iParamDef, iSubscribeToChanges ? this : nullptr);
@@ -125,16 +125,36 @@ public:
   }
 
   /**
-   * Convenient call to register a GUI param simply by using its description. Takes care of the type due to method API
+   * Convenient call to register a callback for the Vst param simply by using its description. Takes care of the
+   * type due to method API
    * @return empty param  if not found or not proper type
    */
   template<typename T>
-  GUIVstParam<T> registerVstParam(VstParam<T> const &iParamDef, Parameters::ChangeCallback iChangeCallback)
+  GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef, Parameters::ChangeCallback iChangeCallback)
   {
     if(fParamCxMgr)
-      return fParamCxMgr->registerVstParam(iParamDef, std::move(iChangeCallback));
+      return fParamCxMgr->registerVstCallback(iParamDef, std::move(iChangeCallback));
     else
       return GUIVstParam<T>{};
+  }
+
+  /**
+   * Convenient call to register a callback for the Vst param simply by using its description. Takes care of
+   * the type due to method API. Since the callback (Parameters::ChangeCallback1) is providing the param, it is not
+   * returned by this api.
+   *
+   * Example:
+   * registerCallback<int>(fParams->fMyParam, [] (GUIVstParam<int> &iParam) { iParam.getValue()...; });
+   *
+   * Note how the compiler requires the type (which seems that it could be inferred).
+   *
+   * @return false if not found or not proper type
+   */
+  template<typename T>
+  bool registerCallback(VstParam<T> const &iParamDef,
+                        Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback)
+  {
+    return fParamCxMgr ? fParamCxMgr->registerVstCallback(iParamDef, std::move(iChangeCallback)) : false;
   }
 
   /**
@@ -146,7 +166,7 @@ public:
    *         been called
    */
   template<typename T>
-  GUIJmbParam<T> registerJmbParam(GUIJmbParam<T> &iParamDef)
+  GUIJmbParam<T> registerParam(GUIJmbParam<T> &iParamDef)
   {
     if(fParamCxMgr)
       return fParamCxMgr->registerJmbParam(iParamDef, this);
@@ -155,30 +175,48 @@ public:
   }
 
   /**
-   * This method registers this class to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
-   * a wrapper directly accessible from the view and as a result there is no need to call this method unless you
-   * want to subscribe to the changes, hence there isn't a second optional parameter
+   * This method registers the callback to be invoked on GUIJmbParam changes.
    *
    * @return a copy of iParamDef for convenience and symmetry of the APIs or empty wrapper if initState has not
    *         been called
    */
   template<typename T>
-  GUIJmbParam<T> registerJmbParam(GUIJmbParam<T> &iParamDef, Parameters::ChangeCallback iChangeCallback)
+  GUIJmbParam<T> registerCallback(GUIJmbParam<T> &iParamDef, Parameters::ChangeCallback iChangeCallback)
   {
     if(fParamCxMgr)
-      return fParamCxMgr->registerJmbParam(iParamDef, std::move(iChangeCallback));
+      return fParamCxMgr->registerJmbCallback(iParamDef, std::move(iChangeCallback));
     else
       return GUIJmbParam<T>{};
   }
 
   /**
-   * Registers the ser param only given its id and return the wrapper to the param.
+   * This method registers the callback to be invoked on GUIJmbParam changes. Since the callback
+   * (Parameters::ChangeCallback1) is providing the param, it is not returned by this api.
+   *
+   * Example:
+   * registerCallback<Range>(fState->fMyParam, [] (GUIJmbParam<Range> &iParam) { iParam.getValue()...; });
+   *
+   * @return false if initState has not been called
+   */
+  template<typename T>
+  bool registerCallback(GUIJmbParam<T> &iParamDef, Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback)
+  {
+    if(fParamCxMgr)
+    {
+      fParamCxMgr->registerJmbCallback(iParamDef, std::move(iChangeCallback));
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Registers the Jmb param only given its id and return the wrapper to the param.
    *
    * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
    */
   template<typename T>
-  GUIJmbParam<T> registerJmbParam(ParamID iParamID,
-                                  bool iSubscribeToChanges = true)
+  GUIJmbParam<T> registerJmbParam(ParamID iParamID, bool iSubscribeToChanges = true)
   {
     if(fParamCxMgr)
       return fParamCxMgr->registerJmbParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
@@ -187,15 +225,15 @@ public:
   }
 
   /**
- * Registers the ser param only given its id and return the wrapper to the param.
- *
- * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
- */
+   * Registers a callback for this Jmb param only given its id and return the wrapper to the param.
+   *
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
+   */
   template<typename T>
-  GUIJmbParam<T> registerJmbParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+  GUIJmbParam<T> registerJmbCallback(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
   {
     if(fParamCxMgr)
-      return fParamCxMgr->registerJmbParam<T>(iParamID, std::move(iChangeCallback));
+      return fParamCxMgr->registerJmbCallback<T>(iParamID, std::move(iChangeCallback));
     else
       return GUIJmbParam<T>{};
   }

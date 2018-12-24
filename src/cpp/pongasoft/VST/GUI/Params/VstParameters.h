@@ -22,6 +22,7 @@
 #include <base/source/fstreamer.h>
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <memory>
+#include "GUIParamCx.h"
 
 namespace pongasoft {
 namespace VST {
@@ -49,6 +50,32 @@ public:
   inline tresult performEdit(ParamID iParamID, ParamValue iValue) const { return fParametersOwner->performEdit(iParamID, iValue); }
   inline tresult endEdit(ParamID iParamID) const { return fParametersOwner->endEdit(iParamID); }
   Vst::Parameter *getParameterObject(ParamID iParamID) const { return fParametersOwner->getParameterObject(iParamID); }
+
+
+  /**
+   * @return a connection that will listen to parameter changes (see FObjectCx)
+   */
+  std::unique_ptr<FObjectCx> connect(ParamID iParamID, Parameters::IChangeListener *iChangeListener)
+  {
+    if(exists(iParamID))
+      return std::make_unique<GUIParamCx>(iParamID,
+                                          getParameterObject(iParamID),
+                                          iChangeListener);
+    else
+      return nullptr;
+  }
+
+  /**
+   * @return a connection that will listen to parameter changes (see FObjectCx)
+   */
+  std::unique_ptr<FObjectCx> connect(ParamID iParamID, Parameters::ChangeCallback iChangeCallback) const
+  {
+    if(exists(iParamID))
+      return std::make_unique<FObjectCxCallback>(getParameterObject(iParamID),
+                                                 std::move(iChangeCallback));
+    else
+      return nullptr;
+  }
 
   // exists
   inline bool exists(ParamID iParamID) const { return getParameterObject(iParamID) != nullptr; }

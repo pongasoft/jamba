@@ -42,8 +42,21 @@ public:
   explicit TextButtonView(const CRect &iSize) : CustomViewAdapter(iSize) {}
 
   // get/set titleTag to (optionally) tie the title of this text button to a (Jmb) parameter
-  void setTitleTag(int32_t iValue);
+  virtual void setTitleTag(int32_t iValue);
   int32_t getTitleTag() const { return fTitleTag; };
+
+  // get/set disabled text color (color to use when button is disabled)
+  CColor const &getDisabledTextColor() const { return fDisabledTextColor; }
+  virtual void setDisabledTextColor(CColor const &iColor) { fDisabledTextColor = iColor; };
+
+  // get/set disabled gradient (gradient to use when button is disabled)
+  GradientPtr getDisabledGradient() const { return fDisabledGradient; }
+  virtual void setDisabledGradient(GradientPtr iGradient) { fDisabledGradient = iGradient; };
+
+  void setMouseEnabled(bool bEnable) override;
+
+  // draw => overridden to handle disabled state
+  void draw(CDrawContext *context) override;
 
   // registerParameters
   void registerParameters() override;
@@ -63,6 +76,10 @@ protected:
   // (optionally) tie the title of this text button to a (Jmb) parameter
   int32_t fTitleTag{-1};
 
+  // Which color and gradient to use when disabled
+  CColor fDisabledTextColor;
+  GradientSPtr fDisabledGradient;
+
   // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fTitle{};
 
@@ -77,6 +94,8 @@ public:
       CustomViewCreator(iViewName, iDisplayName, VSTGUI::UIViewCreator::kCTextButton)
     {
       registerTagAttribute("title-tag", &TextButtonView::getTitleTag, &TextButtonView::setTitleTag);
+      registerColorAttribute("disabled-text-color", &TextButtonView::getDisabledTextColor, &TextButtonView::setDisabledTextColor);
+      registerGradientAttribute("disabled-gradient", &TextButtonView::getDisabledGradient, &TextButtonView::setDisabledGradient);
     }
   };
 };

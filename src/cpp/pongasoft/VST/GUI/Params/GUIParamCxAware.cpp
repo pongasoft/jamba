@@ -64,14 +64,14 @@ bool GUIParamCxAware::__internal__registerRawVstControl(int32_t iParamID,
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerRawVstParam
+// GUIParamCxAware::registerRawVstCallback
 //------------------------------------------------------------------------
-GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+GUIRawVstParam GUIParamCxAware::registerRawVstCallback(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
 {
   if(!fParamCxMgr)
     return GUIRawVstParam{};
 
-  return fParamCxMgr->registerRawVstParam(iParamID, std::move(iChangeCallback));
+  return fParamCxMgr->registerRawVstCallback(iParamID, std::move(iChangeCallback));
 }
 
 //------------------------------------------------------------------------

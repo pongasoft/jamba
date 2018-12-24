@@ -16,6 +16,7 @@
  * @author Yan Pujante
  */
 
+#include <vstgui4/vstgui/lib/cdrawcontext.h>
 #include "TextButtonView.h"
 
 namespace pongasoft {
@@ -38,7 +39,7 @@ void TextButtonView::registerParameters()
 
   auto paramID = static_cast<ParamID>(getTitleTag());
 
-  fTitle = registerJmbParam<UTF8String>(paramID, [this] {
+  fTitle = registerJmbCallback<UTF8String>(paramID, [this] {
     setTitle(fTitle);
   });
 
@@ -76,6 +77,64 @@ void TextButtonView::onClick()
   if(fOnClickListener)
     fOnClickListener();
 }
+
+//------------------------------------------------------------------------
+// TextButtonView::draw
+// Implementation note: code copied from VSTGUI4 and changed to account
+// for disabled state
+//------------------------------------------------------------------------
+void TextButtonView::draw(CDrawContext *context)
+{
+  bool highlight = value > 0.5;
+
+  CGradient *bgGradient = getMouseEnabled() ?
+                          (highlight ? getGradientHighlighted() : getGradient()) : getDisabledGradient();
+  CColor const &textColor = getMouseEnabled() ?
+                            (highlight ? getTextColorHighlighted() : getTextColor()) : getDisabledTextColor();
+
+  auto lineWidth = getFrameWidth();
+  if(lineWidth < 0.)
+    lineWidth = context->getHairlineSize();
+  context->setDrawMode(kAntiAliasing);
+  context->setLineWidth(lineWidth);
+  context->setLineStyle(CLineStyle(CLineStyle::kLineCapRound, CLineStyle::kLineJoinRound));
+  context->setFrameColor(highlight ? frameColorHighlighted : frameColor);
+  CRect r(getViewSize());
+  r.inset(lineWidth / 2., lineWidth / 2.);
+  if(bgGradient)
+  {
+    CGraphicsPath *path = getPath(context, lineWidth);
+    if(path)
+    {
+      context->fillLinearGradient(path, *bgGradient, r.getTopLeft(), r.getBottomLeft(), false);
+      context->drawGraphicsPath(path, CDrawContext::kPathStroked);
+    }
+  }
+  CRect titleRect = getViewSize();
+  titleRect.inset(lineWidth / 2., lineWidth / 2.);
+
+  CBitmap *iconToDraw = nullptr;
+  if(!getMouseEnabled() && getDisabledBackground())
+    iconToDraw = getDisabledBackground();
+  else
+    iconToDraw = highlight ? (iconHighlighted ? iconHighlighted : icon) : (icon ? icon : iconHighlighted);
+  CDrawMethods::drawIconAndText(context, iconToDraw, iconPosition, getTextAlignment(), getTextMargin(), titleRect,
+                                title, getFont(), textColor);
+  setDirty(false);
+}
+
+//------------------------------------------------------------------------
+// TextButtonView::setMouseEnabled
+//------------------------------------------------------------------------
+void TextButtonView::setMouseEnabled(bool iEnable)
+{
+  if(iEnable != getMouseEnabled())
+  {
+    CView::setMouseEnabled(iEnable);
+    markDirty();
+  }
+}
+
 
 }
 }

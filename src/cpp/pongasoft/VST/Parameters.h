@@ -56,6 +56,18 @@ public:
    */
   using ChangeCallback = std::function<void()>;
 
+  /**
+   * A callback which will be invoked for changes with the param as an argument.
+   */
+  template<typename Param>
+  using ChangeCallback1 = std::function<void(Param &)>;
+
+  /**
+   * A callback which will be invoked for changes with the view and param as arguments.
+   */
+  template<typename TView, typename Param>
+  using ChangeCallback2 = std::function<void(TView *, Param &)>;
+
 public:
   /**
    * Implements the builder pattern for ease of build. */

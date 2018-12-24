@@ -199,6 +199,22 @@ public:
     return editor;
   }
 
+  /**
+   * @return an object maintaining the connection between the parameter and the listener
+   */
+  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const
+  {
+    return fRawParameter->connect(iChangeListener);
+  }
+
+  /**
+   * @return an object maintaining the connection between the parameter and the callback
+   */
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const
+  {
+    return fRawParameter->connect(std::move(iChangeCallback));
+  }
+
 private:
   std::shared_ptr<GUIRawVstParameter> fRawParameter;
   std::shared_ptr<VstParamDef<T>> fVstParamDef;
@@ -299,9 +315,71 @@ public:
   // allow to write param1 != param2
   inline bool operator!=(const GUIVstParam &rhs) const { return fPtr->getNormalizedValue() != rhs.fPtr->getNormalizedValue(); }
 
+  /**
+   * @return an object maintaining the connection between the parameter and the listener
+   */
+  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { return fPtr->connect(iChangeListener); }
+
+  /**
+   * @return an object maintaining the connection between the parameter and the callback
+   */
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
+
 private:
   std::unique_ptr<GUIVstParameter<T>> fPtr;
 };
+
+/**
+ * Class which manages GUIVstParameter
+ */
+class GUIVstParameterMgr
+{
+public:
+  // Constructor
+  explicit GUIVstParameterMgr(IGUIRawVstParameterMgr *iMgr) : fGUIRawVstParameterMgr{iMgr} {}
+
+  // getGUIVstParameter
+  template<typename T>
+  std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(ParamID iParamID) const;
+
+  // getGUIVstParameter
+  template<typename T>
+  inline std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(VstParam<T> iParamDef) const {
+    return iParamDef ? getGUIVstParameter<T>(iParamDef->fParamID) : nullptr;
+  }
+
+private:
+  IGUIRawVstParameterMgr *fGUIRawVstParameterMgr;
+};
+
+//------------------------------------------------------------------------
+// GUIVstParameterMgr::getGUIVstParameter
+//------------------------------------------------------------------------
+template<typename T>
+std::unique_ptr<GUIVstParameter<T>> GUIVstParameterMgr::getGUIVstParameter(ParamID iParamID) const
+{
+  auto param = fGUIRawVstParameterMgr->getRawVstParameter(iParamID);
+
+  if(!param)
+  {
+    DLOG_F(WARNING, "vst param [%d] not found", iParamID);
+    return nullptr;
+  }
+
+  auto rawParamDef = fGUIRawVstParameterMgr->getRawVstParamDef(iParamID);
+
+  auto paramDef = std::dynamic_pointer_cast<VstParamDef<T>>(rawParamDef);
+
+  if(paramDef)
+  {
+    return std::make_unique<GUIVstParameter<T>>(std::move(param), paramDef);
+  }
+  else
+  {
+    DLOG_F(WARNING, "vst param [%d] is not of the requested type", iParamID);
+    return nullptr;
+  }
+}
 
 //------------------------------------------------------------------------
 // shortcut notations

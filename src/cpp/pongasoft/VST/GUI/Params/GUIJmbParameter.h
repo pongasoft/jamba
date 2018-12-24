@@ -34,7 +34,7 @@ namespace Params {
 /**
  * Base class for a Jamba (Jmb) GUI parameter. This type of parameter is used when it cannot be mapped to a
  * Vst parameter whose internal representation must be a value in the range [0.0, 1.0]. For example a string (like
- * a user input label to name a component) does not fit in the Vst parameter category. By implementating
+ * a user input label to name a component) does not fit in the Vst parameter category. By implementing
  * the serializable api (readFromStream/writeToStream), any type can be part of the state.
  */
 class IGUIJmbParameter : public IMessageHandler
@@ -199,7 +199,7 @@ public:
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
    */
-  std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener)
+  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener)
   {
     return std::make_unique<GUIParamCx>(getParamID(), this, iChangeListener);
   }
@@ -207,9 +207,9 @@ public:
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
    */
-  std::unique_ptr<GUIParamCx> connect(Parameters::ChangeCallback iChangeCallback)
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback)
   {
-    return std::make_unique<GUIParamCx>(getParamID(), this, std::move(iChangeCallback));
+    return std::make_unique<FObjectCxCallback>(this, std::move(iChangeCallback));
   }
 
 protected:
@@ -290,10 +290,10 @@ public:
   }
 
   // connect
-  inline std::unique_ptr<GUIParamCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }
+  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) { return fPtr->connect(iChangeListener); }
 
   // connect
-  inline std::unique_ptr<GUIParamCx> connect(Parameters::ChangeCallback iChangeCallback) { return fPtr->connect(std::move(iChangeCallback)); }
+  inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) { return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
   GUIJmbParameter<T> *fPtr;
