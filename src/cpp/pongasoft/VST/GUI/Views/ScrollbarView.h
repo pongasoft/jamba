@@ -229,9 +229,13 @@ protected:
   // computeZoomBox
   ZoomBox computeZoomBox() const;
 
+  // returns the width of just the scrollbar (excluding handles and gutter)
+  CCoord getScrollbarWidth() const;
+
 protected:
   // set to true when the 3 AbsoluteRect need to be recomputed
   bool fNeedsRecomputing{true};
+  ZoomBox fZoomBox{};
 
   // the 3 Rect representing the position and size of the 3 pieces of the rendering
   AbsoluteRect fLeftHandleRect;

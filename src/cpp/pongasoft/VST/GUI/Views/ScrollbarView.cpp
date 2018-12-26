@@ -127,8 +127,8 @@ bool ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, DragType iDragType)
   {
     case DragType::kZoomLeft:
       // we move the left and right in opposite direction
-      newLeft = getLeft() + iDeltaX / 2.0;
-      newRight = getRight() - iDeltaX / 2.0;
+      newLeft = getLeft() + iDeltaX;
+      newRight = getRight() - iDeltaX;
       break;
 
     case DragType::kStretchLeft:
@@ -165,8 +165,8 @@ bool ScrollbarView::ZoomBox::stretch(CCoord iDeltaX, DragType iDragType)
 
     case DragType::kZoomRight:
       // we move the left and right in opposite direction
-      newRight = getRight() + iDeltaX / 2.0;
-      newLeft = getLeft() - iDeltaX / 2.0;
+      newRight = getRight() + iDeltaX;
+      newLeft = getLeft() - iDeltaX;
       break;
 
     default:
@@ -223,16 +223,16 @@ void ScrollbarView::recompute()
   if(!fNeedsRecomputing)
     return;
 
-  ZoomBox box = computeZoomBox();
+  fZoomBox = computeZoomBox();
 
-  auto h = box.getHeight();
+  auto h = fZoomBox.getHeight();
 
-  RelativeView rv = box.getRelativeView();
+  RelativeView rv = fZoomBox.getRelativeView();
 
   if(showHandles())
   {
-    fLeftHandleRect = {box.getLeft(), 0, box.getLeft() + box.fZoomHandlesSize, h};
-    fRightHandleRect = {box.getRight() - box.fZoomHandlesSize, 0, box.getRight() , h};
+    fLeftHandleRect = {fZoomBox.getLeft(), 0, fZoomBox.getLeft() + fZoomBox.fZoomHandlesSize, h};
+    fRightHandleRect = {fZoomBox.getRight() - fZoomBox.fZoomHandlesSize, 0, fZoomBox.getRight() , h};
     fScrollbarRect = {fLeftHandleRect.right + fScrollbarGutterSpacing, 0, fRightHandleRect.left - fScrollbarGutterSpacing, h};
 
     fLeftHandleRect = rv.toAbsoluteRect(fLeftHandleRect);
@@ -243,10 +243,27 @@ void ScrollbarView::recompute()
   {
     fLeftHandleRect = {0, 0, 0, 0};
     fRightHandleRect = {0, 0, 0, 0};
-    fScrollbarRect = rv.toAbsoluteRect({box.getLeft(), 0, box.getRight(), h});
+    fScrollbarRect = rv.toAbsoluteRect({fZoomBox.getLeft(), 0, fZoomBox.getRight(), h});
   }
 
   fNeedsRecomputing = false;
+}
+
+//------------------------------------------------------------------------
+// ScrollbarView::getScrollbarWidth
+//------------------------------------------------------------------------
+CCoord ScrollbarView::getScrollbarWidth() const
+{
+  if(showHandles())
+  {
+    auto scrollbarLeft = fZoomBox.getLeft() + fZoomBox.fZoomHandlesSize + fScrollbarGutterSpacing;
+    auto scrollbarRight = fZoomBox.getRight() - fZoomBox.fZoomHandlesSize - fScrollbarGutterSpacing;
+    return scrollbarRight - scrollbarLeft;
+  }
+  else
+  {
+    return fZoomBox.getWidth();
+  }
 }
 
 //------------------------------------------------------------------------
@@ -419,7 +436,7 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
     if(buttons.getModifierState() == CButton::kShift)
       box.move(-1);
     else
-      box.move(-box.getWidth());
+      box.move(-getScrollbarWidth());
     setOffsetPercent(box.computeOffsetPercent());
     return kMouseEventHandled;
   }
@@ -430,7 +447,7 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
     if(buttons.getModifierState() == CButton::kShift)
       box.move(1);
     else
-      box.move(box.getWidth());
+      box.move(getScrollbarWidth());
     setOffsetPercent(box.computeOffsetPercent());
     return kMouseEventHandled;
   }
