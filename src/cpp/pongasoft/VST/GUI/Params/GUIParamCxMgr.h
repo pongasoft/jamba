@@ -19,6 +19,7 @@
 #define __PONGASOFT_VST_GUI_PARAM_CX_MGR_H__
 
 #include <pongasoft/VST/GUI/GUIState.h>
+#include <unordered_map>
 
 namespace pongasoft {
 namespace VST {
@@ -186,6 +187,10 @@ public:
   // getGUIState
   GUIState *getGUIState() const { return fGUIState; };
 
+  /**
+   * Invoke all registered callbacks and listeners */
+  void invokeAll();
+
   friend class GUI::GUIState;
 
 protected:
@@ -220,7 +225,7 @@ private:
   GUIState *fGUIState;
 
   // Maintains the connections for the listeners... will be automatically discarded in the destructor
-  std::map<ParamID, std::unique_ptr<FObjectCx>> fParamCxs;
+  std::unordered_map<ParamID, std::unique_ptr<FObjectCx>> fParamCxs;
 };
 
 //------------------------------------------------------------------------

@@ -18,7 +18,7 @@
 #pragma once
 
 #include <vstgui/uidescription/icontroller.h>
-#include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
+#include <pongasoft/VST/GUI/Params/GUIParamCxAware.hpp>
 #include "PluginAccessor.h"
 
 namespace pongasoft {

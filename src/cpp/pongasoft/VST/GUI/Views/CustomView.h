@@ -20,7 +20,7 @@
 #include <vstgui4/vstgui/lib/cview.h>
 #include <map>
 #include <pongasoft/VST/GUI/GUIState.h>
-#include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
+#include <pongasoft/VST/GUI/Params/GUIParamCxAware.hpp>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include "CustomViewCreator.h"
 #include "PluginAccessor.h"

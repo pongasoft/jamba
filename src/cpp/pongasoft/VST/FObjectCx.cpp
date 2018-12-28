@@ -49,6 +49,17 @@ void FObjectCx::close()
 }
 
 //------------------------------------------------------------------------
+// FObjectCxCallback::update
+//------------------------------------------------------------------------
+void FObjectCx::update(FUnknown * /* iChangedUnknown */, Steinberg::int32 iMessage)
+{
+  if(iMessage == IDependent::kChanged)
+  {
+    onTargetChange();
+  }
+}
+
+//------------------------------------------------------------------------
 // FObjectCxCallback::FObjectCxCallback
 //------------------------------------------------------------------------
 FObjectCxCallback::FObjectCxCallback(FObject *iTarget, FObjectCxCallback::ChangeCallback iChangeCallback)
@@ -68,15 +79,12 @@ void FObjectCxCallback::close()
 }
 
 //------------------------------------------------------------------------
-// FObjectCxCallback::update
+// FObjectCxCallback::onTargetChange
 //------------------------------------------------------------------------
-void FObjectCxCallback::update(FUnknown * /* iChangedUnknown */, Steinberg::int32 iMessage)
+void FObjectCxCallback::onTargetChange()
 {
-  if(iMessage == IDependent::kChanged)
-  {
-    if(fChangeCallback)
-      fChangeCallback();
-  }
+  if(fChangeCallback)
+    fChangeCallback();
 }
 
 }

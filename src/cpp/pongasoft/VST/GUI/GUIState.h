@@ -19,11 +19,11 @@
 
 #include <pongasoft/VST/Parameters.h>
 #include "pongasoft/VST/MessageHandler.h"
-#include "ViewCxMgr.h"
 #include <pongasoft/VST/GUI/Params/VstParameters.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 #include <pongasoft/VST/MessageProducer.h>
+#include "ViewCxMgr.h"
 
 namespace pongasoft {
 namespace VST {
@@ -36,7 +36,7 @@ namespace Params {
 class GUIParamCxMgr;
 }
 
-class GUIState : public IMessageProducer, public IGUIRawVstParameterMgr
+class GUIState : public IMessageProducer
 {
 public:
   // Constructor
@@ -68,7 +68,7 @@ public:
   /**
    * @return the raw parameter given its id
    */
-  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const override
+  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
   {
     if(existsVst(iParamID))
       return std::make_unique<GUIRawVstParameter>(iParamID, fVstParameters);
@@ -77,22 +77,19 @@ public:
   }
 
   // getRawVstParamDef
-  std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const override
+  std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const
   {
     return fPluginParameters.getRawVstParamDef(iParamID);
   }
 
   // getGUIVstParameter
   template<typename T>
-  inline std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(ParamID iParamID) const
-  {
-    return fGUIVstParameterMgr.getGUIVstParameter<T>(iParamID);
-  }
+  std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(ParamID iParamID) const;
 
   // getGUIVstParameter
   template<typename T>
   inline std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(VstParam<T> iParamDef) const {
-    return fGUIVstParameterMgr.getGUIVstParameter<T>(std::move(iParamDef));
+    return iParamDef ? getGUIVstParameter<T>(iParamDef->fParamID) : nullptr;
   }
 
   /**
@@ -123,22 +120,24 @@ public:
    *
    * Example usage:
    *
-   * TextButtonView button = ....;
-   * fState->registerConnectionFor(button).callback<int>(fState->fSelectedPad,
+   * TextButtonView *button = ....;
+   * fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
    *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
    *   iButton->setMouseEnabled(iParam > 3);
    * });
    *
    * @param TView should be a subclass of VSTGUI::CView
-   * @return a builder to register the callback(s)
+   * @return a pointer to an object for registering callbacks, listener and params.
+   *         Note: You should not keep this pointer around as it be will automatically be deleted when the view
+   *         goes away.
    */
   template<typename TView>
-  inline ViewCxMgr::ViewCallbackBuilder<TView> registerConnectionFor(TView *iView) {
-    return fViewCxMgr.registerConnectionFor(iView);
+  inline ViewGUIParamCxAware<TView> *registerConnectionFor(TView *iView) {
+    return fViewCxMgr.registerConnectionFor(iView, this);
   }
 
   /**
-   * @return the ser parameter given its id (nullptr if not found)
+   * @return the Jmb parameter given its id (nullptr if not found)
    */
   IGUIJmbParameter *getJmbParameter(ParamID iParamID) const;
 
@@ -190,11 +189,8 @@ protected:
   // raw vst parameters
   VstParametersSPtr fVstParameters{};
 
-  // gui vst parameters manager
-  GUIVstParameterMgr fGUIVstParameterMgr;
-
   // view connection mgr
-  ViewCxMgr fViewCxMgr;
+  ViewCxMgr fViewCxMgr{};
 
   // message producer (to send messages)
   IMessageProducer *fMessageProducer{};
@@ -307,6 +303,36 @@ tresult GUIState::broadcast(JmbParam<T> const &iParamDef, const T &iMessage)
 
   return res;
 }
+
+//------------------------------------------------------------------------
+// GUIState::getGUIVstParameter
+//------------------------------------------------------------------------
+template<typename T>
+std::unique_ptr<GUIVstParameter<T>> GUIState::getGUIVstParameter(ParamID iParamID) const
+{
+  auto param = getRawVstParameter(iParamID);
+
+  if(!param)
+  {
+    DLOG_F(WARNING, "vst param [%d] not found", iParamID);
+    return nullptr;
+  }
+
+  auto rawParamDef = getRawVstParamDef(iParamID);
+
+  auto paramDef = std::dynamic_pointer_cast<VstParamDef<T>>(rawParamDef);
+
+  if(paramDef)
+  {
+    return std::make_unique<GUIVstParameter<T>>(std::move(param), paramDef);
+  }
+  else
+  {
+    DLOG_F(WARNING, "vst param [%d] is not of the requested type", iParamID);
+    return nullptr;
+  }
+}
+
 
 }
 }

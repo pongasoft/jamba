@@ -27,9 +27,7 @@ namespace GUI {
 // GUIState::GUIState
 //------------------------------------------------------------------------
 GUIState::GUIState(Parameters const &iPluginParameters) :
-  fPluginParameters{iPluginParameters},
-  fGUIVstParameterMgr(this),
-  fViewCxMgr{&fGUIVstParameterMgr}
+  fPluginParameters{iPluginParameters}
 {
 }
 

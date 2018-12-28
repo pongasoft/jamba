@@ -22,6 +22,16 @@ namespace VST {
 namespace GUI {
 namespace Params {
 
+//------------------------------------------------------------------------
+// GUIParamCxMgr::invokeAll
+//------------------------------------------------------------------------
+void GUIParamCxMgr::invokeAll()
+{
+  for(auto &it: fParamCxs)
+  {
+    it.second->onTargetChange();
+  }
+}
 
 //------------------------------------------------------------------------
 // GUIParamCxMgr::unregisterParam

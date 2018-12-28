@@ -44,12 +44,23 @@ public:
   virtual void close();
 
   /**
+   * Called when the target changes (by default does nothing)
+   */
+  virtual void onTargetChange() {};
+
+  /**
    * Automatically closes the connection and stops listening */
   inline ~FObjectCx() override { close(); }
 
   // disabling copy
   FObjectCx(FObjectCx const &) = delete;
   FObjectCx& operator=(FObjectCx const &) = delete;
+
+protected:
+  /**
+   * This is being called when fTarget sends a message to this object
+   */
+  void PLUGIN_API update(FUnknown *iChangedUnknown, Steinberg::int32 iMessage) SMTG_OVERRIDE;
 
 protected:
   FObject *fTarget;
@@ -64,19 +75,18 @@ class FObjectCxCallback : public FObjectCx
 public:
   using ChangeCallback = std::function<void()>;
 
+  // Constructor
   FObjectCxCallback(FObject *iTarget, ChangeCallback iChangeCallback);
 
+  // close
   void close() override;
+
+  // onTargetChange
+  void onTargetChange() override;
 
   // disabling copy
   FObjectCxCallback(FObjectCxCallback const &) = delete;
   FObjectCxCallback& operator=(FObjectCxCallback const &) = delete;
-
-protected:
-  /**
-   * This is being called when the parameter receives a message... do not call explicitly
-   */
-  void PLUGIN_API update(FUnknown *iChangedUnknown, Steinberg::int32 iMessage) SMTG_OVERRIDE;
 
 protected:
   ChangeCallback fChangeCallback;

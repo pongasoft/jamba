@@ -15,12 +15,29 @@
  *
  * @author Yan Pujante
  */
-#include "GUIParamCxAware.h"
+#include "GUIParamCxAware.hpp"
+#include <pongasoft/VST/GUI/GUIState.h>
 
 namespace pongasoft {
 namespace VST {
 namespace GUI {
 namespace Params {
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::~GUIParamCxAware
+//------------------------------------------------------------------------
+GUIParamCxAware::~GUIParamCxAware()
+{
+  fParamCxMgr = nullptr;
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::initState
+//------------------------------------------------------------------------
+void GUIParamCxAware::initState(GUIState *iGUIState)
+{
+  fParamCxMgr = iGUIState->createParamCxMgr();
+}
 
 //------------------------------------------------------------------------
 // GUIParamCxAware::registerRawVstParam
@@ -118,6 +135,15 @@ void GUIParamCxAware::unregisterAll()
 {
   if(fParamCxMgr)
     fParamCxMgr->unregisterAll();
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::invokeAll
+//------------------------------------------------------------------------
+void GUIParamCxAware::invokeAll()
+{
+  if(fParamCxMgr)
+    fParamCxMgr->invokeAll();
 }
 
 }

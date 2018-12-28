@@ -285,20 +285,6 @@ private:
   std::unique_ptr<GUIRawVstParameter> fPtr;
 };
 
-/**
- * Interface for managing Raw Vst parameters
- */
-class IGUIRawVstParameterMgr
-{
-public:
-  // getRawVstParamDef
-  virtual std::shared_ptr<RawVstParamDef> getRawVstParamDef(ParamID iParamID) const = 0;
-
-  /**
-   * @return the raw parameter given its id (or nullptr if doesn't exist) */
-  virtual std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const = 0;
-};
-
 //------------------------------------------------------------------------
 // shortcut notations
 //------------------------------------------------------------------------

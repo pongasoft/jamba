@@ -45,15 +45,12 @@ public:
    */
   void close() override;
 
+  // onTargetChange
+  void onTargetChange() override;
+
   // disabling copy
   GUIParamCx(GUIParamCx const &) = delete;
   GUIParamCx& operator=(GUIParamCx const &) = delete;
-
-protected:
-  /**
-   * This is being called when the parameter receives a message... do not call explicitely
-   */
-  void PLUGIN_API update(FUnknown *iChangedUnknown, Steinberg::int32 iMessage) SMTG_OVERRIDE;
 
 protected:
   ParamID fParamID;

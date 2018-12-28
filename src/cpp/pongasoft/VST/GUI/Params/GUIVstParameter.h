@@ -329,58 +329,6 @@ private:
   std::unique_ptr<GUIVstParameter<T>> fPtr;
 };
 
-/**
- * Class which manages GUIVstParameter
- */
-class GUIVstParameterMgr
-{
-public:
-  // Constructor
-  explicit GUIVstParameterMgr(IGUIRawVstParameterMgr *iMgr) : fGUIRawVstParameterMgr{iMgr} {}
-
-  // getGUIVstParameter
-  template<typename T>
-  std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(ParamID iParamID) const;
-
-  // getGUIVstParameter
-  template<typename T>
-  inline std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(VstParam<T> iParamDef) const {
-    return iParamDef ? getGUIVstParameter<T>(iParamDef->fParamID) : nullptr;
-  }
-
-private:
-  IGUIRawVstParameterMgr *fGUIRawVstParameterMgr;
-};
-
-//------------------------------------------------------------------------
-// GUIVstParameterMgr::getGUIVstParameter
-//------------------------------------------------------------------------
-template<typename T>
-std::unique_ptr<GUIVstParameter<T>> GUIVstParameterMgr::getGUIVstParameter(ParamID iParamID) const
-{
-  auto param = fGUIRawVstParameterMgr->getRawVstParameter(iParamID);
-
-  if(!param)
-  {
-    DLOG_F(WARNING, "vst param [%d] not found", iParamID);
-    return nullptr;
-  }
-
-  auto rawParamDef = fGUIRawVstParameterMgr->getRawVstParamDef(iParamID);
-
-  auto paramDef = std::dynamic_pointer_cast<VstParamDef<T>>(rawParamDef);
-
-  if(paramDef)
-  {
-    return std::make_unique<GUIVstParameter<T>>(std::move(param), paramDef);
-  }
-  else
-  {
-    DLOG_F(WARNING, "vst param [%d] is not of the requested type", iParamID);
-    return nullptr;
-  }
-}
-
 //------------------------------------------------------------------------
 // shortcut notations
 //------------------------------------------------------------------------

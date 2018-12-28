@@ -45,15 +45,12 @@ void GUIParamCx::close()
 }
 
 //------------------------------------------------------------------------
-// GUIParamCx::update
+// GUIParamCx::onTargetChange
 //------------------------------------------------------------------------
-void GUIParamCx::update(FUnknown *iChangedUnknown, Steinberg::int32 iMessage)
+void GUIParamCx::onTargetChange()
 {
-  if(iMessage == IDependent::kChanged)
-  {
-    if(fChangeListener)
-      fChangeListener->onParameterChange(fParamID);
-  }
+  if(fChangeListener)
+    fChangeListener->onParameterChange(fParamID);
 }
 
 }

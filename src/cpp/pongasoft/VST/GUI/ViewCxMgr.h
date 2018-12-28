@@ -23,6 +23,7 @@
 #include <vstgui4/vstgui/lib/iviewlistener.h>
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
+#include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
 
 namespace pongasoft {
 namespace VST {
@@ -36,11 +37,10 @@ using namespace Params;
  * for the life of a view without having to inherit from the view to implement a similar behavior (which is much more
  * involved).
  *
- * Example usage:
+ * Example1 usage:
  *
- * ViewCxMgr *mgr = ...;
  * TextButtonView *button = ....;
- * mgr->registerConnectionFor(button).callback<int>(fState->fMyParam,
+ * fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
  *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
  *   iButton->setMouseEnabled(iParam > 3);
  * });
@@ -49,6 +49,23 @@ using namespace Params;
  * changes, the callback is invoked. Since the view and the parameter are part of the callback API, it is easy to
  * implement simple behaviors like this. Usually this can be done from the main controller (or sub controller) in the
  * verifyView method.
+ *
+ * Example2 usage:
+ *
+ * TextButtonView *button = ....;
+ * auto cx = fState->registerConnectionFor(button);
+ * cx->registerParam(fParams->fMyVstParam);
+ * cx->registerParam(fState->fMyJmbParam);
+ * cx->registerListener([this] (TextButtonView *iButton, ParamID iParamID) {
+ *   if(iParamID == fParams->fMyVstParam.getParamID())
+ *     // do something... iButton->xxx
+ *   if(iParamID == fParams->fState->fMyJmbParam())
+ *     // do something else... iButton->xxx
+ *  });
+ *  cx->invokeAll(); // optionally invoke the listener right away to initialize the button
+ *
+ * This examples sets up the button view as being interested in changes to 2 parameters and when they change,
+ * the listener will be invoked.
  *
  * An alternative would be to inherit from the view which is more work (especially if the only purpose is add a
  * simple callback like behavior):
@@ -61,7 +78,7 @@ using namespace Params;
  *
  *     void registerParameters() override
  *     {
- *        registerVstCallback(fState->fMyParam, [this] (GUIVstParam<int> &iParam) {
+ *        registerVstCallback(fParams->fMyParam, [this] (GUIVstParam<int> &iParam) {
  *          setMouseEnabled(iParam > 3);
  *        });
  *     }
@@ -71,86 +88,13 @@ class ViewCxMgr : private IViewListenerAdapter
 {
 public:
   /**
-   * Builder pattern to add multiple callbacks to a view
-   */
-  template<typename TView>
-  struct ViewCallbackBuilder
-  {
-    /**
-     * Adds a callback to handle changes on a Vst parameter
-     *
-     * @param iInvokeCallback whether to invoke the callback right away or not
-     */
-    template<typename T>
-    inline void callback(VstParam<T> const &iParamDef,
-                         Parameters::ChangeCallback2<TView, GUIVstParam<T>> iChangeCallback,
-                         bool iInvokeCallback = false)
-    {
-      if(iChangeCallback)
-      {
-        auto param = fMgr->fGUIVstParameterMgr->getGUIVstParameter(iParamDef);
-        if(param)
-        {
-          // Implementation note:
-          // 1) using std::make_unique results in an error on std::move(callback) because unique_ptr
-          // cannot be copied...
-          // 2) we need to access the ptr afterwards to call connect
-          auto ptr = std::make_shared<GUIVstParam<T>>(std::move(param));
-          auto callback = [view = this->fView, ptr, cb2 = std::move(iChangeCallback)] () {
-            cb2(view, *ptr);
-          };
-
-          if(iInvokeCallback)
-            callback();
-
-          fMgr->registerConnection(fView, ptr->connect(std::move(callback)));
-        }
-      }
-    }
-
-    /**
-     * Adds a callback to handle changes on a Jmb parameter
-     *
-     * @param iInvokeCallback whether to invoke the callback right away or not
-     */
-    template<typename T>
-    inline void callback(GUIJmbParam<T> &iParam,
-                         Parameters::ChangeCallback2<TView, GUIJmbParam<T>> iChangeCallback,
-                         bool iInvokeCallback = false)
-    {
-      if(iChangeCallback)
-      {
-        auto callback = [view = this->fView, &iParam, cb2 = std::move(iChangeCallback)] () {
-          cb2(view, iParam);
-        };
-
-        if(iInvokeCallback)
-          callback();
-
-        fMgr->registerConnection(fView, std::move(iParam.connect(std::move(callback))));
-      }
-    }
-
-    friend class ViewCxMgr;
-
-  private:
-    // Constructor
-    ViewCallbackBuilder(TView *iView, ViewCxMgr *iMgr) : fView{iView}, fMgr{iMgr} {}
-
-    TView *fView;
-    ViewCxMgr *fMgr;
-  };
-
-public:
-  // Constructor
-  explicit ViewCxMgr(GUIVstParameterMgr *iMgr) : fGUIVstParameterMgr{iMgr} {};
-
-  /**
    * @param TView should be a subclass of VSTGUI::CView
-   * @return a builder class to add callback for this view (see comment at the top for usages)
+   * @return a pointer (owned by this class) to an object for registering callbacks, listener and params.
+   *         Note: You should not keep this pointer around. It is owned by this class and will automatically be deleted
+   *         when the view goes away.
    */
   template<typename TView>
-  inline ViewCallbackBuilder<TView> registerConnectionFor(TView *iView) { return {iView, this};}
+  ViewGUIParamCxAware<TView> *registerConnectionFor(TView *iView, GUIState *iGUIState);
 
   /**
    * Close all previously established connections
@@ -158,23 +102,36 @@ public:
   void closeAll();
 
 private:
-  using FObjectCxUPtr = std::unique_ptr<FObjectCx>;
-  using GUIParamCxVector = std::vector<FObjectCxUPtr>;
-
-  /**
-   * Called by the builder class to add a connection for this view
-   */
-  void registerConnection(CView *iView, FObjectCxUPtr iFObjectCx);
-
   /**
    * Called by VSTGUI when a view that was previously registered is being deleted => all its connections will be closed
    */
   void viewWillDelete(CView *iView) override;
 
 private:
-  GUIVstParameterMgr *fGUIVstParameterMgr;
-  std::unordered_map<CView *, GUIParamCxVector> fViewConnections{};
+  std::unordered_map<CView *, std::unique_ptr<GUIParamCxAware>> fViewConnections{};
 };
+
+//------------------------------------------------------------------------
+// ViewCxMgr::registerConnectionFor
+//------------------------------------------------------------------------
+template<typename TView>
+ViewGUIParamCxAware<TView> *ViewCxMgr::registerConnectionFor(TView *iView, GUIState *iGUIState)
+{
+  if(iView == nullptr)
+    return nullptr;
+
+  auto iter = fViewConnections.find(iView);
+
+  if(iter == fViewConnections.end())
+  {
+    iView->registerViewListener(this);
+    fViewConnections[iView] = std::make_unique<ViewGUIParamCxAware<TView>>(iView);
+    fViewConnections[iView]->initState(iGUIState);
+  }
+
+  return static_cast<ViewGUIParamCxAware<TView> *>(fViewConnections[iView].get());
+}
+
 
 }
 }
