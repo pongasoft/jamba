@@ -143,6 +143,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawVstParameter.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewFactory.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.cpp

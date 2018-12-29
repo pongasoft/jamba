@@ -39,14 +39,10 @@ void TextButtonView::registerParameters()
 
   auto paramID = static_cast<ParamID>(getTitleTag());
 
-  fTitle = registerJmbCallback<UTF8String>(paramID, [this] {
-    setTitle(fTitle);
-  });
-
-  if(fTitle.exists())
-  {
-    setTitle(fTitle);
-  }
+  fTitle =
+    registerJmbCallback<UTF8String>(paramID, [this] {
+      setTitle(fTitle);
+    }, true); // make sure to invoke the callback when the param exists to set the title right away
 }
 
 //------------------------------------------------------------------------

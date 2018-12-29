@@ -119,33 +119,6 @@ bool CustomView::getEditorMode() const
 #endif
 }
 
-///////////////////////////////////////////
-// CustomView::afterCreate
-///////////////////////////////////////////
-void CustomView::afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription)
-{
-  auto provider = dynamic_cast<GUIStateProvider const *>(iDescription->getViewFactory());
-  if(provider)
-    initState(provider->getGUIState());
-}
-
-///////////////////////////////////////////
-// CustomView::beforeApply
-///////////////////////////////////////////
-void CustomView::beforeApply(UIAttributes const &iAttributes, IUIDescription const *iDescription)
-{
-  // nothing to do...
-}
-
-///////////////////////////////////////////
-// CustomView::afterApply
-///////////////////////////////////////////
-void CustomView::afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription)
-{
-  if(fParamCxMgr)
-    registerParameters();
-}
-
 }
 }
 }

@@ -63,9 +63,12 @@ public:
    * Registers a raw parameter (no conversion)
    */
   inline GUIRawVstParam registerRawVstCallback(ParamID iParamID,
-                                               Parameters::ChangeCallback iChangeCallback)
+                                               Parameters::ChangeCallback iChangeCallback,
+                                               bool iInvokeCallback)
   {
-    return __registerRawVstParam(iParamID, std::move(iChangeCallback));
+    return maybeInvokeCallback(std::move(__registerRawVstParam(iParamID, iChangeCallback)),
+                               iChangeCallback,
+                               iInvokeCallback);
   }
 
   /**
@@ -85,9 +88,12 @@ public:
    */
   template<typename T>
   inline GUIVstParam<T> registerVstCallback(ParamID iParamID,
-                                            Parameters::ChangeCallback iChangeCallback)
+                                            Parameters::ChangeCallback iChangeCallback,
+                                            bool iInvokeCallback)
   {
-    return __registerVstParam<T>(iParamID, std::move(iChangeCallback));
+    return maybeInvokeCallback(std::move(__registerVstParam<T>(iParamID, iChangeCallback)),
+                               iChangeCallback,
+                               iInvokeCallback);
   }
 
   /**
@@ -107,9 +113,12 @@ public:
    */
   template<typename T>
   inline GUIVstParam<T> registerVstCallback(VstParam<T> const &iParamDef,
-                                            Parameters::ChangeCallback iChangeCallback)
+                                            Parameters::ChangeCallback iChangeCallback,
+                                            bool iInvokeCallback)
   {
-    return __registerVstParam(iParamDef, std::move(iChangeCallback));
+    return maybeInvokeCallback(std::move(__registerVstParam(iParamDef, iChangeCallback)),
+                               iChangeCallback,
+                               iInvokeCallback);
   }
 
   /**
@@ -119,7 +128,8 @@ public:
    */
   template<typename T>
   bool registerVstCallback(VstParam<T> iParamDef,
-                           Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback);
+                           Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
+                           bool iInvokeCallback);
 
   /**
    * This method registers the listener to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
@@ -142,10 +152,14 @@ public:
    * @return a copy of iParamDef for convenience and symmetry of the APIs
    */
   template<typename T>
-  GUIJmbParam<T> registerJmbCallback(GUIJmbParam<T> &iParamDef, Parameters::ChangeCallback iChangeCallback)
+  GUIJmbParam<T> registerJmbCallback(GUIJmbParam<T> &iParamDef,
+                                     Parameters::ChangeCallback iChangeCallback,
+                                     bool iInvokeCallback)
   {
     DCHECK_F((bool) iChangeCallback);
-    fParamCxs[iParamDef.getParamID()] = std::move(iParamDef.connect(std::move(iChangeCallback)));
+    fParamCxs[iParamDef.getParamID()] = std::move(iParamDef.connect(iChangeCallback));
+    if(iInvokeCallback)
+      iChangeCallback();
     return iParamDef;
   }
 
@@ -153,11 +167,13 @@ public:
    * This method registers a callback to be invoked on GUIJmbParam changes.
    */
   template<typename T>
-  void registerJmbCallback(GUIJmbParam<T> &iParamDef, Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback)
+  void registerJmbCallback(GUIJmbParam<T> &iParamDef,
+                           Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
+                           bool iInvokeCallback)
   {
     DCHECK_F((bool) iChangeCallback);
     auto callback = [&iParamDef, cb2 = std::move(iChangeCallback)] () { cb2(iParamDef); };
-    registerJmbCallback(iParamDef, callback);
+    registerJmbCallback(iParamDef, callback, iInvokeCallback);
   }
 
 
@@ -179,9 +195,14 @@ public:
  * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
  */
   template<typename T>
-  GUIJmbParam<T> registerJmbCallback(ParamID iParamID, Parameters::ChangeCallback iChangeCallback)
+  GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
+                                     Parameters::ChangeCallback iChangeCallback,
+                                     bool iInvokeCallback)
   {
     return __registerJmbParam<T>(iParamID, std::move(iChangeCallback));
+    return maybeInvokeCallback(std::move(__registerJmbParam<T>(iParamID, iChangeCallback)),
+                               iChangeCallback,
+                               iInvokeCallback);
   }
 
   // getGUIState
@@ -219,6 +240,15 @@ protected:
   // __registerJmbParam
   template<typename T, typename Listener>
   GUIJmbParam<T> __registerJmbParam(ParamID iParamID, Listener iListener);
+
+  // maybeInvokeCallback
+  template<typename TParam>
+  inline TParam &&maybeInvokeCallback(TParam &&iParam, Parameters::ChangeCallback &iCallback, bool iInvokeCallback)
+  {
+    if(iInvokeCallback && iParam.exists() && iCallback)
+     iCallback();
+    return std::forward<TParam>(iParam);
+  }
 
 private:
   // the gui state
@@ -342,7 +372,8 @@ GUIJmbParam<T> GUIParamCxMgr::__registerJmbParam(ParamID iParamID, Listener iLis
 //------------------------------------------------------------------------
 template<typename T>
 bool GUIParamCxMgr::registerVstCallback(VstParam<T> iParamDef,
-                                        Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback)
+                                        Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
+                                        bool iInvokeCallback)
 {
   auto paramID = iParamDef->fParamID;
 
@@ -363,6 +394,9 @@ bool GUIParamCxMgr::registerVstCallback(VstParam<T> iParamDef,
       };
 
       fParamCxs[paramID] = ptr->connect(callback);
+
+      if(iInvokeCallback)
+        callback();
 
       return true;
     }

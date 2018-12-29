@@ -85,16 +85,6 @@ private:
 };
 
 /**
- * Interface which is implemented by views interested in being notified during the creation/parameter apply phase */
-class CustomViewInitializer
-{
-public:
-  virtual void afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription) = 0;
-  virtual void beforeApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) = 0;
-  virtual void afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) = 0;
-};
-
-/**
  * Factory method which creates the actual view. Can be specialized for specific cases
  * @return the new view
  */
@@ -881,13 +871,7 @@ public:
     DLOG_F(INFO, "CustomViewCreator<%s>::create()", getViewName());
 #endif
 
-    auto tv = createCustomView<TView>(CRect(0, 0, 0, 0));
-
-    auto *cvi = dynamic_cast<CustomViewInitializer *>(tv);
-    if(cvi != nullptr)
-      cvi->afterCreate(attributes, description);
-
-    return tv;
+    return createCustomView<TView>(CRect(0, 0, 0, 0));
   }
 
   /**
@@ -901,18 +885,10 @@ public:
     if(tv == nullptr)
       return false;
 
-    auto *cvi = dynamic_cast<CustomViewInitializer *>(tv);
-
-    if(cvi != nullptr)
-      cvi->beforeApply(attributes, description);
-
     for(auto attribute : fAttributes)
     {
       attribute.second->apply(tv, attributes, description);
     }
-
-    if(cvi != nullptr)
-      cvi->afterApply(attributes, description);
 
     return true;
   }

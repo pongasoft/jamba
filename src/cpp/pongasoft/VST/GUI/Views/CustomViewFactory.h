@@ -28,30 +28,29 @@ namespace Views {
 using namespace Params;
 
 /**
- * interface to access gui state
- */
-class GUIStateProvider
-{
-public:
-  virtual GUIState *getGUIState() const = 0;
-};
-
-/**
  * Custom view factory to give access to vst parameters
  */
-class CustomUIViewFactory : public VSTGUI::UIViewFactory, public GUIStateProvider
+class CustomUIViewFactory : public VSTGUI::UIViewFactory
 {
 public:
   explicit CustomUIViewFactory(GUIState *iGUIState) : fGUIState{iGUIState}
   {
   }
 
-  ~CustomUIViewFactory() override = default;
+protected:
+  // overridden to detect GUIParamCxAware instances
+  bool applyAttributeValues(CView *view, const UIAttributes &attributes, const IUIDescription *desc) const override;
 
-  GUIState *getGUIState() const override
-  {
-    return fGUIState;
-  }
+  // overridden to detect GUIParamCxAware instances
+  bool applyCustomViewAttributeValues(CView *customView,
+                                      IdStringPtr baseViewName,
+                                      const UIAttributes &attributes,
+                                      const IUIDescription *desc) const override;
+
+  // overridden to detect GUIParamCxAware instances
+  CView *createViewByName(const std::string *className,
+                          const UIAttributes &attributes,
+                          const IUIDescription *description) const override;
 
 private:
   GUIState *fGUIState{};

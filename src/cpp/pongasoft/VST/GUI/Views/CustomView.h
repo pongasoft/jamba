@@ -97,7 +97,7 @@ using namespace Params;
  *   }
  * }
  */
-class CustomView : public CView, public GUIParamCxAware, public CustomViewInitializer
+class CustomView : public CView, public GUIParamCxAware
 {
 public:
   // Constructor
@@ -150,16 +150,7 @@ public:
   inline void markDirty() { setDirty(true); }
 
 public:
-
   CLASS_METHODS_NOCOPY(CustomView, CControl)
-
-  void afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
-
-  // beforeApply
-  void beforeApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
-
-  // afterApply
-  void afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
 
 protected:
   using CView::sizeToFit; // fixes overload hiding warning
@@ -249,7 +240,7 @@ using PluginCustomView = PluginView<CustomView, TGUIPluginState>;
  * @tparam TView the view class (for ex: CTextEdit)
  */
 template<typename TView>
-class CustomViewAdapter : public TView, public GUIParamCxAware, public CustomViewInitializer
+class CustomViewAdapter : public TView, public GUIParamCxAware
 {
 public:
   // Constructor
@@ -267,14 +258,6 @@ public:
    * Callback when a parameter changes. By default simply marks the view as dirty.
    */
   void onParameterChange(ParamID iParamID) override { markDirty(); };
-
-  void afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
-
-  // beforeApply
-  void beforeApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override {};
-
-  // afterApply
-  void afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription) override;
 
 protected:
   int32_t fTag;
@@ -314,27 +297,6 @@ protected:
     PluginAccessor<TGUIPluginState>::initState(iGUIState);
   }
 };
-
-//------------------------------------------------------------------------
-// CustomViewAdapter::afterCreate
-//------------------------------------------------------------------------
-template<typename TView>
-void CustomViewAdapter<TView>::afterCreate(UIAttributes const &iAttributes, IUIDescription const *iDescription)
-{
-  auto provider = dynamic_cast<GUIStateProvider const *>(iDescription->getViewFactory());
-  if(provider)
-    initState(provider->getGUIState());
-}
-
-//------------------------------------------------------------------------
-// CustomViewAdapter::afterApply
-//------------------------------------------------------------------------
-template<typename TView>
-void CustomViewAdapter<TView>::afterApply(UIAttributes const &iAttributes, IUIDescription const *iDescription)
-{
-  if(fParamCxMgr)
-    registerParameters();
-}
 
 
 }
