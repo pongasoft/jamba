@@ -11,11 +11,17 @@
 #include "public.sdk/source/vst/vst2wrapper/vst2wrapper.h"
 #include "[-name-]CIDs.h"
 
+#define VST2_ID 'TBDx'
+
+#if VST2_ID == 'TBDx'
+#warning "You must change the VST2_ID to something unique. See comment at the top of this file!!!"
+#endif
+
 //------------------------------------------------------------------------
 ::AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
 {
   return Steinberg::Vst::Vst2Wrapper::create(GetPluginFactory(),
                                              [-namespace-]::[-name-]ProcessorUID,
-                                             'TBDx',
+                                             VST2_ID,
                                              audioMaster);
 }
