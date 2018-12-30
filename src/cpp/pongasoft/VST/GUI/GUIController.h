@@ -58,7 +58,8 @@ public:
    * Subclasses should override this method to return the custom controller or nullptr if doesn't match the name
    */
   virtual IController *createCustomController(UTF8StringPtr iName,
-                                              IUIDescription const *iDescription) { return nullptr; };
+                                              IUIDescription const *iDescription,
+                                              IController *iBaseController) { return nullptr; };
 
 protected:
   /** Called at first after constructor */

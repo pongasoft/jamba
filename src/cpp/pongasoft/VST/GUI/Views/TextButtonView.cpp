@@ -131,6 +131,22 @@ void TextButtonView::setMouseEnabled(bool iEnable)
   }
 }
 
+//------------------------------------------------------------------------
+// TextButtonView::click
+//------------------------------------------------------------------------
+void TextButtonView::click()
+{
+  setValue(getMax());
+}
+
+//------------------------------------------------------------------------
+// TextButtonView::unClick
+//------------------------------------------------------------------------
+void TextButtonView::unClick()
+{
+  setValue(getMin());
+}
+
 
 }
 }

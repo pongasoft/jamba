@@ -64,6 +64,12 @@ public:
   // handles value change
   void valueChanged() override;
 
+  // call to programmatically click the button
+  virtual void click();
+
+  // call to programmatically unClick the button
+  virtual void unClick();
+
   // callback when the button is clicked
   virtual void onClick();
 

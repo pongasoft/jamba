@@ -17,7 +17,7 @@
  */
 #pragma once
 
-#include <vstgui/uidescription/icontroller.h>
+#include <vstgui4/vstgui/uidescription/delegationcontroller.h>
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.hpp>
 #include "PluginAccessor.h"
 
@@ -29,14 +29,13 @@ namespace Views {
 /**
  * Base class that a custom controller can inherit from, providing access to params
  */
-class CustomController : public VSTGUI::IController, public GUIParamCxAware
+class CustomController : public VSTGUI::DelegationController, public GUIParamCxAware
 {
 public:
-  ~CustomController() override = default;
-
-  // valueChanged => does nothing by default
-  void valueChanged(VSTGUI::CControl *pControl) override { }
+  // Constructor
+  explicit CustomController(IController *iBaseController) : DelegationController(iBaseController) {}
 };
+
 
 /**
  * When implementing a CustomController specific to a given plugin, you can use this class instead to get direct
@@ -48,7 +47,8 @@ template<typename TGUIPluginState>
 class PluginCustomController : public CustomController, public PluginAccessor<TGUIPluginState>
 {
 public:
-  ~PluginCustomController() override = default;
+  // Constructor
+  explicit PluginCustomController(IController *iBaseController) : CustomController(iBaseController) {}
 
 protected:
   // initState - overridden to extract fParams

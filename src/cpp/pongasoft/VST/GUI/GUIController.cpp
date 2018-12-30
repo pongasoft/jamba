@@ -216,9 +216,9 @@ tresult GUIController::sendMessage(IPtr<IMessage> iMessage)
 //------------------------------------------------------------------------
 IController *GUIController::createSubController(UTF8StringPtr iName,
                                                 IUIDescription const *iDescription,
-                                                VST3Editor * /* iEditor */)
+                                                VST3Editor *iEditor)
 {
-  auto customController = createCustomController(iName, iDescription);
+  auto customController = createCustomController(iName, iDescription, iEditor);
   registerParameters(dynamic_cast<GUIParamCxAware *>(customController));
   return customController;
 }
