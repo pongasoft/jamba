@@ -6,7 +6,7 @@ namespace GUI {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-[-name-]Controller::[-name-]Controller() : GUIController("[-name-].uidesc"), fParameters{}, fState{fParameters}
+[-name-]Controller::[-name-]Controller() : GUIController("[-name-].uidesc"), fParams{}, fState{fParams}
 {
   DLOG_F(INFO, "[-name-]Controller()");
 }
@@ -35,7 +35,7 @@ tresult [-name-]Controller::initialize(FUnknown *context)
   {
     using Key = Debug::ParamDisplay::Key;
     DLOG_F(INFO, "GUI Save State - Version=%d --->\n%s",
-           fParameters.getGUISaveStateOrder().fVersion,
+           fParams.getGUISaveStateOrder().fVersion,
            Debug::ParamTable::from(getGUIState(), true).keys({Key::kID, Key::kTitle}).full().toString().c_str());
   }
 #endif

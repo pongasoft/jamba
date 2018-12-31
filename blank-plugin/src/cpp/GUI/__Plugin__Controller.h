@@ -35,7 +35,7 @@ protected:
 
 private:
   // The controller gets its own copy of the parameters (defined in Plugin.h)
-  [-name-]Parameters fParameters;
+  [-name-]Parameters fParams;
 
   // The state accessible in the controller and views
   [-name-]GUIState fState;

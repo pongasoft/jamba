@@ -52,7 +52,7 @@ protected:
 
 private:
   // The processor gets its own copy of the parameters (defined in Plugin.h)
-  [-name-]Parameters fParameters;
+  [-name-]Parameters fParams;
 
   // The state
   [-name-]RTState fState;

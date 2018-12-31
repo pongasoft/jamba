@@ -14,13 +14,13 @@ namespace RT {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-[-name-]Processor::[-name-]Processor() : RTProcessor([-name-]ControllerUID), fParameters{}, fState{fParameters}
+[-name-]Processor::[-name-]Processor() : RTProcessor([-name-]ControllerUID), fParams{}, fState{fParams}
 {
   DLOG_F(INFO, "[-name-]Processor() - jamba: %s - plugin: v%s", JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
 
   // in Debug mode we display the parameters in a table
 #ifndef NDEBUG
-  DLOG_F(INFO, "Parameters ---> \n%s", Debug::ParamTable::from(fParameters).full().toString().c_str());
+  DLOG_F(INFO, "Parameters ---> \n%s", Debug::ParamTable::from(fParams).full().toString().c_str());
 #endif
 }
 
@@ -57,7 +57,7 @@ tresult [-name-]Processor::initialize(FUnknown *context)
 #ifndef NDEBUG
   using Key = Debug::ParamDisplay::Key;
   DLOG_F(INFO, "RT Save State - Version=%d --->\n%s",
-         fParameters.getRTSaveStateOrder().fVersion,
+         fParams.getRTSaveStateOrder().fVersion,
          Debug::ParamTable::from(getRTState(), true).keys({Key::kID, Key::kTitle}).full().toString().c_str());
 #endif
 
