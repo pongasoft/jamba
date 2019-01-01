@@ -66,7 +66,7 @@ public:
                                                Parameters::ChangeCallback iChangeCallback,
                                                bool iInvokeCallback)
   {
-    return maybeInvokeCallback(std::move(__registerRawVstParam(iParamID, iChangeCallback)),
+    return maybeInvokeCallback(__registerRawVstParam(iParamID, iChangeCallback),
                                iChangeCallback,
                                iInvokeCallback);
   }
@@ -91,7 +91,7 @@ public:
                                             Parameters::ChangeCallback iChangeCallback,
                                             bool iInvokeCallback)
   {
-    return maybeInvokeCallback(std::move(__registerVstParam<T>(iParamID, iChangeCallback)),
+    return maybeInvokeCallback(__registerVstParam<T>(iParamID, iChangeCallback),
                                iChangeCallback,
                                iInvokeCallback);
   }
@@ -116,7 +116,7 @@ public:
                                             Parameters::ChangeCallback iChangeCallback,
                                             bool iInvokeCallback)
   {
-    return maybeInvokeCallback(std::move(__registerVstParam(iParamDef, iChangeCallback)),
+    return maybeInvokeCallback(__registerVstParam(iParamDef, iChangeCallback),
                                iChangeCallback,
                                iInvokeCallback);
   }
@@ -200,7 +200,7 @@ public:
                                      bool iInvokeCallback)
   {
     return __registerJmbParam<T>(iParamID, std::move(iChangeCallback));
-    return maybeInvokeCallback(std::move(__registerJmbParam<T>(iParamID, iChangeCallback)),
+    return maybeInvokeCallback(__registerJmbParam<T>(iParamID, iChangeCallback),
                                iChangeCallback,
                                iInvokeCallback);
   }

@@ -23,7 +23,7 @@ Features
 - easily create custom views with their creators (so that they appear in the GUI editor)
 - easily use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
 - store/read state in a thread safe fashion (includes version)
-- included views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state)
+- included views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state), Scrollbar (with optional zoom handles), Text button (to handle clicks with listener)
 
 Quick starting guide
 --------------------
@@ -62,7 +62,7 @@ Simply clone this repository in a location of your choice (referred to as JAMBA\
 
 ### Step 3. Install python3
 
-The `create-plugin.py` script requires `python3` to run so you need to install it if you don't already have it (note that the latest version of macOS 10.13.6 still comes with python2). Note that Jamba is a C++ framework and only uses python for the convenience of creating a blank plugin.
+The `create-plugin.py` script requires `python3` to run so you need to install it if you don't already have it (note that the latest version of macOS 10.13.6 still comes with python2). Note that Jamba is a C++ (14) framework and only uses python for the convenience of creating a blank plugin.
 
 ### Step 4. Generate a blank plugin
 
@@ -202,6 +202,43 @@ Documentation
 
 Release Notes
 -------------
+### 2019-01-02 - `v3.0.0`
+* This is a major release with many changes (a few breaking APIs)
+* Added `TextViewButton` on which you can register a `onClickListener` or implement `onClick`. Also handles disabled state.
+* Added `ScrollbarView` which implements a scrollbar tied to 2 parameters (offset and zoom)
+* Added `CustomController` to implement a custom controller tied into Jamba (access to Vst/Jmb parameters and state)
+* Added ability to easily switch to a new view (`GUIController::switchToView`)
+* Added `GUIJmbParameter::updateIf` to update the value in place when necessary
+* Added callback APIs to `GUIParamCxAware`
+
+        registerCallback<bool>(fParams->fMyParam, [this]  (GUIVstParam<bool> &iParam) { flushCache(); });
+* Added registering callbacks and parameters on a view without inheriting from it (can be used from controllers `verifyView` method):
+
+        auto button = dynamic_cast<Views::TextButtonView *>(iView);
+        if(button) {
+          auto callback = [] (Views::TextButtonView *iButton, GUIJmbParam<SampleData> &iParam) {
+            iButton->setMouseEnabled(iParam->hasUndoHistory());
+          };
+          fState->registerConnectionFor(button)->registerCallback<SampleData>(fState->fSampleData, std::move(callback), true);
+        }
+* Added optional arguments to `Parameters::vst<>()` (resp. `Parameters::jmb<>()`) that get passed through the converter (resp. serializer) allowing syntax like
+
+        fPlayModeHold =
+          vst<BooleanParamConverter>(1201, // param ID
+                                     STR16("Play Mode"), // param title
+                                     STR16("Trigger"), STR16("Hold")) // BooleanParamConverter args
+* Requires C++14
+* Added `EnumParamConverter` for Vst parameters backed by an enum
+* Added `Range` concept
+* Refactored `CustomViewCreator` code to simplify writing individual attributes. Introduced `MarginAttribute`, `RangeAttribute`, and `GradientAttribute`
+
+The following changes are potentially breaking changes:
+
+* Refactored `Lerp` class so that the template parameter of the class is different from the template parameter of the methods. Introduced `SPLerp` (single precision) and `DPLerp` (double precision)
+* `GUIParamCxAware` (which is the class used for registering parameters) has been simplified with `registerParam` methods (when the type is known).
+* Moved `PluginAccessor` into its own header file
+* Removed `CustomViewInitializer`
+
 
 ### 2018-10-11 - `v2.1.2`
 * `AudioBuffers` now properly handles null buffers
