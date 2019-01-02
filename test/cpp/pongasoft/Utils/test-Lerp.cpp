@@ -27,21 +27,29 @@ namespace Test {
 // Lerp - mapValue
 TEST(Lerp, mapValue)
 {
-  ASSERT_EQ(0, DPLerp::mapValue(-1.0, -1.0, 1.0, 0.0, 7.0));
-  ASSERT_EQ(3.5, DPLerp::mapValue(0.0, -1.0, 1.0, 0.0, 7.0));
-  ASSERT_EQ(7, DPLerp::mapValue(1.0, -1.0, 1.0, 0.0, 7.0));
+  ASSERT_EQ(0, mapValueDP(-1.0, -1.0, 1.0, 0.0, 7.0));
+  ASSERT_EQ(3.5, mapValueDP(0.0, -1.0, 1.0, 0.0, 7.0));
+  ASSERT_EQ(7, mapValueDP(1.0, -1.0, 1.0, 0.0, 7.0));
 
-  ASSERT_EQ(100, DPLerp::mapValue(10, 10, 20, 100, 200));
-  ASSERT_EQ(150, DPLerp::mapValue(15, 10, 20, 100, 200));
-  ASSERT_EQ(200, DPLerp::mapValue(20, 10, 20, 100, 200));
+  ASSERT_EQ(100, (mapValueDPXY<int, int>(10, 10, 20, 100, 200)));
+  ASSERT_EQ(150, mapValueDPX<int>(15, 10, 20, 100.0, 200.0));
+  ASSERT_EQ(200, mapValueDPY<int>(20.0, 10.0, 20.0, 100, 200));
 
   // testing outside the range
-  ASSERT_EQ(100, DPLerp::mapValue(5, 10, 20, 100, 200, true));
-  ASSERT_EQ(50, DPLerp::mapValue(5, 10, 20, 100, 200, false));
-  ASSERT_EQ(200, DPLerp::mapValue(25, 10, 20, 100, 200, true));
-  ASSERT_EQ(250, DPLerp::mapValue(25, 10, 20, 100, 200, false));
+  ASSERT_EQ(100, mapValueDP(5, 10, 20, 100, 200, true));
+  ASSERT_EQ(50, mapValueDP(5, 10, 20, 100, 200, false));
+  ASSERT_EQ(200, mapValueDP(25, 10, 20, 100, 200, true));
+  ASSERT_EQ(250, mapValueDP(25, 10, 20, 100, 200, false));
 
-  ASSERT_EQ(150, DPLerp::mapRange(10, 20, 100, 200).computeY(15));
+  ASSERT_EQ(150, mapRangeDP(10, 20, 100, 200).computeY(15));
+
+
+  ASSERT_EQ(5, mapRangeSPY<int>(1.2, 1.3, 0, 10).computeY(1.25));
+  ASSERT_EQ(1.25, mapRangeSPX<int>(0, 10, 1.2, 1.3).computeY(5));
+  // note: the extra set of () is required for google test to compile...
+  // seems to be an issue with the macro definition
+  ASSERT_EQ(25, (mapRangeSPXY<int, int>(0, 10, 20, 30).computeY(5)));
+  ASSERT_EQ(25.0, mapRangeSP(0, 10.0, 20.0, 30.0).computeY(5.0));
 
 }
 

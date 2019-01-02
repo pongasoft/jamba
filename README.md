@@ -234,7 +234,7 @@ Release Notes
 
 The following changes are potentially breaking changes:
 
-* Refactored `Lerp` class so that the template parameter of the class is different from the template parameter of the methods. Introduced `SPLerp` (single precision) and `DPLerp` (double precision)
+* Refactored `Lerp` class so that the template parameter of the class is different from the template parameter of the methods. Introduced `SPLerp` (single precision) and `DPLerp` (double precision).
 * `GUIParamCxAware` (which is the class used for registering parameters) has been simplified with `registerParam` methods (when the type is known).
 * Moved `PluginAccessor` into its own header file
 * Removed `CustomViewInitializer`

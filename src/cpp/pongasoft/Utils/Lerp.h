@@ -23,32 +23,33 @@ namespace pongasoft {
 namespace Utils {
 
 /**
- * Util class to compute linear interpolation. Note that assembly code totally removes this class which is great!
- * ex: Utils::Lerp(MAX_ZOOM_FACTOR_Y, 1.0).computeY(fPropZoomFactorY.getValue());
+ * Util class to compute linear interpolation. Use SPLerp/DPLerp and mapValueSP/mapRangeSP (resp mapValueDP/mapRangeDP)
+ * for convenience.
+ *
  * Providing iX1 == iX2 will result in undefined behavior
  */
-template <typename TFloat>
+template <typename TFloat, typename X, typename Y>
 class Lerp
 {
 public:
-  Lerp(TFloat iX1, TFloat iY1, TFloat iX2, TFloat iY2) : fA((iY1 - iY2) / (iX1 - iX2)), fB(iY1 - fA * iX1) {}
+  Lerp(X iX1, Y iY1, X iX2, Y iY2) :
+    fA((static_cast<TFloat>(iY1 - iY2)) / (static_cast<TFloat>(iX1 - iX2))),
+    fB(static_cast<TFloat>(iY1) - fA * static_cast<TFloat>(iX1)) {}
 
   /**
    * Shortcut for when x=0 => iY0 and x=1.0 => iY1
    */
-  Lerp(TFloat iY0, TFloat iY1) : fA(iY1 - iY0), fB(iY0) {};
+  Lerp(Y iY0, Y iY1) : fA(static_cast<TFloat>(iY1 - iY0)), fB(static_cast<TFloat>(iY0)) {};
 
-  template<typename T>
-  inline T computeY(T iX) const
+  inline Y computeY(X iX) const
   {
-    return static_cast<T>((iX * fA) + fB);
+    return static_cast<Y>((static_cast<TFloat>(iX) * fA) + fB);
   }
 
-  template<typename T>
-  inline T computeX(T iY) const
+  inline X computeX(Y iY) const
   {
     DCHECK_F(fA != 0);
-    return static_cast<T>((iY - fB) / fA);
+    return static_cast<X>((static_cast<TFloat>(iY) - fB) / fA);
   }
 
   /**
@@ -56,7 +57,7 @@ public:
    * into another range: [iFromLow, iFromHigh] -> [iToLow, iToHigh]. Note that low can be greater than high: for
    * example you can map [1, -1] to the range [0, height] (display where 0 is at the top and height is the bottom)
    */
-  static inline Lerp mapRange(TFloat iFromLow, TFloat iFromHigh, TFloat iToLow, TFloat iToHigh)
+  static inline Lerp mapRange(X iFromLow, X iFromHigh, Y iToLow, Y iToHigh)
   {
     return Lerp(iFromLow, iToLow, iFromHigh, iToHigh);
   }
@@ -72,8 +73,7 @@ public:
    *
    * @param iValue will be constrained to the range [min(iFromLow, iFromHigh), max(iFromLow, iFromHigh)]
    */
-  template<typename T, typename U>
-  static U mapValue(T iValue, T iFromLow, T iFromHigh, U iToLow, U iToHigh, bool iClamp = true)
+  static Y mapValue(X iValue, X iFromLow, X iFromHigh, Y iToLow, Y iToHigh, bool iClamp = true)
   {
     // if the first range is empty (computation would be dividing by 0)
     if(iFromLow == iFromHigh)
@@ -88,7 +88,7 @@ public:
       iValue = clampRange(iValue, iFromLow, iFromHigh);
     }
 
-    return static_cast<U>(Lerp(static_cast<TFloat>(iFromLow), static_cast<TFloat>(iToLow), static_cast<TFloat>(iFromHigh), static_cast<TFloat>(iToHigh)).computeY(iValue));
+    return Lerp(iFromLow, iToLow, iFromHigh, iToHigh).computeY(iValue);
   }
 
 private:
@@ -99,12 +99,125 @@ private:
 //------------------------------------------------------------------------
 // SPLerp - Single Precision Lerp (float)
 //------------------------------------------------------------------------
-using SPLerp = Lerp<float>;
+template<typename X, typename Y>
+using SPLerpXY = Lerp<float, X, Y>;
+
+template<typename X>
+using SPLerpX = Lerp<float, X, float>;
+
+template<typename Y>
+using SPLerpY = Lerp<float, float, Y>;
+
+using SPLerp = Lerp<float, float, float>;
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapRange */
+template<typename X, typename Y>
+static inline SPLerpXY<X, Y> mapRangeSPXY(X iFromLow, X iFromHigh, Y iToLow, Y iToHigh)
+{
+  return SPLerpXY<X, Y>(iFromLow, iToLow, iFromHigh, iToHigh);
+}
+
+template<typename Y>
+constexpr auto mapRangeSPY = mapRangeSPXY<float, Y>;
+
+template<typename X>
+constexpr auto mapRangeSPX = mapRangeSPXY<X, float>;
+
+constexpr auto mapRangeSP = mapRangeSPXY<float, float>;
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+template<typename X, typename Y>
+inline static Y mapValueSPXY(X iValue, X iFromLow, X iFromHigh, Y iToLow, Y iToHigh, bool iClamp = true)
+{
+  return SPLerpXY<X, Y>::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+template<typename Y>
+inline static Y mapValueSPY(float iValue, float iFromLow, float iFromHigh, Y iToLow, Y iToHigh, bool iClamp = true)
+{
+  return SPLerpY<Y>::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+template<typename X>
+inline static float mapValueSPX(X iValue, X iFromLow, X iFromHigh, float iToLow, float iToHigh, bool iClamp = true)
+{
+  return SPLerpX<X>::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+inline static float mapValueSP(float iValue, float iFromLow, float iFromHigh, float iToLow, float iToHigh, bool iClamp = true)
+{
+  return SPLerp::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
+
 
 //------------------------------------------------------------------------
 // DPLerp - Double Precision Lerp (double)
 //------------------------------------------------------------------------
-using DPLerp = Lerp<double>;
+template<typename X, typename Y>
+using DPLerpXY = Lerp<double, X, Y>;
+
+template<typename X>
+using DPLerpX = Lerp<double, X, double>;
+
+template<typename Y>
+using DPLerpY = Lerp<double, double, Y>;
+
+using DPLerp = Lerp<double, double, double>;
+
+/**
+ * Convenient shortcut for double precision. See Lerp::mapRange */
+template<typename X, typename Y>
+static inline DPLerpXY<X, Y> mapRangeDPXY(X iFromLow, X iFromHigh, Y iToLow, Y iToHigh)
+{
+  return DPLerpXY<X, Y>(iFromLow, iToLow, iFromHigh, iToHigh);
+}
+
+template<typename Y>
+constexpr auto mapRangeDPY = mapRangeDPXY<double, Y>;
+
+template<typename X>
+constexpr auto mapRangeDPX = mapRangeDPXY<X, double>;
+
+constexpr auto mapRangeDP = mapRangeDPXY<double, double>;
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+template<typename X, typename Y>
+inline static Y mapValueDPXY(X iValue, X iFromLow, X iFromHigh, Y iToLow, Y iToHigh, bool iClamp = true)
+{
+  return DPLerpXY<X, Y>::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+template<typename Y>
+inline static Y mapValueDPY(double iValue, double iFromLow, double iFromHigh, Y iToLow, Y iToHigh, bool iClamp = true)
+{
+  return DPLerpY<Y>::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+template<typename X>
+inline static double mapValueDPX(X iValue, X iFromLow, X iFromHigh, double iToLow, double iToHigh, bool iClamp = true)
+{
+  return DPLerpX<X>::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
+
+/**
+ * Convenient shortcut for single precision. See Lerp::mapValue */
+inline static double mapValueDP(double iValue, double iFromLow, double iFromHigh, double iToLow, double iToHigh, bool iClamp = true)
+{
+  return DPLerp::mapValue(iValue, iFromLow, iFromHigh, iToLow, iToHigh, iClamp);
+}
 
 /**
  * Defines a range of values.
@@ -141,7 +254,7 @@ struct Range
    * @param iRange the range to map the iValue into
    * @return the new value
    */
-  template<typename U, typename TLerp = DPLerp>
+  template<typename U, typename TLerp = DPLerpXY<T, U>>
   inline U mapValue(T iValue, Range<U> const &iRange, bool iClampToRange = true) const
   {
     return TLerp::mapValue(iValue, fFrom, fTo, iRange.fFrom, iRange.fTo, iClampToRange);
@@ -153,7 +266,7 @@ struct Range
    * @param iRange the range to map the iValue into
    * @return the new range
    */
-  template<typename U, typename TLerp = DPLerp>
+  template<typename U, typename TLerp = DPLerpXY<T, U>>
   inline Range<U> mapRange(Range<U> const &iRange, bool iClampToRange = true) const
   {
     return mapSubRange<U,TLerp>(*this, iRange, iClampToRange);
@@ -165,7 +278,7 @@ struct Range
    * @param iRange the range to map the iValue into
    * @return the new range
    */
-  template<typename U, typename TLerp = DPLerp>
+  template<typename U, typename TLerp = DPLerpXY<T, U>>
   inline Range<U> mapSubRange(Range<T> const &iSubRange, Range<U> const &iRange, bool iClampToRange = true) const
   {
     // TODO: optimize by generating a computing TLerp only once
