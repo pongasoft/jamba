@@ -48,9 +48,7 @@ protected:
                                       const IUIDescription *desc) const override;
 
   // overridden to detect GUIParamCxAware instances
-  CView *createViewByName(const std::string *className,
-                          const UIAttributes &attributes,
-                          const IUIDescription *description) const override;
+  CView *createView(const UIAttributes &attributes, const IUIDescription *description) const override;
 
 private:
   GUIState *fGUIState{};

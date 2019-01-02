@@ -55,13 +55,11 @@ bool CustomUIViewFactory::applyCustomViewAttributeValues(CView *customView,
 }
 
 //------------------------------------------------------------------------
-// CustomUIViewFactory::createViewByName
+// CustomUIViewFactory::createView
 //------------------------------------------------------------------------
-CView *CustomUIViewFactory::createViewByName(const std::string *className,
-                                             const UIAttributes &attributes,
-                                             const IUIDescription *description) const
+CView *CustomUIViewFactory::createView(const UIAttributes &attributes, const IUIDescription *description) const
 {
-  auto view = UIViewFactory::createViewByName(className, attributes, description);
+  auto view = UIViewFactory::createView(attributes, description);
   auto paramAware = dynamic_cast<GUIParamCxAware *>(view);
   if(paramAware)
   {
