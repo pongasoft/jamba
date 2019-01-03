@@ -202,7 +202,7 @@ Documentation
 
 Release Notes
 -------------
-### 2019-01-02 - `v3.0.0`
+### 2019-01-03 - `v3.0.0`
 * This is a major release with many changes (a few breaking APIs)
 * Added `TextViewButton` on which you can register a `onClickListener` or implement `onClick`. Also handles disabled state.
 * Added `ScrollbarView` which implements a scrollbar tied to 2 parameters (offset and zoom)
@@ -212,6 +212,7 @@ Release Notes
 * Added callback APIs to `GUIParamCxAware`
 
         registerCallback<bool>(fParams->fMyParam, [this]  (GUIVstParam<bool> &iParam) { flushCache(); });
+
 * Added registering callbacks and parameters on a view without inheriting from it (can be used from controllers `verifyView` method):
 
         auto button = dynamic_cast<Views::TextButtonView *>(iView);
@@ -221,12 +222,14 @@ Release Notes
           };
           fState->registerConnectionFor(button)->registerCallback<SampleData>(fState->fSampleData, std::move(callback), true);
         }
+
 * Added optional arguments to `Parameters::vst<>()` (resp. `Parameters::jmb<>()`) that get passed through the converter (resp. serializer) allowing syntax like
 
         fPlayModeHold =
           vst<BooleanParamConverter>(1201, // param ID
                                      STR16("Play Mode"), // param title
                                      STR16("Trigger"), STR16("Hold")) // BooleanParamConverter args
+
 * Requires C++14
 * Added `EnumParamConverter` for Vst parameters backed by an enum
 * Added `Range` concept
@@ -234,7 +237,15 @@ Release Notes
 
 The following changes are potentially breaking changes:
 
-* Refactored `Lerp` class so that the template parameter of the class is different from the template parameter of the methods. Introduced `SPLerp` (single precision) and `DPLerp` (double precision).
+* Refactored `Lerp` class to deal with type parameters differently (`TFloat` for math precision, `X` for type of x, `Y` for type of y). Introduced `SPLerp` (single precision) and `DPLerp` (double precision) as well as several convenient methods. Example:
+
+        // this will interpolate (SP=single precision)
+        // X -> the time (long) from the range [0, fFadeDuration]
+        // Y -> to the alpha (uint8_t) range [255, 0] (opaque -> transparent)
+        // Note that although X and Y types are integer flavors, the interpolation will use floats
+        // and the value returned will be cast to uint8_t
+        fColor.alpha = Utils::mapValueSPXY<long, uint8_t>(iTime, 0, fFadeDuration, 255, 0);
+
 * `GUIParamCxAware` (which is the class used for registering parameters) has been simplified with `registerParam` methods (when the type is known).
 * Moved `PluginAccessor` into its own header file
 * Removed `CustomViewInitializer`
