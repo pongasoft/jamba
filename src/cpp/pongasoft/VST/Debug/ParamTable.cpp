@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,7 +43,7 @@ std::string ParamTable::toString() const
 
   std::ostringstream s;
 
-  for(int i = 0; i < rowsVector.size(); i++)
+  for(size_t i = 0; i < rowsVector.size(); i++)
   {
     if(i > 0)
       s << std::endl;
@@ -58,6 +58,7 @@ std::string ParamTable::toString() const
 //------------------------------------------------------------------------
 void ParamTable::print(std::string const &iFirstLine) const
 {
+#ifndef NDEBUG
   auto rowsVector = rows();
 
   if(!iFirstLine.empty())
@@ -67,6 +68,7 @@ void ParamTable::print(std::string const &iFirstLine) const
   {
     DLOG_F(INFO, "%s", row.c_str());
   }
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -151,7 +153,7 @@ std::string ParamTable::toString(NormalizedState const &iNormalizedState) const
 
   std::ostringstream s;
 
-  for(int i = 0; i < rowsVector.size(); i++)
+  for(size_t i = 0; i < rowsVector.size(); i++)
   {
     if(i > 0)
       s << std::endl;
@@ -166,6 +168,7 @@ std::string ParamTable::toString(NormalizedState const &iNormalizedState) const
 //------------------------------------------------------------------------
 void ParamTable::print(NormalizedState const &iNormalizedState, std::string const &iFirstLine) const
 {
+#ifndef NDEBUG
   auto rowsVector = rows(iNormalizedState);
 
   if(!iFirstLine.empty())
@@ -175,6 +178,7 @@ void ParamTable::print(NormalizedState const &iNormalizedState, std::string cons
   {
     DLOG_F(INFO, "%s", row.c_str());
   }
+#endif
 }
 
 //------------------------------------------------------------------------
