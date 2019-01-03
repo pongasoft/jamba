@@ -14,9 +14,11 @@ set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PAT
 project([-name-])
 
 # To use local jamba install, uncomment the following line (no download)
+[-remote_jamba-]unset(JAMBA_ROOT_DIR)
 [-local_jamba-]set(JAMBA_ROOT_DIR "[-jamba_root_dir-]")
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly
+unset(GOOGLETEST_ROOT_DIR)
 #set(GOOGLETEST_ROOT_DIR ../../google/googletest)
 
 include(jamba.cmake)

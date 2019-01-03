@@ -101,6 +101,7 @@ def config(plugin):
     plugin['root_dir'] = os.path.join(os.path.realpath(project_dir), project_name)
     plugin['jamba_root_dir'] = this_script_root_dir.replace('\\', '\\\\')
     plugin['local_jamba'] = "" if args.local else "#"
+    plugin['remote_jamba'] = "" if not args.local else "#"
 
     print(f'''##################
 Plugin Name        - {plugin["name"]}
