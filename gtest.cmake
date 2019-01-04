@@ -16,6 +16,7 @@ FetchContent_Declare(googletest
     GIT_REPOSITORY    ${googletest_GIT_REPO}
     GIT_TAG           ${googletest_GIT_TAG}
     GIT_CONFIG        advice.detachedHead=false
+    GIT_SHALLOW       true
     SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
     BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
     CONFIGURE_COMMAND ""

@@ -202,6 +202,9 @@ Documentation
 
 Release Notes
 -------------
+### 2019-01-04 - `v3.0.1`
+* Use shallow cloning to avoid downloading the (unused) project history
+
 ### 2019-01-03 - `v3.0.0`
 * This is a major release with many changes (a few breaking APIs)
 * Added `TextViewButton` on which you can register a `onClickListener` or implement `onClick`. Also handles disabled state.

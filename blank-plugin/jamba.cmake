@@ -16,6 +16,7 @@ FetchContent_Declare(jamba
       GIT_REPOSITORY    ${JAMBA_GIT_REPO}
       GIT_TAG           ${JAMBA_GIT_TAG}
       GIT_CONFIG        advice.detachedHead=false
+      GIT_SHALLOW       true
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/jamba"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/jamba-build"
       CONFIGURE_COMMAND ""
