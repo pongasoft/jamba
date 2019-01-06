@@ -15,13 +15,14 @@
  *
  * @author Yan Pujante
  */
-
+#pragma once
 #include <pluginterfaces/base/ftypes.h>
 
 namespace pongasoft {
 namespace Utils {
 
 constexpr Steinberg::int32 MAX_INT32 = 0x7fffffff;
+constexpr auto ZERO_INT32 = static_cast<Steinberg::int32>(0);
 
 }
 }

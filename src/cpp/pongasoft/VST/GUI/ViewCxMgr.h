@@ -88,7 +88,7 @@ class ViewCxMgr : private IViewListenerAdapter
 {
 public:
   /**
-   * @param TView should be a subclass of VSTGUI::CView
+   * @tparam TView should be a subclass of VSTGUI::CView
    * @return a pointer (owned by this class) to an object for registering callbacks, listener and params.
    *         Note: You should not keep this pointer around. It is owned by this class and will automatically be deleted
    *         when the view goes away.

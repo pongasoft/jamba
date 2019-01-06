@@ -202,6 +202,9 @@ Documentation
 
 Release Notes
 -------------
+### 2019-01-06 - `v3.0.2`
+* fixed minor bugs
+
 ### 2019-01-04 - `v3.0.1`
 * Use shallow cloning to avoid downloading the (unused) project history
 

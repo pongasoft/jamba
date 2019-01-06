@@ -343,7 +343,7 @@ public:
     }
 
     if(getNumChannels() > 0)
-      fBuffer.silenceFlags == (static_cast<uint64>(1) << getNumChannels()) - 1;
+      fBuffer.silenceFlags = (static_cast<uint64>(1) << getNumChannels()) - 1;
 
     return kResultOk;
   }

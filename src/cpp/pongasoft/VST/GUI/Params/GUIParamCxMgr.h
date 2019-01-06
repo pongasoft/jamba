@@ -190,16 +190,15 @@ public:
   }
 
   /**
- * Registers the ser param only given its id and return the wrapper to the param.
- *
- * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
- */
+   * Registers the ser param only given its id and return the wrapper to the param.
+   *
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
+   */
   template<typename T>
   GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
                                      Parameters::ChangeCallback iChangeCallback,
                                      bool iInvokeCallback)
   {
-    return __registerJmbParam<T>(iParamID, std::move(iChangeCallback));
     return maybeInvokeCallback(__registerJmbParam<T>(iParamID, iChangeCallback),
                                iChangeCallback,
                                iInvokeCallback);
