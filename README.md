@@ -197,7 +197,11 @@ Here are some recommended steps:
 Documentation
 -------------
 
+- Check the [Latest doxygen documentation](http://pongasoft.github.io/jamba/docs/3.0.2/html/index.html)
 - The [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) project was designed as a documentation plugin for this project.
+- The [vst-vac-6v](https://github.com/pongasoft/vst-vac-6v) plugin is built with Jamba.
+- The [vst-ab-switch](https://github.com/pongasoft/vst-ab-switch) plugin is built with Jamba.
+- The [vst-sam-spl-64](https://github.com/pongasoft/vst-sam-spl-64) plugin is built with Jamba.
 - The [Announcing Jamba](https://www.pongasoft.com/blog/yan/vst/2018/08/29/Announcing-Jamba/) blog post goes into more details about the history and the main features of the framework.
 
 Release Notes

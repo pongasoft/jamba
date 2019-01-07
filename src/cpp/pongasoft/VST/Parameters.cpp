@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -91,7 +91,7 @@ tresult Parameters::readRTState(IBStreamer &iStreamer, NormalizedState *oNormali
   {
     uint16 stateVersion = __readStateVersion(iStreamer);
 
-    // TODO handle multiple versions
+    /// @todo handle multiple versions
     if(stateVersion != fRTSaveStateOrder.fVersion)
     {
       DLOG_F(WARNING, "unexpected RT state version %d", stateVersion);

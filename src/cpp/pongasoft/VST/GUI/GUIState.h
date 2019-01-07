@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -120,13 +120,13 @@ public:
    *
    * Example usage:
    *
-   * TextButtonView *button = ....;
-   * fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
-   *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
-   *   iButton->setMouseEnabled(iParam > 3);
-   * });
+   *     TextButtonView *button = ....;
+   *     fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
+   *       [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
+   *       iButton->setMouseEnabled(iParam > 3);
+   *     });
    *
-   * @param TView should be a subclass of VSTGUI::CView
+   * @tparam TView should be a subclass of VSTGUI::CView
    * @return a pointer to an object for registering callbacks, listener and params.
    *         Note: You should not keep this pointer around as it be will automatically be deleted when the view
    *         goes away.

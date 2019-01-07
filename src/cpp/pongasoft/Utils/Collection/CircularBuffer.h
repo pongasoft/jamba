@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -103,27 +103,28 @@ public:
     }
   }
 
-  /*
-   * Technically speaking the BinaryPredicate is defined like this
-   *  template<typename U>
-   *  using BinaryPredicate = U (*)(U const&, T const&);
-   *
-   *  BUT it is not really defined in the following methods because of the fact that lambda with capture
-   *  cannot be converted to it... where by defining it loosely this way, it just works...
-   */
 
   /**
-   * "standard" implementation of the fold algorithm starting at startOffset and ending at endOffsetNotIncluded (which
-   * as the name hinted is NOT included). This implementation works fine whether startOffset is less or more than
-   * endOffsetNotIncluded (in which case the direction of iteration is reversed). It also handles properly wrapping
+   * "standard" implementation of the fold algorithm starting at `startOffset` and ending at `endOffsetNotIncluded` (which
+   * as the name hinted is NOT included). This implementation works fine whether `startOffset` is less or more than
+   * `endOffsetNotIncluded` (in which case the direction of iteration is reversed). It also handles properly wrapping
    * around the buffer (potentially multiple times...).
    *
    * The fold algorithm is the following:
-   * resultValue = initValue;
-   * resultValue = op(resultValue, fBuf[<adjusted start offset>]);
-   * resultValue = op(resultValue, fBuf[<adjusted start offset> + 1]);
-   * ...
-   * return resultValue;
+   *
+   *     resultValue = initValue;
+   *     resultValue = op(resultValue, fBuf[<adjusted start offset>]);
+   *     resultValue = op(resultValue, fBuf[<adjusted start offset> + 1]);
+   *     ...
+   *     return resultValue;
+   *
+   * Technically speaking the `BinaryPredicate` is defined like this
+   *
+   *     template<typename U>
+   *     using BinaryPredicate = U (*)(U const&, T const&);
+   *
+   *  BUT it is not really defined in the following methods because of the fact that lambda with capture
+   *  cannot be converted to it... where by defining it loosely this way, it just works...
    */
   template<typename U, class BinaryPredicate>
   inline U fold(int startOffset, int endOffsetNotIncluded, U initValue, BinaryPredicate &op) const
@@ -182,10 +183,11 @@ public:
   }
 
   /**
- * Similar to fold but BinaryPredicateWithIndex is also provided the index (starting at startOffset)
- *  template<typename U>
- *  using BinaryPredicateWithIndex = U (*)(int, U const&, T const&);
- */
+   * Similar to fold but `BinaryPredicateWithIndex` is also provided the index (starting at `startOffset`)
+   *
+   *     template<typename U>
+   *     using BinaryPredicateWithIndex = U (*)(int, U const&, T const&);
+   */
   template<typename U, class BinaryPredicateWithIndex>
   inline U foldWithIndex(int startOffset, int endOffsetNotIncluded, U initValue, BinaryPredicateWithIndex &op) const
   {

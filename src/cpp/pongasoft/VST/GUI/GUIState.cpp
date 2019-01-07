@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -97,7 +97,7 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
     if(!iStreamer.readInt16u(stateVersion))
       stateVersion = 0;
 
-    // TODO handle multiple versions
+    /// @todo handle multiple versions
     if(stateVersion != saveOrder.fVersion)
     {
       DLOG_F(WARNING, "unexpected GUI state version %d", stateVersion);

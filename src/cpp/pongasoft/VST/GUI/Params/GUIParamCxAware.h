@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -125,6 +125,7 @@ public:
   /**
    * Convenient call to register a callback for the Vst param simply by using its description. Takes care of the
    * type due to method API
+   *
    * @return empty param  if not found or not proper type
    */
   template<typename T>
@@ -138,11 +139,12 @@ public:
    * returned by this api.
    *
    * Example:
-   * registerCallback<int>(fParams->fMyParam, [] (GUIVstParam<int> &iParam) { iParam.getValue()...; });
+   *
+   *     registerCallback<int>(fParams->fMyParam, [] (GUIVstParam<int> &iParam) { iParam.getValue()...; });
    *
    * Note how the compiler requires the type (which seems that it could be inferred).
    *
-   * @return false if not found or not proper type
+   * @return `false` if not found or not proper type
    */
   template<typename T>
   bool registerCallback(VstParam<T> const &iParamDef,
@@ -154,7 +156,7 @@ public:
    * a wrapper directly accessible from the view and as a result there is no need to call this method unless you
    * want to subscribe to the changes, hence there isn't a second optional parameter
    *
-   * @return a copy of iParamDef for convenience and symmetry of the APIs or empty wrapper if initState has not
+   * @return a copy of `iParamDef` for convenience and symmetry of the APIs or empty wrapper if GUIParamCxAware::initState has not
    *         been called
    */
   template<typename T>
@@ -163,7 +165,7 @@ public:
   /**
    * This method registers the callback to be invoked on GUIJmbParam changes.
    *
-   * @return a copy of iParamDef for convenience and symmetry of the APIs or empty wrapper if initState has not
+   * @return a copy of `iParamDef` for convenience and symmetry of the APIs or empty wrapper if GUIParamCxAware::initState has not
    *         been called
    */
   template<typename T>
@@ -176,9 +178,10 @@ public:
    * (Parameters::ChangeCallback1) is providing the param, it is not returned by this api.
    *
    * Example:
-   * registerCallback<Range>(fState->fMyParam, [] (GUIJmbParam<Range> &iParam) { iParam.getValue()...; });
    *
-   * @return false if initState has not been called
+   *     registerCallback<Range>(fState->fMyParam, [] (GUIJmbParam<Range> &iParam) { iParam.getValue()...; });
+   *
+   * @return `false` if GUIParamCxAware::initState has not been called
    */
   template<typename T>
   bool registerCallback(GUIJmbParam<T> &iParamDef,
@@ -188,7 +191,7 @@ public:
   /**
    * Registers the Jmb param only given its id and return the wrapper to the param.
    *
-   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
    */
   template<typename T>
   GUIJmbParam<T> registerJmbParam(ParamID iParamID, bool iSubscribeToChanges = true);
@@ -196,7 +199,7 @@ public:
   /**
    * Registers a callback for this Jmb param only given its id and return the wrapper to the param.
    *
-   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use .exists)
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
    */
   template<typename T>
   GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
@@ -223,21 +226,21 @@ public:
   /**
    * Removes the registration of the provided param (closing the connection/stopping to listen)
    *
-   * @return true if the param was present, false otherwise
+   * @return `true` if the param was present, `false` otherwise
    */
   bool unregisterParam(ParamID iParamID);
 
   /**
    * Removes the registration of the provided param (closing the connection/stopping to listen)
    *
-   * @return an empty param so that you can write param = unregisterParam(param)
+   * @return an empty param so that you can write `param = unregisterParam(param)`
    */
   GUIRawVstParam unregisterParam(GUIRawVstParam const &iParam);
 
   /**
    * Removes the registration of the provided param (closing the connection/stopping to listen)
    *
-   * @return an empty param so that you can write param = unregisterParam(param)
+   * @return an empty param so that you can write `param = unregisterParam(param)`
    */
   template<typename T>
   GUIVstParam<T> unregisterParam(GUIVstParam<T> const &iParam);
@@ -245,7 +248,7 @@ public:
   /**
  * Removes the registration of the provided param (closing the connection/stopping to listen)
  *
- * @return an empty param so that you can write param = unregisterParam(param)
+ * @return an empty param so that you can write `param = unregisterParam(param)`
  */
   template<typename T>
   GUIJmbParam<T> unregisterParam(GUIJmbParam<T> const &iParam);
@@ -297,9 +300,10 @@ public:
    * the view to be passed back (since the view is not inheriting from this class).
    *
    * Example:
-   * registerCallback<bool>(fParams->fMyParam, [] (CTextLabel *iView, GUIVstParam<bool> &iParam) { iParam.getValue()...; });
    *
-   * @return false if not found or not proper type
+   *     registerCallback<bool>(fParams->fMyParam, [] (CTextLabel *iView, GUIVstParam<bool> &iParam) { iParam.getValue()...; });
+   *
+   * @return `false` if not found or not proper type
    */
   template<typename T>
   inline bool registerCallback(VstParam<T> const &iParamDef,
@@ -318,9 +322,10 @@ public:
    * the view to be passed back (since the view is not inheriting from this class).
    *
    * Example:
-   * registerCallback<Range>(fState->fMyParam, [] (CTextLabel *iView, GUIJmbParam<Range> &iParam) { iParam.getValue()...; });
    *
-   * @return false if not found or not proper type
+   *     registerCallback<Range>(fState->fMyParam, [] (CTextLabel *iView, GUIJmbParam<Range> &iParam) { iParam.getValue()...; });
+   *
+   * @return `false` if not found or not proper type
    */
   template<typename T>
   inline bool registerCallback(GUIJmbParam<T> &iParam,

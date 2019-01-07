@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -55,7 +55,7 @@ public:
   /** Here we go...the process call */
   tresult PLUGIN_API process(ProcessData &data) override;
 
-  /** Asks if a given sample size is supported see \ref SymbolicSampleSizes. */
+  /** Asks if a given sample size is supported see `SymbolicSampleSizes`. */
   tresult PLUGIN_API canProcessSampleSize(int32 symbolicSampleSize) override;
 
   /** Restore the state (ex: after loading preset or project) */

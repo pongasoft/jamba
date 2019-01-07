@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -185,7 +185,7 @@ tresult Message::getSerializableValue(IAttributeList::AttrID id, const IParamSer
   if(res != kResultOk)
     return res;
 
-  // TODO this line unnecessarily copies the data but there is no other API
+  /// @todo this line unnecessarily copies the data but there is no other API
   Buffer buffer(data, size);
 
   BufferStream stream{std::move(buffer)};

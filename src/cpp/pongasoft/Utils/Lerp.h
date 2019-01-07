@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -281,7 +281,7 @@ struct Range
   template<typename U, typename TLerp = DPLerpXY<T, U>>
   inline Range<U> mapSubRange(Range<T> const &iSubRange, Range<U> const &iRange, bool iClampToRange = true) const
   {
-    // TODO: optimize by generating a computing TLerp only once
+    /// @todo optimize by computing `TLerp` only once
     return Range<U>{mapValue<U,TLerp>(iSubRange.fFrom, iRange, iClampToRange),
                     mapValue<U,TLerp>(iSubRange.fTo, iRange, iClampToRange)};
   }

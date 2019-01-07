@@ -35,7 +35,6 @@ namespace Debug { class ParamDisplay; }
 
 /**
  * This is the class which maintains all the registered parameters
- * TODO provide example on how to use this class
  */
 class Parameters
 {
@@ -211,7 +210,6 @@ public:
 
   /**
    * Used from derived classes to build a parameter backed by a VST parameter
-   * TODO add example + don't forget that order is important (define the order in Maschine for example)
    */
   template<typename ParamConverter, typename... Args>
   VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, const TChar *iTitle, Args... iConverterArgs);
@@ -241,7 +239,7 @@ public:
    * processor, setComponentState in the controller)
    *
    * @param iVersion should be a >= 0 number. If negative it will be ignored
-   * @tparam Args can be any combination of ParamID, RawParamDef or VstParamDef<T>
+   * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef, JmbParamDef
    */
   template<typename... Args>
   tresult setRTSaveStateOrder(int16 iVersion, Args... args);
@@ -262,7 +260,7 @@ public:
    * the controller)
    *
    * @param iVersion should be a >= 0 number. If negative it will be ignored
-   * @tparam Args can be any combination of ParamID, RawVstParamDef, VstParamDef<T>, JmbParamDef<T>
+   * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef, JmbParamDef
    */
   template<typename... Args>
   tresult setGUISaveStateOrder(int16 iVersion, Args... args);
@@ -349,7 +347,7 @@ private:
   // order in which the parameters were registered
   std::vector<ParamID> fAllRegistrationOrder{};
 
-  // TODO: Handle multiple versions with upgrade
+  /// @todo Handle multiple versions with upgrade
   NormalizedState::SaveOrder fRTSaveStateOrder{};
   NormalizedState::SaveOrder fGUISaveStateOrder{};
 

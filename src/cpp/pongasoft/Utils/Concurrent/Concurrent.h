@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -58,7 +58,7 @@ namespace LockFree {
  * safe as long as load is called by a single thread and store is called by another single thread as well (if load
  * and store are called by the same thread it is obviously thread safe since it would be mono thread...)
  *
- * TODO: the implementation somehow assumes that T is a real type, not a primitive.. maybe there is a way to write
+ * \todo the implementation somehow assumes that `T` is a real type, not a primitive.. maybe there is a way to write
  * a primitive version (if that becomes a necessity)
  */
 template<typename T>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -100,18 +100,19 @@ protected:
 
   /**
    * This method should be called to display a totally different (root) view.
-   * Example: with xxx.uidesc like this one, you would call switchToView("compact_view");
    *
-   * <vstgui-ui-description version="1">
-   *   <!-- Main view opened on creation -->
-	 *   <template class="CViewContainer" name="view" ...>
-   *   </template>
-   *   <!-- Secondary view you can switch to -->
-	 *   <template class="CViewContainer" name="compact_view" ...>
-   *   </template>
-   * <vstgui-ui-description
+   * Example: with `xxx.uidesc` like this one, you would call `switchToView("compact_view")`;
    *
-   * @return true if switching worked
+   *     <vstgui-ui-description version="1">
+   *       <!-- Main view opened on creation -->
+	 *       <template class="CViewContainer" name="view" ...>
+   *       </template>
+   *       <!-- Secondary view you can switch to -->
+	 *       <template class="CViewContainer" name="compact_view" ...>
+   *       </template>
+   *     <vstgui-ui-description
+   *
+   * @return `true` if switching worked
    */
   virtual bool switchToView(char const *iViewName);
 
