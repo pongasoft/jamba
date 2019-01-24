@@ -37,7 +37,6 @@ CustomView::CustomView(const CRect &iSize)
     fEditorMode{false},
     fBackColor{0, 0, 0}
 {
-  setWantsFocus(true);
 }
 
 //------------------------------------------------------------------------

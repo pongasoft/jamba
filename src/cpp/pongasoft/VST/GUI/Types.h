@@ -19,11 +19,25 @@
 
 #include <vstgui4/vstgui/lib/cbitmap.h>
 #include <vstgui4/vstgui/lib/cfont.h>
+#include <vstgui4/vstgui/lib/vstkeycode.h>
 #include <pongasoft/Utils/Lerp.h>
 
 #if VSTGUI_LIVE_EDITING
 #define EDITOR_MODE 1
 #endif
+
+namespace VSTGUI {
+/**
+ * VSTGUI defines a `CMouseEventResult` enum for mouse handling but no enumeration for keyboard events which seems
+ * to be an oversight. Adding it for convenience.
+ */
+enum CKeyboardEventResult : int32_t
+{
+  kKeyboardEventNotHandled = -1,
+  kKeyboardEventHandled = 1
+};
+
+}
 
 namespace pongasoft {
 namespace VST {
@@ -48,6 +62,10 @@ using GradientSPtr = SharedPointer<CGradient>;
  */
 using Range = Utils::Range<CCoord>;
 
+/**
+ * Used to register global keyboard hooks
+ */
+using KeyboardEventCallback = std::function<CKeyboardEventResult(VstKeyCode const&)>;
 
 }
 }

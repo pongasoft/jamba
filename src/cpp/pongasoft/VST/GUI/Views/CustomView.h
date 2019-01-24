@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,67 +35,11 @@ using namespace Params;
 
 /**
  * Base class that all custom views will inherit from. Defines a basic back color.
- * The custom view tag should be a tag associated to the view itself not a parameter (like it is the case for CControl).
- * The registerParameters method is the method that you inherit from to register which VST parameters your view will
+ * The custom view tag should be a tag associated to the view itself not a parameter (like it is the case for `CControl`).
+ * The CustomView::registerParameters method is the method that you inherit from to register which Vst parameters your view will
  * use. By default each parameter will be also be registered to listen for changes which will trigger the view to be
- * redrawn: the onParameterChange method can be overridden to react differently (or additionally) to handle parameter changes.
- * You use the convenient registerXXParameter methods to register each parameter.
- * Ex:
- * ...
- * std::unique_ptr<BooleanParameter> fMyBoolParameter{nullptr};
- * std::unique_ptr<PercentParameter> fMyPercentParameter{nullptr};
- * std::unique_ptr<PercentParameter::Editor> fMyPercentParameterEditor{nullptr};
- * ...
- * void registerParameters() override
- * {
- *   fMyBoolParameter = registerBooleanParameter(EParamIDs::kMyBoolParamID);
- *   fMyPercentParameter = registerPercentParameter(EParamIDs::kMyPercentParamID);
- * }
- * ...
- * void draw() override
- * {
- *   CustomView::draw();
- *
- *   if(fMyBoolParameter->getValue())
- *     ... do something ...
- *
- *   CColor c = CColor{255, 255, 255, fMyPercentParameter->getValue() * 255);
- *   ...
- * }
- *
- * void onMouseDown(CPoint &where, const CButtonState &buttons)
- * {
- *    double percent = ...; // for example using where.y compute a percentage value
- *    fMyPercentParameterEditor = fMyPercentParameter->edit(percent);
- * }
- *
- * void onMouseMoved(CPoint &where, const CButtonState &buttons)
- * {
- *   if(fMyPercentParameterEditor)
- *   {
- *     double percent = ...; // for example using where.y compute a percentage value
- *     fMyPercentParameterEditor->setValue(percent);
- *   }
- * }
- *
- * void onMouseUp(CPoint &where, const CButtonState &buttons)
- * {
- *   if(fMyPercentParameterEditor)
- *   {
- *     double percent = ...; // for example using where.y compute a percentage value
- *     fMyPercentParameterEditor->commit(percent);
- *     fMyPercentParameterEditor = nullptr;
- *   }
- * }
- *
- * void onMouseCancel()
- * {
- *   if(fMyPercentParameterEditor)
- *   {
- *     fMyPercentParameterEditor->rollback();
- *     fMyPercentParameterEditor = nullptr;
- *   }
- * }
+ * redrawn: the CustomView::onParameterChange method can be overridden to react differently (or additionally) to handle parameter changes.
+ * You use the convenient `registerParam` or `registerCallback` methods to register each parameter.
  */
 class CustomView : public CView, public GUIParamCxAware
 {

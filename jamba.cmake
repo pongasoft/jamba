@@ -102,6 +102,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewCreator.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewFactory.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/GlobalKeyboardHook.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/PluginAccessor.h
@@ -109,6 +110,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ScrollbarView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ScrollbarView.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/SelfContainedViewListener.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.h
@@ -393,6 +395,7 @@ set(JAMBA_TEST_SRC_FILES
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-Lerp.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-StringUtils.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
     )

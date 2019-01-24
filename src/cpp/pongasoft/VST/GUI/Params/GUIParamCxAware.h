@@ -346,7 +346,7 @@ public:
       fListener(fView, iParamID);
   }
 
-private:
+protected:
   TView *fView;
   ChangeListener fListener;
 };

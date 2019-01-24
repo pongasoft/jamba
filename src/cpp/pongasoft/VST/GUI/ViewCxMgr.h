@@ -24,6 +24,7 @@
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
+#include <pongasoft/VST/GUI/Views/GlobalKeyboardHook.h>
 
 namespace pongasoft {
 namespace VST {
@@ -39,11 +40,11 @@ using namespace Params;
  *
  * Example1 usage:
  *
- * TextButtonView *button = ....;
- * fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
- *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
- *   iButton->setMouseEnabled(iParam > 3);
- * });
+ *     TextButtonView *button = ....;
+ *     fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
+ *       [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
+ *       iButton->setMouseEnabled(iParam > 3);
+ *     });
  *
  * This examples sets up a callback on the button view, so that when the (Vst) parameter "my param"
  * changes, the callback is invoked. Since the view and the parameter are part of the callback API, it is easy to
@@ -52,17 +53,17 @@ using namespace Params;
  *
  * Example2 usage:
  *
- * TextButtonView *button = ....;
- * auto cx = fState->registerConnectionFor(button);
- * cx->registerParam(fParams->fMyVstParam);
- * cx->registerParam(fState->fMyJmbParam);
- * cx->registerListener([this] (TextButtonView *iButton, ParamID iParamID) {
- *   if(iParamID == fParams->fMyVstParam.getParamID())
- *     // do something... iButton->xxx
- *   if(iParamID == fParams->fState->fMyJmbParam())
- *     // do something else... iButton->xxx
- *  });
- *  cx->invokeAll(); // optionally invoke the listener right away to initialize the button
+ *     TextButtonView *button = ....;
+ *     auto cx = fState->registerConnectionFor(button);
+ *     cx->registerParam(fParams->fMyVstParam);
+ *     cx->registerParam(fState->fMyJmbParam);
+ *     cx->registerListener([this] (TextButtonView *iButton, ParamID iParamID) {
+ *       if(iParamID == fParams->fMyVstParam.getParamID())
+ *         // do something... iButton->xxx
+ *       if(iParamID == fParams->fState->fMyJmbParam())
+ *         // do something else... iButton->xxx
+ *      });
+ *      cx->invokeAll(); // optionally invoke the listener right away to initialize the button
  *
  * This examples sets up the button view as being interested in changes to 2 parameters and when they change,
  * the listener will be invoked.
@@ -70,19 +71,19 @@ using namespace Params;
  * An alternative would be to inherit from the view which is more work (especially if the only purpose is add a
  * simple callback like behavior):
  *
- * class MyView : public TextButtonView, PluginAccessor<MyGUIState>
- * {
- *   public:
- *     // constructor
- *     MyView(...);
- *
- *     void registerParameters() override
+ *     class MyView : public TextButtonView, PluginAccessor<MyGUIState>
  *     {
- *        registerVstCallback(fParams->fMyParam, [this] (GUIVstParam<int> &iParam) {
- *          setMouseEnabled(iParam > 3);
- *        });
- *     }
- * };
+ *       public:
+ *         // constructor
+ *         MyView(...);
+ *
+ *         void registerParameters() override
+ *         {
+ *            registerVstCallback(fParams->fMyParam, [this] (GUIVstParam<int> &iParam) {
+ *              setMouseEnabled(iParam > 3);
+ *            });
+ *         }
+ *     };
  */
 class ViewCxMgr : private IViewListenerAdapter
 {

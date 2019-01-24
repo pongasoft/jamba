@@ -225,6 +225,10 @@ inline static double mapValueDP(double iValue, double iFromLow, double iFromHigh
 template<typename T>
 struct Range
 {
+  /**
+   * Gives access to the type of elements in the range */
+  using value_type = T;
+
   // Empty constructor (no range)
   Range() = default;
 
@@ -236,6 +240,22 @@ struct Range
 
   // return true if the range is a single value (aka degenerate range)
   bool isSingleValue() const { return fFrom == fTo; }
+
+  /**
+   * This method assumes that `fFrom` and `fTo` are part of the range or another way to put it:
+   *
+   *     range.contains(range.fFrom) // returns true
+   *     range.contains(range.fTo) // returns true
+   *
+   * @return `true` if the range contains the value
+   */
+  bool contains(T iValue) const
+  {
+    if(fFrom < fTo)
+      return iValue >= fFrom && iValue <= fTo;
+    else
+      return iValue <= fFrom && iValue >= fTo;
+  }
 
   /**
    * Clamp the value to this range
