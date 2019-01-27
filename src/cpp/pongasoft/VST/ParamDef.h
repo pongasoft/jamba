@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -49,18 +49,18 @@ public:
   };
 public:
   IParamDef(ParamID const iParamID,
-            TChar const *const iTitle,
+            VstString16 iTitle,
             Owner const iOwner,
             bool const iTransient) :
     fParamID{iParamID},
-    fTitle{iTitle},
+    fTitle{std::move(iTitle)},
     fOwner{iOwner},
     fTransient{iTransient}
   {}
 
 public:
   const ParamID fParamID;
-  const TChar *const fTitle;
+  const VstString16 fTitle;
   const Owner fOwner; // who owns the parameter (and which stream will it be saved if non transient)
   const bool fTransient; // not saved in the stream
 };
@@ -73,23 +73,23 @@ class RawVstParamDef : public IParamDef
 {
 public:
   RawVstParamDef(ParamID const iParamID,
-                 TChar const *const iTitle,
-                 TChar const *const iUnits,
+                 VstString16 iTitle,
+                 VstString16 iUnits,
                  ParamValue const iDefaultNormalizedValue,
                  int32 const iStepCount,
                  int32 const iFlags,
                  UnitID const iUnitID,
-                 TChar const *const iShortTitle,
+                 VstString16 iShortTitle,
                  int32 const iPrecision,
                  Owner const iOwner,
                  bool const iTransient) :
-    IParamDef(iParamID, iTitle, iOwner, iTransient),
-    fUnits{iUnits},
+    IParamDef(iParamID, std::move(iTitle), iOwner, iTransient),
+    fUnits{std::move(iUnits)},
     fDefaultValue{Utils::clampE(iDefaultNormalizedValue, 0.0, 1.0)},
     fStepCount{iStepCount},
     fFlags{iFlags},
     fUnitID{iUnitID},
-    fShortTitle{iShortTitle},
+    fShortTitle{std::move(iShortTitle)},
     fPrecision{iPrecision}
   {}
 
@@ -113,12 +113,12 @@ public:
   }
 
 public:
-  const TChar *const fUnits;
+  const VstString16 fUnits;
   const ParamValue fDefaultValue;
   const int32 fStepCount;
   const int32 fFlags;
   const UnitID fUnitID;
-  const TChar *const fShortTitle;
+  const VstString16 fShortTitle;
   const int32 fPrecision;
 };
 
@@ -132,24 +132,24 @@ public:
   using ParamType = T;
 
   VstParamDef(ParamID const iParamID,
-              TChar const *const iTitle,
-              TChar const *const iUnits,
+              VstString16 iTitle,
+              VstString16 iUnits,
               ParamType const iDefaultValue,
               int32 const iFlags,
               UnitID const iUnitID,
-              TChar const *const iShortTitle,
+              VstString16 iShortTitle,
               int32 const iPrecision,
               Owner const iOwner,
               bool const iTransient,
               std::shared_ptr<IParamConverter<ParamType>> iConverter) :
     RawVstParamDef(iParamID,
-                   iTitle,
-                   iUnits,
+                   std::move(iTitle),
+                   std::move(iUnits),
                    iConverter ? iConverter->normalize(iDefaultValue) : 0,
                    iConverter ? iConverter->getStepCount() : 0,
                    iFlags,
                    iUnitID,
-                   iShortTitle,
+                   std::move(iShortTitle),
                    iPrecision,
                    iOwner,
                    iTransient),
@@ -200,11 +200,11 @@ class IJmbParamDef : public IParamDef
 {
 public:
   IJmbParamDef(const ParamID iParamID,
-               const TChar *const iTitle,
+               VstString16 iTitle,
                Owner const iOwner,
                bool const iTransient,
                bool const iShared)
-    : IParamDef(iParamID, iTitle, iOwner, iTransient),
+    : IParamDef(iParamID, std::move(iTitle), iOwner, iTransient),
       fShared{iShared}
   {}
 
@@ -228,13 +228,13 @@ public:
   using ParamType = T;
 
   JmbParamDef(ParamID const iParamID,
-              TChar const *const iTitle,
+              VstString16 iTitle,
               Owner const iOwner,
               bool const iTransient,
               bool const iShared,
               ParamType const &iDefaultValue,
               std::shared_ptr<IParamSerializer<ParamType>> iSerializer) :
-    IJmbParamDef(iParamID, iTitle, iOwner, iTransient, iShared),
+    IJmbParamDef(iParamID, std::move(iTitle), iOwner, iTransient, iShared),
     fDefaultValue{iDefaultValue},
     fSerializer{std::move(iSerializer)}
   {}

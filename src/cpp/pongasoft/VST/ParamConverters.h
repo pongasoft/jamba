@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@
 #define __PONGASOFT_VST_PARAM_CONVERTERS_H__
 
 #include <pongasoft/Utils/Misc.h>
+#include <pongasoft/VST/Types.h>
 
 #include <pluginterfaces/vst/vsttypes.h>
 #include <pluginterfaces/vst/ivstparameterchanges.h>
@@ -105,10 +106,10 @@ class BooleanParamConverter : public IParamConverter<bool>
 public:
   using IParamConverter<bool>::toString;
 
-  explicit BooleanParamConverter(char16 const *iFalseString = STR16("Off"),
-                                 char16 const *iTrueString = STR16("On")) :
-    fFalseString{iFalseString},
-    fTrueString{iTrueString}
+  explicit BooleanParamConverter(VstString16 iFalseString = STR16("Off"),
+                                 VstString16 iTrueString = STR16("On")) :
+    fFalseString{std::move(iFalseString)},
+    fTrueString{std::move(iTrueString)}
   {}
 
   inline int getStepCount() const override { return 1; }
@@ -127,14 +128,14 @@ public:
   {
     Steinberg::UString wrapper(oString, str16BufferSize(String128));
     if(iValue)
-      wrapper.assign(fTrueString);
+      wrapper.assign(fTrueString.c_str());
     else
-      wrapper.assign(fFalseString);
+      wrapper.assign(fFalseString.c_str());
   }
 
 protected:
-  char16 const *fFalseString;
-  char16 const *fTrueString;
+  VstString16 fFalseString;
+  VstString16 fTrueString;
 };
 
 /**
@@ -187,11 +188,11 @@ public:
   explicit DiscreteValueParamConverter(int iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
 
   // Constructor with printf style format where the parameter (%d) will be (value + offset)
-  explicit DiscreteValueParamConverter(char16 const *iFormat, int iToStringOffset = 0) :
-    fToStringOffset{iToStringOffset}, fFormat{iFormat} {}
+  explicit DiscreteValueParamConverter(VstString16 iFormat, int iToStringOffset = 0) :
+    fToStringOffset{iToStringOffset}, fFormat{std::move(iFormat)} {}
 
   // Constructor with all values defined
-  explicit DiscreteValueParamConverter(std::array<ConstString, StepCount + 1> const &iToStringValues) :
+  explicit DiscreteValueParamConverter(std::array<VstString16, StepCount + 1> const &iToStringValues) :
     fToStringValues(iToStringValues.cbegin(), iToStringValues.cend()) {}
 
   inline int getStepCount() const override { return StepCount; }
@@ -214,10 +215,10 @@ public:
   void toString(ParamType const &iValue, String128 oString, int32 /* iPrecision */) const override
   {
     Steinberg::UString wrapper(oString, str16BufferSize (String128));
-    if(fFormat)
+    if(!fFormat.empty())
     {
       String s;
-      s.printf(fFormat, iValue + fToStringOffset);
+      s.printf(fFormat.c_str(), iValue + fToStringOffset);
       wrapper.assign(s.text());
     }
     else
@@ -229,15 +230,15 @@ public:
       }
       else
       {
-        wrapper.assign(fToStringValues[iValue].text());
+        wrapper.assign(fToStringValues[iValue].c_str());
       }
     }
   }
 
 private:
   int fToStringOffset{};
-  char16 const *fFormat{};
-  std::vector<ConstString> fToStringValues{};
+  VstString16 fFormat{};
+  std::vector<VstString16> fToStringValues{};
 };
 
 /**
@@ -256,10 +257,10 @@ public:
   explicit EnumParamConverter(int iToStringOffset = 0) : fConverter{iToStringOffset} {}
 
   // Constructor with printf style format where the parameter (%d) will be (value + offset)
-  explicit EnumParamConverter(char16 const *iFormat, int iToStringOffset = 0) : fConverter{iFormat, iToStringOffset} {}
+  explicit EnumParamConverter(VstString16 iFormat, int iToStringOffset = 0) : fConverter{std::move(iFormat), iToStringOffset} {}
 
   // Constructor with all values defined
-  explicit EnumParamConverter(std::array<ConstString, MaxValue + 1> const &iToStringValues) : fConverter{iToStringValues} {}
+  explicit EnumParamConverter(std::array<VstString16, MaxValue + 1> const &iToStringValues) : fConverter{iToStringValues} {}
 
   inline int getStepCount() const override { return fConverter.getStepCount(); }
 

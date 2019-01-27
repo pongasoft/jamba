@@ -74,12 +74,12 @@ public:
   struct RawVstParamDefBuilder
   {
     // builder methods
-    RawVstParamDefBuilder &units(const TChar *iUnits) { fUnits = iUnits; return *this; }
+    RawVstParamDefBuilder &units(VstString16 iUnits) { fUnits = iUnits; return *this; }
     RawVstParamDefBuilder &defaultValue(ParamValue iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     RawVstParamDefBuilder &stepCount(int32 iStepCount) { fStepCount = iStepCount; return *this;}
     RawVstParamDefBuilder &flags(int32 iFlags) { fFlags = iFlags; return *this; }
     RawVstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
-    RawVstParamDefBuilder &shortTitle(const TChar *iShortTitle) { fShortTitle = iShortTitle; return *this; }
+    RawVstParamDefBuilder &shortTitle(VstString16 iShortTitle) { fShortTitle = iShortTitle; return *this; }
     RawVstParamDefBuilder &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
     RawVstParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
     RawVstParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
@@ -90,13 +90,13 @@ public:
 
     // fields
     ParamID fParamID;
-    const TChar *fTitle;
-    const TChar *fUnits = nullptr;
+    VstString16 fTitle;
+    VstString16 fUnits{};
     ParamValue fDefaultValue{};
     int32 fStepCount{0};
     int32 fFlags = ParameterInfo::kCanAutomate;
     UnitID fUnitID = kRootUnitId;
-    const TChar *fShortTitle = nullptr;
+    VstString16 fShortTitle{};
     int32 fPrecision = 4;
     IParamDef::Owner fOwner = IParamDef::Owner::kRT;
     bool fTransient = false;
@@ -104,8 +104,8 @@ public:
     friend class Parameters;
 
   protected:
-    RawVstParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
-      fParamID{iParamID}, fTitle{iTitle}, fParameters{iParameters} {}
+    RawVstParamDefBuilder(Parameters *iParameters, ParamID iParamID, VstString16 iTitle) :
+      fParamID{iParamID}, fTitle{std::move(iTitle)}, fParameters{iParameters} {}
 
   private:
     Parameters *fParameters;
@@ -118,11 +118,11 @@ public:
   struct VstParamDefBuilder
   {
     // builder methods
-    VstParamDefBuilder &units(const TChar *iUnits) { fUnits = iUnits; return *this; }
+    VstParamDefBuilder &units(VstString16 iUnits) { fUnits = iUnits; return *this; }
     VstParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     VstParamDefBuilder &flags(int32 iFlags) { fFlags = iFlags; return *this; }
     VstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
-    VstParamDefBuilder &shortTitle(const TChar *iShortTitle) { fShortTitle = iShortTitle; return *this; }
+    VstParamDefBuilder &shortTitle(VstString16 iShortTitle) { fShortTitle = iShortTitle; return *this; }
     VstParamDefBuilder &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
     VstParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
     VstParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
@@ -136,12 +136,12 @@ public:
 
     // fields
     ParamID fParamID;
-    const TChar *fTitle;
-    const TChar *fUnits = nullptr;
+    VstString16 fTitle;
+    VstString16 fUnits{};
     T fDefaultValue{};
     int32 fFlags = ParameterInfo::kCanAutomate;
     UnitID fUnitID = kRootUnitId;
-    const TChar *fShortTitle = nullptr;
+    VstString16 fShortTitle{};
     int32 fPrecision = 4;
     IParamDef::Owner fOwner = IParamDef::Owner::kRT;
     bool fTransient = false;
@@ -150,8 +150,8 @@ public:
     friend class Parameters;
 
   protected:
-    VstParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
-      fParamID{iParamID}, fTitle{iTitle}, fParameters{iParameters} {}
+    VstParamDefBuilder(Parameters *iParameters, ParamID iParamID, VstString16 iTitle) :
+      fParamID{iParamID}, fTitle{std::move(iTitle)}, fParameters{iParameters} {}
 
   private:
     Parameters *fParameters;
@@ -178,7 +178,7 @@ public:
 
     // fields
     ParamID fParamID;
-    const TChar *fTitle;
+    VstString16 fTitle;
     T fDefaultValue{};
     IParamDef::Owner fOwner = IParamDef::Owner::kGUI;
     bool fTransient = false;
@@ -188,8 +188,8 @@ public:
     friend class Parameters;
 
   protected:
-    JmbParamDefBuilder(Parameters *iParameters, ParamID iParamID, const TChar* iTitle) :
-      fParamID{iParamID}, fTitle{iTitle}, fParameters{iParameters} {}
+    JmbParamDefBuilder(Parameters *iParameters, ParamID iParamID, VstString16 iTitle) :
+      fParamID{iParamID}, fTitle{std::move(iTitle)}, fParameters{iParameters} {}
 
   private:
     Parameters *fParameters;
@@ -206,33 +206,33 @@ public:
   /**
    * Used from derived classes to build a parameter backed by a raw VST parameter
    */
-  RawVstParamDefBuilder raw(ParamID iParamID, const TChar *iTitle);
+  RawVstParamDefBuilder raw(ParamID iParamID, VstString16 iTitle);
 
   /**
    * Used from derived classes to build a parameter backed by a VST parameter
    */
   template<typename ParamConverter, typename... Args>
-  VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, const TChar *iTitle, Args... iConverterArgs);
+  VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, VstString16 iTitle, Args... iConverterArgs);
 
   /**
    * Used from derived classes to build a parameter backed by a VST parameter. Use this version
    * if you want to provide a different converter.
    */
   template<typename T>
-  VstParamDefBuilder<T> vstFromType(ParamID iParamID, const TChar *iTitle);
+  VstParamDefBuilder<T> vstFromType(ParamID iParamID, VstString16 iTitle);
 
   /**
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue)
    */
   template<typename ParamSerializer, typename... Args>
-  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, const TChar *iTitle, Args... iSerializerArgs);
+  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, VstString16 iTitle, Args... iSerializerArgs);
 
   /**
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue). Use this version
    * if you want to provide a different serializer.
    */
   template<typename T>
-  JmbParamDefBuilder<T> jmbFromType(ParamID iParamID, const TChar *iTitle);
+  JmbParamDefBuilder<T> jmbFromType(ParamID iParamID, VstString16 iTitle);
 
   /**
    * Used to change the default order (registration order) used when saving the RT state (getState/setState in the
@@ -471,9 +471,9 @@ JmbParam<T> Parameters::add(Parameters::JmbParamDefBuilder<T> const &iBuilder)
 // Parameters::vstFromType
 //------------------------------------------------------------------------
 template<typename T>
-Parameters::VstParamDefBuilder<T> Parameters::vstFromType(ParamID iParamID, const TChar *iTitle)
+Parameters::VstParamDefBuilder<T> Parameters::vstFromType(ParamID iParamID, VstString16 iTitle)
 {
-  return Parameters::VstParamDefBuilder<T>(this, iParamID, iTitle);
+  return Parameters::VstParamDefBuilder<T>(this, iParamID, std::move(iTitle));
 }
 
 //------------------------------------------------------------------------
@@ -481,10 +481,10 @@ Parameters::VstParamDefBuilder<T> Parameters::vstFromType(ParamID iParamID, cons
 //------------------------------------------------------------------------
 template<typename ParamConverter, typename... Args>
 Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::vst(ParamID iParamID,
-                                                                                   const TChar *iTitle,
+                                                                                   VstString16 iTitle,
                                                                                    Args... iConverterArgs)
 {
-  auto builder = vstFromType<typename ParamConverter::ParamType>(iParamID, iTitle);
+  auto builder = vstFromType<typename ParamConverter::ParamType>(iParamID, std::move(iTitle));
   builder.template converter<ParamConverter>(iConverterArgs...);
   return builder;
 }
@@ -493,9 +493,9 @@ Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::v
 // Parameters::jmbFromType
 //------------------------------------------------------------------------
 template<typename T>
-Parameters::JmbParamDefBuilder<T> Parameters::jmbFromType(ParamID iParamID, const TChar *iTitle)
+Parameters::JmbParamDefBuilder<T> Parameters::jmbFromType(ParamID iParamID, VstString16 iTitle)
 {
-  return Parameters::JmbParamDefBuilder<T>(this, iParamID, iTitle);
+  return Parameters::JmbParamDefBuilder<T>(this, iParamID, std::move(iTitle));
 }
 
 //------------------------------------------------------------------------
@@ -503,10 +503,10 @@ Parameters::JmbParamDefBuilder<T> Parameters::jmbFromType(ParamID iParamID, cons
 //------------------------------------------------------------------------
 template<typename ParamSerializer, typename... Args>
 Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::jmb(ParamID iParamID,
-                                                                                    const TChar *iTitle,
+                                                                                    VstString16 iTitle,
                                                                                     Args... iSerializerArgs)
 {
-  auto builder = jmbFromType<typename ParamSerializer::ParamType>(iParamID, iTitle);
+  auto builder = jmbFromType<typename ParamSerializer::ParamType>(iParamID, std::move(iTitle));
   builder.template serializer<ParamSerializer>(iSerializerArgs...);
   return builder;
 }

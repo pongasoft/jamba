@@ -80,6 +80,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/ParamSerializers.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/SampleRateBasedClock.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Timer.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/Types.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTProcessor.h

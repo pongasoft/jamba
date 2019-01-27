@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -216,7 +216,7 @@ std::string ParamDisplay::getValue(RawVstParamDef const *iParamDef, Key iKey) co
     case Key::kType:
       return "vst";
     case Key::kTitle:
-      return String(iParamDef->fTitle).text8();
+      return String(iParamDef->fTitle.c_str()).text8();
     case Key::kOwner:
       return iParamDef->fOwner == IParamDef::Owner::kGUI ? "ui" : "rt";
     case Key::kTransient:
@@ -234,13 +234,13 @@ std::string ParamDisplay::getValue(RawVstParamDef const *iParamDef, Key iKey) co
     case Key::kFlags:
       return std::to_string(iParamDef->fFlags);
     case Key::kShortTitle:
-      return String(iParamDef->fShortTitle).text8();
+      return String(iParamDef->fShortTitle.c_str()).text8();
     case Key::kPrecision:
       return std::to_string(iParamDef->fPrecision);
     case Key::kUnitID:
       return std::to_string(iParamDef->fUnitID);
     case Key::kUnits:
-      return String(iParamDef->fUnits).text8();
+      return String(iParamDef->fUnits.c_str()).text8();
     default:
       return "";
   }
@@ -318,7 +318,7 @@ std::string ParamDisplay::getValue(IJmbParamDef const *iParamDef, Key iKey) cons
     case Key::kType:
       return "jmb";
     case Key::kTitle:
-      return String(iParamDef->fTitle).text8();
+      return String(iParamDef->fTitle.c_str()).text8();
     case Key::kOwner:
       return iParamDef->fOwner == IParamDef::Owner::kGUI ? "ui" : "rt";
     case Key::kTransient:

@@ -28,14 +28,14 @@ class VstParameterImpl : public Vst::Parameter
 {
 public:
   explicit VstParameterImpl(std::shared_ptr<RawVstParamDef> const &iParamDef) :
-    Vst::Parameter(iParamDef->fTitle,
+    Vst::Parameter(iParamDef->fTitle.c_str(),
                    iParamDef->fParamID,
-                   iParamDef->fUnits,
+                   iParamDef->fUnits.empty() ? nullptr : iParamDef->fUnits.c_str(),
                    iParamDef->fDefaultValue,
                    iParamDef->fStepCount,
                    iParamDef->fFlags,
                    iParamDef->fUnitID,
-                   iParamDef->fShortTitle),
+                   iParamDef->fShortTitle.empty() ? nullptr : iParamDef->fShortTitle.c_str()),
     fParamDef{iParamDef}
   {
     setPrecision(fParamDef->fPrecision);
@@ -265,7 +265,7 @@ tresult Parameters::setRTSaveStateOrder(NormalizedState::SaveOrder const &iSaveO
     res |= paramOk;
   }
 
-  for(auto p : fVstParams)
+  for(auto const &p : fVstParams)
   {
     auto param = p.second;
     if(param->fOwner == IParamDef::Owner::kRT && !param->fTransient)
@@ -396,9 +396,9 @@ RawVstParam Parameters::add(RawVstParamDefBuilder const &iBuilder)
 //------------------------------------------------------------------------
 // Parameters::raw
 //------------------------------------------------------------------------
-Parameters::RawVstParamDefBuilder Parameters::raw(ParamID iParamID, const TChar *iTitle)
+Parameters::RawVstParamDefBuilder Parameters::raw(ParamID iParamID, VstString16 iTitle)
 {
-  return Parameters::RawVstParamDefBuilder(this, iParamID, iTitle);
+  return Parameters::RawVstParamDefBuilder(this, iParamID, std::move(iTitle));
 }
 
 }
