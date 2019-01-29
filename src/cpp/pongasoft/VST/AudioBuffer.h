@@ -117,6 +117,31 @@ public:
     }
 
     /**
+     * @return the max sample (absolute) for this channel
+     */
+    inline SampleType absoluteMax()
+    {
+      SampleType max = 0;
+
+      auto buffer = getBuffer();
+
+      // sanity check
+      if(!buffer)
+        return max;
+
+      for(int j = 0; j < getNumSamples(); ++j, buffer++)
+      {
+        auto sample = *buffer;
+        if(sample < 0)
+          sample -= sample;
+
+        max = std::max(max, sample);
+      }
+
+      return max;
+    }
+
+    /**
      * Clears the channel (and sets the silence flag) */
     inline void clear()
     {
