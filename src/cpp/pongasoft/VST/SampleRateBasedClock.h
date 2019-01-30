@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -99,6 +99,29 @@ public:
   uint32 getTimeForSampleCount(uint32 iSampleCount) const
   {
     return static_cast<uint32>(ceil(iSampleCount * 1000.0 / fSampleRate));
+  }
+
+  /**
+   * Given the current sample count (which can be extracted from `ProcessData::processContext->projectTimeSamples`)
+   * returns the number of samples for the next bar boundary.
+   *
+   * Example: with a tempo of 120 (4/4), and a sample rate of 48000, each bar is 96000 samples.
+   *
+   *     getNextBarSampleCount(52123, 120) == 96000; // 1 bar
+   *     getNextBarSampleCount(600000, 120) == 672000; // 7 bars
+   *     getNextBarSampleCount(672000, 120) == 672000; // 7 bars
+   *     getNextBarSampleCount(672001, 120) == 768000; // 8 bars
+   */
+  TSamples getNextBarSampleCount(TSamples iCurrentSampleCount, double iTempo, int32 iTimeSigNumerator = 4, int32 iTimeSigDenominator = 4) const
+  {
+    auto sampleCountFor1Bar =
+      static_cast<TSamples>(getSampleCountFor1Bar(iTempo, iTimeSigNumerator, iTimeSigDenominator));
+    auto barMultiples = iCurrentSampleCount / sampleCountFor1Bar;
+    auto barBoundary = barMultiples * sampleCountFor1Bar;
+    if(barBoundary == iCurrentSampleCount)
+      return iCurrentSampleCount;
+    else
+      return barBoundary + sampleCountFor1Bar;
   }
 
   // getSampleRate

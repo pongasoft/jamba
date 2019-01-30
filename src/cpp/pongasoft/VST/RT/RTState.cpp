@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -185,7 +185,7 @@ bool RTState::applyParameterChanges(IParameterChanges &inputParameterChanges)
 //------------------------------------------------------------------------
 // RTState::getParamUpdateSampleOffset
 //------------------------------------------------------------------------
-int32 RTState::getParamUpdateSampleOffset(ProcessData &iData, ParamID iParamID)
+int32 RTState::getParamUpdateSampleOffset(ProcessData &iData, ParamID iParamID) const
 {
   // check for actual changes
   auto inputParameterChanges = iData.inputParameterChanges;

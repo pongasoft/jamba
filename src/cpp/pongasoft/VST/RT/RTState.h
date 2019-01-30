@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -94,7 +94,7 @@ public:
    *
    * @return the offset at which the param changed (-1 if it did not change)
    */
-  virtual int32 getParamUpdateSampleOffset(ProcessData &iData, ParamID iParamID);
+  virtual int32 getParamUpdateSampleOffset(ProcessData &iData, ParamID iParamID) const;
 
   /**
    * This method should be called at the end of process(ProcessData &data) method. It will update the previous state
