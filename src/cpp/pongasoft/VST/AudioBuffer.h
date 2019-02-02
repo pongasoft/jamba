@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -42,6 +42,26 @@ template<typename SampleType>
 class AudioBuffers
 {
 public:
+  /**
+   * Unary operator adapter for computing the absolute max
+   */
+  struct AbsoluteMaxOp
+  {
+    void operator()(SampleType iSample)
+    {
+      fAbsoluteMax = std::max(fAbsoluteMax, iSample < 0 ? -iSample : iSample);
+    }
+
+    SampleType fAbsoluteMax = 0;
+  };
+
+  /**
+   * Represents a single channel (for example left audio channel).
+   *
+   * Note an instance of this class may represent an invalid/non active channel in which case
+   * the various methods will react accordingly (ex: `getBuffer` returns `nullptr`,
+   * `forEachSample` doesn't do anything, etc...)
+   */
   class Channel
   {
   public:
@@ -60,13 +80,31 @@ public:
     /**
      * Note that this pointer is NOT guaranteed to be not null as demonstrated by this piece of logic in
      * the Audio Unit wrapper code:
-     * ...
-			 processData.inputs[i].channelBuffers32[channel] =
-			   input->IsActive () ? (Sample32*)input->GetBufferList ().mBuffers[channel].mData : 0;
-     * ...
-     * @return the underlying sample buffer or nullptr if not active
+     *
+     *     ...
+		 *	   processData.inputs[i].channelBuffers32[channel] =
+		 *     input->IsActive () ? (Sample32*)input->GetBufferList ().mBuffers[channel].mData : 0;
+     *     ...
+     *
+     * @return the underlying sample buffer or `nullptr` if not active
      */
-    inline SampleType *getBuffer() const
+    inline SampleType *getBuffer()
+    {
+      return fChannel < fBuffers.getNumChannels() ? fBuffers.getBuffer()[fChannel] : nullptr;
+    }
+
+    /**
+     * Note that this pointer is NOT guaranteed to be not null as demonstrated by this piece of logic in
+     * the Audio Unit wrapper code:
+     *
+     *     ...
+     *	   processData.inputs[i].channelBuffers32[channel] =
+     *     input->IsActive () ? (Sample32*)input->GetBufferList ().mBuffers[channel].mData : 0;
+     *     ...
+     *
+     * @return the underlying sample buffer or `nullptr` if not active
+     */
+    inline SampleType const *getBuffer() const
     {
       return fChannel < fBuffers.getNumChannels() ? fBuffers.getBuffer()[fChannel] : nullptr;
     }
@@ -85,7 +123,7 @@ public:
     }
 
     /**
-     * @return true if this channel is active, meaning
+     * @return true if this channel is active, meaning there is such a channel and its buffer is not null
      */
     inline bool isActive() const
     {
@@ -119,26 +157,9 @@ public:
     /**
      * @return the max sample (absolute) for this channel
      */
-    inline SampleType absoluteMax()
+    inline SampleType absoluteMax() const
     {
-      SampleType max = 0;
-
-      auto buffer = getBuffer();
-
-      // sanity check
-      if(!buffer)
-        return max;
-
-      for(int j = 0; j < getNumSamples(); ++j, buffer++)
-      {
-        auto sample = *buffer;
-        if(sample < 0)
-          sample -= sample;
-
-        max = std::max(max, sample);
-      }
-
-      return max;
+      return forEachSample(AbsoluteMaxOp()).fAbsoluteMax;
     }
 
     /**
@@ -154,6 +175,104 @@ public:
       std::fill(buffer, buffer + getNumSamples(), 0);
 
       setSilenceFlag(true);
+    }
+
+    /**
+     * Applies the provided unary function to each sample (if the channel is active).
+     *
+     * Example:
+     *
+     *     double gain = 0.5;
+     *     leftChannel.forEachSample([gain](SampleType &iSample) { iSample *= gain; });
+     *
+     * @tparam UnaryFunction can be a lambda, a function object (etc...) but should provide an
+     *                       api similar to `std::function<void(SampleType)>` or `std::function<void(SampleType &)>`
+     * @return the function (similar api as `std::for_each`)
+     */
+    template<typename UnaryFunction>
+    inline UnaryFunction forEachSample(UnaryFunction f)
+    {
+      auto buffer = getBuffer();
+
+      if(buffer)
+      {
+        return std::for_each(buffer, buffer + getNumSamples(), f);
+      }
+      else
+        return f;
+    }
+
+    /**
+     * Applies the provided unary function to each sample (if the channel is active). Because the method is const,
+     * the unary function cannot modify the elements.
+     *
+     * Example:
+     *
+     *     auto max = leftChannel.forEachSample(AbsoluteMaxOp()).fAbsoluteMax;
+     *
+     * @tparam UnaryFunction can be a lambda, a function object (etc...) but should provide an
+     *                       api similar to `std::function<void(SampleType)>` or `std::function<void(SampleType const &)>`
+     * @return the function (similar api as `std::for_each`)
+     */
+    template<typename UnaryFunction>
+    inline UnaryFunction forEachSample(UnaryFunction f) const
+    {
+      auto buffer = getBuffer();
+
+      if(buffer)
+      {
+        return std::for_each(buffer, buffer + getNumSamples(), f);
+      }
+      else
+        return f;
+    }
+
+    /**
+     * Copy `iFromChannel` to this channel, applying `f` to each sample or in other words, for each sample
+     *
+     *     getBuffer[i] = f(iFromChannel.getBuffer[i]);
+     *
+     * This handles properly inactive channels (nothing done if either of the channel is inactive) and channels
+     * of different sizes.
+     *
+     * Example:
+     *
+     *     AudioBuffers<SampleType> in(data.inputs[0], data.numSamples);
+     *     AudioBuffers<SampleType> out(data.outputs[0], data.numSamples);
+     *
+     *     double gain = 0.5;
+     *     out.getLeftChannel().copyFrom(in.getLeftChannel(), [gain](SampleType iSample) { return iSample * gain; });
+     *
+     * @tparam UnaryOperation can be a lambda, a function object (etc...) but should provide an
+     *                        api similar to `std::function<SampleType(SampleType)>`
+     * @return the function provided
+     */
+    template<typename UnaryOperation>
+    inline UnaryOperation copyFrom(Channel const &iFromChannel, UnaryOperation f)
+    {
+      auto outputBuffer = getBuffer();
+      auto inputBuffer = iFromChannel.getBuffer();
+
+      if(outputBuffer && inputBuffer)
+      {
+        int32 const numSamples = std::min(getNumSamples(), iFromChannel.getNumSamples());
+
+        // not using std::transform because f is copied and not returned...
+        auto last = inputBuffer + numSamples;
+        for (; inputBuffer != last; ++inputBuffer, ++outputBuffer)
+          *outputBuffer = f(*inputBuffer);
+      }
+
+      return f;
+    }
+
+    /**
+     * Same as `copyFrom` with the roles reversed
+     */
+    template<typename UnaryOperation>
+    inline UnaryOperation copyTo(Channel &oToChannel, UnaryOperation f) const
+    {
+      return oToChannel.copyFrom(*this, f);
     }
 
   private:
@@ -243,11 +362,26 @@ public:
   }
 
   /**
-   * @return the audio channel provided its channel (make sure that iChannel is <  getNumChannels!)
+   * Return the audio channel for the provided channel. Note that this method never fails and will return an object
+   * where Channel::isActive returns `false` in the event the channel is not active.
+   *
+   * @return the audio channel provided its channel
    */
   inline Channel getAudioChannel(int32 iChannel)
   {
     return Channel{*this, iChannel};
+  }
+
+  /**
+   * Return the audio channel for the provided channel. Note that this method never fails and will return an object
+   * where Channel::isActive returns `false` in the event the channel is not active.
+   *
+   * @return the audio channel provided its channel
+   */
+  inline const Channel getAudioChannel(int32 iChannel) const
+  {
+    // implementation note: removing const since Channel accepts only non const
+    return Channel{*const_cast<class_type *>(this), iChannel};
   }
 
   /**
@@ -256,12 +390,25 @@ public:
   inline Channel getLeftChannel() { return getAudioChannel(DEFAULT_LEFT_CHANNEL); }
 
   /**
+   * @return the left channel (using the fact that the left channel is 0)
+   */
+  inline const Channel getLeftChannel() const { return getAudioChannel(DEFAULT_LEFT_CHANNEL); }
+
+  /**
    * @return the right channel (using the fact that the left channel is 1)
    */
   inline Channel getRightChannel() { return getAudioChannel(DEFAULT_RIGHT_CHANNEL); }
 
+  /**
+   * @return the right channel (using the fact that the left channel is 1)
+   */
+  inline const Channel getRightChannel() const { return getAudioChannel(DEFAULT_RIGHT_CHANNEL); }
+
   // returns the underlying buffer
-  inline SampleType **getBuffer() const;
+  inline SampleType **getBuffer();
+
+  // returns the underlying buffer
+  inline SampleType const * const *getBuffer() const;
 
   /**
    * @return number of channels (2 for stereo) of the underlying buffer
@@ -274,6 +421,52 @@ public:
   inline int32 getNumSamples() const { return fNumSamples; }
 
   /**
+   * Applies the provided unary function to each sample of each channel
+   *
+   * Example:
+   *
+   *     double gain = 0.5;
+   *     out.forEachSample([gain](SampleType &iSample) { iSample *= gain; });
+   *
+   * @tparam UnaryFunction can be a lambda, a function object (etc...) but should provide an
+   *                       api similar to `std::function<void(SampleType)>` or `std::function<void(SampleType &)>`
+   * @return the function (similar api as `std::for_each`)
+   */
+  template<typename UnaryFunction>
+  inline UnaryFunction forEachSample(UnaryFunction f)
+  {
+    for(int32 channel = 0; channel < getNumChannels(); channel++)
+    {
+      f = getAudioChannel(channel).forEachSample(f);
+    }
+
+    return f;
+  }
+
+  /**
+   * Applies the provided unary function to each sample of each channel. Because the method is const, the unary function
+   * cannot modify the elements.
+   *
+   * Example:
+   *
+   *     auto max = out.forEachSample(AbsoluteMaxOp()).fAbsoluteMax;
+   *
+   * @tparam UnaryFunction can be a lambda, a function object (etc...) but should provide an
+   *                       api similar to `std::function<void(SampleType)>` or `std::function<void(SampleType const &)>`
+   * @return the function (similar api as `std::for_each`)
+   */
+  template<typename UnaryFunction>
+  inline UnaryFunction forEachSample(UnaryFunction f) const
+  {
+    for(int32 channel = 0; channel < getNumChannels(); channel++)
+    {
+      f = getAudioChannel(channel).forEachSample(f);
+    }
+
+    return f;
+  }
+
+  /**
    * Copy the content of THIS buffer to the provided buffer (up to num samples)
    */
   inline tresult copyTo(class_type &toBuffer) const { return toBuffer.copyFrom(*this); };
@@ -283,8 +476,8 @@ public:
    */
   tresult copyFrom(class_type const &fromBuffer)
   {
-    SampleType **fromSamples = fromBuffer.getBuffer();
-    SampleType **toSamples = getBuffer();
+    auto fromSamples = fromBuffer.getBuffer();
+    auto toSamples = getBuffer();
 
     // there are cases when the 2 buffers could be identical.. no need to copy
     if(fromSamples == toSamples)
@@ -313,62 +506,58 @@ public:
   }
 
   /**
-   * @return the max sample (absolute) across all channels
+   * Copy `iFromBuffer` to this buffer, applying `f` to each sample for each channel or in other words,
+   * for each channel c and each sample i
+   *
+   *     getChannel(c).getBuffer[i] = f(iFromBuffer.getChannel(c).getBuffer[i]);
+   *
+   * Example:
+   *
+   *     AudioBuffers<SampleType> in(data.inputs[0], data.numSamples);
+   *     AudioBuffers<SampleType> out(data.outputs[0], data.numSamples);
+   *
+   *     double gain = 0.5;
+   *     out.copyFrom(in, [gain](SampleType iSample) { return iSample * gain; });
+   *
+   * @tparam UnaryOperation can be a lambda, a function object (etc...) but should provide an
+   *                        api similar to `std::function<SampleType(SampleType)>`
+   * @return the function provided
    */
-  inline SampleType absoluteMax()
+  template<typename UnaryOperation>
+  inline UnaryOperation copyFrom(class_type const &iFromBuffer, UnaryOperation f)
   {
-    SampleType max = 0;
+    int32 numChannels = std::min(getNumChannels(), iFromBuffer.getNumChannels());
 
-    auto buffer = getBuffer();
-
-    // sanity check
-    if(!buffer)
-      return max;
-
-    for(int32 channel = 0; channel < getNumChannels(); channel++)
+    for(int32 channel = 0; channel < numChannels; channel++)
     {
-      auto ptr = buffer[channel];
-
-      // sanity check
-      if(!ptr)
-        continue;
-
-      for(int j = 0; j < getNumSamples(); ++j, ptr++)
-      {
-        auto sample = *ptr;
-        if(sample < 0)
-          sample -= sample;
-
-        max = std::max(max, sample);
-      }
+      f = getAudioChannel(channel).copyFrom(iFromBuffer.getAudioChannel(channel), f);
     }
 
-    return max;
+    return f;
+  }
+
+  /**
+   * Same as `copyFrom` with the roles reversed
+   */
+  template<typename UnaryOperation>
+  inline UnaryOperation copyTo(class_type &iToBuffer, UnaryOperation f) const { return iToBuffer.copyFrom(*this, f); };
+
+  /**
+   * @return the max sample (absolute) across all channels
+   */
+  inline SampleType absoluteMax() const
+  {
+    return forEachSample(AbsoluteMaxOp()).fAbsoluteMax;
   }
 
   /**
    * Clears the buffer (and sets the silence flag) */
   inline tresult clear()
   {
-    auto buffer = getBuffer();
-
-    // sanity check
-    if(!buffer)
-      return kResultFalse;
-
     for(int32 channel = 0; channel < getNumChannels(); channel++)
     {
-      auto ptr = buffer[channel];
-
-      // sanity check
-      if(!ptr)
-        continue;
-
-      std::fill(ptr, ptr + getNumSamples(), 0);
+      getAudioChannel(channel).clear();
     }
-
-    if(getNumChannels() > 0)
-      fBuffer.silenceFlags = (static_cast<uint64>(1) << getNumChannels()) - 1;
 
     return kResultOk;
   }
@@ -379,10 +568,16 @@ private:
 };
 
 template<>
-inline Sample32 **AudioBuffers<Sample32>::getBuffer() const { return fBuffer.channelBuffers32; }
+inline Sample32 const * const *AudioBuffers<Sample32>::getBuffer() const { return fBuffer.channelBuffers32; }
 
 template<>
-inline Sample64 **AudioBuffers<Sample64>::getBuffer() const { return fBuffer.channelBuffers64; }
+inline Sample64 const * const *AudioBuffers<Sample64>::getBuffer() const { return fBuffer.channelBuffers64; }
+
+template<>
+inline Sample32 **AudioBuffers<Sample32>::getBuffer() { return fBuffer.channelBuffers32; }
+
+template<>
+inline Sample64 **AudioBuffers<Sample64>::getBuffer() { return fBuffer.channelBuffers64; }
 
 typedef AudioBuffers<Sample32> AudioBuffers32;
 typedef AudioBuffers<Sample64> AudioBuffers64;
