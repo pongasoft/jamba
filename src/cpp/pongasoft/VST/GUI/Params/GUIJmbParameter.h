@@ -154,6 +154,13 @@ public:
     changed();
   }
 
+  /**
+   * Resets the param to its default value */
+  void resetToDefault()
+  {
+    setValue(getParamDefT()->fDefaultValue);
+  }
+
   // readFromStream
   tresult readFromStream(IBStreamer &iStreamer) override
   {
@@ -262,6 +269,10 @@ public:
    * The difference with update is that it does not check for equality (case when T is not comparable)
    */
   inline void setValue(T &&iNewValue) { fPtr->setValue(std::move(iNewValue)); }
+
+  /**
+   * Resets the param to its default value */
+  inline void resetToDefault() { fPtr->resetToDefault(); }
 
   // getValue
   inline T const &getValue() const { return fPtr->getValue(); }
