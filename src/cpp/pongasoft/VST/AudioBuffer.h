@@ -257,10 +257,9 @@ public:
       {
         int32 const numSamples = std::min(getNumSamples(), iFromChannel.getNumSamples());
 
-        // not using std::transform because f is copied and not returned...
-        auto last = inputBuffer + numSamples;
-        for (; inputBuffer != last; ++inputBuffer, ++outputBuffer)
-          *outputBuffer = f(*inputBuffer);
+        // implementation note: adding 'UnaryOperation &' as the template type forces f to be passed
+        // by reference otherwise it would be copied which would loose the state (ex: for functors).
+        std::transform<decltype(inputBuffer), decltype(outputBuffer), UnaryOperation &>(inputBuffer, inputBuffer + numSamples, outputBuffer, f);
       }
 
       return f;
