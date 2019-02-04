@@ -176,19 +176,19 @@ public:
  * documentation. Note that the number of steps is always -1 from the number of values.
  * For example for 3 values (0, 1, 2) the number of steps is 2.
  */
-template<int StepCount>
-class DiscreteValueParamConverter : public IParamConverter<int>
+template<int StepCount, typename IntType = int>
+class DiscreteValueParamConverter : public IParamConverter<IntType>
 {
 public:
-  using ParamType = int;
+  using ParamType = IntType;
 
-  using IParamConverter<int>::toString;
+  using IParamConverter<IntType>::toString;
 
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
-  explicit DiscreteValueParamConverter(int iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
+  explicit DiscreteValueParamConverter(IntType iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
 
   // Constructor with printf style format where the parameter (%d) will be (value + offset)
-  explicit DiscreteValueParamConverter(VstString16 iFormat, int iToStringOffset = 0) :
+  explicit DiscreteValueParamConverter(VstString16 iFormat, IntType iToStringOffset = 0) :
     fToStringOffset{iToStringOffset}, fFormat{std::move(iFormat)} {}
 
   // Constructor with all values defined
@@ -197,18 +197,18 @@ public:
 
   inline int getStepCount() const override { return StepCount; }
 
-  inline ParamValue normalize(int const &iDiscreteValue) const override
+  inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
-    auto value = Utils::clamp(iDiscreteValue, 0, StepCount);
+    auto value = Utils::clamp<ParamType, ParamType>(iDiscreteValue, 0, StepCount);
     return value / static_cast<double>(StepCount);
   }
 
-  inline int denormalize(ParamValue iNormalizedValue) const override
+  inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
     // ParamValue must remain within its bounds
     auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
-    return static_cast<int>(std::floor(std::min(static_cast<ParamValue>(StepCount),
-                                                value * (StepCount + 1))));
+    return static_cast<ParamType>(std::floor(std::min(static_cast<ParamValue>(StepCount),
+                                                      value * (StepCount + 1))));
   }
 
   // toString
@@ -236,7 +236,7 @@ public:
   }
 
 private:
-  int fToStringOffset{};
+  IntType fToStringOffset{};
   VstString16 fFormat{};
   std::vector<VstString16> fToStringValues{};
 };
