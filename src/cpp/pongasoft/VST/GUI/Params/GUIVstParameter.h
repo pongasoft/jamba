@@ -164,6 +164,11 @@ public:
   }
 
   /**
+   * @return number of steps (for discrete param) or 0 for continuous
+   */
+  inline int32 getStepCount() const { return fVstParamDef->fStepCount; }
+
+  /**
    * Populates the oString with a string representation of this parameter
    */
   void toString(String128 oString)
@@ -280,6 +285,11 @@ public:
    * is faster and avoid math precision loss in normalize/denormalize
    */
   tresult copyValueFrom(GUIVstParam<T> const &iParam) { return setNormalizedValue(iParam.getNormalizedValue()); }
+
+  /**
+   * @return number of steps (for discrete param) or 0 for continuous
+   */
+  inline int32 getStepCount() const { return fPtr->getStepCount(); }
 
   /**
    * Populates the oString with a string representation of this parameter

@@ -109,11 +109,23 @@ public:
    *
    * @param iParamID -1 when there is no parameter to use
    * @param oControlValue the reference to the value
-   * @param oGUIVstParam the reference to the backed parameter
+   * @param oParam the reference to the backed parameter
    * @return true if a new parameter was registered, false otherwise
    */
   template<typename T>
-  bool __internal__registerVstControl(int32_t iParamID, T &oControlValue, GUIVstParam<T> &oGUIVstParam);
+  bool __internal__registerVstControl(int32_t iParamID, T &oControlValue, GUIVstParam<T> &oParam);
+
+  /**
+   * Convenient method to register a parameter which is backed by a value when the parameter does not exist.
+   *
+   * IMPORTANT: this api should be considered internal as this is not the right concept... It will be removed!
+   *
+   * @param iParamID -1 when there is no parameter to use
+   * @param oControlValue the reference to the value
+   * @param oParam the reference to the backed parameter
+   * @return true if a new parameter was registered, false otherwise
+   */
+  bool __internal__registerVstControl(int32_t iParamID, ParamValue &oControlValue, GUIRawVstParam &oParam);
 
   /**
    * Convenient call to register a Vst param simply by using its description. Takes care of the type due to method API

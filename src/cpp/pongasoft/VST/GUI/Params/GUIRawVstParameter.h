@@ -130,6 +130,11 @@ public:
   }
 
   /**
+   * @return number of steps (for discrete param) or 0 for continuous
+   */
+  inline int32 getStepCount() const { return fVstParameters->getParameterInfo(fParamID)->stepCount; }
+
+  /**
    * Populates the oString with a string representation of this parameter
    */
   void toString(String128 oString)
@@ -246,6 +251,11 @@ public:
    * Shortcut to copy the value from another param to this one.
    */
   tresult copyValueFrom(GUIRawVstParam const &iParam) { return setValue(iParam.getValue()); }
+
+  /**
+   * @return number of steps (for discrete param) or 0 for continuous
+   */
+  inline int32 getStepCount() const { return fPtr->getStepCount(); }
 
   /**
    * Populates the oString with a string representation of this parameter

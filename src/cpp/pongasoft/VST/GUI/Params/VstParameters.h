@@ -51,6 +51,14 @@ public:
   inline tresult endEdit(ParamID iParamID) const { return fParametersOwner->endEdit(iParamID); }
   Vst::Parameter *getParameterObject(ParamID iParamID) const { return fParametersOwner->getParameterObject(iParamID); }
 
+  /**
+   * @return the parameter info describing the parameter
+   */
+  Vst::ParameterInfo const *getParameterInfo(ParamID iParamID) const {
+    auto parameter = getParameterObject(iParamID);
+    return parameter ? &parameter->getInfo() : nullptr;
+  }
+
 
   /**
    * @return a connection that will listen to parameter changes (see FObjectCx)

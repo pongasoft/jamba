@@ -172,6 +172,33 @@ public:
 };
 
 /**
+ * Implements the algorithm described in the VST documentation on how to interpret a
+ * discrete value into a normalized value
+ */
+template<typename IntType = int>
+static inline ParamValue convertDiscreteValueToNormalizedValue(int iStepCount, IntType iDiscreteValue)
+{
+  auto value = Utils::clamp<IntType, IntType>(iDiscreteValue, 0, iStepCount);
+  if(value == 0)
+    return value;
+  else
+    return value / static_cast<double>(iStepCount);
+}
+
+/**
+ * Implements the algorithm described in the VST documentation on how to interpret a
+ * normalized value as a discrete value
+ */
+template<typename IntType = int>
+static inline IntType convertNormalizedValueToDiscreteValue(int iStepCount, ParamValue iNormalizedValue)
+{
+  // ParamValue must remain within its bounds
+  auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
+  return static_cast<IntType>(std::floor(std::min(static_cast<ParamValue>(iStepCount),
+                                                    value * (iStepCount + 1))));
+}
+
+/**
  * A converter to deal with a discrete value which has StepCount steps. It follows the formulas given in the SDK
  * documentation. Note that the number of steps is always -1 from the number of values.
  * For example for 3 values (0, 1, 2) the number of steps is 2.
@@ -199,16 +226,12 @@ public:
 
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
-    auto value = Utils::clamp<ParamType, ParamType>(iDiscreteValue, 0, StepCount);
-    return value / static_cast<double>(StepCount);
+    return convertDiscreteValueToNormalizedValue<IntType>(StepCount, iDiscreteValue);
   }
 
   inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
-    // ParamValue must remain within its bounds
-    auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
-    return static_cast<ParamType>(std::floor(std::min(static_cast<ParamValue>(StepCount),
-                                                      value * (StepCount + 1))));
+    return convertNormalizedValueToDiscreteValue<IntType>(StepCount, iNormalizedValue);
   }
 
   // toString

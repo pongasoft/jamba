@@ -55,7 +55,7 @@ public:
 };
 
 /**
- * Base class for custom views providing one parameter only (similar to CControl)
+ * Base class for custom views providing one parameter only (similar to CControl). Deals with typed parameters (`T`).
  * This base class automatically registers the custom control and also keeps a control value for the case when
  * the control does not exist (for example in editor the control tag may not be defined).
  */
@@ -94,6 +94,77 @@ public:
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
       CustomViewCreatorT(iViewName, iDisplayName)
+    {
+    }
+  };
+};
+
+/**
+ * Base class for custom views providing one parameter only (similar to CControl). Deals with raw parameter
+ * (`ParamValue`).
+ * This base class automatically registers the custom control and also keeps a control value for the case when
+ * the control does not exist (for example in editor the control tag may not be defined).
+ */
+class RawCustomControlView : public CustomControlView
+{
+public:
+  // TCustomControlView
+  explicit RawCustomControlView(const CRect &iSize) : CustomControlView(iSize) {}
+
+public:
+  CLASS_METHODS_NOCOPY(RawCustomControlView, CustomControlView)
+
+  // when the control tag changes we need to handle it
+  void setControlTag(int32_t iTag) override
+  {
+    CustomControlView::setControlTag(iTag);
+    registerParameters();
+  }
+
+  // getControlValue
+  ParamValue getControlValue() const
+  {
+    if(fControlParameter.exists())
+      return fControlParameter.getValue();
+    else
+      return fControlValue;
+  }
+
+  // setControlValue
+  virtual void setControlValue(ParamValue const &iControlValue)
+  {
+    if(fControlParameter.exists())
+      fControlParameter.setValue(iControlValue);
+    else
+    {
+      if(fControlValue != iControlValue)
+      {
+        fControlValue = iControlValue;
+        markDirty();
+      }
+    }
+  }
+
+  // registerParameters
+  void registerParameters() override
+  {
+    CustomControlView::registerParameters();
+    __internal__registerVstControl(getControlTag(), fControlValue, fControlParameter);
+  }
+
+protected:
+  // the gui parameter tied to the control (optional)
+  GUIRawVstParam fControlParameter{};
+
+  // the value when the control parameter is not assigned
+  ParamValue fControlValue{};
+
+public:
+  class Creator : public CustomViewCreator<RawCustomControlView, CustomControlView>
+  {
+  public:
+    explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
+      CustomViewCreator(iViewName, iDisplayName)
     {
     }
   };

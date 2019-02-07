@@ -148,6 +148,34 @@ void GUIParamCxAware::invokeAll()
     fParamCxMgr->invokeAll();
 }
 
+//------------------------------------------------------------------------
+// GUIParamCxAware::__internal__registerVstControl
+//------------------------------------------------------------------------
+bool GUIParamCxAware::__internal__registerVstControl(int32_t iParamID, ParamValue &oControlValue, GUIRawVstParam &oParam)
+{
+  if(!fParamCxMgr)
+    return false; // not set yet
+
+  if(iParamID < 0)
+  {
+    if(oParam.exists())
+    {
+      oControlValue = oParam.getValue();
+      oParam = unregisterParam(oParam);
+    }
+  }
+  else
+  {
+    if(!oParam.exists() || oParam.getParamID() != iParamID)
+    {
+      oParam = registerRawVstParam(static_cast<ParamID>(iParamID));
+      return true;
+    }
+  }
+
+  return false;
+}
+
 }
 }
 }
