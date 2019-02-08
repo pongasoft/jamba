@@ -55,11 +55,11 @@ public:
 };
 
 /**
- * Base class for custom views providing one parameter only (similar to CControl). Deals with typed parameters (`T`).
+ * Base class for custom views providing one parameter only (similar to CControl).
  * This base class automatically registers the custom control and also keeps a control value for the case when
  * the control does not exist (for example in editor the control tag may not be defined).
  */
-template<typename T>
+template<typename T, typename TGUIParam = GUIVstParam<T>>
 class TCustomControlView : public CustomControlView
 {
 public:
@@ -81,100 +81,25 @@ public:
 
 protected:
   // the gui parameter tied to the control (optional)
-  GUIVstParam<T> fControlParameter{};
+  TGUIParam fControlParameter{};
 
   // the value when the control parameter is not assigned
   T fControlValue{};
 
 public:
-  class Creator : public CustomViewCreator<TCustomControlView<T>, CustomControlView>
-  {
-  private:
-    using CustomViewCreatorT = CustomViewCreator<TCustomControlView<T>, CustomControlView>;
-  public:
-    explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
-      CustomViewCreatorT(iViewName, iDisplayName)
-    {
-    }
-  };
+  using Creator = CustomViewCreator<TCustomControlView<T, TGUIParam>, CustomControlView>;
 };
 
 /**
- * Base class for custom views providing one parameter only (similar to CControl). Deals with raw parameter
- * (`ParamValue`).
- * This base class automatically registers the custom control and also keeps a control value for the case when
- * the control does not exist (for example in editor the control tag may not be defined).
+ * Specialization for raw parameter (`ParamValue` / no conversion).
  */
-class RawCustomControlView : public CustomControlView
-{
-public:
-  // TCustomControlView
-  explicit RawCustomControlView(const CRect &iSize) : CustomControlView(iSize) {}
+using RawCustomControlView = TCustomControlView<ParamValue, GUIRawVstParam>;
 
-public:
-  CLASS_METHODS_NOCOPY(RawCustomControlView, CustomControlView)
-
-  // when the control tag changes we need to handle it
-  void setControlTag(int32_t iTag) override
-  {
-    CustomControlView::setControlTag(iTag);
-    registerParameters();
-  }
-
-  // getControlValue
-  ParamValue getControlValue() const
-  {
-    if(fControlParameter.exists())
-      return fControlParameter.getValue();
-    else
-      return fControlValue;
-  }
-
-  // setControlValue
-  virtual void setControlValue(ParamValue const &iControlValue)
-  {
-    if(fControlParameter.exists())
-      fControlParameter.setValue(iControlValue);
-    else
-    {
-      if(fControlValue != iControlValue)
-      {
-        fControlValue = iControlValue;
-        markDirty();
-      }
-    }
-  }
-
-  // registerParameters
-  void registerParameters() override
-  {
-    CustomControlView::registerParameters();
-    __internal__registerVstControl(getControlTag(), fControlValue, fControlParameter);
-  }
-
-protected:
-  // the gui parameter tied to the control (optional)
-  GUIRawVstParam fControlParameter{};
-
-  // the value when the control parameter is not assigned
-  ParamValue fControlValue{};
-
-public:
-  class Creator : public CustomViewCreator<RawCustomControlView, CustomControlView>
-  {
-  public:
-    explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
-      CustomViewCreator(iViewName, iDisplayName)
-    {
-    }
-  };
-};
-
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // TCustomControlView<T>::getControlValue
-///////////////////////////////////////////
-template<typename T>
-T TCustomControlView<T>::getControlValue() const
+//------------------------------------------------------------------------
+template<typename T, typename TGUIParam>
+T TCustomControlView<T, TGUIParam>::getControlValue() const
 {
   if(fControlParameter.exists())
     return fControlParameter.getValue();
@@ -182,11 +107,11 @@ T TCustomControlView<T>::getControlValue() const
     return fControlValue;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // TCustomControlView<T>::setControlValue
-///////////////////////////////////////////
-template<typename T>
-void TCustomControlView<T>::setControlValue(T const &iControlValue)
+//------------------------------------------------------------------------
+template<typename T, typename TGUIParam>
+void TCustomControlView<T, TGUIParam>::setControlValue(T const &iControlValue)
 {
   if(fControlParameter.exists())
     fControlParameter.setValue(iControlValue);
@@ -200,11 +125,11 @@ void TCustomControlView<T>::setControlValue(T const &iControlValue)
   }
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // TCustomControlView<T>::registerParameters
-///////////////////////////////////////////
-template<typename T>
-void TCustomControlView<T>::registerParameters()
+//------------------------------------------------------------------------
+template<typename T, typename TGUIParam>
+void TCustomControlView<T, TGUIParam>::registerParameters()
 {
   CustomControlView::registerParameters();
 
@@ -214,8 +139,8 @@ void TCustomControlView<T>::registerParameters()
 //------------------------------------------------------------------------
 // TCustomControlView<T>::setControlTag
 //------------------------------------------------------------------------
-template<typename T>
-void TCustomControlView<T>::setControlTag(int32_t iTag)
+template<typename T, typename TGUIParam>
+void TCustomControlView<T, TGUIParam>::setControlTag(int32_t iTag)
 {
   CustomControlView::setControlTag(iTag);
   registerParameters();
