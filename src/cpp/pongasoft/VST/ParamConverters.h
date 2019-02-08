@@ -52,7 +52,7 @@ class IParamConverter
 {
 public:
   using ParamType = T;
-  virtual int getStepCount() const { return 0; }
+  virtual int32 getStepCount() const { return 0; }
   virtual ParamValue normalize(ParamType const &iValue) const = 0;
   virtual ParamType denormalize(ParamValue iNormalizedValue) const = 0;
   virtual void toString(ParamType const &iValue, String128 iString, int32 iPrecision) const { }
@@ -112,7 +112,7 @@ public:
     fTrueString{std::move(iTrueString)}
   {}
 
-  inline int getStepCount() const override { return 1; }
+  inline int32 getStepCount() const override { return 1; }
 
   inline ParamValue normalize(bool const &iValue) const override
   {
@@ -203,7 +203,7 @@ static inline IntType convertNormalizedValueToDiscreteValue(int iStepCount, Para
  * documentation. Note that the number of steps is always -1 from the number of values.
  * For example for 3 values (0, 1, 2) the number of steps is 2.
  */
-template<int StepCount, typename IntType = int>
+template<int32 StepCount, typename IntType = int>
 class DiscreteValueParamConverter : public IParamConverter<IntType>
 {
 public:
@@ -222,7 +222,7 @@ public:
   explicit DiscreteValueParamConverter(std::array<VstString16, StepCount + 1> const &iToStringValues) :
     fToStringValues(iToStringValues.cbegin(), iToStringValues.cend()) {}
 
-  inline int getStepCount() const override { return StepCount; }
+  inline int32 getStepCount() const override { return StepCount; }
 
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
@@ -285,7 +285,7 @@ public:
   // Constructor with all values defined
   explicit EnumParamConverter(std::array<VstString16, MaxValue + 1> const &iToStringValues) : fConverter{iToStringValues} {}
 
-  inline int getStepCount() const override { return fConverter.getStepCount(); }
+  inline int32 getStepCount() const override { return fConverter.getStepCount(); }
 
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {

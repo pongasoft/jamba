@@ -17,23 +17,24 @@
  */
 
 #include <string>
+#include <pluginterfaces/base/ftypes.h>
 
 namespace pongasoft {
 namespace VST {
 
 /**
- * Strings made of char16 characters are represented by the native C++11 type `std::u16string` and properly converted
- * to what is required by the VST classes. The `Steinberg::String` class can be used to generate a formatted string like
- * this:
+ * Strings made of char16 characters are represented by the native C++11 type
+ * `std::basic_string<Steinberg::char16>` and properly converted to what is required by the VST classes.
+ * The `Steinberg::String` class can be used to generate a formatted string like this:
  *
  *     int pad = 3;
  *     String title;
  *     title.printf(STR16("Pad [%d]", pad);
- *     // because std::u16string can be created from a char16 const *, then you can simply
+ *     // because std::basic_string<Steinberg::char16> can be created from a char16 const *, then you can simply
  *     // use title.text16() wherever a VstString16 is requested
  *     myParam = vst<BooleanParamConverter>(id, title.text16()).add();
  */
-using VstString16 = std::u16string;
+using VstString16 = std::basic_string<Steinberg::char16>;
 
 }
 }
