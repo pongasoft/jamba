@@ -47,7 +47,7 @@
  * - easily create custom views with their creators (so that they appear in the GUI editor)
  * - easily use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
  * - store/read state in a thread safe fashion (includes version)
- * - included views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state), Scrollbar (with optional zoom handles), Text button (to handle clicks with listener)
+ * - included views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state), Scrollbar (with optional zoom handles), Text button (to handle clicks with listener), Step Button (to increment/decrement a param value by a fixed amount)
  *
  * Details
  * -------

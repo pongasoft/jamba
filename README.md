@@ -23,7 +23,7 @@ Features
 - easily create custom views with their creators (so that they appear in the GUI editor)
 - easily use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
 - store/read state in a thread safe fashion (includes version)
-- included views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state), Scrollbar (with optional zoom handles), Text button (to handle clicks with listener)
+- included views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state), Scrollbar (with optional zoom handles), Text button (to handle clicks with listener), Step Button (to increment/decrement a param value by a fixed amount)
 
 Quick starting guide
 --------------------
@@ -206,6 +206,12 @@ Documentation
 
 Release Notes
 -------------
+### 2019-01-06 - `v3.1.0`
+* added ability to conveniently register a global key hook (check `Views::registerGlobalKeyboardHook`)
+* parameters now copy the provided strings (title, short tile and units) so that they no longer have to be static and for example can be computed
+* added convenient methods to `AudioBuffers` and `Channel` (`copyFrom` and `forEachSample`). Defined `const` and non `const` versions.
+* added Step Button view which is a button that increment/decrement a parameter by a fixed amount when clicked. Another amount (tied to shift click) can be provided.
+
 ### 2019-01-06 - `v3.0.2`
 * fixed minor bugs
 

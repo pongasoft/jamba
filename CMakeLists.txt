@@ -24,6 +24,9 @@ if(DOXYGEN_FOUND)
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       COMMENT "Generating API documentation with Doxygen" VERBATIM
       )
+  add_custom_command(TARGET doc POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E echo "Documentation generated and available @ ${CMAKE_CURRENT_BINARY_DIR}/docs/${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}/html/index.html"
+      )
 else()
   message(STATUS "Doxygen is not installed. Install it if you want to generate the documentation.")
 endif()
