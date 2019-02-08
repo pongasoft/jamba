@@ -175,10 +175,9 @@ public:
  * Implements the algorithm described in the VST documentation on how to interpret a
  * discrete value into a normalized value
  */
-template<typename IntType = int>
-static inline ParamValue convertDiscreteValueToNormalizedValue(int iStepCount, IntType iDiscreteValue)
+static inline ParamValue convertDiscreteValueToNormalizedValue(int32 iStepCount, int32 iDiscreteValue)
 {
-  auto value = Utils::clamp<IntType, IntType>(iDiscreteValue, 0, iStepCount);
+  auto value = Utils::clamp<int32, int32>(iDiscreteValue, 0, iStepCount);
   if(value == 0)
     return value;
   else
@@ -189,13 +188,12 @@ static inline ParamValue convertDiscreteValueToNormalizedValue(int iStepCount, I
  * Implements the algorithm described in the VST documentation on how to interpret a
  * normalized value as a discrete value
  */
-template<typename IntType = int>
-static inline IntType convertNormalizedValueToDiscreteValue(int iStepCount, ParamValue iNormalizedValue)
+static inline int32 convertNormalizedValueToDiscreteValue(int32 iStepCount, ParamValue iNormalizedValue)
 {
   // ParamValue must remain within its bounds
   auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
-  return static_cast<IntType>(std::floor(std::min(static_cast<ParamValue>(iStepCount),
-                                                    value * (iStepCount + 1))));
+  return static_cast<int32>(std::floor(std::min(static_cast<ParamValue>(iStepCount),
+                                                value * (iStepCount + 1))));
 }
 
 /**
@@ -203,19 +201,19 @@ static inline IntType convertNormalizedValueToDiscreteValue(int iStepCount, Para
  * documentation. Note that the number of steps is always -1 from the number of values.
  * For example for 3 values (0, 1, 2) the number of steps is 2.
  */
-template<int32 StepCount, typename IntType = int>
-class DiscreteValueParamConverter : public IParamConverter<IntType>
+template<int32 StepCount>
+class DiscreteValueParamConverter : public IParamConverter<int32>
 {
 public:
-  using ParamType = IntType;
+  using ParamType = int32;
 
-  using IParamConverter<IntType>::toString;
+  using IParamConverter<int32>::toString;
 
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
-  explicit DiscreteValueParamConverter(IntType iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
+  explicit DiscreteValueParamConverter(int32 iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
 
   // Constructor with printf style format where the parameter (%d) will be (value + offset)
-  explicit DiscreteValueParamConverter(VstString16 iFormat, IntType iToStringOffset = 0) :
+  explicit DiscreteValueParamConverter(VstString16 iFormat, int32 iToStringOffset = 0) :
     fToStringOffset{iToStringOffset}, fFormat{std::move(iFormat)} {}
 
   // Constructor with all values defined
@@ -226,12 +224,12 @@ public:
 
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
-    return convertDiscreteValueToNormalizedValue<IntType>(StepCount, iDiscreteValue);
+    return convertDiscreteValueToNormalizedValue(StepCount, iDiscreteValue);
   }
 
   inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
-    return convertNormalizedValueToDiscreteValue<IntType>(StepCount, iNormalizedValue);
+    return convertNormalizedValueToDiscreteValue(StepCount, iNormalizedValue);
   }
 
   // toString
@@ -259,7 +257,7 @@ public:
   }
 
 private:
-  IntType fToStringOffset{};
+  int32 fToStringOffset{};
   VstString16 fFormat{};
   std::vector<VstString16> fToStringValues{};
 };
