@@ -16,6 +16,7 @@
  * @author Yan Pujante
  */
 #include "StepButtonView.h"
+#include <pongasoft/Utils/Constants.h>
 
 
 namespace pongasoft {
@@ -261,7 +262,7 @@ ParamValue StepButtonView::computeNextValue(double iIncrement) const
     else
     {
       // no wrapping => simply clamp the value to the range
-      discreteValue = Utils::clamp(discreteValue, 0, stepCount);
+      discreteValue = Utils::clamp(discreteValue, Utils::ZERO_INT32, stepCount);
     }
 
     // converts back to normalized value

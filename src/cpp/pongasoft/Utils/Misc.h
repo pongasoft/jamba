@@ -33,7 +33,7 @@ template <typename T, typename U>
 inline static T clamp(const U &iValue, const T &iLower, const T &iUpper)
 {
   auto v = static_cast<T>(iValue);
-  return v < iLower ? iLower : (v > iUpper ? iUpper : iValue);
+  return v < iLower ? iLower : (v > iUpper ? iUpper : v);
 }
 
 /**

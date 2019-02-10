@@ -33,6 +33,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <type_traits>
 
 namespace pongasoft {
 namespace VST {
@@ -175,25 +176,27 @@ public:
  * Implements the algorithm described in the VST documentation on how to interpret a
  * discrete value into a normalized value
  */
-static inline ParamValue convertDiscreteValueToNormalizedValue(int32 iStepCount, int32 iDiscreteValue)
+template<typename IntType = int>
+static inline ParamValue convertDiscreteValueToNormalizedValue(int32 iStepCount, IntType iDiscreteValue)
 {
   auto value = Utils::clamp<int32, int32>(iDiscreteValue, 0, iStepCount);
   if(value == 0)
     return value;
   else
-    return value / static_cast<double>(iStepCount);
+    return value / static_cast<ParamValue>(iStepCount);
 }
 
 /**
  * Implements the algorithm described in the VST documentation on how to interpret a
  * normalized value as a discrete value
  */
-static inline int32 convertNormalizedValueToDiscreteValue(int32 iStepCount, ParamValue iNormalizedValue)
+template<typename IntType = int>
+static inline IntType convertNormalizedValueToDiscreteValue(int32 iStepCount, ParamValue iNormalizedValue)
 {
   // ParamValue must remain within its bounds
   auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
-  return static_cast<int32>(std::floor(std::min(static_cast<ParamValue>(iStepCount),
-                                                value * (iStepCount + 1))));
+  auto discreteValue = std::floor(std::min(static_cast<ParamValue>(iStepCount), value * (iStepCount + 1)));
+  return static_cast<IntType>(discreteValue);
 }
 
 /**
@@ -201,19 +204,19 @@ static inline int32 convertNormalizedValueToDiscreteValue(int32 iStepCount, Para
  * documentation. Note that the number of steps is always -1 from the number of values.
  * For example for 3 values (0, 1, 2) the number of steps is 2.
  */
-template<int32 StepCount>
-class DiscreteValueParamConverter : public IParamConverter<int32>
+template<int32 StepCount, typename IntType = int>
+class DiscreteValueParamConverter : public IParamConverter<IntType>
 {
 public:
-  using ParamType = int32;
+  using ParamType = IntType;
 
-  using IParamConverter<int32>::toString;
+  using IParamConverter<IntType>::toString;
 
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
-  explicit DiscreteValueParamConverter(int32 iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
+  explicit DiscreteValueParamConverter(IntType iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
 
   // Constructor with printf style format where the parameter (%d) will be (value + offset)
-  explicit DiscreteValueParamConverter(VstString16 iFormat, int32 iToStringOffset = 0) :
+  explicit DiscreteValueParamConverter(VstString16 iFormat, IntType iToStringOffset = 0) :
     fToStringOffset{iToStringOffset}, fFormat{std::move(iFormat)} {}
 
   // Constructor with all values defined
@@ -224,12 +227,12 @@ public:
 
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
-    return convertDiscreteValueToNormalizedValue(StepCount, iDiscreteValue);
+    return convertDiscreteValueToNormalizedValue<IntType>(StepCount, iDiscreteValue);
   }
 
   inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
-    return convertNormalizedValueToDiscreteValue(StepCount, iNormalizedValue);
+    return convertNormalizedValueToDiscreteValue<IntType>(StepCount, iNormalizedValue);
   }
 
   // toString
@@ -257,7 +260,7 @@ public:
   }
 
 private:
-  int32 fToStringOffset{};
+  IntType fToStringOffset{};
   VstString16 fFormat{};
   std::vector<VstString16> fToStringValues{};
 };
@@ -272,36 +275,38 @@ class EnumParamConverter : public IParamConverter<Enum>
 public:
   using ParamType = Enum;
 
+  using IntType = std::underlying_type_t<Enum>;
+
   using IParamConverter<Enum>::toString;
 
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
-  explicit EnumParamConverter(int iToStringOffset = 0) : fConverter{iToStringOffset} {}
+  explicit EnumParamConverter(IntType iToStringOffset = 0) : fConverter{iToStringOffset} {}
 
   // Constructor with printf style format where the parameter (%d) will be (value + offset)
-  explicit EnumParamConverter(VstString16 iFormat, int iToStringOffset = 0) : fConverter{std::move(iFormat), iToStringOffset} {}
+  explicit EnumParamConverter(VstString16 iFormat, IntType iToStringOffset = 0) : fConverter{std::move(iFormat), iToStringOffset} {}
 
   // Constructor with all values defined
   explicit EnumParamConverter(std::array<VstString16, MaxValue + 1> const &iToStringValues) : fConverter{iToStringValues} {}
 
-  inline int32 getStepCount() const override { return fConverter.getStepCount(); }
+  inline int32 getStepCount() const override { return MaxValue; }
 
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
-    return fConverter.normalize(iDiscreteValue);
+    return fConverter.normalize(static_cast<IntType>(iDiscreteValue));
   }
 
   inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
-    return static_cast<ParamType>(fConverter.denormalize(iNormalizedValue));
+    return static_cast<Enum>(fConverter.denormalize(iNormalizedValue));
   }
 
   void toString(ParamType const &iValue, String128 oString, int32 iPrecision) const override
   {
-    fConverter.toString(iValue, oString, iPrecision);
+    fConverter.toString(static_cast<IntType>(iValue), oString, iPrecision);
   }
 
 private:
-  DiscreteValueParamConverter<MaxValue> fConverter;
+  DiscreteValueParamConverter<MaxValue, IntType> fConverter;
 };
 
 }
