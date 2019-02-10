@@ -197,7 +197,7 @@ Here are some recommended steps:
 Documentation
 -------------
 
-- Check the [Latest doxygen documentation](http://pongasoft.github.io/jamba/docs/3.0.2/html/index.html)
+- Check the [Latest doxygen documentation](http://pongasoft.github.io/jamba/docs/3.1.0/html/index.html)
 - The [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) project was designed as a documentation plugin for this project.
 - The [vst-vac-6v](https://github.com/pongasoft/vst-vac-6v) plugin is built with Jamba.
 - The [vst-ab-switch](https://github.com/pongasoft/vst-ab-switch) plugin is built with Jamba.
@@ -206,7 +206,7 @@ Documentation
 
 Release Notes
 -------------
-### 2019-01-06 - `v3.1.0`
+### 2019-02-10 - `v3.1.0`
 * added ability to conveniently register a global key hook (check `Views::registerGlobalKeyboardHook`)
 * parameters now copy the provided strings (title, short tile and units) so that they no longer have to be static and for example can be computed
 * added convenient methods to `AudioBuffers` and `Channel` (`copyFrom` and `forEachSample`). Defined `const` and non `const` versions.
