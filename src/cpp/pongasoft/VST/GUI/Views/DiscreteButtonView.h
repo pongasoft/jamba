@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,10 +28,17 @@ namespace Views {
 using namespace VSTGUI;
 using namespace Params;
 
-class ToggleButtonView : public TCustomControlView<bool>
+/**
+ * A discrete button behaves like a toggle button except that it is `on` only if the control value (tied to a vst
+ * parameter) is equal to the `step` value (DiscreteButtonView::getStep() / `step` property in the xml).
+ * Selecting the button will set the underlying vst parameter to `step`. This button is designed to be used with a
+ * discrete parameter (where the raw param value is divided into steps) and uses the underlying
+ * GUIVstParameter::getStepCount() method to determine how many steps to account for.
+ */
+class DiscreteButtonView : public RawCustomControlView
 {
 public:
-  explicit ToggleButtonView(const CRect &iSize) : TCustomControlView(iSize)
+  explicit DiscreteButtonView(const CRect &iSize) : RawCustomControlView(iSize)
   {
     // off color is grey
     fBackColor = CColor{200, 200, 200};
@@ -55,9 +62,11 @@ public:
   bool sizeToFit() override;
 
   // is on or off
-  bool isOn() const { return getControlValue(); }
+  bool isOn() const;
 
   bool isOff() const { return !isOn(); }
+
+  void setOn();
 
   // get/set frames (should be either 2 or 4) 4 includes the pressed state
   int getFrames() const { return fFrames; }
@@ -74,6 +83,9 @@ public:
 
   void setInverse(bool iInverse) { fInverse = iInverse; }
 
+  int32 getStep() const { return fStep; }
+  void setStep(int32 step);
+
   /**
    * get/setImage for the button which should have 2 or 4 frames depending on the fFrames value
    * The images should contain the following :
@@ -89,8 +101,7 @@ public:
   BitmapPtr getImage() const { return fImage; }
   void setImage(BitmapPtr iImage) { fImage = iImage; }
 
-public:
-  CLASS_METHODS_NOCOPY(ToggleButtonView, TCustomControlView<bool>)
+  void registerParameters() override;
 
 protected:
   int fFrames{4};
@@ -100,17 +111,20 @@ protected:
 
   bool fPressed{false};
 
+  int32 fStep{0};
+
 public:
-  class Creator : public CustomViewCreator<ToggleButtonView, TCustomControlView<bool>>
+  class Creator : public CustomViewCreator<DiscreteButtonView, RawCustomControlView>
   {
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
       CustomViewCreator(iViewName, iDisplayName)
     {
-      registerIntAttribute("frames", &ToggleButtonView::getFrames, &ToggleButtonView::setFrames);
-      registerColorAttribute("on-color", &ToggleButtonView::getOnColor, &ToggleButtonView::setOnColor);
-      registerBitmapAttribute("button-image", &ToggleButtonView::getImage, &ToggleButtonView::setImage);
-      registerBooleanAttribute("inverse", &ToggleButtonView::getInverse, &ToggleButtonView::setInverse);
+      registerIntAttribute("frames", &DiscreteButtonView::getFrames, &DiscreteButtonView::setFrames);
+      registerColorAttribute("on-color", &DiscreteButtonView::getOnColor, &DiscreteButtonView::setOnColor);
+      registerBitmapAttribute("button-image", &DiscreteButtonView::getImage, &DiscreteButtonView::setImage);
+      registerBooleanAttribute("inverse", &DiscreteButtonView::getInverse, &DiscreteButtonView::setInverse);
+      registerIntegerAttribute<int32>("step", &DiscreteButtonView::getStep, &DiscreteButtonView::setStep);
     }
   };
 };
