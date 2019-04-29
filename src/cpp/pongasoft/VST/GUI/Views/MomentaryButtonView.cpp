@@ -48,14 +48,27 @@ void MomentaryButtonView::drawOn(CDrawContext *iContext)
 {
   if(fImage)
   {
-    CCoord y = fImage->getHeight() / 2;
-    fImage->draw(iContext, getViewSize(), CPoint{0, y});
+    CCoord frameHeight;
+    int frameIndex;
+
+    if(fImageHasDisabledState)
+    {
+      frameHeight = fImage->getHeight() / 3;
+      frameIndex = getMouseEnabled() ? 2 : 0;
+    }
+    else
+    {
+      frameHeight = fImage->getHeight() / 2;
+      frameIndex = 1;
+    }
+
+    fImage->draw(iContext, getViewSize(), CPoint{0, frameIndex * frameHeight});
   }
   else
   {
     // no image => simply fill the surface with appropriate color (background and "on" color)
     // so that the button is fully functioning right away
-    iContext->setFillColor(getOnColor());
+    iContext->setFillColor(getMouseEnabled() ? getOnColor() : getDisabledColor());
     iContext->drawRect(getViewSize(), kDrawFilled);
   }
 }
@@ -67,11 +80,31 @@ void MomentaryButtonView::drawOff(CDrawContext *iContext)
 {
   if(fImage)
   {
-    CCoord y = 0;
-    fImage->draw(iContext, getViewSize(), CPoint{0, y});
-  }
+    CCoord frameHeight;
+    int frameIndex;
 
-  // when there is no image the background color is drawn (already done)
+    if(fImageHasDisabledState)
+    {
+      frameHeight = fImage->getHeight() / 3;
+      frameIndex = getMouseEnabled() ? 1 : 0;
+    }
+    else
+    {
+      frameHeight = fImage->getHeight() / 2;
+      frameIndex = 0;
+    }
+
+    fImage->draw(iContext, getViewSize(), CPoint{0, frameIndex * frameHeight});
+  }
+  else
+  {
+    if(!getMouseEnabled())
+    {
+      iContext->setFillColor(getDisabledColor());
+      iContext->drawRect(getViewSize(), kDrawFilled);
+    }
+    // else already done: when there is no image the background color is drawn
+  }
 }
 
 ///////////////////////////////////////////

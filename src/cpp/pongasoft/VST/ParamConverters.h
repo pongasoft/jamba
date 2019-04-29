@@ -81,7 +81,7 @@ public:
 
   inline ParamValue denormalize(ParamValue iNormalizedValue) const override
   {
-    return Utils::clamp(iNormalizedValue, 0.0, 1.0);;
+    return Utils::clamp(iNormalizedValue, 0.0, 1.0);
   }
 
   inline void toString(ParamValue const &iValue, String128 oString, int32 iPrecision) const override
@@ -122,7 +122,7 @@ public:
 
   inline bool denormalize(ParamValue iNormalizedValue) const override
   {
-    return iNormalizedValue >= 0.5;
+    return toBoolean(iNormalizedValue);
   }
 
   inline void toString(bool const &iValue, String128 oString, int32 /* iPrecision */) const override
@@ -133,6 +133,11 @@ public:
     else
       wrapper.assign(fFalseString.c_str());
   }
+
+  /**
+   * Converts a normalized value to a boolean according to the rule: `false` for `[0.0, 0.5[` and `true`
+   * for `[0.5, 1.0]` */
+  inline static bool toBoolean(ParamValue iNormalizedValue) { return iNormalizedValue >= 0.5; }
 
 protected:
   VstString16 fFalseString;

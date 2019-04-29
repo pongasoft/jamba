@@ -32,6 +32,7 @@ using namespace Params;
  * Extends the CTextButton view to:
  * - have a (potentially) dynamic title tied to a parameter (fTitle via fTitleTag)
  * - handle click conveniently (either inherit from this class and implement onClick, or provide an onClick listener)
+ * - optionally handle image (3 states : disabled / off / on)
  */
 class TextButtonView : public CustomViewAdapter<CTextButton>
 {
@@ -76,7 +77,38 @@ public:
   // setOnClickListener
   void setOnClickListener(OnClickListener iListener) { fOnClickListener = std::move(iListener); }
 
-  CLASS_METHODS_NOCOPY(TextButtonView, CustomViewAdapter<CTextButton>)
+  /**
+   * If you want to replace the entire drawing with an image you can provide a 'button-image'.
+   *
+   * If 'button-image-has-disabled-state' is selected then the image should contain the following
+   * 3 frames (each is of size image height / 3):
+   *   - at y = 0, the button in its disabled state
+   *   - at y = 1 * image height / 3, the button in its off state
+   *   - at y = 2 * image height / 3, the button in its on state
+   *
+   * If 'button-image-has-disabled-state' is NOT selected then the image should contain the following
+   * 2 frames (each is of size image height / 2):
+   *   - at y = 0, the button in its off state
+   *   - at y = image height / 2, the button in its on state
+   */
+  BitmapPtr getImage() const { return fImage; }
+  void setImage(BitmapPtr iImage) { fImage = iImage; }
+
+  /**
+   * If the image contains a disabled state (3 frames) or not (2 frames) */
+  bool getImageHasDisabledState() const { return fImageHasDisabledState; }
+  void setImageHasDisabledState(bool iValue) { fImageHasDisabledState = iValue; }
+
+protected:
+  /**
+   * Called when the button should be drawn entirely (background + text + icon)
+   */
+  virtual void drawButtonText(CDrawContext *context);
+
+  /**
+   * Called when the button is simply rendered as an image (\see TextButtonView::getImage)
+   */
+  virtual void drawButtonImage(CDrawContext *context);
 
 protected:
   // (optionally) tie the title of this text button to a (Jmb) parameter
@@ -88,6 +120,12 @@ protected:
 
   // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fTitle{};
+
+  // the image to use (in place of text)
+  BitmapSPtr fImage{nullptr};
+
+  // whether the image has disabled state (3 frames) or not (2 frames)
+  bool fImageHasDisabledState{false};
 
   // the onclick listener
   OnClickListener fOnClickListener{};
@@ -102,6 +140,8 @@ public:
       registerTagAttribute("title-tag", &TextButtonView::getTitleTag, &TextButtonView::setTitleTag);
       registerColorAttribute("disabled-text-color", &TextButtonView::getDisabledTextColor, &TextButtonView::setDisabledTextColor);
       registerGradientAttribute("disabled-gradient", &TextButtonView::getDisabledGradient, &TextButtonView::setDisabledGradient);
+      registerBitmapAttribute("button-image", &TextButtonView::getImage, &TextButtonView::setImage);
+      registerBooleanAttribute("button-image-has-disabled-state", &TextButtonView::getImageHasDisabledState, &TextButtonView::setImageHasDisabledState);
     }
   };
 };

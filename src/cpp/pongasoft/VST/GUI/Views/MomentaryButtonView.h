@@ -85,21 +85,40 @@ public:
   CColor const &getOnColor() const { return fOnColor; }
   void setOnColor(CColor const &iColor) { fOnColor = iColor; }
 
+  // get/setDisabledColor color for when disabled (mouse enabled set to false)
+  CColor const &getDisabledColor() const { return fDisabledColor; }
+  void setDisabledColor(CColor const &iColor) { fDisabledColor = iColor; }
+
   /**
-   * get/setImage for the button which should have 2 frames
-   * The images should contain the following 2 frames (each is of size image height / 2):
+   * If 'button-image-has-disabled-state' is selected then the image should contain the following
+   * 3 frames (each is of size image height / 3):
+   *   - at y = 0, the button in its disabled state
+   *   - at y = 1 * image height / 3, the button in its off state
+   *   - at y = 2 * image height / 3, the button in its on state
+   *
+   * If 'button-image-has-disabled-state' is NOT selected then the image should contain the following
+   * 2 frames (each is of size image height / 2):
    *   - at y = 0, the button in its off state
    *   - at y = image height / 2, the button in its on state
    */
   BitmapPtr getImage() const { return fImage; }
   void setImage(BitmapPtr iImage) { fImage = iImage; }
 
+  /**
+   * If the image contains a disabled state (3 frames) or not (2 frames) */
+  bool getImageHasDisabledState() const { return fImageHasDisabledState; }
+  void setImageHasDisabledState(bool iValue) { fImageHasDisabledState = iValue; }
+
 public:
   CLASS_METHODS_NOCOPY(MomentaryButtonView, TCustomControlView<bool>)
 
 protected:
   CColor fOnColor{kRedCColor};
+  CColor fDisabledColor{kBlackCColor};
   BitmapSPtr fImage{nullptr};
+
+  // whether the image has disabled state (3 frames) or not (2 frames)
+  bool fImageHasDisabledState{false};
 
 public:
   class Creator : public CustomViewCreator<MomentaryButtonView, TCustomControlView<bool>>
@@ -109,7 +128,9 @@ public:
       CustomViewCreator(iViewName, iDisplayName)
     {
       registerColorAttribute("on-color", &MomentaryButtonView::getOnColor, &MomentaryButtonView::setOnColor);
+      registerColorAttribute("disabled-color", &MomentaryButtonView::getDisabledColor, &MomentaryButtonView::setDisabledColor);
       registerBitmapAttribute("button-image", &MomentaryButtonView::getImage, &MomentaryButtonView::setImage);
+      registerBooleanAttribute("button-image-has-disabled-state", &MomentaryButtonView::getImageHasDisabledState, &MomentaryButtonView::setImageHasDisabledState);
     }
   };
 };

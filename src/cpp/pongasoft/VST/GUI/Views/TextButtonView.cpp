@@ -76,12 +76,23 @@ void TextButtonView::onClick()
 
 //------------------------------------------------------------------------
 // TextButtonView::draw
-// Implementation note: code copied from VSTGUI4 and changed to account
-// for disabled state
 //------------------------------------------------------------------------
 void TextButtonView::draw(CDrawContext *context)
 {
-  bool highlight = value > 0.5;
+  if(fImage)
+    drawButtonImage(context);
+  else
+    drawButtonText(context);
+}
+
+//------------------------------------------------------------------------
+// TextButtonView::drawButtonText
+// Implementation note: code copied from VSTGUI4 and changed to account
+// for disabled state
+//------------------------------------------------------------------------
+void TextButtonView::drawButtonText(CDrawContext *context)
+{
+  bool highlight = BooleanParamConverter::toBoolean(value);
 
   CGradient *bgGradient = getMouseEnabled() ?
                           (highlight ? getGradientHighlighted() : getGradient()) : getDisabledGradient();
@@ -116,7 +127,30 @@ void TextButtonView::draw(CDrawContext *context)
     iconToDraw = highlight ? (iconHighlighted ? iconHighlighted : icon) : (icon ? icon : iconHighlighted);
   CDrawMethods::drawIconAndText(context, iconToDraw, iconPosition, getTextAlignment(), getTextMargin(), titleRect,
                                 title, getFont(), textColor);
-  setDirty(false);
+}
+
+//------------------------------------------------------------------------
+// TextButtonView::drawButtonImage
+//------------------------------------------------------------------------
+void TextButtonView::drawButtonImage(CDrawContext *iContext)
+{
+  CCoord frameHeight;
+  int frameIndex;
+
+  bool onState = BooleanParamConverter::toBoolean(value);
+
+  if(fImageHasDisabledState)
+  {
+    frameHeight = fImage->getHeight() / 3;
+    frameIndex = getMouseEnabled() ? (onState ? 2 : 1) : 0;
+  }
+  else
+  {
+    frameHeight = fImage->getHeight() / 2;
+    frameIndex = onState ? 1 : 0;
+  }
+
+  fImage->draw(iContext, getViewSize(), CPoint{0, frameIndex * frameHeight});
 }
 
 //------------------------------------------------------------------------
@@ -146,6 +180,7 @@ void TextButtonView::unClick()
 {
   setValue(getMin());
 }
+
 
 
 }
