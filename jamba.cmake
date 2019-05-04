@@ -114,6 +114,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ScrollbarView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/SelfContainedViewListener.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/StepButtonView.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/SwitchViewContainer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/DrawContext.h
@@ -152,6 +153,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/DiscreteButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/StepButtonView.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/SwitchViewContainer.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ToggleButtonView.cpp

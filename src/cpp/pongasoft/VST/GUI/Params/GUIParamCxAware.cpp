@@ -51,6 +51,15 @@ GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubs
 }
 
 //------------------------------------------------------------------------
+// GUIParamCxAware::registerParam
+//------------------------------------------------------------------------
+bool GUIParamCxAware::registerParam(int32_t iParamID, GUIRawVstParam &oGUIRawVstParam)
+{
+  ParamValue unused;
+  return __internal__registerRawVstControl(iParamID, unused, oGUIRawVstParam);
+}
+
+//------------------------------------------------------------------------
 // GUIParamCxAware::__internal__registerRawVstControl
 //------------------------------------------------------------------------
 bool GUIParamCxAware::__internal__registerRawVstControl(int32_t iParamID,
@@ -72,6 +81,7 @@ bool GUIParamCxAware::__internal__registerRawVstControl(int32_t iParamID,
   {
     if(!oGUIRawVstParam.exists() || oGUIRawVstParam.getParamID() != iParamID)
     {
+      unregisterParam(oGUIRawVstParam);
       oGUIRawVstParam = registerRawVstParam(static_cast<ParamID>(iParamID));
       return true;
     }
@@ -168,6 +178,7 @@ bool GUIParamCxAware::__internal__registerVstControl(int32_t iParamID, ParamValu
   {
     if(!oParam.exists() || oParam.getParamID() != iParamID)
     {
+      unregisterParam(oParam);
       oParam = registerRawVstParam(static_cast<ParamID>(iParamID));
       return true;
     }

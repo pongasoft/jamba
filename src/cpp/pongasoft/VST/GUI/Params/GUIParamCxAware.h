@@ -46,6 +46,16 @@ public:
   GUIRawVstParam registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
+   * Registers a raw parameter (no conversion). This version will properly unregister a previously registered
+   * param.
+   *
+   * @param iParamID -1 when there is no parameter to use
+   * @param oGUIRawVstParam the reference to the backed parameter
+   * @return true if a new parameter was registered, false otherwise
+   */
+  bool registerParam(int32_t iParamID, GUIRawVstParam &oGUIRawVstParam);
+
+  /**
    * Registers a raw parameter (no conversion)
    */
   GUIRawVstParam registerRawVstCallback(ParamID iParamID,

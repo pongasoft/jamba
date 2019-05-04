@@ -202,6 +202,7 @@ bool GUIParamCxAware::__internal__registerVstControl(int32_t iParamID, T &oContr
   {
     if(!oGUIVstParam.exists() || oGUIVstParam.getParamID() != iParamID)
     {
+      unregisterParam(oGUIVstParam);
       oGUIVstParam = registerVstParam<T>(static_cast<ParamID>(iParamID));
       return true;
     }

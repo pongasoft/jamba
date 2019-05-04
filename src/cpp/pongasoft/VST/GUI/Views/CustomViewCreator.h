@@ -89,7 +89,9 @@ private:
  * @return the new view
  */
 template<typename TView>
-inline TView *createCustomView(CRect const &iSize) { return new TView(iSize); }
+inline TView *createCustomView(CRect const &iSize,
+                               const UIAttributes &iAttributes,
+                               const IUIDescription *iDescription) { return new TView(iSize); }
 
 /**
  * Generic custom view creator base class. Inherit from it and call the various "registerXX" methods in the constructor.
@@ -685,6 +687,59 @@ private:
     }
   };
 
+  /**
+   * Specialization for a vector of strings. Note that the strings are assumed to be UTF8 encoded strings.
+   */
+  class VectorStringAttribute : public ByRefAttribute<std::vector<std::string>>
+  {
+    using super_type = ByRefAttribute<std::vector<std::string>>;
+
+  public:
+    // Constructor
+    VectorStringAttribute(std::string const &iName,
+                          typename super_type::Getter iGetter,
+                          typename super_type::Setter iSetter,
+                          char iDelimiter = ',',
+                          bool iSkipEmptyEntries = false) :
+      super_type(iName, iGetter, iSetter),
+      fDelimiter{iDelimiter},
+      fSkipEmptyEntries{iSkipEmptyEntries}
+    {}
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription,
+                    std::string const &iAttributeValue,
+                    std::vector<std::string> &oValue) const override
+    {
+      oValue = Utils::splitString(iAttributeValue, fDelimiter, fSkipEmptyEntries);
+      return true;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription,
+                  const std::vector<std::string> &iValue,
+                  std::string &oStringValue) const override
+    {
+      oStringValue.clear();
+      int i = 0;
+      for(auto &entry : iValue)
+      {
+        if(i > 0)
+          oStringValue += fDelimiter;
+        if(!entry.empty() || !fSkipEmptyEntries)
+        {
+          oStringValue += entry;
+          i++;
+        }
+      }
+      return true;
+    }
+
+  protected:
+    char fDelimiter;
+    bool fSkipEmptyEntries;
+  };
+
 public:
   // Constructor
   explicit TCustomViewCreator(char const *iViewName = nullptr,
@@ -802,6 +857,18 @@ public:
   }
 
   /**
+ * Registers a Range attribute with the given name and getter/setter
+ */
+  void registerVectorStringAttribute(std::string const &iName,
+                                     typename VectorStringAttribute::Getter iGetter,
+                                     typename VectorStringAttribute::Setter iSetter,
+                                     char iDelimiter = ',',
+                                     bool iSkipEmptyEntries = false)
+  {
+    registerAttribute<VectorStringAttribute>(iName, iGetter, iSetter, iDelimiter, iSkipEmptyEntries);
+  }
+
+  /**
    * Registers a tag attribute with the given name and getter/setter
    */
   void registerTagAttribute(std::string const &iName,
@@ -871,7 +938,7 @@ public:
     DLOG_F(INFO, "CustomViewCreator<%s>::create()", getViewName());
 #endif
 
-    return createCustomView<TView>(CRect(0, 0, 0, 0));
+    return createCustomView<TView>(CRect(0, 0, 0, 0), attributes, description);
   }
 
   /**
@@ -955,13 +1022,14 @@ private:
   /**
    * Generic register attribute
    */
-  template<typename TViewAttribute>
+  template<typename TViewAttribute, typename... Args>
   void registerAttribute(std::string const &iName,
                          typename TViewAttribute::Getter iGetter,
-                         typename TViewAttribute::Setter iSetter)
+                         typename TViewAttribute::Setter iSetter,
+                         Args... iArgs)
   {
     std::shared_ptr<ViewAttribute> cva;
-    cva.reset(new TViewAttribute(iName, iGetter, iSetter));
+    cva.reset(new TViewAttribute(iName, iGetter, iSetter, iArgs...));
     registerAttribute(cva);
   }
 

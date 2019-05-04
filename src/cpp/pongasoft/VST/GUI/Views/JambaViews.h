@@ -24,6 +24,7 @@
 #include "TextButtonView.h"
 #include "ScrollbarView.h"
 #include "DiscreteButtonView.h"
+#include "SwitchViewContainer.h"
 
 namespace pongasoft {
 namespace VST {
@@ -44,7 +45,8 @@ struct JambaViews : public FObject
   const StepButtonView::Creator fStepButtonView{"jamba::StepButton", "Jamba - Step Button (+ or - discrete property)"};
   const TextEditView::Creator fTextEditCreator{"jamba::TextEdit", "Jamba - Text Edit (user input string)"};
   const TextButtonView::Creator fTextButtonCreator{"jamba::TextButton", "Jamba - Text Button"};
-  const ScrollbarView::Creator fScrollbarView{"jamba::Scrollbar", "Jamba - Scrollbar"};
+  const ScrollbarView::Creator fScrollbarViewCreator{"jamba::Scrollbar", "Jamba - Scrollbar"};
+  const SwitchViewContainer::Creator fSwitchViewContainerCreator{"jamba::SwitchViewContainer", "Jamba - Switch View Container (dynamic template selection)"};
 };
 
 }
