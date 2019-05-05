@@ -43,9 +43,10 @@ SwitchViewContainer::~SwitchViewContainer()
 //------------------------------------------------------------------------
 // SwitchViewContainer::afterCreate
 //------------------------------------------------------------------------
-void SwitchViewContainer::afterCreate(IUIDescription const *iDescription)
+void SwitchViewContainer::afterCreate(IUIDescription const *iDescription, IController *iController)
 {
   fUIDescription = iDescription;
+  fUIController = iController;
 }
 
 //------------------------------------------------------------------------
@@ -77,7 +78,7 @@ void SwitchViewContainer::switchCurrentView()
 
     if(templateName != fCurrentTemplateName)
     {
-      setCurrentView(fUIDescription->createView(templateName, fUIDescription->getController()));
+      setCurrentView(fUIDescription->createView(templateName, fUIController));
       fCurrentTemplateName = templateName;
       invalid();
     }
@@ -149,7 +150,10 @@ SwitchViewContainer *createCustomView<SwitchViewContainer>(CRect const &iSize,
                                                            const IUIDescription *iDescription)
 {
   auto view = new SwitchViewContainer(iSize);
-  view->afterCreate(iDescription);
+  // YP Impl note: for some reason iDescription->getController() becomes nullptr later so need to
+  // keep a handle of it right away (see similar code in vstsdk: uiviewcreator.cpp line 3667)
+  // 		new UIDescriptionViewSwitchController (vsc, description, description->getController ());
+  view->afterCreate(iDescription, iDescription->getController());
   return view;
 }
 

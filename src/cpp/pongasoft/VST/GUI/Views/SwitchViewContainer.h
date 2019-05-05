@@ -29,11 +29,11 @@ namespace Views {
  * switch as defined by `switch-control-tag`). The multiple views come from the list of template names (comma
  * separated list of names `template-names`).
  *
- * The VST SDK comes with a similar implementation which a) is buggy, b) requires an actual control tied to a vst
- * parameter (so for example does not work with StepButtonView or cannot be changed by the RT). This implementation
- * uses a VST parameter directly so has none of these restrictions.
+ * The %VST SDK comes with a similar implementation which a) is buggy, b) requires an actual control tied to a vst
+ * parameter (so for example does not work with StepButtonView or cannot be changed by the %RT). This implementation
+ * uses a %VST parameter directly so has none of these restrictions.
  *
- * Note: when editing the layout using the editor, and saving the xml file, unfortunately the editor will save the
+ * \note When editing the layout using the editor, and saving the xml file, unfortunately the editor will save the
  * children of this class (in this case, the one that was added dynamically). Although the code handles this case,
  * it is recommended (for production) to manually edit the xml file to remove any child of this entry (otherwise
  * objects will be created to be destroyed right away).
@@ -57,7 +57,7 @@ public:
   void registerParameters() override;
 
   // afterCreate
-  virtual void afterCreate(IUIDescription const *iDescription);
+  virtual void afterCreate(IUIDescription const *iDescription, IController *iController);
 
   // onParameterChange
   void onParameterChange(ParamID iParamID) override;
@@ -87,6 +87,7 @@ protected:
 
 protected:
   IUIDescription const *fUIDescription{};
+  IController *fUIController{};
 
   int32_t fSwitchControlTag{-1};
   GUIRawVstParam fControlSwitch{};
