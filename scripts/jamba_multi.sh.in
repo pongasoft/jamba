@@ -42,8 +42,9 @@ usage()
   echo "     test     : run the unit tests"
   echo "     validate : run the VST3 validator"
   echo "     ---- Audio Unit Commands ----"
-  echo "     build-au   : build the Audio Unit wrapper plugin"
-  echo "     install-au : install the Audio Unit plugin in its default location"
+  echo "     build-au    : build the Audio Unit wrapper plugin"
+  echo "     install-au  : install the Audio Unit plugin in its default location"
+  echo "     validate-au : run the Audio Unit validator"
   echo "     ---- Generic Commands ----"
   echo "     archive : generate the zip file containing the plugin(s) and README/License"
   echo "     prod    : run test/validate/archive (default to Release, override with -d)"
@@ -110,6 +111,23 @@ validate()
   build
   ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target validator
   ${DRY_RUN} ./bin/${BUILD_CONFIG}/validator VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3
+}
+
+###############################################################################
+# Function Name : validate_au()
+###############################################################################
+validate_au()
+{
+  if [ "${JAMBA_ENABLE_AUDIO_UNIT}" == "ON" ]; then
+    build_au
+
+    AU_BUILD_COMPONENT="VST3/${BUILD_CONFIG}/${BUILD_TARGET}_au.component"
+    AU_PLIST_FILE="$AU_BUILD_COMPONENT/Contents/Info.plist"
+    AU_TYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:type" "${AU_PLIST_FILE}"`
+    AU_SUBTYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" "${AU_PLIST_FILE}"`
+    AU_MANUFACTURER=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}"`
+    ${DRY_RUN} /usr/bin/auvaltool -v $AU_TYPE $AU_SUBTYPE $AU_MANUFACTURER
+  fi
 }
 
 ###############################################################################
@@ -250,6 +268,9 @@ case $1 in
            ;;
 
   'validate' ) validate
+               ;;
+
+  'validate-au' ) validate_au
                ;;
 
   'install' ) install
