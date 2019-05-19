@@ -56,12 +56,14 @@ void SwitchViewContainer::registerParameters()
 {
   registerParam(getSwitchControlTag(), fControlSwitch);
 
+#ifndef NDEBUG
   if(fControlSwitch.exists())
   {
     if(fControlSwitch.getStepCount() == 0)
       DLOG_F(WARNING, "Param [%d] should be a discrete parameter (stepCount != 0) to be used as the switch control",
              getSwitchControlTag());
   }
+#endif
 
   switchCurrentView();
 }
