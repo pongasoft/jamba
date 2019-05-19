@@ -23,7 +23,14 @@ Features
 - easily create custom views with their creators (so that they appear in the GUI editor)
 - easily use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
 - store/read state in a thread safe fashion (includes version)
-- included views: toggle button and momentary button with 2 or 4 frames, Text Edit (with input saved part of the state), Scrollbar (with optional zoom handles), Text button (to handle clicks with listener), Step Button (to increment/decrement a param value by a fixed amount)
+- included views:
+  - Toggle button and Momentary button with 2 or 4 frames
+  - Text Edit (with input saved part of the state)
+  - Scrollbar (with optional zoom handles)
+  - Text button (to handle clicks with listener)
+  - Step Button (to increment/decrement a param value by a fixed amount)
+  - Discrete Button ("on" only when discrete param value matches (ex: radio buttons, tabs, etc...))
+  - Switch Container (to switch between multiple views based on (discrete) param value (ex: tabs))
 
 Quick starting guide
 --------------------
@@ -154,6 +161,7 @@ After generating the plugin, the script gives you instructions on the various co
            ---- Audio Unit Commands ----
            build-au   : build the Audio Unit wrapper plugin
            install-au : install the Audio Unit plugin in its default location
+           validate-au : run the Audio Unit validator
            ---- Generic Commands ----
            archive : generate the zip file containing the plugin(s) and README/License
            prod    : run test/validate/archive (default to Release, override with -d)
@@ -206,6 +214,14 @@ Documentation
 
 Release Notes
 -------------
+### 2019-05-19 - `v3.2.0`
+* added audio unit validation to `jamba.sh` script (`jamba.sh validate-au`) which runs the `auvaltool` utility on the audio unit plugin
+* added switch container view to handle tab like switching (check `Views::SwitchContainerView`)
+* added (optional) image for text buttons (`Views::TextButtonView`)
+* added (optional) disabled state for momentary buttons (`Views::MomentaryButtonView`)
+* added discrete button view (a button which is "on" only when the backing discrete parameter matches the `step` value). This button can be used for radio groups, tabs, etc... (check `Views::DiscreteButtonView`)
+* Note: There is a small potentially breaking API change with function `Views::createCustomView` (defined in `Views/CustomViewCreator.h`). Check [commit](https://github.com/pongasoft/jamba/commit/08d06ceda9b936b92c45b8bd9f22a93acfeb3995). The function takes an additional 2 parameters which can be safely ignored if you don't need them.
+
 ### 2019-02-10 - `v3.1.0`
 * added ability to conveniently register a global key hook (check `Views::registerGlobalKeyboardHook`)
 * parameters now copy the provided strings (title, short tile and units) so that they no longer have to be static and for example can be computed
