@@ -118,13 +118,13 @@ install()
   if [ "${BUILD_CONFIG}" == "Release" ]; then
     FILENAME=${RELEASE_FILENAME}
   fi
-  ${DRY_RUN} rm -rf ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
-  ${DRY_RUN} cp -r VST3/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
+  ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
+  ${DRY_RUN} cp -r "VST3/${BUILD_TARGET}.vst3"  "$HOME/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
   echo "VST3 plugin installed under ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
 
   if [ "${JAMBA_ENABLE_VST2}" == "ON" ]; then
-    ${DRY_RUN} rm -rf ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
-    ${DRY_RUN} cp -r VST3/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
+    ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
+    ${DRY_RUN} cp -r "VST3/${BUILD_TARGET}.vst3"  "$HOME/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
     echo "VST2 plugin installed under ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
   fi
 }

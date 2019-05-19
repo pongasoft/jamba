@@ -214,6 +214,9 @@ Documentation
 
 Release Notes
 -------------
+### 2019-05-19 - `v3.2.1`
+* fixed `jamba.sh` script to handle filename with white spaces and install audio unit before validation (validation tool unfortunately works from an installed component, not a file...)
+
 ### 2019-05-19 - `v3.2.0`
 * added audio unit validation to `jamba.sh` script (`jamba.sh validate-au`) which runs the `auvaltool` utility on the audio unit plugin
 * added switch container view to handle tab like switching (check `Views::SwitchContainerView`)

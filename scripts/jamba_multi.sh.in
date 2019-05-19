@@ -119,13 +119,22 @@ validate()
 validate_au()
 {
   if [ "${JAMBA_ENABLE_AUDIO_UNIT}" == "ON" ]; then
-    build_au
+    install_au
 
     AU_BUILD_COMPONENT="VST3/${BUILD_CONFIG}/${BUILD_TARGET}_au.component"
     AU_PLIST_FILE="$AU_BUILD_COMPONENT/Contents/Info.plist"
-    AU_TYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:type" "${AU_PLIST_FILE}"`
-    AU_SUBTYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" "${AU_PLIST_FILE}"`
-    AU_MANUFACTURER=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}"`
+    if [ -z "$DRY_RUN" ]; then
+      AU_TYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:type" "${AU_PLIST_FILE}"`
+      AU_SUBTYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" "${AU_PLIST_FILE}"`
+      AU_MANUFACTURER=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}"`
+    else
+      ${DRY_RUN} AU_TYPE=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:type" "${AU_PLIST_FILE}"
+      ${DRY_RUN} AU_SUBTYPE=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" "${AU_PLIST_FILE}"
+      ${DRY_RUN} AU_MANUFACTURER=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}"
+      AU_TYPE="<computed AU_TYE>"
+      AU_SUBTYPE="<computed AU_SUBTYPE>"
+      AU_MANUFACTURER="<computed AU_MANUFACTURER>"
+    fi
     ${DRY_RUN} /usr/bin/auvaltool -v $AU_TYPE $AU_SUBTYPE $AU_MANUFACTURER
   fi
 }
@@ -151,13 +160,13 @@ install()
   if [ "${BUILD_CONFIG}" == "Release" ]; then
     FILENAME=${RELEASE_FILENAME}
   fi
-  ${DRY_RUN} rm -rf ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
-  ${DRY_RUN} cp -r VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3
+  ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
+  ${DRY_RUN} cp -r "VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3"  "$HOME/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
   echo "VST3 plugin installed under ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
 
   if [ "${JAMBA_ENABLE_VST2}" == "ON" ]; then
-    ${DRY_RUN} rm -rf ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
-    ${DRY_RUN} cp -r VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3  ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst
+    ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
+    ${DRY_RUN} cp -r "VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3" "$HOME/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
     echo "VST2 plugin installed under ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
   fi
 }
@@ -174,8 +183,8 @@ install_au()
     if [ "${BUILD_CONFIG}" == "Release" ]; then
       FILENAME=${RELEASE_FILENAME}
     fi
-    ${DRY_RUN} rm -rf ~/Library/Audio/Plug-Ins/Components/${FILENAME}.component
-    ${DRY_RUN} cp -r VST3/${BUILD_CONFIG}/${BUILD_TARGET}_au.component  ~/Library/Audio/Plug-Ins/Components/${FILENAME}.component
+    ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/Components/${FILENAME}.component"
+    ${DRY_RUN} cp -r "VST3/${BUILD_CONFIG}/${BUILD_TARGET}_au.component" "$HOME/Library/Audio/Plug-Ins/Components/${FILENAME}.component"
     echo "Audio Unit plugin installed under ~/Library/Audio/Plug-Ins/Components/${FILENAME}.component"
   fi
 }
