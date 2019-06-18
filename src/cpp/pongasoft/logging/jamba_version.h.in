@@ -16,6 +16,7 @@ namespace jamba {
 #define JAMBA_FULL_VERSION_STR "@JAMBA_VERSION@"
 
 #define JAMBA_GIT_VERSION_STR "@JAMBA_GIT_VERSION@"
+#define JAMBA_GIT_TAG_STR "@JAMBA_GIT_TAG_STR@"
 
 }
 }

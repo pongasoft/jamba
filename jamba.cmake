@@ -12,8 +12,13 @@ execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     OUTPUT_VARIABLE JAMBA_GIT_VERSION
     WORKING_DIRECTORY ${JAMBA_ROOT}
     OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND git describe --tags
+    RESULT_VARIABLE result
+    OUTPUT_VARIABLE JAMBA_GIT_TAG
+    WORKING_DIRECTORY ${JAMBA_ROOT}
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(JAMBA_VERSION "${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}")
-message(STATUS "jamba git version - ${JAMBA_GIT_VERSION}")
+message(STATUS "jamba git version - ${JAMBA_GIT_VERSION} | jamba git tag - ${JAMBA_GIT_TAG}")
 
 #-------------------------------------------------------------------------------
 # Options

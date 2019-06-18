@@ -30,3 +30,17 @@ if(DOXYGEN_FOUND)
 else()
   message(STATUS "Doxygen is not installed. Install it if you want to generate the documentation.")
 endif()
+
+
+set(BLANK_PLUGIN_ARCHIVE_NAME jamba-blank-plugin-${JAMBA_GIT_TAG})
+set(BLANK_PLUGIN_ARCHIVE_PATH ${CMAKE_BINARY_DIR}/archive)
+
+add_custom_command(OUTPUT ${BLANK_PLUGIN_ARCHIVE_PATH}.zip
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${BLANK_PLUGIN_ARCHIVE_PATH}
+    COMMAND ${CMAKE_COMMAND} -E tar cvf ${BLANK_PLUGIN_ARCHIVE_PATH}/${BLANK_PLUGIN_ARCHIVE_NAME}.zip --format=zip .
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/blank-plugin
+    )
+
+add_custom_target(blank-plugin-archive
+    DEPENDS ${BLANK_PLUGIN_ARCHIVE_PATH}.zip
+    )
