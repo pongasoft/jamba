@@ -38,6 +38,7 @@ parser.add_argument("-n", "--namespace", help="The C++ namespace")
 parser.add_argument("-d", "--directory", help="The directory for the project")
 parser.add_argument("-j", "--project", help="The name of the project")
 parser.add_argument("-g", "--jambagithash", help="The git hash for jamba")
+parser.add_argument("-s", "--downloadsdk", help="Download the VST SDK", action="store_true")
 args = parser.parse_args()
 
 
@@ -94,6 +95,7 @@ def config(plugin):
     plugin['company_url'] = maybe_ask_user(args.url, "Company URL", f'https://www.{plugin["company"]}.com')
     plugin['company_email'] = maybe_ask_user(args.email, "Company Email", f'support@{plugin["company"]}.com')
     plugin['namespace'] = maybe_ask_user(args.namespace, "C++ namespace", f"{plugin['company']}::VST::{plugin['name']}")
+    plugin['download_vst_sdk'] = "ON" if maybe_confirm_user(args.downloadsdk, "Download VST SDK") else "OFF"
 
     project_dir = maybe_ask_user(args.directory, "Project directory", os.path.realpath(os.curdir))
     project_name = maybe_ask_user(args.project, "Project Name", f'{plugin["company"]}-{plugin["name"]}-plugin')
@@ -114,6 +116,7 @@ Company URL        - {plugin["company_url"]}
 Company Email      - {plugin["company_email"]}
 Jamba git hash     - {plugin["jamba_git_hash"]}
 C++ Namespace      - {plugin["namespace"]}
+Dowload VST SDK    - {plugin["download_vst_sdk"]}
 Plugin root dir    - {plugin["root_dir"]}
 ''')
     confirm = input("Are you sure (Y/n)?")

@@ -6,6 +6,9 @@ option(JAMBA_ENABLE_VST2 "Use VST2" [-enable_vst2-])
 # build Audio Unit?
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" [-enable_audio_unit-])
 
+# Download VST SDK if not installed?
+option(JAMBA_DOWNLOAD_VSTSDK "Download VST SDK if not installed" [-download_vst_sdk-])
+
 set(PLUGIN_MAJOR_VERSION 1)
 set(PLUGIN_MINOR_VERSION 0)
 set(PLUGIN_PATCH_VERSION 0)
@@ -21,6 +24,12 @@ project([-name-])
 unset(GOOGLETEST_ROOT_DIR)
 #set(GOOGLETEST_ROOT_DIR ../../google/googletest)
 
+# check for existence of default VST3.6.9 install and install it if not found
+if(JAMBA_DOWNLOAD_VSTSDK)
+  include(vst369.cmake)
+endif()
+
+# download jamba framework
 include(jamba.cmake)
 
 set(CPP_SOURCES src/cpp)
