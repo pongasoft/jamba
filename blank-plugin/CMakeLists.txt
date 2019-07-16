@@ -61,7 +61,7 @@ if (MAC OR WIN)
   set(vst_sources ${vst_sources} ${vst2_sources})
 endif ()
 
-set(target [-company-]_[-name-])
+set(target [-target-])
 jamba_add_vst3plugin(${target} "${vst_sources}")
 target_include_directories(${target} PUBLIC ${VSTGUI_ROOT}/vstgui4)
 target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)

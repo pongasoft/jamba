@@ -104,6 +104,7 @@ def config(plugin):
     plugin['jamba_root_dir'] = this_script_root_dir.replace('\\', '\\\\')
     plugin['local_jamba'] = "" if args.local else "#"
     plugin['remote_jamba'] = "" if not args.local else "#"
+    plugin['target'] = f'{plugin["company"]}_{plugin["name"]}' if plugin["company"] else plugin["name"]
 
     print(f'''##################
 Plugin Name        - {plugin["name"]}
