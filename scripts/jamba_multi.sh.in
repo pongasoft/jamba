@@ -131,9 +131,9 @@ validate_au()
       ${DRY_RUN} AU_TYPE=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:type" "${AU_PLIST_FILE}"
       ${DRY_RUN} AU_SUBTYPE=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" "${AU_PLIST_FILE}"
       ${DRY_RUN} AU_MANUFACTURER=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}"
-      AU_TYPE="<computed AU_TYE>"
-      AU_SUBTYPE="<computed AU_SUBTYPE>"
-      AU_MANUFACTURER="<computed AU_MANUFACTURER>"
+      AU_TYPE="\$AU_TYPE"
+      AU_SUBTYPE="\$AU_SUBTYPE"
+      AU_MANUFACTURER="\$AU_MANUFACTURER"
     fi
     ${DRY_RUN} /usr/bin/auvaltool -v $AU_TYPE $AU_SUBTYPE $AU_MANUFACTURER
   fi
