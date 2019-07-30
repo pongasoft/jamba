@@ -67,7 +67,7 @@ clean()
 ###############################################################################
 build()
 {
-  ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target ${BUILD_TARGET}
+  ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target build_vst3
 }
 
 ###############################################################################
@@ -76,7 +76,7 @@ build()
 build_au()
 {
   if [ "${JAMBA_ENABLE_AUDIO_UNIT}" == "ON" ]; then
-    ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target ${BUILD_TARGET}_au
+    ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target build_au
   fi
 }
 
@@ -99,7 +99,7 @@ edit()
 ###############################################################################
 test()
 {
-  ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target ${BUILD_TARGET}_test
+  ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target test_vst3
   ${DRY_RUN} ctest -C ${BUILD_CONFIG}
 }
 
@@ -154,20 +154,10 @@ archive()
 ###############################################################################
 install()
 {
-  build
-
-  FILENAME="${BUILD_TARGET}"
-  if [ "${BUILD_CONFIG}" == "Release" ]; then
-    FILENAME=${RELEASE_FILENAME}
-  fi
-  ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
-  ${DRY_RUN} cp -r "VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3"  "$HOME/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
-  echo "VST3 plugin installed under ~/Library/Audio/Plug-Ins/VST3/${FILENAME}.vst3"
+  ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target install_vst3
 
   if [ "${JAMBA_ENABLE_VST2}" == "ON" ]; then
-    ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
-    ${DRY_RUN} cp -r "VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3" "$HOME/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
-    echo "VST2 plugin installed under ~/Library/Audio/Plug-Ins/VST/${FILENAME}.vst"
+    ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target install_vst2
   fi
 }
 
@@ -177,15 +167,7 @@ install()
 install_au()
 {
   if [ "${JAMBA_ENABLE_AUDIO_UNIT}" == "ON" ]; then
-    build_au
-
-    FILENAME="${BUILD_TARGET}"
-    if [ "${BUILD_CONFIG}" == "Release" ]; then
-      FILENAME=${RELEASE_FILENAME}
-    fi
-    ${DRY_RUN} rm -rf "$HOME/Library/Audio/Plug-Ins/Components/${FILENAME}.component"
-    ${DRY_RUN} cp -r "VST3/${BUILD_CONFIG}/${BUILD_TARGET}_au.component" "$HOME/Library/Audio/Plug-Ins/Components/${FILENAME}.component"
-    echo "Audio Unit plugin installed under ~/Library/Audio/Plug-Ins/Components/${FILENAME}.component"
+    ${DRY_RUN} cmake --build . --config ${BUILD_CONFIG} --target install_au
   fi
 }
 

@@ -29,7 +29,7 @@ EXIT /B %ERRORLEVEL%
 
 :: build the VST plugin
 :build
-%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target %BUILD_TARGET% -- /m
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target build_vst3 -- /m
 EXIT /B %ERRORLEVEL%
 
 :: start the GUI editor (Debug only)
@@ -45,7 +45,7 @@ EXIT /B %ERRORLEVEL%
 
 :: run the unit tests
 :test
-%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target %BUILD_TARGET%_test -- /m
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target test_vst3 -- /m
 %DRY_RUN% ctest -C %BUILD_CONFIG%
 EXIT /B %ERRORLEVEL%
 
@@ -58,43 +58,10 @@ EXIT /B %ERRORLEVEL%
 
 :: install the VST plugin in its default location
 :install
-CALL :build
-
-set FILENAME=%BUILD_TARGET%
-IF "%BUILD_CONFIG%"=="Release" set FILENAME=%RELEASE_FILENAME%
-
-IF EXIST "C:\Program Files\Common Files\VST3\%FILENAME%.vst3" (
-  %DRY_RUN% del /Q "C:\Program Files\Common Files\VST3\%FILENAME%.vst3"
-  IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
-)
-IF NOT EXIST "C:\Program Files\Common Files\VST3" (
-  %DRY_RUN% md "C:\Program Files\Common Files\VST3"
-  IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
-)
-%DRY_RUN% copy /Y "VST3\%BUILD_CONFIG%\%BUILD_TARGET%.vst3" "C:\Program Files\Common Files\VST3\%FILENAME%.vst3"
-IF %ERRORLEVEL% EQU 0 (
-  Echo VST3 plugin installed under  C:\Program Files\Common Files\VST3\%FILENAME%.vst3
-) ELSE (
-  Echo Failed to install VST3 plugin under C:\Program Files\Common Files\VST3\%FILENAME%.vst3 !!!!
-  GOTO :access_denied
-)
+%DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target install_vst3
 
 IF "%JAMBA_ENABLE_VST2%"=="ON" (
-  IF EXIST "C:\Program Files\VSTPlugins\%FILENAME%.dll" (
-    %DRY_RUN% del /Q "C:\Program Files\VSTPlugins\%FILENAME%.dll"
-    IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
-  )
-  IF NOT EXIST "C:\Program Files\VSTPlugins" (
-    %DRY_RUN% md "C:\Program Files\VSTPlugins"
-    IF %ERRORLEVEL% NEQ 0 GOTO :access_denied
-  )
-  %DRY_RUN% copy /Y "VST3\%BUILD_CONFIG%\%BUILD_TARGET%.vst3" "C:\Program Files\VSTPlugins\%FILENAME%.dll"
-  IF %ERRORLEVEL% EQU 0 (
-    Echo VST2 plugin installed under C:\Program Files\VSTPlugins\%FILENAME%.dll
-  ) ELSE (
-    Echo Failed to install VST2 plugin under C:\Program Files\VSTPlugins\%FILENAME%.dll !!!!
-    GOTO :access_denied
-  )
+  %DRY_RUN% cmake --build . --config %BUILD_CONFIG% --target install_vst2
 )
 EXIT /B %ERRORLEVEL%
 
