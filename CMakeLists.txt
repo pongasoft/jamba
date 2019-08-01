@@ -32,12 +32,19 @@ else()
 endif()
 
 
-set(BLANK_PLUGIN_ARCHIVE_NAME jamba-blank-plugin-${JAMBA_GIT_TAG})
+set(BLANK_PLUGIN_ARCHIVE_NAME jamba-blank-plugin-v${JAMBA_VERSION})
 set(BLANK_PLUGIN_ARCHIVE_PATH ${CMAKE_BINARY_DIR}/archive)
 
+# Generate the file list for blank-plugin in order to exclude .DS_Store files
+file(GLOB_RECURSE BLANK_PLUGIN_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} blank-plugin/*)
+list(FILTER BLANK_PLUGIN_FILES EXCLUDE REGEX "\\.DS_Store$")
+list(JOIN BLANK_PLUGIN_FILES "\n" BLANK_PLUGIN_FILES)
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/blank-plugin-files.txt ${BLANK_PLUGIN_FILES})
+
+# Build the blank-plugin zip archive
 add_custom_command(OUTPUT ${BLANK_PLUGIN_ARCHIVE_PATH}.zip
     COMMAND ${CMAKE_COMMAND} -E make_directory ${BLANK_PLUGIN_ARCHIVE_PATH}
-    COMMAND ${CMAKE_COMMAND} -E tar cvf ${BLANK_PLUGIN_ARCHIVE_PATH}/${BLANK_PLUGIN_ARCHIVE_NAME}.zip --format=zip blank-plugin
+    COMMAND ${CMAKE_COMMAND} -E tar cvf ${BLANK_PLUGIN_ARCHIVE_PATH}/${BLANK_PLUGIN_ARCHIVE_NAME}.zip --files-from=${CMAKE_CURRENT_BINARY_DIR}/blank-plugin-files.txt --format=zip
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
