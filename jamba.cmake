@@ -446,10 +446,16 @@ function(jamba_dev_scripts target)
     ### install_vst3 target
     add_custom_target(install_vst3
         COMMAND ${CMAKE_COMMAND} -E make_directory ${VST3_PLUGIN_DIR}
-        COMMAND ${CMAKE_COMMAND} -E remove_directory ${VST3_PLUGIN_DST}
-        COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_FILE:${target}> ${VST3_PLUGIN_DST}
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${VST3_PLUGIN_DST}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${VST3_PLUGIN_DST}
+        COMMENT "#### You might need to run as administrator if the command fails"
         DEPENDS build_vst3
         )
+
+    add_custom_command(TARGET install_vst3 
+                       POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E echo "#### VST3 plugin installed under ${VST3_PLUGIN_DST}"
+                      )
 
     ### VST2 ??
     if (JAMBA_ENABLE_VST2)
@@ -459,10 +465,16 @@ function(jamba_dev_scripts target)
       ### install_vst2 target
       add_custom_target(install_vst2
           COMMAND ${CMAKE_COMMAND} -E make_directory ${VST2_PLUGIN_DIR}
-          COMMAND ${CMAKE_COMMAND} -E remove_directory ${VST2_PLUGIN_DST}
-          COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_FILE:${target}> ${VST2_PLUGIN_DST}
+          COMMAND ${CMAKE_COMMAND} -E remove -f ${VST2_PLUGIN_DST}
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${VST2_PLUGIN_DST}
+          COMMENT "#### You might need to run as administrator if the command fails"
           DEPENDS build_vst3
           )
+
+      add_custom_command(TARGET install_vst2 
+                         POST_BUILD
+                         COMMAND ${CMAKE_COMMAND} -E echo "#### VST2 plugin installed under ${VST2_PLUGIN_DST}"
+                        )
     endif ()
   endif ()
 endfunction()
