@@ -44,6 +44,15 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 
 Latest Release Notes
 --------------------
+### 2019-08-01 - `v3.2.3`
+* Implemented [#6](https://github.com/pongasoft/jamba/issues/6): added cmake targets `build_vst3`, `test_vst3`, `install_vst3`, `install_vst2`, `build_au` and `install_au`
+* This change allows those targets to be used directly in an IDE and for example use them for debugging (ex: attach a DAW executable to `install_vst2` or `install_vst3`)
+* Modified `jamba.sh` and `jamba.bat` to use the new cmake targets (making the scripts more generic)
+* Added ability to customize (extend or completely override) the following targets:
+  * `build_vst3` by setting an optional `BUILD_VST3_TARGET` variable
+  * `test_vst3` by setting an optional `TEST_VST3_TARGET` variable
+  * `build_au` by setting an optional `BUILD_AU_TARGET` variable
+
 ### 2019-07-23 - `v3.2.2`
 * released [Jamba](https://jamba.dev/) website with [Quickstart](https://jamba.dev/quickstart/) section to make it very easy to generate a blank plugin (answer a few questions in the browser)
 * added (optional) VST3 SDK automatic download to the blank plugin (web and command line)
