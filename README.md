@@ -44,6 +44,9 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 
 Latest Release Notes
 --------------------
+### 2019-08-03 - `v3.2.4`
+* fixed blank plugin `initialize` API to match superclass
+
 ### 2019-08-01 - `v3.2.3`
 * Implemented [#6](https://github.com/pongasoft/jamba/issues/6): added cmake targets `build_vst3`, `test_vst3`, `install_vst3`, `install_vst2`, `build_au` and `install_au`
 * This change allows those targets to be used directly in an IDE and for example use them for debugging (ex: attach a DAW executable to `install_vst2` or `install_vst3`)
@@ -68,13 +71,6 @@ Latest Release Notes
 * added (optional) disabled state for momentary buttons (`Views::MomentaryButtonView`)
 * added discrete button view (a button which is "on" only when the backing discrete parameter matches the `step` value). This button can be used for radio groups, tabs, etc... (check `Views::DiscreteButtonView`)
 * Note: There is a small potentially breaking API change with function `Views::createCustomView` (defined in `Views/CustomViewCreator.h`). Check [commit](https://github.com/pongasoft/jamba/commit/08d06ceda9b936b92c45b8bd9f22a93acfeb3995). The function takes an additional 2 parameters which can be safely ignored if you don't need them.
-
-### 2019-02-10 - `v3.1.0`
-* added ability to conveniently register a global key hook (check `Views::registerGlobalKeyboardHook`)
-* parameters now copy the provided strings (title, short tile and units) so that they no longer have to be static and for example can be computed
-* added convenient methods to `AudioBuffers` and `Channel` (`copyFrom` and `forEachSample`). Defined `const` and non `const` versions.
-* added Step Button view which is a button that increment/decrement a parameter by a fixed amount when clicked. Another amount (tied to shift click) can be provided.
-
 
 [All release notes](https://jamba.dev/releases/)
 

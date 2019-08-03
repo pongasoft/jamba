@@ -31,7 +31,7 @@ public:
 
 protected:
   // initialize
-  tresult initialize(FUnknown *context) override;
+  tresult PLUGIN_API initialize(FUnknown *context) override;
 
 private:
   // The controller gets its own copy of the parameters (defined in Plugin.h)
