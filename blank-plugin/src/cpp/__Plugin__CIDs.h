@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------
 // These 2 IDs are used in [-name-]_VST2.cpp and [-name-]_VST3.cpp to create
 // the processor (RT) and controller (GUI). Those IDs are unique and have
-// been generated automatically by create-plugin.py
+// been generated automatically.
 //------------------------------------------------------------------------
 static const ::Steinberg::FUID [-name-]ProcessorUID([-processor_uuid-]);
 static const ::Steinberg::FUID [-name-]ControllerUID([-controller_uuid-]);
