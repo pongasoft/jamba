@@ -155,6 +155,22 @@ public:
   }
 
   /**
+   * Update the parameter with a value.
+   *
+   * @return true if the value was actually updated, false if it is the same
+   */
+  bool update(ParamValue const &iValue)
+  {
+    auto const previousValue = getValue();
+    if(previousValue != iValue)
+    {
+      setValue(iValue);
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */

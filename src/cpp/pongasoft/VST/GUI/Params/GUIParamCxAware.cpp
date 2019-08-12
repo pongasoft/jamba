@@ -16,6 +16,8 @@
  * @author Yan Pujante
  */
 #include "GUIParamCxAware.hpp"
+#include "GUIParamCxAware.h"
+
 #include <pongasoft/VST/GUI/GUIState.h>
 
 namespace pongasoft {
@@ -159,32 +161,18 @@ void GUIParamCxAware::invokeAll()
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::__internal__registerVstControl
+// GUIParamCxAware::registerRawAnyParam
 //------------------------------------------------------------------------
-bool GUIParamCxAware::__internal__registerVstControl(int32_t iParamID, ParamValue &oControlValue, GUIRawVstParam &oParam)
+bool GUIParamCxAware::registerRawAnyParam(TagID iParamID,
+                                          GUIRawAnyParam &oParam,
+                                          bool iSubscribeToChanges)
 {
-  if(!fParamCxMgr)
-    return false; // not set yet
-
-  if(iParamID < 0)
+  if(fParamCxMgr)
   {
-    if(oParam.exists())
-    {
-      oControlValue = oParam.getValue();
-      oParam = unregisterParam(oParam);
-    }
+    return fParamCxMgr->registerRawAnyParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
   }
   else
-  {
-    if(!oParam.exists() || oParam.getParamID() != iParamID)
-    {
-      unregisterParam(oParam);
-      oParam = registerRawVstParam(static_cast<ParamID>(iParamID));
-      return true;
-    }
-  }
-
-  return false;
+    return false;
 }
 
 }

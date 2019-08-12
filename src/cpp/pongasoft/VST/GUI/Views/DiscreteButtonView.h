@@ -86,6 +86,9 @@ public:
   int32 getStep() const { return fStep; }
   void setStep(int32 step);
 
+  int32 getStepCount() const { return fStepCount; }
+  void setStepCount(int32 iStepCount) { fStepCount = iStepCount; }
+
   /**
    * get/setImage for the button which should have 2 or 4 frames depending on the fFrames value
    * The images should contain the following :
@@ -103,11 +106,14 @@ public:
 
   void registerParameters() override;
 
+  virtual int32 computeStepCount() const;
+
 protected:
   int fFrames{4};
   CColor fOnColor{kRedCColor};
   BitmapSPtr fImage{nullptr};
   bool fInverse{false};
+  int32 fStepCount{-1};
 
   bool fPressed{false};
 
@@ -125,6 +131,7 @@ public:
       registerBitmapAttribute("button-image", &DiscreteButtonView::getImage, &DiscreteButtonView::setImage);
       registerBooleanAttribute("inverse", &DiscreteButtonView::getInverse, &DiscreteButtonView::setInverse);
       registerIntegerAttribute<int32>("step", &DiscreteButtonView::getStep, &DiscreteButtonView::setStep);
+      registerIntegerAttribute<int32>("step-count", &DiscreteButtonView::getStepCount, &DiscreteButtonView::setStepCount);
     }
   };
 };

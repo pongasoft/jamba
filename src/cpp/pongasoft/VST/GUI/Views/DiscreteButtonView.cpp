@@ -178,12 +178,7 @@ void DiscreteButtonView::setStep(int32 step)
 //------------------------------------------------------------------------
 bool DiscreteButtonView::isOn() const
 {
-  if(fControlParameter.exists())
-  {
-    return convertNormalizedValueToDiscreteValue(fControlParameter.getStepCount(), getControlValue()) == fStep;
-  }
-  else
-    return false;
+  return convertNormalizedValueToDiscreteValue(computeStepCount(), getControlValue()) == fStep;
 }
 
 //------------------------------------------------------------------------
@@ -191,10 +186,7 @@ bool DiscreteButtonView::isOn() const
 //------------------------------------------------------------------------
 void DiscreteButtonView::setOn()
 {
-  if(fControlParameter.exists())
-  {
-    setControlValue(convertDiscreteValueToNormalizedValue(fControlParameter.getStepCount(), fStep));
-  }
+  setControlValue(convertDiscreteValueToNormalizedValue(computeStepCount(), fStep));
 }
 
 //------------------------------------------------------------------------
@@ -204,9 +196,22 @@ void DiscreteButtonView::registerParameters()
 {
   TCustomControlView::registerParameters();
 #ifndef NDEBUG
-  if(fControlParameter.exists() && fControlParameter.getStepCount() == 0)
-    DLOG_F(WARNING, "%d parameter is not discrete (stepCount == 0)", fControlParameter.getParamID());
+  if(fControlParameter.getStepCount() == 0)
+    DLOG_F(WARNING, "%d parameter is not discrete (stepCount == 0)", fControlParameter.getTagID());
 #endif
+}
+
+//------------------------------------------------------------------------
+// DiscreteButtonView::computeStepCount
+//------------------------------------------------------------------------
+int32 DiscreteButtonView::computeStepCount() const
+{
+  auto stepCount = getStepCount();
+  if(stepCount < 0)
+  {
+    return fControlParameter.getStepCount();
+  }
+  return stepCount;
 }
 
 }

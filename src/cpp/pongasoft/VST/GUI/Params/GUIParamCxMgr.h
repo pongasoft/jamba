@@ -44,11 +44,20 @@ public:
    *
    * @return true if the param was present, false otherwise
    */
-  bool unregisterParam(ParamID iParamID);
+  bool unregisterParam(TagID iParamID);
 
   /**
    * Unregisters all parameters */
   void unregisterAll();
+
+  bool registerRawAnyParam(TagID iParamID,
+                           GUIRawAnyParam &oParam,
+                           Parameters::IChangeListener *iChangeListener = nullptr);
+
+  template<typename T>
+  bool registerAnyParam(TagID iParamID,
+                        GUIAnyParam<T> &oParam,
+                        Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
    * Registers a raw parameter (no conversion)
@@ -256,6 +265,69 @@ private:
   // Maintains the connections for the listeners... will be automatically discarded in the destructor
   std::unordered_map<ParamID, std::unique_ptr<FObjectCx>> fParamCxs;
 };
+
+//------------------------------------------------------------------------
+// GUIParamCxMgr::registerAnyParam
+//------------------------------------------------------------------------
+template<typename T>
+bool GUIParamCxMgr::registerAnyParam(TagID iParamID,
+                                     GUIAnyParam<T> &oParam,
+                                     Parameters::IChangeListener *iChangeListener)
+{
+  auto previousTagID = oParam.getTagID();
+
+  if(previousTagID != iParamID)
+    unregisterParam(previousTagID);
+
+  bool paramChanged = false;
+
+  // if VST parameter...
+  if(existsVst(iParamID))
+  {
+    auto param = fGUIState->getGUIVstParameter<T>(iParamID);
+
+    // although existsVst(iParamID) returned true, param could still be null if T does not match
+    if(param)
+      paramChanged = oParam.assign(std::move(param));
+  }
+
+  // if Jmb parameter...
+  if(!paramChanged && existsJmb(iParamID))
+  {
+    auto param = fGUIState->getJmbParameter(iParamID);
+
+    auto res = dynamic_cast<GUIJmbParameter<T> *>(param);
+    if(res)
+    {
+      paramChanged = oParam.assign(res);
+    }
+    else
+    {
+      DLOG_F(WARNING, "jmb param [%d] is not of the requested type", iParamID);
+    }
+  }
+
+  // no vst or jmb parameter match => using default
+  if(!paramChanged)
+  {
+    paramChanged = oParam.clearAssignment(iParamID, true);
+#ifndef NDEBUG
+    if(iParamID != UNDEFINED_PARAM_ID)
+      DLOG_F(WARNING, "could not find any parameter (vst or jmb) with id [%d]... reverting to default", iParamID);
+#endif
+  }
+
+  if(iChangeListener)
+  {
+    fParamCxs[iParamID] = oParam.connect(iChangeListener);
+  }
+  else
+  {
+    unregisterParam(iParamID);
+  }
+
+  return paramChanged;
+}
 
 //------------------------------------------------------------------------
 // GUIParamCxMgr::__registerRawVstParameter

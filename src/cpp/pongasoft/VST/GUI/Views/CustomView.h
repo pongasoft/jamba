@@ -55,8 +55,8 @@ public:
   CColor const &getBackColor() const { return fBackColor; }
 
   // setCustomViewTag / getCustomViewTag
-  void setCustomViewTag (int32_t iTag) { fTag = iTag; }
-  int32_t getCustomViewTag () const { return fTag; }
+  void setCustomViewTag (TagID iTag) { fTag = iTag; }
+  TagID getCustomViewTag () const { return fTag; }
 
   // setEditorMode / getEditorMode
   void setEditorMode(bool iEditorMode);
@@ -125,7 +125,7 @@ protected:
   }
 
 protected:
-  int32_t fTag;
+  TagID fTag;
   bool fEditorMode;
   CColor fBackColor;
 
@@ -189,14 +189,14 @@ class CustomViewAdapter : public TView, public GUIParamCxAware
 public:
   // Constructor
   template<typename... Args>
-  explicit CustomViewAdapter(const CRect &iSize, Args... args) : TView(iSize, args...), fTag{-1} {}
+  explicit CustomViewAdapter(const CRect &iSize, Args&& ...args) : TView(iSize, std::forward<Args>(args)...), fTag{UNDEFINED_TAG_ID} {}
 
   // markDirty
   inline void markDirty() { TView::setDirty(true); }
 
   // setCustomViewTag / getCustomViewTag
-  void setCustomViewTag (int32_t iTag) { fTag = iTag; }
-  int32_t getCustomViewTag () const { return fTag; }
+  void setCustomViewTag (TagID iTag) { fTag = iTag; }
+  TagID getCustomViewTag () const { return fTag; }
 
   /**
    * Callback when a parameter changes. By default simply marks the view as dirty.
@@ -204,7 +204,7 @@ public:
   void onParameterChange(ParamID iParamID) override { markDirty(); };
 
 protected:
-  int32_t fTag;
+  TagID fTag;
 
 public:
   class Creator : public TCustomViewCreator<CustomViewAdapter>
@@ -231,7 +231,7 @@ class PluginCustomViewAdapter : public CustomViewAdapter<TView>, public PluginAc
 public:
   // Constructor
   template<typename... Args>
-  explicit PluginCustomViewAdapter(const CRect &iSize, Args... args) : CustomViewAdapter<TView>(iSize, args...) {}
+  explicit PluginCustomViewAdapter(const CRect &iSize, Args&& ...args) : CustomViewAdapter<TView>(iSize, std::forward<Args>(args)...) {}
 
 protected:
   // initState - overridden to extract fParams

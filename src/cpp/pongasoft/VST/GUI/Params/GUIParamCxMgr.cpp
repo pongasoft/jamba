@@ -23,6 +23,64 @@ namespace GUI {
 namespace Params {
 
 //------------------------------------------------------------------------
+// GUIParamCxMgr::registerRawAnyParam
+//------------------------------------------------------------------------
+bool GUIParamCxMgr::registerRawAnyParam(TagID iParamID,
+                                        GUIRawAnyParam &oParam,
+                                        Parameters::IChangeListener *iChangeListener)
+{
+  auto previousTagID = oParam.getTagID();
+
+  if(previousTagID != iParamID)
+    unregisterParam(previousTagID);
+
+  bool paramChanged = false;
+
+  // if VST parameter...
+  if(existsVst(iParamID))
+  {
+    paramChanged = oParam.assign(fGUIState->getRawVstParameter(iParamID));
+  }
+
+  // if Jmb parameter...
+  if(!paramChanged && existsJmb(iParamID))
+  {
+    auto param = fGUIState->getJmbParameter(iParamID);
+
+    auto res = dynamic_cast<GUIJmbParameter<ParamValue> *>(param);
+    if(res)
+    {
+      paramChanged = oParam.assign(res);
+    }
+    else
+    {
+      DLOG_F(WARNING, "jmb param [%d] is not of ParamValue type", iParamID);
+    }
+  }
+
+  // no vst or jmb parameter match => using default
+  if(!paramChanged)
+  {
+    paramChanged = oParam.clearAssignment(iParamID, true);
+#ifndef NDEBUG
+    if(iParamID != UNDEFINED_PARAM_ID)
+      DLOG_F(WARNING, "could not find any parameter (vst or jmb) with id [%d]... reverting to default", iParamID);
+#endif
+  }
+
+  if(iChangeListener)
+  {
+    fParamCxs[iParamID] = oParam.connect(iChangeListener);
+  }
+  else
+  {
+    unregisterParam(iParamID);
+  }
+
+  return paramChanged;
+}
+
+//------------------------------------------------------------------------
 // GUIParamCxMgr::invokeAll
 //------------------------------------------------------------------------
 void GUIParamCxMgr::invokeAll()
@@ -36,9 +94,11 @@ void GUIParamCxMgr::invokeAll()
 //------------------------------------------------------------------------
 // GUIParamCxMgr::unregisterParam
 //------------------------------------------------------------------------
-bool GUIParamCxMgr::unregisterParam(ParamID iParamID)
+bool GUIParamCxMgr::unregisterParam(TagID iParamID)
 {
-  return fParamCxs.erase(iParamID) == 1;
+  if(iParamID >= 0)
+    return fParamCxs.erase(static_cast<ParamID>(iParamID)) == 1;
+  return false;
 }
 
 //------------------------------------------------------------------------

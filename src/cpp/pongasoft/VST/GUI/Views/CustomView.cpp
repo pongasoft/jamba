@@ -33,7 +33,7 @@ using namespace VSTGUI;
 CustomView::CustomView(const CRect &iSize)
   : CView(iSize),
     GUIParamCxAware(),
-    fTag{-1},
+    fTag{UNDEFINED_TAG_ID},
     fEditorMode{false},
     fBackColor{0, 0, 0}
 {

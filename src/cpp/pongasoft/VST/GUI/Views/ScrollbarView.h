@@ -47,12 +47,12 @@ public:
   void draw(CDrawContext *iContext) override;
 
   // tag to tie offsetPercent to a Vst parameter
-  int32_t getOffsetPercentTag() const { return fOffsetPercentTag; }
-  void setOffsetPercentTag(int32_t offsetPercentTag);
+  TagID getOffsetPercentTag() const { return fOffsetPercentTag; }
+  void setOffsetPercentTag(TagID offsetPercentTag);
 
   // tag to tie zoomPercent to a Vst parameter
-  int32_t getZoomPercentTag() const { return fZoomPercentTag; }
-  void setZoomPercentTag(int32_t zoomPercentTag);
+  TagID getZoomPercentTag() const { return fZoomPercentTag; }
+  void setZoomPercentTag(TagID zoomPercentTag);
 
   // margin : whitespace around the scrollbar
   Margin const &getMargin() const { return fMargin; }
@@ -256,16 +256,14 @@ protected:
   bool fEnableZoomDoubleClick{true};
 
   // offsetPercent tag/param/value + editor and editor value ("value" is used when no param)
-  int32_t fOffsetPercentTag{-1};
-  GUIRawVstParam fOffsetPercentParam{};
-  double fOffsetPercentValue{};
-  GUIRawVstParamEditor fOffsetPercentEditor{nullptr};
+  TagID fOffsetPercentTag{UNDEFINED_PARAM_ID};
+  GUIRawAnyParam fOffsetPercentParam{};
+  GUIRawAnyParamEditor fOffsetPercentEditor{};
 
   // zoomPercent tag/param/value + editor and editor value ("value" is used when no param)
-  int32_t fZoomPercentTag{-1};
-  GUIRawVstParam fZoomPercentParam{};
-  double fZoomPercentValue{};
-  GUIRawVstParamEditor fZoomPercentEditor{nullptr};
+  TagID fZoomPercentTag{UNDEFINED_PARAM_ID};
+  GUIRawAnyParam fZoomPercentParam{};
+  GUIRawAnyParamEditor fZoomPercentEditor{};
 
   // used when dragging
   RelativeCoord fDragGestureX{-1.0};

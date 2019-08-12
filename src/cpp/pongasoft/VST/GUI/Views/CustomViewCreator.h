@@ -213,16 +213,16 @@ private:
   using ByRefAttribute = TAttribute<T, T const &(TView::*)() const, void (TView::*)(T const &)>;
 
   /**
-   * Specialization for a tag attribute (vst type int32_t). The view must have getter and setter as defined by the
+   * Specialization for a tag attribute (vst type TagID). The view must have getter and setter as defined by the
    * types below.
    */
-  class TagAttribute : public ByValAttribute<int32_t>
+  class TagAttribute : public ByValAttribute<TagID>
   {
   public:
     TagAttribute(std::string const &iName,
-                 typename ByValAttribute<int32_t>::Getter iGetter,
-                 typename ByValAttribute<int32_t>::Setter iSetter) :
-      ByValAttribute<int32_t>(iName, iGetter, iSetter) {}
+                 typename ByValAttribute<TagID>::Getter iGetter,
+                 typename ByValAttribute<TagID>::Setter iSetter) :
+      ByValAttribute<TagID>(iName, iGetter, iSetter) {}
 
     // getType
     IViewCreator::AttrType getType() override
@@ -231,15 +231,15 @@ private:
     }
 
     // fromString
-    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, int32_t &oValue) const override
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, TagID &oValue) const override
     {
       if(iAttributeValue.length() != 0)
       {
         auto tag = iDescription->getTagForName(iAttributeValue.c_str());
-        if(tag == -1)
+        if(tag == UNDEFINED_TAG_ID)
         {
           char *endPtr = nullptr;
-          tag = (int32_t) strtol(iAttributeValue.c_str(), &endPtr, 10);
+          tag = (TagID) strtol(iAttributeValue.c_str(), &endPtr, 10);
           if(endPtr == iAttributeValue.c_str())
           {
             return false;
@@ -252,9 +252,9 @@ private:
     }
 
     // toString
-    bool toString(IUIDescription const *iDescription, const int32_t &iValue, std::string &oStringValue) const override
+    bool toString(IUIDescription const *iDescription, const TagID &iValue, std::string &oStringValue) const override
     {
-      if(iValue != -1)
+      if(iValue != UNDEFINED_TAG_ID)
       {
         UTF8StringPtr controlTag = iDescription->lookupControlTagName(iValue);
         if(controlTag)
@@ -1026,10 +1026,10 @@ private:
   void registerAttribute(std::string const &iName,
                          typename TViewAttribute::Getter iGetter,
                          typename TViewAttribute::Setter iSetter,
-                         Args... iArgs)
+                         Args&& ...iArgs)
   {
     std::shared_ptr<ViewAttribute> cva;
-    cva.reset(new TViewAttribute(iName, iGetter, iSetter, iArgs...));
+    cva.reset(new TViewAttribute(iName, iGetter, iSetter, std::forward<Args>(iArgs)...));
     registerAttribute(cva);
   }
 

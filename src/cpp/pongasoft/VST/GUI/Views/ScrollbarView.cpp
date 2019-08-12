@@ -280,10 +280,7 @@ void ScrollbarView::setViewSize(const CRect &rect, bool invalid)
 //------------------------------------------------------------------------
 double ScrollbarView::getOffsetPercent() const
 {
-  if(fOffsetPercentParam.exists())
-    return fOffsetPercentParam.getValue();
-  else
-    return fOffsetPercentValue;
+  return fOffsetPercentParam.getValue();
 }
 
 //------------------------------------------------------------------------
@@ -295,16 +292,7 @@ void ScrollbarView::setOffsetPercent(double iOffsetPercent)
     fOffsetPercentEditor->setValue(iOffsetPercent);
   else
   {
-    if(fOffsetPercentParam.exists())
-      fOffsetPercentParam.setValue(iOffsetPercent);
-    else
-    {
-      if(fOffsetPercentValue != iOffsetPercent)
-      {
-        fOffsetPercentValue = iOffsetPercent;
-        needsRecomputing();
-      }
-    }
+    fOffsetPercentParam.update(iOffsetPercent);
   }
 }
 
@@ -313,10 +301,7 @@ void ScrollbarView::setOffsetPercent(double iOffsetPercent)
 //------------------------------------------------------------------------
 double ScrollbarView::getZoomPercent() const
 {
-  if(fZoomPercentParam.exists())
-    return fZoomPercentParam.getValue();
-  else
-    return fZoomPercentValue;
+  return fZoomPercentParam.getValue();
 }
 
 //------------------------------------------------------------------------
@@ -328,16 +313,7 @@ void ScrollbarView::setZoomPercent(double iZoomPercent)
     fZoomPercentEditor->setValue(iZoomPercent);
   else
   {
-    if(fZoomPercentParam.exists())
-      fZoomPercentParam.setValue(iZoomPercent);
-    else
-    {
-      if(fZoomPercentValue != iZoomPercent)
-      {
-        fZoomPercentValue = iZoomPercent;
-        needsRecomputing();
-      }
-    }
+    fZoomPercentParam.update(iZoomPercent);
   }
 }
 
@@ -349,17 +325,14 @@ void ScrollbarView::registerParameters()
   if(!fParamCxMgr)
     return; // not set yet
 
-  if(__internal__registerRawVstControl(fOffsetPercentTag, fOffsetPercentValue, fOffsetPercentParam))
-    needsRecomputing();
-
-  if(__internal__registerRawVstControl(fZoomPercentTag, fZoomPercentValue, fZoomPercentParam))
-    needsRecomputing();
+  registerRawAnyParam(fOffsetPercentTag, fOffsetPercentParam);
+  registerRawAnyParam(fZoomPercentTag, fZoomPercentParam);
 }
 
 //------------------------------------------------------------------------
 // ScrollbarView::setOffsetPercentTag
 //------------------------------------------------------------------------
-void ScrollbarView::setOffsetPercentTag(int32_t offsetPercentTag)
+void ScrollbarView::setOffsetPercentTag(TagID offsetPercentTag)
 {
   fOffsetPercentTag = offsetPercentTag;
   registerParameters();
@@ -369,7 +342,7 @@ void ScrollbarView::setOffsetPercentTag(int32_t offsetPercentTag)
 //------------------------------------------------------------------------
 // ScrollbarView::setZoomPercentTag
 //------------------------------------------------------------------------
-void ScrollbarView::setZoomPercentTag(int32_t zoomPercentTag)
+void ScrollbarView::setZoomPercentTag(TagID zoomPercentTag)
 {
   fZoomPercentTag = zoomPercentTag;
   registerParameters();
@@ -401,12 +374,10 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
   {
     if(fLeftHandleRect.pointInside(where) || fRightHandleRect.pointInside(where))
     {
-      if(fZoomPercentParam.exists())
-        fZoomPercentEditor = fZoomPercentParam.edit();
+      fZoomPercentEditor = fZoomPercentParam.edit();
 
       // when the size changes, it can also affect the offset
-      if(fOffsetPercentParam.exists())
-        fOffsetPercentEditor = fOffsetPercentParam.edit();
+      fOffsetPercentEditor = fOffsetPercentParam.edit();
 
       if(fLeftHandleRect.pointInside(where))
         fDragType = box.isMaxRight() ? DragType::kStretchLeft : DragType::kZoomLeft;
@@ -462,12 +433,10 @@ CMouseEventResult ScrollbarView::onMouseDown(CPoint &where, const CButtonState &
   }
 
   // the scrollbar itself was clicked => beginning of drag gesture...
-  if(fZoomPercentParam.exists())
-    fZoomPercentEditor = fZoomPercentParam.edit();
+  fZoomPercentEditor = fZoomPercentParam.edit();
 
   // when the size changes, it can also affect the offset
-  if(fOffsetPercentParam.exists())
-    fOffsetPercentEditor = fOffsetPercentParam.edit();
+  fOffsetPercentEditor = fOffsetPercentParam.edit();
 
   fDragGestureX = x;
   fDragType = DragType::kScroll;

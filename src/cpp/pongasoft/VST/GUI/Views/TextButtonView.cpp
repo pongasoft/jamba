@@ -48,7 +48,7 @@ void TextButtonView::registerParameters()
 //------------------------------------------------------------------------
 // TextButtonView::setTitleTag
 //------------------------------------------------------------------------
-void TextButtonView::setTitleTag(int32_t iValue)
+void TextButtonView::setTitleTag(TagID iValue)
 {
   fTitleTag = iValue;
   registerParameters();

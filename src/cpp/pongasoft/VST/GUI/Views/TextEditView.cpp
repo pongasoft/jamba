@@ -60,7 +60,7 @@ void TextEditView::valueChanged()
 //------------------------------------------------------------------------
 // TextEditView::setTag
 //------------------------------------------------------------------------
-void TextEditView::setTag(int32_t val)
+void TextEditView::setTag(TagID val)
 {
   CTextEdit::setTag(val);
   registerParameters();

@@ -27,6 +27,21 @@ namespace Params {
 
 
 //------------------------------------------------------------------------
+// GUIParamCxAware::registerAnyParam
+//------------------------------------------------------------------------
+template<typename T>
+bool GUIParamCxAware::registerAnyParam(TagID iParamID, GUIAnyParam<T> &oParam, bool iSubscribeToChanges)
+{
+  if(fParamCxMgr)
+  {
+    return fParamCxMgr->registerAnyParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
+  }
+  else
+    return false;
+}
+
+
+//------------------------------------------------------------------------
 // GUIParamCxAware::registerVstParam
 //------------------------------------------------------------------------
 template<typename T>
@@ -180,37 +195,6 @@ GUIJmbParam<T> GUIParamCxAware::unregisterParam(GUIJmbParam<T> const &iParam)
     fParamCxMgr->unregisterParam(iParam.getParamID());
   return GUIJmbParam<T>{};
 }
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::__internal__registerVstControl
-//------------------------------------------------------------------------
-template<typename T>
-bool GUIParamCxAware::__internal__registerVstControl(int32_t iParamID, T &oControlValue, GUIVstParam<T> &oGUIVstParam)
-{
-  if(!fParamCxMgr)
-    return false; // not set yet
-
-  if(iParamID < 0)
-  {
-    if(oGUIVstParam.exists())
-    {
-      oControlValue = oGUIVstParam.getValue();
-      oGUIVstParam = unregisterParam(oGUIVstParam);
-    }
-  }
-  else
-  {
-    if(!oGUIVstParam.exists() || oGUIVstParam.getParamID() != iParamID)
-    {
-      unregisterParam(oGUIVstParam);
-      oGUIVstParam = registerVstParam<T>(static_cast<ParamID>(iParamID));
-      return true;
-    }
-  }
-
-  return false;
-}
-
 
 }
 }

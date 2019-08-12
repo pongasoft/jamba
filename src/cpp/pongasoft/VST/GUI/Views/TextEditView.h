@@ -33,7 +33,7 @@ using namespace Params;
 class TextEdit : public CTextEdit
 {
 public:
-  explicit TextEdit(const CRect &iSize) : CTextEdit(iSize, nullptr, -1) {};
+  explicit TextEdit(const CRect &iSize) : CTextEdit(iSize, nullptr, UNDEFINED_TAG_ID) {};
 };
 
 /**
@@ -48,7 +48,7 @@ public:
   {}
 
   // setTag => overridden to be able to change the param (in the editor)
-  void setTag(int32_t val) override;
+  void setTag(TagID val) override;
 
   // registerParameters
   void registerParameters() override;

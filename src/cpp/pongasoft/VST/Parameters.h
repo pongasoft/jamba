@@ -34,6 +34,15 @@ namespace VST {
 namespace Debug { class ParamDisplay; }
 
 /**
+ * ParamID is defined as a `uint32`. In some cases we need to represent the fact that there is no parameter assigned
+ * in which case we use `-1` which cannot be represented as a ParamID. This type account for this use case.
+ */
+using TagID = int32;
+
+constexpr TagID UNDEFINED_TAG_ID = -1;
+constexpr TagID UNDEFINED_PARAM_ID = UNDEFINED_TAG_ID;
+
+/**
  * This is the class which maintains all the registered parameters
  */
 class Parameters
@@ -129,7 +138,7 @@ public:
     VstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
     VstParamDefBuilder &converter(std::shared_ptr<IParamConverter<T>> iConverter) { fConverter = std::move(iConverter); return *this; }
     template<typename ParamConverter, typename... Args>
-    VstParamDefBuilder &converter(Args... iArgs) { fConverter = std::make_shared<ParamConverter>(iArgs...); return *this; }
+    VstParamDefBuilder &converter(Args&& ...iArgs) { fConverter = std::make_shared<ParamConverter>(std::forward<Args>(iArgs)...); return *this; }
 
     // parameter factory method
     VstParam<T> add() const;
@@ -171,7 +180,7 @@ public:
     JmbParamDefBuilder &shared(bool iShared = true) { fShared = iShared; return *this; }
     JmbParamDefBuilder &serializer(std::shared_ptr<IParamSerializer<T>> iSerializer) { fSerializer = std::move(iSerializer); return *this; }
     template<typename ParamSerializer, typename... Args>
-    JmbParamDefBuilder &serializer(Args... iArgs) { fSerializer = std::make_shared<ParamSerializer>(iArgs...); return *this; }
+    JmbParamDefBuilder &serializer(Args&& ...iArgs) { fSerializer = std::make_shared<ParamSerializer>(std::forward<Args>(iArgs)...); return *this; }
 
     // parameter factory method
     JmbParam<T> add() const;
@@ -212,7 +221,7 @@ public:
    * Used from derived classes to build a parameter backed by a VST parameter
    */
   template<typename ParamConverter, typename... Args>
-  VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, VstString16 iTitle, Args... iConverterArgs);
+  VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, VstString16 iTitle, Args&& ...iConverterArgs);
 
   /**
    * Used from derived classes to build a parameter backed by a VST parameter. Use this version
@@ -225,7 +234,7 @@ public:
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue)
    */
   template<typename ParamSerializer, typename... Args>
-  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, VstString16 iTitle, Args... iSerializerArgs);
+  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, VstString16 iTitle, Args&& ...iSerializerArgs);
 
   /**
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue). Use this version
@@ -242,7 +251,7 @@ public:
    * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef, JmbParamDef
    */
   template<typename... Args>
-  tresult setRTSaveStateOrder(int16 iVersion, Args... args);
+  tresult setRTSaveStateOrder(int16 iVersion, Args&& ...args);
 
   /**
    * Used to change the default order (registration order) used when saving the RT state (getState/setState in the
@@ -263,7 +272,7 @@ public:
    * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef, JmbParamDef
    */
   template<typename... Args>
-  tresult setGUISaveStateOrder(int16 iVersion, Args... args);
+  tresult setGUISaveStateOrder(int16 iVersion, Args&& ...args);
 
   /**
    * Used to change the default order (registration order) used when saving the GUI state (getState/setState in
@@ -357,34 +366,34 @@ private:
 
   // case when ParamID
   template<typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID id, Args... args);
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID id, Args&& ...args);
 
   // case when IJmbParamDef
   template<typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<IJmbParamDef> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<IJmbParamDef> &iParamDef, Args&& ...args)
   {
-    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, std::forward<Args>(args)...);
   }
 
   // case when IJmbParamDef
   template<typename T, typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<JmbParamDef<T>> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<JmbParamDef<T>> &iParamDef, Args&& ...args)
   {
-    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, std::forward<Args>(args)...);
   }
 
   // case when VstParamDef
   template<typename ParamConverver, typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<VstParamDef<ParamConverver>> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<VstParamDef<ParamConverver>> &iParamDef, Args&& ...args)
   {
-    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, std::forward<Args>(args)...);
   }
 
   // case when RawVstParamDef
   template<typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<RawVstParamDef> &iParamDef, Args... args)
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<RawVstParamDef> &iParamDef, Args&& ...args)
   {
-    return buildParamIDs(iParamIDs, iParamDef->fParamID, args...);
+    return buildParamIDs(iParamIDs, iParamDef->fParamID, std::forward<Args>(args)...);
   }
 
 };
@@ -482,10 +491,10 @@ Parameters::VstParamDefBuilder<T> Parameters::vstFromType(ParamID iParamID, VstS
 template<typename ParamConverter, typename... Args>
 Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::vst(ParamID iParamID,
                                                                                    VstString16 iTitle,
-                                                                                   Args... iConverterArgs)
+                                                                                   Args&& ...iConverterArgs)
 {
   auto builder = vstFromType<typename ParamConverter::ParamType>(iParamID, std::move(iTitle));
-  builder.template converter<ParamConverter>(iConverterArgs...);
+  builder.template converter<ParamConverter>(std::forward<Args>(iConverterArgs)...);
   return builder;
 }
 
@@ -504,10 +513,10 @@ Parameters::JmbParamDefBuilder<T> Parameters::jmbFromType(ParamID iParamID, VstS
 template<typename ParamSerializer, typename... Args>
 Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::jmb(ParamID iParamID,
                                                                                     VstString16 iTitle,
-                                                                                    Args... iSerializerArgs)
+                                                                                    Args&& ...iSerializerArgs)
 {
   auto builder = jmbFromType<typename ParamSerializer::ParamType>(iParamID, std::move(iTitle));
-  builder.template serializer<ParamSerializer>(iSerializerArgs...);
+  builder.template serializer<ParamSerializer>(std::forward<Args>(iSerializerArgs)...);
   return builder;
 }
 
@@ -515,7 +524,7 @@ Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::
 // Parameters::buildParamIDs
 //------------------------------------------------------------------------
 template<typename... Args>
-tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID, Args... args)
+tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID, Args&& ...args)
 {
   tresult res = kResultOk;
 
@@ -529,7 +538,7 @@ tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iPara
     DLOG_F(ERROR, "No such parameter [%d]", iParamID);
     res = kResultFalse;
   }
-  res |= buildParamIDs(iParamIDs, args...);
+  res |= buildParamIDs(iParamIDs, std::forward<Args>(args)...);
   return res;
 }
 
@@ -537,10 +546,10 @@ tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iPara
 // Parameters::setRTSaveStateOrder
 //------------------------------------------------------------------------
 template<typename... Args>
-tresult Parameters::setRTSaveStateOrder(int16 iVersion, Args... args)
+tresult Parameters::setRTSaveStateOrder(int16 iVersion, Args&& ...args)
 {
   std::vector<ParamID> ids{};
-  buildParamIDs(ids, args...);
+  buildParamIDs(ids, std::forward<Args>(args)...);
   return setRTSaveStateOrder({iVersion, ids});
 }
 
@@ -548,10 +557,10 @@ tresult Parameters::setRTSaveStateOrder(int16 iVersion, Args... args)
 // Parameters::setRTSaveStateOrder
 //------------------------------------------------------------------------
 template<typename... Args>
-tresult Parameters::setGUISaveStateOrder(int16 iVersion, Args... args)
+tresult Parameters::setGUISaveStateOrder(int16 iVersion, Args&& ...args)
 {
   std::vector<ParamID> ids{};
-  buildParamIDs(ids, args...);
+  buildParamIDs(ids, std::forward<Args>(args)...);
   return setGUISaveStateOrder({iVersion, ids});
 }
 

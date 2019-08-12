@@ -120,8 +120,9 @@ public:
   }
 
   /**
-   * Use this flavor of update if you want to modify the value itself. ValueModifier will be called
-   * back with &fValue. The callback should return true when the value was updated, false otherwise
+   * Use this flavor of update if you want to modify the value itself.
+   * ValueModifier will be called back with &fValue (of type `T *`).
+   * The callback should return true when the value was updated, false otherwise
    */
   template<class ValueModifier>
   bool updateIf(ValueModifier const &iValueModifier)
@@ -138,20 +139,22 @@ public:
    * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
    * not comparable)
    */
-  void setValue(ParamType const &iValue)
+  tresult setValue(ParamType const &iValue)
   {
     fValue = iValue;
     changed();
+    return kResultOk;
   }
 
   /**
    * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
    * not comparable)
    */
-  void setValue(ParamType &&iValue)
+  tresult setValue(ParamType &&iValue)
   {
     fValue = std::move(iValue);
     changed();
+    return kResultOk;
   }
 
   /**

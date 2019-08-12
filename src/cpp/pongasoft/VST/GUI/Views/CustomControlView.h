@@ -33,14 +33,14 @@ public:
   explicit CustomControlView(const CRect &iSize) : CustomView(iSize) {}
 
   // get/setControlTag
-  virtual void setControlTag (int32_t iTag) { fControlTag = iTag; };
-  int32_t getControlTag () const { return fControlTag; }
+  virtual void setControlTag (TagID iTag) { fControlTag = iTag; };
+  TagID getControlTag () const { return fControlTag; }
 
 public:
   CLASS_METHODS_NOCOPY(CustomControlView, CustomView)
 
 protected:
-  int32_t fControlTag{-1};
+  TagID fControlTag{UNDEFINED_PARAM_ID};
 
 public:
   class Creator : public CustomViewCreator<CustomControlView, CustomView>
@@ -59,7 +59,7 @@ public:
  * This base class automatically registers the custom control and also keeps a control value for the case when
  * the control does not exist (for example in editor the control tag may not be defined).
  */
-template<typename T, typename TGUIParam = GUIVstParam<T>>
+template<typename T, typename TGUIParam = GUIAnyParam<T>>
 class TCustomControlView : public CustomControlView
 {
 public:
@@ -70,7 +70,7 @@ public:
   CLASS_METHODS_NOCOPY(TCustomControlView, CustomControlView)
 
   // when the control tag changes we need to handle it
-  void setControlTag(int32_t iTag) override;
+  void setControlTag(TagID iTag) override;
 
   // set/getControlValue
   T getControlValue() const;
@@ -80,11 +80,8 @@ public:
   void registerParameters() override;
 
 protected:
-  // the gui parameter tied to the control (optional)
+  // the gui parameter tied to the control (handle vst/jmb or simple value)
   TGUIParam fControlParameter{};
-
-  // the value when the control parameter is not assigned
-  T fControlValue{};
 
 public:
   using Creator = CustomViewCreator<TCustomControlView<T, TGUIParam>, CustomControlView>;
@@ -93,7 +90,7 @@ public:
 /**
  * Specialization for raw parameter (`ParamValue` / no conversion).
  */
-using RawCustomControlView = TCustomControlView<ParamValue, GUIRawVstParam>;
+using RawCustomControlView = TCustomControlView<ParamValue, GUIRawAnyParam>;
 
 //------------------------------------------------------------------------
 // TCustomControlView<T>::getControlValue
@@ -101,10 +98,7 @@ using RawCustomControlView = TCustomControlView<ParamValue, GUIRawVstParam>;
 template<typename T, typename TGUIParam>
 T TCustomControlView<T, TGUIParam>::getControlValue() const
 {
-  if(fControlParameter.exists())
-    return fControlParameter.getValue();
-  else
-    return fControlValue;
+  return fControlParameter.getValue();
 }
 
 //------------------------------------------------------------------------
@@ -113,17 +107,15 @@ T TCustomControlView<T, TGUIParam>::getControlValue() const
 template<typename T, typename TGUIParam>
 void TCustomControlView<T, TGUIParam>::setControlValue(T const &iControlValue)
 {
-  if(fControlParameter.exists())
-    fControlParameter.setValue(iControlValue);
-  else
-  {
-    if(fControlValue != iControlValue)
-    {
-      fControlValue = iControlValue;
-      markDirty();
-    }
-  }
+  fControlParameter.update(iControlValue);
 }
+
+//------------------------------------------------------------------------
+// TCustomControlView<ParamValue, GUIRawVstParameter>::registerParameters
+// Specialization for ParamValue/GUIRawVstParameter
+//------------------------------------------------------------------------
+template<>
+void TCustomControlView<ParamValue, GUIRawAnyParam>::registerParameters();
 
 //------------------------------------------------------------------------
 // TCustomControlView<T>::registerParameters
@@ -133,14 +125,14 @@ void TCustomControlView<T, TGUIParam>::registerParameters()
 {
   CustomControlView::registerParameters();
 
-  __internal__registerVstControl(getControlTag(), fControlValue, fControlParameter);
+  registerAnyParam(getControlTag(), fControlParameter);
 }
 
 //------------------------------------------------------------------------
 // TCustomControlView<T>::setControlTag
 //------------------------------------------------------------------------
 template<typename T, typename TGUIParam>
-void TCustomControlView<T, TGUIParam>::setControlTag(int32_t iTag)
+void TCustomControlView<T, TGUIParam>::setControlTag(TagID iTag)
 {
   CustomControlView::setControlTag(iTag);
   registerParameters();

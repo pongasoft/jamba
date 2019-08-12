@@ -192,32 +192,29 @@ void StepButtonView::registerParameters()
 #ifndef NDEBUG
   const auto stepIncrement = getStepIncrement();
 
-  if(fControlParameter.exists())
+  const auto stepCount = fControlParameter.getStepCount();
+
+  if(stepCount == 0)
   {
-    const auto stepCount = fControlParameter.getStepCount();
+    // continuous value => step increment should be in the range ]-1.0, 1.0[ otherwise it does not make
+    // much sense
+    if(stepIncrement <= -1.0 || stepIncrement >= 1.0)
+      DLOG_F(WARNING, "parameter [%d] represents a continuous value (stepCount == 0) "
+                      "so step-increment (%f) should be in the ]-1.0, 1.0[ range",
+             fControlParameter.getTagID(),
+             stepIncrement);
+  }
+  else
+  {
+    auto s = std::abs(stepIncrement);
 
-    if(stepCount == 0)
-    {
-      // continuous value => step increment should be in the range ]-1.0, 1.0[ otherwise it does not make
-      // much sense
-      if(stepIncrement <= -1.0 || stepIncrement >= 1.0)
-        DLOG_F(WARNING, "parameter [%d] represents a continuous value (stepCount == 0) "
-                        "so step-increment (%f) should be in the ]-1.0, 1.0[ range",
-               fControlParameter.getParamID(),
-               stepIncrement);
-    }
-    else
-    {
-      auto s = std::abs(stepIncrement);
-
-      // discrete value => step increment should be an integer
-      if(std::floor(s) != s)
-        DLOG_F(WARNING, "parameter [%d] represents a discrete value (stepCount == %d) "
-                        "so step-increment (%f) should be an integer",
-               fControlParameter.getParamID(),
-               stepCount,
-               stepIncrement);
-    }
+    // discrete value => step increment should be an integer
+    if(std::floor(s) != s)
+      DLOG_F(WARNING, "parameter [%d] represents a discrete value (stepCount == %d) "
+                      "so step-increment (%f) should be an integer",
+             fControlParameter.getTagID(),
+             stepCount,
+             stepIncrement);
   }
 
   if(stepIncrement == 0.0)
@@ -237,7 +234,7 @@ ParamValue StepButtonView::computeNextValue(double iIncrement) const
   if(iIncrement == 0.0)
     return getControlValue();
 
-  auto stepCount = fControlParameter.exists() ? fControlParameter.getStepCount() : 0;
+  auto stepCount = fControlParameter.getStepCount();
 
   if(stepCount > 0)
   {

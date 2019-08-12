@@ -230,34 +230,34 @@ public:
    * @param y if -1 means bottom
    */
   template<typename... Args>
-  inline void debugXY(RelativeCoord x, RelativeCoord y, char const *iFormat, Args... iArgs)
+  inline void debugXY(RelativeCoord x, RelativeCoord y, char const *iFormat, Args&& ...iArgs)
   {
     // handles strings up to 4k characters so should be fine for debug...
-    auto s = Steinberg::String().printf(iFormat, iArgs...);
+    auto s = Steinberg::String().printf(iFormat, std::forward<Args>(iArgs)...);
     debugText(x, y, s.text8());
   }
 
   // debugTopLeft
   template<typename... Args>
-  inline void debugTopLeft(char const *iFormat, Args... iArgs) { debugXY(0, 0, iFormat, iArgs...); }
+  inline void debugTopLeft(char const *iFormat, Args&& ...iArgs) { debugXY(0, 0, iFormat, std::forward<Args>(iArgs)...); }
 
   // debugTopRight
   template<typename... Args>
-  inline void debugTopRight(char const *iFormat, Args... iArgs) { debugXY(-1, 0, iFormat, iArgs...); }
+  inline void debugTopRight(char const *iFormat, Args&& ...iArgs) { debugXY(-1, 0, iFormat, std::forward<Args>(iArgs)...); }
 
   // debugBottomLeft
   template<typename... Args>
-  inline void debugBottomLeft(char const *iFormat, Args... iArgs) { debugXY(0, -1, iFormat, iArgs...); }
+  inline void debugBottomLeft(char const *iFormat, Args&& ...iArgs) { debugXY(0, -1, iFormat, std::forward<Args>(iArgs)...); }
 
   // debugBottomRight
   template<typename... Args>
-  inline void debugBottomRight(char const *iFormat, Args... iArgs) { debugXY(-1, -1, iFormat, iArgs...); }
+  inline void debugBottomRight(char const *iFormat, Args&& ...iArgs) { debugXY(-1, -1, iFormat, std::forward<Args>(iArgs)...); }
 
   /**
    * Draw a string containing the formatted string (printf style) at the top of the view (0,0)
    */
   template<typename... Args>
-  inline void debug(char const *iFormat, Args... iArgs) { debugTopLeft(iFormat, iArgs...); }
+  inline void debug(char const *iFormat, Args&& ...iArgs) { debugTopLeft(iFormat, std::forward<Args>(iArgs)...); }
 
   /**
    * Draw the text at the top of the view (0,0)
