@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vstgui-ui-description version="1">
+	<fonts>
+	</fonts>
+	<colors>
+	</colors>
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" name="view" opacity="1" origin="0, 0" size="600, 600" transparent="false" wants-focus="false">
+		<view back-color="#c8c8c8ff" class="jamba::ToggleButton" editor-mode="false" frames="4" inverse="false" mouse-enabled="true" on-color="~ RedCColor" opacity="1" origin="110, 60" size="20, 20" transparent="false" wants-focus="false"/>
+	</template>
+	<bitmaps/>
+	<custom>
+		<attributes name="FocusDrawing"/>
+		<attributes Path="/Volumes/Development/github/org.pongasoft/jamba/jamba-test-plugin/resource/JambaTestPlugin.uidesc" name="VST3Editor"/>
+		<attributes Size="10, 10" name="UIGridController"/>
+		<attributes SelectedTemplate="view" name="UITemplateController"/>
+		<attributes EditViewScale="1" EditorSize="0, 0, 1123, 814" SplitViewSize_0_0="0.8360655737704918433195189209072850644588" SplitViewSize_0_1="0.1387137452711223184476097003425820730627" SplitViewSize_1_0="0.4867591424968474300705167934211203828454" SplitViewSize_1_1="0.5069356872635560895545836501696612685919" SplitViewSize_2_0="0.6384683882457702353008244244847446680069" SplitViewSize_2_1="0.3570792520035618866636184520757524296641" Version="1" name="UIEditController"/>
+		<attributes name="UIAttributesController"/>
+		<attributes SelectedRow="13" name="UIViewCreatorDataSource"/>
+	</custom>
+</vstgui-ui-description>

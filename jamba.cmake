@@ -483,11 +483,6 @@ function(jamba_dev_scripts target)
 endfunction()
 
 #------------------------------------------------------------------------
-# install targets
-#------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------
 # Testing
 #------------------------------------------------------------------------
 # Download and unpack googletest at configure time
@@ -515,24 +510,3 @@ function(jamba_add_test PROJECT_TEST_NAME TEST_CASES_FILES TEST_SOURCES TEST_LIB
       TEST_LIST ${PROJECT_TEST_NAME}_targets
   )
 endfunction()
-
-#------------------------------------------------------------------------
-# Testing - for this framework
-#------------------------------------------------------------------------
-set(JAMBA_TEST_SOURCES "${JAMBA_ROOT}/test/cpp")
-set(JAMBA_TEST_SRC_FILES
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Collection/test-CircularBuffer.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-Lerp.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-StringUtils.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-SampleRateBasedClock.cpp
-    )
-
-set(JAMBA_CPP_FOR_TEST_SOURCES
-    ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.cpp
-    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
-    )

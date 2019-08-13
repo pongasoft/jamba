@@ -9,11 +9,18 @@ project(jamba)
 #
 # The purpose of this file is so that it can be compiled separately to develop and test
 
-include(jamba.cmake)
+add_subdirectory(jamba-test-plugin)
 
-set(test_libs base sdk vstgui_support)
+add_custom_target(test_jamba
+    COMMAND ctest
+    WORKING_DIRECTORY "jamba-test-plugin"
+    DEPENDS test_vst3
+    )
 
-jamba_add_test(jamba_test "${JAMBA_TEST_SRC_FILES}" "${JAMBA_CPP_FOR_TEST_SOURCES}" "${test_libs}")
+get_directory_property(JAMBA_MAJOR_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_MAJOR_VERSION)
+get_directory_property(JAMBA_MINOR_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_MINOR_VERSION)
+get_directory_property(JAMBA_PATCH_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_PATCH_VERSION)
+get_directory_property(JAMBA_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_VERSION)
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
