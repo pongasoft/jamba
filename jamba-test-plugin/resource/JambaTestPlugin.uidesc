@@ -4,8 +4,17 @@
 	</fonts>
 	<colors>
 	</colors>
-	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" name="view" opacity="1" origin="0, 0" size="600, 600" transparent="false" wants-focus="false">
-		<view back-color="#c8c8c8ff" class="jamba::ToggleButton" editor-mode="false" frames="4" inverse="false" mouse-enabled="true" on-color="~ RedCColor" opacity="1" origin="110, 60" size="20, 20" transparent="false" wants-focus="false"/>
+	<control-tags>
+		<control-tag name="Param_Bypass" tag="1000"/>
+		<control-tag name="Param_Tab" tag="1100"/>
+	</control-tags>
+	<template background-color="~ WhiteCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" name="view" opacity="1" origin="0, 0" size="600, 400" transparent="false" wants-focus="false">
+		<view class="jamba::SwitchViewContainer" mouse-enabled="true" opacity="1" origin="0, 40" size="600, 360" switch-control-tag="Param_Tab" template-names="tab_0,tab_1" transparent="false" wants-focus="false">
+			<view background-color="~ RedCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" opacity="1" origin="0, 0" size="600, 360" template="tab_1" transparent="false" wants-focus="false"/>
+		</view>
+		<view arrow-direction="right" back-color="~ TransparentCColor" class="jamba::StepButton" control-tag="Param_Tab" editor-mode="false" held-color="~ RedCColor" mouse-enabled="true" opacity="1" origin="580, 10" released-color="~ GreyCColor" shift-step-increment="0" size="15, 15" step-increment="1" transparent="false" wants-focus="false" wrap="true"/>
+		<view arrow-direction="left" back-color="~ TransparentCColor" class="jamba::StepButton" control-tag="Param_Tab" editor-mode="false" held-color="~ RedCColor" mouse-enabled="true" opacity="1" origin="560, 10" released-color="~ GreyCColor" shift-step-increment="0" size="15, 15" step-increment="-1" transparent="false" wants-focus="false" wrap="true"/>
+		<view back-color="~ BlackCColor" background-offset="0, 0" class="CParamDisplay" control-tag="Param_Tab" default-value="0" font="~ NormalFont" font-antialias="true" font-color="~ WhiteCColor" frame-color="~ BlackCColor" frame-width="1" max-value="1" min-value="0" mouse-enabled="true" opacity="1" origin="450, 10" round-rect-radius="6" shadow-color="~ RedCColor" size="90, 20" style-3D-in="false" style-3D-out="false" style-no-draw="false" style-no-frame="false" style-no-text="false" style-round-rect="false" style-shadow-text="false" text-alignment="center" text-inset="0, 0" text-rotation="0" text-shadow-offset="1, 1" transparent="false" value-precision="2" wants-focus="false" wheel-inc-value="0.1"/>
 	</template>
 	<bitmaps/>
 	<custom>
@@ -13,8 +22,15 @@
 		<attributes Path="/Volumes/Development/github/org.pongasoft/jamba/jamba-test-plugin/resource/JambaTestPlugin.uidesc" name="VST3Editor"/>
 		<attributes Size="10, 10" name="UIGridController"/>
 		<attributes SelectedTemplate="view" name="UITemplateController"/>
-		<attributes EditViewScale="1" EditorSize="0, 0, 1123, 814" SplitViewSize_0_0="0.8360655737704918433195189209072850644588" SplitViewSize_0_1="0.1387137452711223184476097003425820730627" SplitViewSize_1_0="0.4867591424968474300705167934211203828454" SplitViewSize_1_1="0.5069356872635560895545836501696612685919" SplitViewSize_2_0="0.6384683882457702353008244244847446680069" SplitViewSize_2_1="0.3570792520035618866636184520757524296641" Version="1" name="UIEditController"/>
+		<attributes EditViewScale="1" EditorSize="0, 0, 1123, 814" SplitViewSize_0_0="0.8360655737704918433195189209072850644588" SplitViewSize_0_1="0.1387137452711223184476097003425820730627" SplitViewSize_1_0="0.4867591424968474300705167934211203828454" SplitViewSize_1_1="0.5069356872635560895545836501696612685919" SplitViewSize_2_0="0.6384683882457702353008244244847446680069" SplitViewSize_2_1="0.3570792520035618866636184520757524296641" TabSwitchValue="0" Version="1" name="UIEditController"/>
 		<attributes name="UIAttributesController"/>
-		<attributes SelectedRow="13" name="UIViewCreatorDataSource"/>
+		<attributes SelectedRow="23" name="UIViewCreatorDataSource"/>
+		<attributes SelectedRow="-1" name="UITagsDataSource"/>
 	</custom>
+	<template background-color="~ MagentaCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" name="tab_0" opacity="1" origin="0, 0" size="600, 360" transparent="false" wants-focus="false">
+		<view back-color="~ BlackCColor" background-offset="0, 0" class="CTextLabel" default-value="0.5" font="~ NormalFont" font-antialias="true" font-color="~ WhiteCColor" frame-color="~ BlackCColor" frame-width="1" max-value="1" min-value="0" mouse-enabled="true" opacity="1" origin="500, 340" round-rect-radius="6" shadow-color="~ RedCColor" size="100, 20" style-3D-in="false" style-3D-out="false" style-no-draw="false" style-no-frame="false" style-no-text="false" style-round-rect="false" style-shadow-text="false" text-alignment="center" text-inset="0, 0" text-rotation="0" text-shadow-offset="1, 1" title="Tab 0" transparent="false" value-precision="2" wants-focus="false" wheel-inc-value="0.1"/>
+	</template>
+	<template background-color="~ RedCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" name="tab_1" opacity="1" origin="0, 0" size="600, 360" transparent="false" wants-focus="false">
+		<view back-color="~ BlackCColor" background-offset="0, 0" class="CTextLabel" default-value="0.5" font="~ NormalFont" font-antialias="true" font-color="~ WhiteCColor" frame-color="~ BlackCColor" frame-width="1" max-value="1" min-value="0" mouse-enabled="true" opacity="1" origin="500, 340" round-rect-radius="6" shadow-color="~ RedCColor" size="100, 20" style-3D-in="false" style-3D-out="false" style-no-draw="false" style-no-frame="false" style-no-text="false" style-round-rect="false" style-shadow-text="false" text-alignment="center" text-inset="0, 0" text-rotation="0" text-shadow-offset="1, 1" title="Tab 1" transparent="false" value-precision="2" wants-focus="false" wheel-inc-value="0.1"/>
+	</template>
 </vstgui-ui-description>

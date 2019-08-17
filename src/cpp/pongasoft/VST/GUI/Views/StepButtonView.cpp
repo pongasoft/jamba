@@ -88,17 +88,39 @@ CDrawContext::PointList *StepButtonView::getButtonPolygon()
 
     // a triangle pointing up or down depending on fStepIncrement sign
 
-    if(getStepIncrement() >= 0)
+    auto direction = getArrowDirection();
+
+    if(direction == EArrowDirection::kAuto)
+      direction = getStepIncrement() >= 0 ? EArrowDirection::kUp : EArrowDirection::kDown;
+
+    switch(direction)
     {
-      fButtonPolygon->emplace_back(viewSize.left, viewSize.bottom);
-      fButtonPolygon->emplace_back(viewSize.right, viewSize.bottom);
-      fButtonPolygon->emplace_back((viewSize.left + viewSize.right) / 2.0, viewSize.top);
-    }
-    else
-    {
-      fButtonPolygon->emplace_back(viewSize.right, viewSize.top);
-      fButtonPolygon->emplace_back(viewSize.left, viewSize.top);
-      fButtonPolygon->emplace_back((viewSize.left + viewSize.right) / 2.0, viewSize.bottom);
+      case EArrowDirection::kUp:
+        fButtonPolygon->emplace_back(viewSize.left, viewSize.bottom);
+        fButtonPolygon->emplace_back(viewSize.right, viewSize.bottom);
+        fButtonPolygon->emplace_back((viewSize.left + viewSize.right) / 2.0, viewSize.top);
+        break;
+
+      case EArrowDirection::kRight:
+        fButtonPolygon->emplace_back(viewSize.left, viewSize.top);
+        fButtonPolygon->emplace_back(viewSize.left, viewSize.bottom);
+        fButtonPolygon->emplace_back(viewSize.right, (viewSize.top + viewSize.bottom) / 2.0);
+        break;
+
+      case EArrowDirection::kDown:
+        fButtonPolygon->emplace_back(viewSize.right, viewSize.top);
+        fButtonPolygon->emplace_back(viewSize.left, viewSize.top);
+        fButtonPolygon->emplace_back((viewSize.left + viewSize.right) / 2.0, viewSize.bottom);
+        break;
+
+      case EArrowDirection::kLeft:
+        fButtonPolygon->emplace_back(viewSize.right, viewSize.top);
+        fButtonPolygon->emplace_back(viewSize.right, viewSize.bottom);
+        fButtonPolygon->emplace_back(viewSize.left, (viewSize.top + viewSize.bottom) / 2.0);
+        break;
+
+      default:
+        DLOG_F(ERROR, "should not be here...");
     }
   }
 

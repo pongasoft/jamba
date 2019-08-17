@@ -44,6 +44,17 @@ using namespace VSTGUI;
 class StepButtonView : public RawCustomControlView
 {
 public:
+  /**
+   * Represents the direction of the arrow (if not using an image) */
+  enum class EArrowDirection
+  {
+    kAuto,
+    kUp,
+    kRight,
+    kDown,
+    kLeft
+  };
+public:
   explicit StepButtonView(const CRect &iSize) : RawCustomControlView(iSize)
   {
   }
@@ -114,6 +125,10 @@ public:
   inline bool getWrap() const { return fWrap; }
   void setWrap(bool iFlag) { fWrap = iFlag; markDirty(); }
 
+  // get/setArrowDirection => used when there is no bitmap
+  EArrowDirection getArrowDirection() const { return fArrowDirection; }
+  void setArrowDirection(EArrowDirection iArrowDirection) { fArrowDirection = iArrowDirection; fButtonPolygon = nullptr; markDirty(); }
+
 protected:
   // registerParameters
   void registerParameters() override;
@@ -146,6 +161,8 @@ protected:
   CColor fHeldColor{kRedCColor};
   CColor fReleasedColor{kGreyCColor};
   BitmapSPtr fImage{nullptr};
+
+  EArrowDirection fArrowDirection{EArrowDirection::kAuto};
   std::unique_ptr<CDrawContext::PointList> fButtonPolygon{};
 
 public:
@@ -161,6 +178,16 @@ public:
       registerColorAttribute("held-color", &StepButtonView::getHeldColor, &StepButtonView::setHeldColor);
       registerColorAttribute("released-color", &StepButtonView::getReleasedColor, &StepButtonView::setReleasedColor);
       registerBitmapAttribute("button-image", &StepButtonView::getImage, &StepButtonView::setImage);
+      registerListAttribute<EArrowDirection>("arrow-direction",
+                                             &StepButtonView::getArrowDirection, &StepButtonView::setArrowDirection,
+                                             {
+                                               {"auto", EArrowDirection::kAuto},
+                                               {"up", EArrowDirection::kUp},
+                                               {"right", EArrowDirection::kRight},
+                                               {"down", EArrowDirection::kDown},
+                                               {"left", EArrowDirection::kLeft}
+                                             }
+      );
     }
   };
 };

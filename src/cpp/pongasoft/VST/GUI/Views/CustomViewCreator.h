@@ -31,6 +31,7 @@
 #include <pongasoft/VST/GUI/Types.h>
 #include <pongasoft/VST/GUI/LookAndFeel.h>
 #include <pongasoft/Utils/StringUtils.h>
+#include <pongasoft/VST/Types.h>
 
 namespace pongasoft {
 namespace VST {
@@ -80,6 +81,14 @@ public:
    */
   virtual bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const = 0;
 
+  /**
+   * @return the list of values available (if attribute is a list attribute)
+   */
+  virtual bool getPossibleListValues(std::list<const std::string *> &iValues) const
+  {
+    return false;
+  }
+
 private:
   std::string fName;
 };
@@ -92,6 +101,17 @@ template<typename TView>
 inline TView *createCustomView(CRect const &iSize,
                                const UIAttributes &iAttributes,
                                const IUIDescription *iDescription) { return new TView(iSize); }
+
+/**
+ * Defines a map of `string` to attribute value */
+template<typename T>
+using AttrValMap = std::map<std::string, T>;
+
+/**
+ * Defines the type to initialize an [AttrValMap], for an example check [TCustomViewCreator::registerListAttribute]
+ */
+template<typename T>
+using AttrValInitList = std::initializer_list<typename AttrValMap<T>::value_type>;
 
 /**
  * Generic custom view creator base class. Inherit from it and call the various "registerXX" methods in the constructor.
@@ -740,6 +760,87 @@ private:
     bool fSkipEmptyEntries;
   };
 
+  /**
+   * Specialization for a list of possible values defined by the `AttributeMap`
+   */
+  template<typename T>
+  class ListAttribute : public ByValAttribute<T>
+  {
+    using super_type = ByValAttribute<T>;
+
+  public:
+    // Constructor
+    ListAttribute(std::string const &iName,
+                  typename super_type::Getter iGetter,
+                  typename super_type::Setter iSetter,
+                  AttrValInitList<T> const &iAttributeValues) :
+      super_type(iName, iGetter, iSetter),
+      fAttributeValuesMap(iAttributeValues)
+#ifndef NDEBUG
+      ,fAttributeValuesList{iAttributeValues}
+#endif
+    {
+    }
+
+    // getType
+    IViewCreator::AttrType getType() override
+    {
+      return IViewCreator::kListType;
+    }
+
+    // fromString
+    bool fromString(IUIDescription const *iDescription,
+                    std::string const &iAttributeValue,
+                    T &oValue) const override
+    {
+      if(fAttributeValuesMap.find(iAttributeValue) != fAttributeValuesMap.cend())
+      {
+        oValue = fAttributeValuesMap.at(iAttributeValue);
+        return true;
+      }
+
+      DLOG_F(WARNING, "Attribute value '%s' is not valid for '%s'", iAttributeValue.c_str(), ViewAttribute::getName().c_str());
+      return false;
+    }
+
+    // toString
+    bool toString(IUIDescription const *iDescription,
+                  T const &iValue,
+                  std::string &oStringValue) const override
+    {
+      auto pos = std::find_if(std::begin(fAttributeValuesList),
+                              std::end(fAttributeValuesList),
+                              [&iValue](auto entry) -> bool {
+                                return entry.second == iValue;
+                              });
+      if(pos != std::end(fAttributeValuesList))
+      {
+        oStringValue = pos->first;
+        return true;
+      }
+
+      return false;
+    }
+
+#ifndef NDEBUG
+    // getPossibleListValues
+    bool getPossibleListValues(std::list<const std::string *> &iValues) const override
+    {
+      for(auto const &p : fAttributeValuesList)
+      {
+        iValues.emplace_back(&p.first);
+      }
+      return true;
+    }
+#endif
+
+  protected:
+    AttrValMap<T> const fAttributeValuesMap;
+#ifndef NDEBUG
+    std::vector<typename AttrValMap<T>::value_type> const fAttributeValuesList;
+#endif
+  };
+
 public:
   // Constructor
   explicit TCustomViewCreator(char const *iViewName = nullptr,
@@ -857,8 +958,8 @@ public:
   }
 
   /**
- * Registers a Range attribute with the given name and getter/setter
- */
+   * Registers a Range attribute with the given name and getter/setter
+   */
   void registerVectorStringAttribute(std::string const &iName,
                                      typename VectorStringAttribute::Getter iGetter,
                                      typename VectorStringAttribute::Setter iSetter,
@@ -866,6 +967,31 @@ public:
                                      bool iSkipEmptyEntries = false)
   {
     registerAttribute<VectorStringAttribute>(iName, iGetter, iSetter, iDelimiter, iSkipEmptyEntries);
+  }
+
+  /**
+   * Registers a list attribute with the given name and getter/setter. This kind of attribute is represented in the
+   * editor with a drop down list of values: for example "vertical" / "horizontal" and usually maps to an enum of some
+   * kind (or in other words, in general `T` is an enum). The `iAttributeValues` parameter is an initializer list
+   * of pairs (string,T) which makes it easy to initialize. This list is also used to populate the dropdown (in the
+   * editor) in the order defined.
+   *
+   * Example:
+   * ```
+   * registerListAttribute<EOrientation>("orientation", &MyView::getOrientation, &MyView::setOrientation,
+   *                                     {
+   *                                       { "vertical", EOrientation::kVertical },
+   *                                       { "horizontal", EOrientation::kHorizontal }
+   *                                     }
+   * ```
+   */
+  template<typename T>
+  void registerListAttribute(std::string const &iName,
+                             typename ListAttribute<T>::Getter iGetter,
+                             typename ListAttribute<T>::Setter iSetter,
+                             AttrValInitList<T> const &iAttributeValues)
+  {
+    registerAttribute<ListAttribute<T>>(iName, iGetter, iSetter, iAttributeValues);
   }
 
   /**
@@ -1002,6 +1128,21 @@ public:
 
     return false;
   }
+
+#ifndef NDEBUG
+  /**
+   * This is used by the editor to populate the drop down list for list attributes. Since the editor is only
+   * available in debug mode, there is no reason to keep this implementation for release... (default returns `false`) */
+  bool getPossibleListValues(const std::string &iAttributeName, std::list<const std::string *> &iValues) const override
+  {
+    auto iter = fAttributes.find(iAttributeName);
+    if(iter != fAttributes.cend())
+    {
+      return iter->second->getPossibleListValues(iValues);
+    }
+    return false;
+  }
+#endif
 
 private:
 

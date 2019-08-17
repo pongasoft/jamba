@@ -37,8 +37,10 @@ endif ()
 set(vst_sources
     ${CPP_SOURCES}/JambaTestPlugin_VST3.cpp
 
-    ${CPP_SOURCES}/JambaTestPlugin.h
     ${CPP_SOURCES}/JambaTestPluginCIDs.h
+    ${CPP_SOURCES}/Model.h
+    ${CPP_SOURCES}/Plugin.h
+    ${CPP_SOURCES}/Plugin.cpp
 
     ${CPP_SOURCES}/RT/JambaTestPluginProcessor.h
     ${CPP_SOURCES}/RT/JambaTestPluginProcessor.cpp
@@ -81,6 +83,7 @@ set(JAMBA_TEST_SRC_FILES
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-Lerp.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-StringUtils.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-CustomViewCreator.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
@@ -92,7 +95,7 @@ set(JAMBA_CPP_FOR_TEST_SOURCES
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
     )
 
-set(test_libs base sdk vstgui_support)
+set(test_libs base sdk jamba vstgui_support)
 
 jamba_add_test(${target}_test "${JAMBA_TEST_SRC_FILES}" "${JAMBA_CPP_FOR_TEST_SOURCES}" "${test_libs}")
 

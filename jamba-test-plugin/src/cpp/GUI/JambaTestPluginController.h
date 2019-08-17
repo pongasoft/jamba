@@ -19,7 +19,7 @@
 #pragma once
 
 #include <pongasoft/VST/GUI/GUIController.h>
-#include "../JambaTestPlugin.h"
+#include "../Plugin.h"
 
 namespace pongasoft {
 namespace test {

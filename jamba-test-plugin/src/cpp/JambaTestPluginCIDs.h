@@ -42,6 +42,10 @@ enum EJambaTestPluginParamID : Steinberg::Vst::ParamID
 
   // the bypass parameter which has a special meaning to the host
   kBypass = 1000,
+
+
+  // represents which tab is currently shown in the UI
+  kTab = 1100,
 };
 
 }

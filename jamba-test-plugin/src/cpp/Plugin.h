@@ -50,26 +50,12 @@ constexpr uint16 CONTROLLER_STATE_VERSION = 1;
 class JambaTestPluginParameters : public Parameters
 {
 public:
-  VstParam<bool> fBypassParam;    // the bypass toggle (bypasses the processing if Fx)
+  VstParam<bool> fBypassParam; // the bypass toggle (bypasses the processing if Fx)
+
+  VstParam<int> fTab;          // multiple tabs to test different aspects of the framework
 
 public:
-  JambaTestPluginParameters()
-  {
-    // bypass
-    fBypassParam =
-      vst<BooleanParamConverter>(EJambaTestPluginParamID::kBypass, STR16 ("Bypass"))
-        .defaultValue(false)
-        .flags(ParameterInfo::kCanAutomate | ParameterInfo::kIsBypass)
-        .shortTitle(STR16 ("Bypass"))
-        .add();
-
-
-    setRTSaveStateOrder(PROCESSOR_STATE_VERSION,
-                        fBypassParam);
-
-    // same for GUI - note that if the GUI does not save anything then you don't need this
-    // setGUISaveStateOrder(CONTROLLER_STATE_VERSION);
-  }
+  JambaTestPluginParameters();
 };
 
 using namespace RT;

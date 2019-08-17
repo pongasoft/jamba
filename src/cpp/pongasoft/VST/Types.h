@@ -15,6 +15,7 @@
  *
  * @author Yan Pujante
  */
+#pragma once
 
 #include <string>
 #include <pluginterfaces/base/ftypes.h>
@@ -35,6 +36,16 @@ namespace VST {
  *     myParam = vst<BooleanParamConverter>(id, title.text16()).add();
  */
 using VstString16 = std::basic_string<Steinberg::char16>;
+
+/**
+ * ParamID is defined as a `uint32`. In some cases we need to represent the fact that there is no parameter assigned
+ * in which case we use `-1` which cannot be represented as a ParamID. This type account for this use case.
+ */
+using TagID = Steinberg::int32;
+
+constexpr TagID UNDEFINED_TAG_ID = -1;
+constexpr TagID UNDEFINED_PARAM_ID = UNDEFINED_TAG_ID;
+
 
 }
 }

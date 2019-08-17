@@ -34,15 +34,6 @@ namespace VST {
 namespace Debug { class ParamDisplay; }
 
 /**
- * ParamID is defined as a `uint32`. In some cases we need to represent the fact that there is no parameter assigned
- * in which case we use `-1` which cannot be represented as a ParamID. This type account for this use case.
- */
-using TagID = int32;
-
-constexpr TagID UNDEFINED_TAG_ID = -1;
-constexpr TagID UNDEFINED_PARAM_ID = UNDEFINED_TAG_ID;
-
-/**
  * This is the class which maintains all the registered parameters
  */
 class Parameters
