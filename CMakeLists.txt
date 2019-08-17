@@ -9,19 +9,35 @@ project(jamba)
 #
 # The purpose of this file is so that it can be compiled separately to develop and test
 
+set(CMAKE_CXX_STANDARD 14)
+
+#------------------------------------------------------------------------
+# adds the test plugin as a subdirectory (which will end up including jamba.cmake)
+#------------------------------------------------------------------------
 add_subdirectory(jamba-test-plugin)
 
+#------------------------------------------------------------------------
+# test for jamba framework
+#------------------------------------------------------------------------
+file(COPY test.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 add_custom_target(test_jamba
-    COMMAND ctest
+    COMMAND ctest -C $<CONFIG>
     WORKING_DIRECTORY "jamba-test-plugin"
     DEPENDS test_vst3
     )
 
+#------------------------------------------------------------------------
+# Extract version
+#------------------------------------------------------------------------
 get_directory_property(JAMBA_MAJOR_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_MAJOR_VERSION)
 get_directory_property(JAMBA_MINOR_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_MINOR_VERSION)
 get_directory_property(JAMBA_PATCH_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_PATCH_VERSION)
 get_directory_property(JAMBA_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMBA_VERSION)
 
+#------------------------------------------------------------------------
+# Doxygen => generate html documentation
+#------------------------------------------------------------------------
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}")
@@ -39,6 +55,10 @@ else()
 endif()
 
 
+#------------------------------------------------------------------------
+# blank-plugin-archive => generates the zip file containing the blank
+# plugin only (used on the https://jamba.dev website)
+#------------------------------------------------------------------------
 set(BLANK_PLUGIN_ARCHIVE_NAME jamba-blank-plugin-v${JAMBA_VERSION})
 set(BLANK_PLUGIN_ARCHIVE_PATH ${CMAKE_BINARY_DIR}/archive)
 

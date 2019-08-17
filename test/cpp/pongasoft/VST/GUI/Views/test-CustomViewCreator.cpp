@@ -31,9 +31,9 @@ enum MyEnum
   kMyEnum1
 };
 
-class MyView : public CustomView {
+class MyCustomView : public CustomView {
 public:
-  MyView(const CRect &iSize) : CustomView(iSize) {}
+  MyCustomView(const CRect &iSize) : CustomView(iSize) {}
 
   MyEnum getVal() const
   {
@@ -48,13 +48,13 @@ public:
   MyEnum fVal{kUndefined};
 
 public:
-  class Creator : public CustomViewCreator<MyView, CustomView>
+  class Creator : public CustomViewCreator<MyCustomView, CustomView>
   {
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
       CustomViewCreator(iViewName, iDisplayName)
     {
-      registerListAttribute<MyEnum>("my-enum", &MyView::getVal, &MyView::setVal,
+      registerListAttribute<MyEnum>("my-enum", &MyCustomView::getVal, &MyCustomView::setVal,
                                     {
                                       {"enum-0", MyEnum::kMyEnum0},
                                       {"enum-1", MyEnum::kMyEnum1}
@@ -66,9 +66,9 @@ public:
 
 // CustomViewCreator - listAttribute
 TEST(CustomViewCreator, listAttribute) {
-  MyView::Creator creator{"testViewName", "testViewDisplayName"};
+  MyCustomView::Creator creator{"testViewName", "testViewDisplayName"};
 
-  MyView v{CRect{0, 0, 100, 100}};
+  MyCustomView v{CRect{0, 0, 100, 100}};
 
   // val => kUndefined
   ASSERT_EQ(MyEnum::kUndefined, v.getVal());
@@ -82,8 +82,12 @@ TEST(CustomViewCreator, listAttribute) {
 
   // toString => "enum-1"
   std::string value;
+#ifdef EDITOR_MODE
   ASSERT_TRUE(creator.getAttributeValue(&v, "my-enum", value, nullptr));
   ASSERT_EQ(value, "enum-1");
+#else
+  ASSERT_FALSE(creator.getAttributeValue(&v, "my-enum", value, nullptr));
+#endif
 
   // setting to invalid string should fail
   attributes.setAttribute("my-enum", "invalid");
@@ -97,7 +101,7 @@ TEST(CustomViewCreator, listAttribute) {
   ASSERT_EQ(MyEnum::kUndefined, v.getVal());
 
   std::list<std::string const *> possibleValues{};
-#ifndef NDEBUG
+#ifdef EDITOR_MODE
   ASSERT_TRUE(creator.getPossibleListValues("my-enum", possibleValues));
   ASSERT_EQ(2, possibleValues.size());
   ASSERT_EQ("enum-0", *possibleValues.front());

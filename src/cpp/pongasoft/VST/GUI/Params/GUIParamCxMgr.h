@@ -263,7 +263,7 @@ private:
   GUIState *fGUIState;
 
   // Maintains the connections for the listeners... will be automatically discarded in the destructor
-  std::unordered_map<ParamID, std::unique_ptr<FObjectCx>> fParamCxs;
+  std::unordered_map<ParamID, std::unique_ptr<FObjectCx>> fParamCxs{};
 };
 
 //------------------------------------------------------------------------

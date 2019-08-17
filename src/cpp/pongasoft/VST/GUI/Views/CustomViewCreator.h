@@ -40,6 +40,12 @@ namespace Views {
 
 using namespace VSTGUI;
 
+//------------------------------------------------------------------------
+// Implementation Note: Half of the API (the "getter"/"read" part of it)  is not used in Release mode because the
+// editor code is built only during Debug mode (EDITOR_MODE is defined) and only the editor code is using it.
+// As a result, it is conditionnally compiled so that it doesn't use  unecessary space in Release mode.
+//------------------------------------------------------------------------
+
 /**
  * Base abstract class for an attribute of a view
  */
@@ -73,6 +79,7 @@ public:
    */
   virtual bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) = 0;
 
+#ifdef EDITOR_MODE
   /**
    * Extracts the value from the view for this attribute (getName()) and store it in oStringValue. Subclass
    * will handle the extraction based on type.
@@ -88,6 +95,7 @@ public:
   {
     return false;
   }
+#endif
 
 private:
   std::string fName;
@@ -157,7 +165,12 @@ private:
 
     // Constructor
     TAttribute(std::string const &iName, Getter iGetter, Setter iSetter) :
-      ViewAttribute(iName), fGetter{iGetter}, fSetter{iSetter} { }
+      ViewAttribute(iName),
+#ifdef EDITOR_MODE
+      fGetter{iGetter},
+#endif
+      fSetter{iSetter}
+      { }
 
     // getType
     IViewCreator::AttrType getType() override
@@ -170,15 +183,6 @@ private:
      * conversion is possible in which case the result is written to oValue, false otherwise.
      */
     virtual bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, T &oValue) const
-    {
-      return false;
-    }
-
-    /**
-     * Subclasses need to implement this method to convert a T to a string. Returns true if the
-     * conversion is possible in which case the result is written to oStringValue, false otherwise.
-     */
-    virtual bool toString(IUIDescription const *iDescription, T const &iValue, std::string &oStringValue) const
     {
       return false;
     }
@@ -203,6 +207,17 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
+    /**
+     * Subclasses need to implement this method to convert a T to a string. Returns true if the
+     * conversion is possible in which case the result is written to oStringValue, false otherwise.
+     */
+    virtual bool toString(IUIDescription const *iDescription, T const &iValue, std::string &oStringValue) const
+    {
+      return false;
+    }
+
+
     // getAttributeValue => get a color from the view
     bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
     {
@@ -217,6 +232,9 @@ private:
 
   private:
     Getter fGetter;
+#endif
+
+  private:
     Setter fSetter;
   };
 
@@ -271,6 +289,7 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, const TagID &iValue, std::string &oStringValue) const override
     {
@@ -286,6 +305,7 @@ private:
 
       return false;
     }
+#endif
   };
 
   /**
@@ -323,6 +343,7 @@ private:
       return true;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, const TInt &iValue, std::string &oStringValue) const override
     {
@@ -331,6 +352,7 @@ private:
       oStringValue = str.str();
       return true;
     }
+#endif
   };
 
   /**
@@ -367,6 +389,7 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, const TFloat &iValue, std::string &oStringValue) const override
     {
@@ -375,6 +398,7 @@ private:
       oStringValue = str.str();
       return true;
     }
+#endif
   };
 
   /**
@@ -409,11 +433,13 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, const CColor &iValue, std::string &oStringValue) const override
     {
       return UIViewCreator::colorToString(iValue, oStringValue, iDescription);
     }
+#endif
   };
 
   /**
@@ -448,6 +474,7 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, GradientPtr const &iValue, std::string &oStringValue) const override
     {
@@ -463,6 +490,7 @@ private:
       }
       return false;
     }
+#endif
   };
 
   /**
@@ -502,12 +530,14 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, const bool &iValue, std::string &oStringValue) const override
     {
       oStringValue = iValue ? "true" : "false";
       return true;
     }
+#endif
   };
 
   /**
@@ -541,6 +571,7 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, BitmapPtr const &iValue, std::string &oStringValue) const override
     {
@@ -549,6 +580,7 @@ private:
       else
         return false;
     }
+#endif
   };
 
   /**
@@ -582,6 +614,7 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, FontPtr const &iValue, std::string &oStringValue) const override
     {
@@ -596,6 +629,7 @@ private:
       }
       return false;
     }
+#endif
   };
 
   /**
@@ -637,6 +671,7 @@ private:
       return true;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, const Margin &iValue, std::string &oStringValue) const override
     {
@@ -656,6 +691,7 @@ private:
       oStringValue = str.str();
       return true;
     }
+#endif
   };
 
   /**
@@ -690,6 +726,7 @@ private:
       return true;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription, const Range &iValue, std::string &oStringValue) const override
     {
@@ -705,6 +742,7 @@ private:
       oStringValue = str.str();
       return true;
     }
+#endif
   };
 
   /**
@@ -735,6 +773,7 @@ private:
       return true;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription,
                   const std::vector<std::string> &iValue,
@@ -754,6 +793,7 @@ private:
       }
       return true;
     }
+#endif
 
   protected:
     char fDelimiter;
@@ -776,7 +816,7 @@ private:
                   AttrValInitList<T> const &iAttributeValues) :
       super_type(iName, iGetter, iSetter),
       fAttributeValuesMap(iAttributeValues)
-#ifndef NDEBUG
+#ifdef EDITOR_MODE
       ,fAttributeValuesList{iAttributeValues}
 #endif
     {
@@ -803,6 +843,7 @@ private:
       return false;
     }
 
+#ifdef EDITOR_MODE
     // toString
     bool toString(IUIDescription const *iDescription,
                   T const &iValue,
@@ -822,7 +863,6 @@ private:
       return false;
     }
 
-#ifndef NDEBUG
     // getPossibleListValues
     bool getPossibleListValues(std::list<const std::string *> &iValues) const override
     {
@@ -836,7 +876,7 @@ private:
 
   protected:
     AttrValMap<T> const fAttributeValuesMap;
-#ifndef NDEBUG
+#ifdef EDITOR_MODE
     std::vector<typename AttrValMap<T>::value_type> const fAttributeValuesList;
 #endif
   };
@@ -1107,6 +1147,7 @@ public:
     return kUnknownType;
   }
 
+#ifdef EDITOR_MODE
   /**
    * This is used by the editor when instantiating a new view (drag & drop) and populating the various attributes
    * with the values coming from the view */
@@ -1129,7 +1170,6 @@ public:
     return false;
   }
 
-#ifndef NDEBUG
   /**
    * This is used by the editor to populate the drop down list for list attributes. Since the editor is only
    * available in debug mode, there is no reason to keep this implementation for release... (default returns `false`) */
