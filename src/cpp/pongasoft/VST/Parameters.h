@@ -215,6 +215,14 @@ public:
   VstParamDefBuilder<typename ParamConverter::ParamType> vst(ParamID iParamID, VstString16 iTitle, Args&& ...iConverterArgs);
 
   /**
+   * This flavor allows the `ParamConverter` to provide an actual type for the primary constructor
+   */
+  template<typename ParamConverter>
+  VstParamDefBuilder<typename ParamConverter::ParamType> vst(int32 iParamID,
+                                                             VstString16 iTitle,
+                                                             typename ParamConverter::ConstructorType initValue);
+
+  /**
    * Used from derived classes to build a parameter backed by a VST parameter. Use this version
    * if you want to provide a different converter.
    */
@@ -486,6 +494,18 @@ Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::v
 {
   auto builder = vstFromType<typename ParamConverter::ParamType>(iParamID, std::move(iTitle));
   builder.template converter<ParamConverter>(std::forward<Args>(iConverterArgs)...);
+  return builder;
+}
+
+//------------------------------------------------------------------------
+// Parameters::vst
+//------------------------------------------------------------------------
+template<typename ParamConverter>
+Parameters::VstParamDefBuilder<typename ParamConverter::ParamType> Parameters::vst(int32 iParamID,
+                                                                                   VstString16 iTitle,
+                                                                                   typename ParamConverter::ConstructorType initValue) {
+  auto builder = vstFromType<typename ParamConverter::ParamType>(iParamID, std::move(iTitle));
+  builder.template converter<ParamConverter>(initValue);
   return builder;
 }
 

@@ -17,6 +17,7 @@
  */
 #include <pongasoft/VST/ParamConverters.h>
 #include <gtest/gtest.h>
+#include <pongasoft/VST/Parameters.h>
 
 namespace pongasoft {
 namespace VST {
@@ -54,6 +55,35 @@ TEST(ParamConverters, testEnumParamConverter) {
   ASSERT_EQ("3", converter.toString(TestEnum::kValue4, 0));
   ASSERT_EQ("4", converter.toString(TestEnum::kValue5, 0));
 
+  // make sure the syntax is "nice" for parameter building
+  Parameters p{};
+
+  // invoke default constructor
+  auto b = p.vst<EnumParamConverter<TestEnum, TestEnum::kValue5>>(100, STR16("test"));
+  ASSERT_EQ("0", b.fConverter->toString(TestEnum::kValue1, 0));
+  ASSERT_EQ("4", b.fConverter->toString(TestEnum::kValue5, 0));
+
+  b = p.vst<EnumParamConverter<TestEnum, TestEnum::kValue5>>(100, STR16("test"), 1);
+  ASSERT_EQ("1", b.fConverter->toString(TestEnum::kValue1, 0));
+  ASSERT_EQ("5", b.fConverter->toString(TestEnum::kValue5, 0));
+
+  b = p.vst<EnumParamConverter<TestEnum, TestEnum::kValue5>>(100, STR16("test"), STR16("Page %d"));
+  ASSERT_EQ("Page 0", b.fConverter->toString(TestEnum::kValue1, 0));
+  ASSERT_EQ("Page 4", b.fConverter->toString(TestEnum::kValue5, 0));
+
+  b = p.vst<EnumParamConverter<TestEnum, TestEnum::kValue5>>(100, STR16("test"), STR16("Page %d"), 1);
+  ASSERT_EQ("Page 1", b.fConverter->toString(TestEnum::kValue1, 0));
+  ASSERT_EQ("Page 5", b.fConverter->toString(TestEnum::kValue5, 0));
+
+  // no need to use std::array anymore!
+  b = p.vst<EnumParamConverter<TestEnum, TestEnum::kValue5>>(100, STR16("test"),
+                                                             {STR16("v0"),
+                                                              STR16("v1"),
+                                                              STR16("v2"),
+                                                              STR16("v3"),
+                                                              STR16("v4")});
+  ASSERT_EQ("v0", b.fConverter->toString(TestEnum::kValue1, 0));
+  ASSERT_EQ("v4", b.fConverter->toString(TestEnum::kValue5, 0));
 }
 
 // ParamConverters - testDiscreteTypeParamConverter
@@ -113,21 +143,27 @@ TEST(ParamConverters, testDiscreteTypeParamConverter) {
   ASSERT_EQ(converter.denormalize(0.29), values[1]);
 
   // test toString
-  String128 s;
-  converter.toString(values[0], s, 2);
-  ASSERT_EQ(VstString16(STR16("val0")), VstString16(s));
-  converter.toString(values[1], s, 2);
-  ASSERT_EQ(VstString16(STR16("val1")), VstString16(s));
-  converter.toString(values[2], s, 2);
-  ASSERT_EQ(VstString16(STR16("val2")), VstString16(s));
-  converter.toString(values[3], s, 2);
-  ASSERT_EQ(VstString16(STR16("val3")), VstString16(s));
-  converter.toString(values[4], s, 2);
-  ASSERT_EQ(VstString16(STR16("val4")), VstString16(s));
+  ASSERT_EQ("val0", converter.toString(values[0], 2));
+  ASSERT_EQ("val1", converter.toString(values[1], 2));
+  ASSERT_EQ("val2", converter.toString(values[2], 2));
+  ASSERT_EQ("val3", converter.toString(values[3], 2));
+  ASSERT_EQ("val4", converter.toString(values[4], 2));
 
-  s[0] = 0;
-  converter.toString(TestStruct{100}, s, 2);
-  ASSERT_EQ(VstString16(STR16("")), VstString16(s));
+  ASSERT_EQ("", converter.toString(TestStruct{100}, 2));
+
+  // make sure the syntax is "nice" for parameter building
+  Parameters p{};
+  auto b = p.vst<DiscreteTypeParamConverter<TestStruct>>(100, STR16("test"),
+                                                         {
+                                                           {values[0], STR16("val0")},
+                                                           {values[1], STR16("val1")},
+                                                           {values[2], STR16("val2")},
+                                                           {values[3], STR16("val3")},
+                                                           {values[4], STR16("val4")}
+                                                         });
+  ASSERT_EQ("val0", b.fConverter->toString(values[0], 2));
+  ASSERT_EQ("val4", b.fConverter->toString(values[4], 2));
+
 
   // should be valid for an enum class (and only a subset of the values)
   enum class MyEnum {

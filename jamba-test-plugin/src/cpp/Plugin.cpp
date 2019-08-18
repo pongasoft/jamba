@@ -40,7 +40,7 @@ JambaTestPluginParameters::JambaTestPluginParameters()
   fTab =
     vst<DiscreteTypeParamConverter<ETabs>>(EJambaTestPluginParamID::kTab,
                                            STR16("Tab"),
-                                           DiscreteTypeParamConverter<ETabs>::TInitList{
+                                           {
                                              {ETabs::kTabAll,              STR16("All Controls")},
                                              {ETabs::kTabToggleButtonView, STR16("ToggleButtonView")}
                                            })

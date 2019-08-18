@@ -62,6 +62,7 @@ public:
   virtual std::string toString(ParamType const &iValue, int32 iPrecision) const
   {
     String128 s;
+    s[0] = 0;
     toString(iValue, s, iPrecision);
     return String(s).text8();
   }
@@ -291,7 +292,7 @@ private:
  * fTab =
  *   vst<DiscreteTypeParamConverter<ETabs>>(EJambaTestPluginParamID::kTab,
  *                                          STR16("Tab"),
- *                                          DiscreteTypeParamConverter<ETabs>::TInitList{
+ *                                          {
  *                                            {ETabs::kTabAll,              STR16("All Controls")},
  *                                            {ETabs::kTabToggleButtonView, STR16("ToggleButtonView")}
  *                                          })
@@ -314,7 +315,7 @@ public:
 
   /**
    * Defines the type for the constructor argument : `{ { t, STR16("abc") }, ... }` */
-  using TInitList = std::initializer_list<std::pair<const T, VstString16>>;
+  using ConstructorType = std::initializer_list<std::pair<const T, VstString16>> const &;
 
   using ParamType = T;
 
@@ -323,7 +324,7 @@ public:
   /**
    * This constructor will be called this way when initializing a vst or jmb parameter:
    */
-  DiscreteTypeParamConverter(TInitList const &iInitList)
+  DiscreteTypeParamConverter(ConstructorType iInitList)
   {
     int32 stepCount = iInitList.size() - 1;
 
@@ -375,6 +376,8 @@ public:
       Steinberg::UString wrapper(oString, str16BufferSize (String128));
       wrapper.assign(iter->second.first.c_str());
     }
+    else
+      oString[0] = 0;
   }
 
 private:
@@ -397,6 +400,10 @@ public:
 
   using IParamConverter<Enum>::toString;
 
+  /**
+   * Defines the type for the constructor argument : `{ STR16("abc"), ... }` */
+  using ConstructorType = std::array<VstString16, MaxValue + 1> const &;
+
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
   explicit EnumParamConverter(IntType iToStringOffset = 0) : fConverter{iToStringOffset} {}
 
@@ -404,7 +411,7 @@ public:
   explicit EnumParamConverter(VstString16 iFormat, IntType iToStringOffset = 0) : fConverter{std::move(iFormat), iToStringOffset} {}
 
   // Constructor with all values defined
-  explicit EnumParamConverter(std::array<VstString16, MaxValue + 1> const &iToStringValues) : fConverter{iToStringValues} {}
+  explicit EnumParamConverter(ConstructorType iToStringValues) : fConverter{iToStringValues} {}
 
   inline int32 getStepCount() const override { return MaxValue; }
 
