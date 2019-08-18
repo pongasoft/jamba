@@ -33,7 +33,9 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <map>
 #include <type_traits>
+#include <pongasoft/Utils/Constants.h>
 
 namespace pongasoft {
 namespace VST {
@@ -271,8 +273,119 @@ private:
 };
 
 /**
+ * This converters maps a list of values of type `T` to discrete values. It can be used with any `T` that is
+ * comparable (note that you can optionally provide your own `Compare`. For example, `T` can be an enum, enum class,
+ * struct, class, etc...
+ *
+ * Example:
+ * ```
+ * enum class ETabs {
+ *  kTabAll = 100,
+ *  kTabToggleButtonView = 150
+ * };
+ *
+ * // ...
+ * VstParam<ETabs> fTab;
+ *
+ * // ...
+ * fTab =
+ *   vst<DiscreteTypeParamConverter<ETabs>>(EJambaTestPluginParamID::kTab,
+ *                                          STR16("Tab"),
+ *                                          DiscreteTypeParamConverter<ETabs>::TInitList{
+ *                                            {ETabs::kTabAll,              STR16("All Controls")},
+ *                                            {ETabs::kTabToggleButtonView, STR16("ToggleButtonView")}
+ *                                          })
+ *     .guiOwned()
+ *     .add();
+ *
+ * ```
+ */
+template<typename T, class Compare = std::less<T>>
+class DiscreteTypeParamConverter : public IParamConverter<T>
+{
+public:
+  /**
+   * Maintains the map of possible values of T (defined in constructor) */
+  using TMap = std::map<T, std::pair<VstString16, ParamValue>, Compare>;
+
+  /**
+   * Defines the mapping: discrete value [0, stepCount[ to T */
+  using TList = std::vector<T>;
+
+  /**
+   * Defines the type for the constructor argument : `{ { t, STR16("abc") }, ... }` */
+  using TInitList = std::initializer_list<std::pair<const T, VstString16>>;
+
+  using ParamType = T;
+
+  using IParamConverter<T>::toString;
+
+  /**
+   * This constructor will be called this way when initializing a vst or jmb parameter:
+   */
+  DiscreteTypeParamConverter(TInitList const &iInitList)
+  {
+    int32 stepCount = iInitList.size() - 1;
+
+    // by definition, a discrete parameter has a step count > 0
+    DCHECK_F(stepCount > 0);
+
+    int32 i = 0;
+    for(auto &pair : iInitList)
+    {
+      auto paramValue = convertDiscreteValueToNormalizedValue<int32>(stepCount, i);
+      fMap[pair.first] = {pair.second, paramValue};
+      fList.emplace_back(pair.first);
+      i++;
+    }
+
+    // sanity check... if not the same size it means that 2 entries in the list were the same!
+    DCHECK_F(fList.size() == fMap.size());
+  }
+
+  // getStepCount
+  inline int32 getStepCount() const override { return fMap.size() - 1; }
+
+  // normalize
+  inline ParamValue normalize(ParamType const &iValue) const override
+  {
+    auto iter = fMap.find(iValue);
+    if(iter != fMap.cend())
+      return iter->second.second;
+    else
+    {
+      DLOG_F(WARNING, "could not normalize value...");
+      return 0;
+    }
+  }
+
+  // denormalize
+  inline ParamType denormalize(ParamValue iNormalizedValue) const override
+  {
+    auto index = convertNormalizedValueToDiscreteValue<int32>(getStepCount(), iNormalizedValue);
+    return fList[index];
+  }
+
+  // toString
+  void toString(ParamType const &iValue, String128 oString, int32 iPrecision) const override
+  {
+    auto iter = fMap.find(iValue);
+    if(iter != fMap.cend())
+    {
+      Steinberg::UString wrapper(oString, str16BufferSize (String128));
+      wrapper.assign(iter->second.first.c_str());
+    }
+  }
+
+private:
+  TMap fMap{};
+  TList fList{};
+};
+
+/**
  * A converter to deal with an enum (assumes that the enum is contiguous, starts at 0 and that MaxValue is the latest
- * value in the enum)
+ * value in the enum). Note that you can also use `DiscreteTypeParamConverter<Enum>` instead in case your enum
+ * is not contiguous, you want to select only some values of the enum, or you want a simpler way to initialize it.
  */
 template<typename Enum, Enum MaxValue>
 class EnumParamConverter : public IParamConverter<Enum>
@@ -313,6 +426,7 @@ public:
 private:
   DiscreteValueParamConverter<MaxValue, IntType> fConverter;
 };
+
 
 }
 }

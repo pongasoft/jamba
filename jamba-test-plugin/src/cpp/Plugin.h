@@ -19,6 +19,7 @@
 #pragma once
 
 #include "JambaTestPluginCIDs.h"
+#include "Model.h"
 
 #include <pongasoft/VST/Parameters.h>
 #include <pongasoft/VST/RT/RTState.h>
@@ -52,7 +53,7 @@ class JambaTestPluginParameters : public Parameters
 public:
   VstParam<bool> fBypassParam; // the bypass toggle (bypasses the processing if Fx)
 
-  VstParam<int> fTab;          // multiple tabs to test different aspects of the framework
+  VstParam<ETabs> fTab;        // multiple tabs to test different aspects of the framework
 
 public:
   JambaTestPluginParameters();

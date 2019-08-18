@@ -56,5 +56,104 @@ TEST(ParamConverters, testEnumParamConverter) {
 
 }
 
+// ParamConverters - testDiscreteTypeParamConverter
+TEST(ParamConverters, testDiscreteTypeParamConverter) {
+  struct TestStruct {
+    float fMyVal;
+
+    bool operator<(const TestStruct &o)  const {
+      return fMyVal < o.fMyVal;
+    }
+
+    bool operator==(const TestStruct &rhs) const
+    {
+      return fMyVal == rhs.fMyVal;
+    }
+
+    bool operator!=(const TestStruct &rhs) const
+    {
+      return !(rhs == *this);
+    }
+  };
+
+  auto values =
+    std::array<TestStruct, 5>{ TestStruct{0.9}, TestStruct{1.4}, TestStruct{-4}, TestStruct{50}, TestStruct{1} };
+
+  DiscreteTypeParamConverter<TestStruct> converter{
+    {values[0], STR16("val0")},
+    {values[1], STR16("val1")},
+    {values[2], STR16("val2")},
+    {values[3], STR16("val3")},
+    {values[4], STR16("val4")}
+  };
+
+  // stepCount
+  ASSERT_EQ(4, converter.getStepCount());
+
+  // test normalize
+  ASSERT_EQ(converter.normalize(values[0]), 0);
+  ASSERT_EQ(converter.normalize(values[1]), 0.25);
+  ASSERT_EQ(converter.normalize(values[2]), 0.50);
+  ASSERT_EQ(converter.normalize(values[3]), 0.75);
+  ASSERT_EQ(converter.normalize(values[4]), 1.0);
+
+  // invalid struct (warning + return 0)
+  ASSERT_EQ(converter.normalize(TestStruct{100}), 0);
+
+  // test denormalize
+  ASSERT_EQ(converter.denormalize(0),    values[0]);
+  ASSERT_EQ(converter.denormalize(0.25), values[1]);
+  ASSERT_EQ(converter.denormalize(0.5),  values[2]);
+  ASSERT_EQ(converter.denormalize(0.75), values[3]);
+  ASSERT_EQ(converter.denormalize(1.0),  values[4]);
+
+  // out of range
+  ASSERT_EQ(converter.denormalize(-2.0), values[0]);
+  ASSERT_EQ(converter.denormalize(1.2),  values[4]);
+  ASSERT_EQ(converter.denormalize(0.29), values[1]);
+
+  // test toString
+  String128 s;
+  converter.toString(values[0], s, 2);
+  ASSERT_EQ(VstString16(STR16("val0")), VstString16(s));
+  converter.toString(values[1], s, 2);
+  ASSERT_EQ(VstString16(STR16("val1")), VstString16(s));
+  converter.toString(values[2], s, 2);
+  ASSERT_EQ(VstString16(STR16("val2")), VstString16(s));
+  converter.toString(values[3], s, 2);
+  ASSERT_EQ(VstString16(STR16("val3")), VstString16(s));
+  converter.toString(values[4], s, 2);
+  ASSERT_EQ(VstString16(STR16("val4")), VstString16(s));
+
+  s[0] = 0;
+  converter.toString(TestStruct{100}, s, 2);
+  ASSERT_EQ(VstString16(STR16("")), VstString16(s));
+
+  // should be valid for an enum class (and only a subset of the values)
+  enum class MyEnum {
+    kVal0 = 90,
+    kVal1 = 140,
+    kVal2 = -40,
+    kVal3 = 500,
+    kVal4 = 10,
+  };
+
+  DiscreteTypeParamConverter<MyEnum> ec {
+    { MyEnum::kVal4, STR16("val4")},
+    { MyEnum::kVal1, STR16("val1")}
+  };
+
+  // stepCount
+  ASSERT_EQ(1, ec.getStepCount());
+
+  // test normalize
+  ASSERT_EQ(ec.normalize(MyEnum::kVal4), 0);
+  ASSERT_EQ(ec.normalize(MyEnum::kVal1), 1.0);
+
+  // invalid for this converter
+  ASSERT_EQ(ec.normalize(MyEnum::kVal3), 0.0);
+
+}
+
 }
 }

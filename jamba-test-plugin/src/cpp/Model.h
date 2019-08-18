@@ -22,6 +22,11 @@ namespace pongasoft {
 namespace test {
 namespace jamba {
 
+enum class ETabs {
+  kTabAll,
+  kTabToggleButtonView
+};
+
 }
 }
 }
