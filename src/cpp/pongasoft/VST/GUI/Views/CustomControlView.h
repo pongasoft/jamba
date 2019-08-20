@@ -59,7 +59,7 @@ public:
  * This base class automatically registers the custom control and also keeps a control value for the case when
  * the control does not exist (for example in editor the control tag may not be defined).
  */
-template<typename T, typename TGUIParam = GUIAnyParam<T>>
+template<typename T, typename TGUIParam = GUIOptionalParam<T>>
 class TCustomControlView : public CustomControlView
 {
 public:
@@ -90,7 +90,7 @@ public:
 /**
  * Specialization for raw parameter (`ParamValue` / no conversion).
  */
-using RawCustomControlView = TCustomControlView<ParamValue, GUIRawAnyParam>;
+using RawCustomControlView = TCustomControlView<ParamValue, GUIRawOptionalParam>;
 
 //------------------------------------------------------------------------
 // TCustomControlView<T>::getControlValue
@@ -115,7 +115,7 @@ void TCustomControlView<T, TGUIParam>::setControlValue(T const &iControlValue)
 // Specialization for ParamValue/GUIRawVstParameter
 //------------------------------------------------------------------------
 template<>
-void TCustomControlView<ParamValue, GUIRawAnyParam>::registerParameters();
+void TCustomControlView<ParamValue, GUIRawOptionalParam>::registerParameters();
 
 //------------------------------------------------------------------------
 // TCustomControlView<T>::registerParameters
@@ -125,7 +125,7 @@ void TCustomControlView<T, TGUIParam>::registerParameters()
 {
   CustomControlView::registerParameters();
 
-  registerAnyParam(getControlTag(), fControlParameter);
+  registerOptionalParam(getControlTag(), fControlParameter);
 }
 
 //------------------------------------------------------------------------

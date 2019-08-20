@@ -50,14 +50,14 @@ public:
    * Unregisters all parameters */
   void unregisterAll();
 
-  bool registerRawAnyParam(TagID iParamID,
-                           GUIRawAnyParam &oParam,
-                           Parameters::IChangeListener *iChangeListener = nullptr);
+  bool registerRawOptionalParam(TagID iParamID,
+                                GUIRawOptionalParam &oParam,
+                                Parameters::IChangeListener *iChangeListener = nullptr);
 
   template<typename T>
-  bool registerAnyParam(TagID iParamID,
-                        GUIAnyParam<T> &oParam,
-                        Parameters::IChangeListener *iChangeListener = nullptr);
+  bool registerOptionalParam(TagID iParamID,
+                             GUIOptionalParam<T> &oParam,
+                             Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
    * Registers a raw parameter (no conversion)
@@ -267,12 +267,12 @@ private:
 };
 
 //------------------------------------------------------------------------
-// GUIParamCxMgr::registerAnyParam
+// GUIParamCxMgr::registerOptionalParam
 //------------------------------------------------------------------------
 template<typename T>
-bool GUIParamCxMgr::registerAnyParam(TagID iParamID,
-                                     GUIAnyParam<T> &oParam,
-                                     Parameters::IChangeListener *iChangeListener)
+bool GUIParamCxMgr::registerOptionalParam(TagID iParamID,
+                                          GUIOptionalParam<T> &oParam,
+                                          Parameters::IChangeListener *iChangeListener)
 {
   auto previousTagID = oParam.getTagID();
 

@@ -21,7 +21,7 @@
 #include "GUIRawVstParameter.h"
 #include "GUIJmbParameter.h"
 #include "GUIVstParameter.h"
-#include "GUIAnyParam.h"
+#include "GUIOptionalParam.h"
 
 namespace pongasoft {
 namespace VST {
@@ -41,14 +41,14 @@ class GUIParamCxAware : public Parameters::IChangeListener
 public:
   virtual ~GUIParamCxAware();
 
-  bool registerRawAnyParam(TagID iParamID,
-                           GUIRawAnyParam &oParam,
-                           bool iSubscribeToChanges = true);
+  bool registerRawOptionalParam(TagID iParamID,
+                                GUIRawOptionalParam &oParam,
+                                bool iSubscribeToChanges = true);
 
   template<typename T>
-  bool registerAnyParam(TagID iParamID,
-                        GUIAnyParam<T> &oParam,
-                        bool iSubscribeToChanges = true);
+  bool registerOptionalParam(TagID iParamID,
+                             GUIOptionalParam<T> &oParam,
+                             bool iSubscribeToChanges = true);
 
 
   /**

@@ -325,8 +325,8 @@ void ScrollbarView::registerParameters()
   if(!fParamCxMgr)
     return; // not set yet
 
-  registerRawAnyParam(fOffsetPercentTag, fOffsetPercentParam);
-  registerRawAnyParam(fZoomPercentTag, fZoomPercentParam);
+  registerRawOptionalParam(fOffsetPercentTag, fOffsetPercentParam);
+  registerRawOptionalParam(fZoomPercentTag, fZoomPercentParam);
 }
 
 //------------------------------------------------------------------------

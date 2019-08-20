@@ -161,15 +161,15 @@ void GUIParamCxAware::invokeAll()
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerRawAnyParam
+// GUIParamCxAware::registerRawOptionalParam
 //------------------------------------------------------------------------
-bool GUIParamCxAware::registerRawAnyParam(TagID iParamID,
-                                          GUIRawAnyParam &oParam,
-                                          bool iSubscribeToChanges)
+bool GUIParamCxAware::registerRawOptionalParam(TagID iParamID,
+                                               GUIRawOptionalParam &oParam,
+                                               bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
   {
-    return fParamCxMgr->registerRawAnyParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
+    return fParamCxMgr->registerRawOptionalParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
   }
   else
     return false;

@@ -27,14 +27,14 @@ namespace Params {
 
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerAnyParam
+// GUIParamCxAware::registerOptionalParam
 //------------------------------------------------------------------------
 template<typename T>
-bool GUIParamCxAware::registerAnyParam(TagID iParamID, GUIAnyParam<T> &oParam, bool iSubscribeToChanges)
+bool GUIParamCxAware::registerOptionalParam(TagID iParamID, GUIOptionalParam<T> &oParam, bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
   {
-    return fParamCxMgr->registerAnyParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
+    return fParamCxMgr->registerOptionalParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
   }
   else
     return false;

@@ -12,8 +12,8 @@ project(JambaTestPlugin)
 set(JAMBA_ROOT_DIR "..")
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly
-unset(GOOGLETEST_ROOT_DIR)
-#set(GOOGLETEST_ROOT_DIR ../../../google/googletest)
+#unset(GOOGLETEST_ROOT_DIR)
+set(GOOGLETEST_ROOT_DIR ../../../google/googletest)
 
 # finally we include jamba itself
 include(${JAMBA_ROOT_DIR}/jamba.cmake)

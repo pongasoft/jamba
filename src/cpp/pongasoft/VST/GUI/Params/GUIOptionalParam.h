@@ -77,10 +77,10 @@ private:
 };
 
 template<typename T, typename TGUIVstParameter = GUIVstParameter<T>>
-class GUIAnyParam
+class GUIOptionalParam
 {
 public:
-  using class_type = GUIAnyParam<T, TGUIVstParameter>;
+  using class_type = GUIOptionalParam<T, TGUIVstParameter>;
   using ParamType = T;
 
   class Editor
@@ -127,7 +127,7 @@ public:
       return kResultFalse;
     }
 
-    friend class GUIAnyParam<T, TGUIVstParameter>;
+    friend class GUIOptionalParam<T, TGUIVstParameter>;
 
     Editor(Editor const &) = delete;
 
@@ -143,18 +143,18 @@ public:
   };
 
 public:
-  GUIAnyParam() : fValPtr{UNDEFINED_TAG_ID, T{}} {}
+  GUIOptionalParam() : fValPtr{UNDEFINED_TAG_ID, T{}} {}
 
-  explicit GUIAnyParam(T const &iDefaultValue) : fValPtr{UNDEFINED_TAG_ID, iDefaultValue} {}
+  explicit GUIOptionalParam(T const &iDefaultValue) : fValPtr{UNDEFINED_TAG_ID, iDefaultValue} {}
 
   // delete copy constructor
-  GUIAnyParam(class_type &iPtr) = delete;
+  GUIOptionalParam(class_type &iPtr) = delete;
 
   // move copy constructor
-  GUIAnyParam(class_type &&iPtr) noexcept = delete;
+  GUIOptionalParam(class_type &&iPtr) noexcept = delete;
 
   // move assignment constructor
-  GUIAnyParam &operator=(class_type &&iPtr) noexcept = delete;
+  GUIOptionalParam &operator=(class_type &&iPtr) noexcept = delete;
 
   // getTagID
   inline TagID getTagID() const
@@ -288,12 +288,12 @@ private:
   GUIValParameter<T> fValPtr;
 };
 
-using GUIRawAnyParam = GUIAnyParam<ParamValue, GUIRawVstParameter>;
+using GUIRawOptionalParam = GUIOptionalParam<ParamValue, GUIRawVstParameter>;
 
 template<typename T, typename TGUIVstParameter = GUIVstParameter<T>>
-using GUIAnyParamEditor = std::unique_ptr<typename GUIAnyParam<T, TGUIVstParameter>::Editor>;
+using GUIOptionalParamEditor = std::unique_ptr<typename GUIOptionalParam<T, TGUIVstParameter>::Editor>;
 
-using GUIRawAnyParamEditor = std::unique_ptr<typename GUIAnyParam<ParamValue, GUIRawVstParameter>::Editor>;
+using GUIRawOptionalParamEditor = std::unique_ptr<typename GUIOptionalParam<ParamValue, GUIRawVstParameter>::Editor>;
 
 }
 }

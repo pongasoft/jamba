@@ -24,14 +24,14 @@ namespace GUI {
 namespace Views {
 
 //------------------------------------------------------------------------
-// TCustomControlView<ParamValue, GUIRawAnyParam>::registerParameters
+// TCustomControlView<ParamValue, GUIRawOptionalParam>::registerParameters
 //------------------------------------------------------------------------
 template<>
-void TCustomControlView<ParamValue, GUIRawAnyParam>::registerParameters()
+void TCustomControlView<ParamValue, GUIRawOptionalParam>::registerParameters()
 {
   CustomControlView::registerParameters();
 
-  registerRawAnyParam(getControlTag(), fControlParameter);
+  registerRawOptionalParam(getControlTag(), fControlParameter);
 }
 
 }

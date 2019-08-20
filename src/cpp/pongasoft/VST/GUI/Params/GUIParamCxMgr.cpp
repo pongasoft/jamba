@@ -23,11 +23,11 @@ namespace GUI {
 namespace Params {
 
 //------------------------------------------------------------------------
-// GUIParamCxMgr::registerRawAnyParam
+// GUIParamCxMgr::registerRawOptionalParam
 //------------------------------------------------------------------------
-bool GUIParamCxMgr::registerRawAnyParam(TagID iParamID,
-                                        GUIRawAnyParam &oParam,
-                                        Parameters::IChangeListener *iChangeListener)
+bool GUIParamCxMgr::registerRawOptionalParam(TagID iParamID,
+                                             GUIRawOptionalParam &oParam,
+                                             Parameters::IChangeListener *iChangeListener)
 {
   auto previousTagID = oParam.getTagID();
 

@@ -93,8 +93,8 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTJmbInParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTState.h
 
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIAnyParam.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIJmbParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIOptionalParam.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCx.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.hpp
