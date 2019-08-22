@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -158,21 +158,6 @@ void GUIParamCxAware::invokeAll()
 {
   if(fParamCxMgr)
     fParamCxMgr->invokeAll();
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::registerRawOptionalParam
-//------------------------------------------------------------------------
-bool GUIParamCxAware::registerRawOptionalParam(TagID iParamID,
-                                               GUIRawOptionalParam &oParam,
-                                               bool iSubscribeToChanges)
-{
-  if(fParamCxMgr)
-  {
-    return fParamCxMgr->registerRawOptionalParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
-  }
-  else
-    return false;
 }
 
 }

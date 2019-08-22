@@ -83,6 +83,7 @@ set(JAMBA_TEST_SRC_FILES
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-Lerp.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-StringUtils.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Params/test-IGUIParameter.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-CustomViewCreator.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp

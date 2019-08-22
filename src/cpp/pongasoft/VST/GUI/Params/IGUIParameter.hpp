@@ -16,23 +16,31 @@
  * @author Yan Pujante
  */
 
-#include "CustomControlView.h"
+#pragma once
+
+#include "GUIVstParameter.h"
 
 namespace pongasoft {
 namespace VST {
 namespace GUI {
-namespace Views {
+namespace Params {
 
-////------------------------------------------------------------------------
-//// TCustomControlView<ParamValue, GUIRawOptionalParam>::registerParameters
-////------------------------------------------------------------------------
-//template<>
-//void TCustomControlView<ParamValue, GUIRawOptionalParam>::registerParameters()
-//{
-//  CustomControlView::registerParameters();
-//
-//  registerRawOptionalParam(getControlTag(), fControlParameter);
-//}
+template<typename T>
+std::shared_ptr<ITGUIParameter<T>> IGUIParameter::cast()
+{
+  auto sft = shared_from_this();
+
+  auto rawPtr = std::dynamic_pointer_cast<GUIRawVstParameter>(sft);
+
+  if(rawPtr)
+  {
+    auto vstPtr = rawPtr->asVstParameter<T>();
+    if(vstPtr)
+      return vstPtr;
+  }
+
+  return std::dynamic_pointer_cast<ITGUIParameter<T>>(sft);
+}
 
 }
 }

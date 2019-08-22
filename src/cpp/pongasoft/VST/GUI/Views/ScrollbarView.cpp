@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -325,8 +325,8 @@ void ScrollbarView::registerParameters()
   if(!fParamCxMgr)
     return; // not set yet
 
-  registerRawOptionalParam(fOffsetPercentTag, fOffsetPercentParam);
-  registerRawOptionalParam(fZoomPercentTag, fZoomPercentParam);
+  registerOptionalParam(fOffsetPercentTag, fOffsetPercentParam);
+  registerOptionalParam(fZoomPercentTag, fZoomPercentParam);
 }
 
 //------------------------------------------------------------------------

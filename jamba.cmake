@@ -103,6 +103,8 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawVstParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIVstParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIValParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/IGUIParameter.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/IGUIParameter.hpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/VstParameters.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomController.h

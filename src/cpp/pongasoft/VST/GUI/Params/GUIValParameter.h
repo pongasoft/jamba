@@ -19,6 +19,7 @@
 
 #include <pluginterfaces/vst/vsttypes.h>
 #include <pongasoft/logging/logging.h>
+#include "GUIParamCx.h"
 
 namespace pongasoft {
 namespace VST {
@@ -27,11 +28,16 @@ namespace Params {
 
 using namespace Steinberg::Vst;
 
+/**
+ * This parameter is not tied to any parameter definition/registration and is primarily used by the optional
+ * parameter.
+ */
 template<typename T>
-class GUIValParameter: public FObject
+class GUIValParameter: public ITGUIParameter<T>, public FObject
 {
 public:
   using ParamType = T;
+  using EditorType = typename ITGUIParameter<T>::ITEditor;
 
   using FObject::update; // fixes overload hiding warning
 
@@ -51,11 +57,20 @@ public:
   void setTagID(TagID iTagID) { fTagID = iTagID; }
 
   /**
+   * In order to comply with the api, we return 0 when tag id is undefined... */
+  ParamID getParamID() const override
+  {
+    if(fTagID < 0)
+      return 0;
+    return static_cast<ParamID>(fTagID);
+  }
+
+  /**
    * Update the parameter with a value.
    *
    * @return true if the value was actually updated, false if it is the same
    */
-  bool update(ParamType const &iValue)
+  bool update(ParamType const &iValue) override
   {
     if(fValue != iValue)
     {
@@ -64,6 +79,14 @@ public:
       return true;
     }
     return false;
+  }
+
+  /**
+   * @return an editor to edit modify the value
+   */
+  std::unique_ptr<EditorType> edit() override
+  {
+    return std::make_unique<DefaultEditorImpl<T>>(this);
   }
 
   /**
@@ -86,7 +109,7 @@ public:
    * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
    * not comparable)
    */
-  tresult setValue(ParamType const &iValue)
+  tresult setValue(ParamType const &iValue) override
   {
     fValue = iValue;
     changed();
@@ -105,7 +128,7 @@ public:
   }
 
   // getValue
-  inline ParamType const &getValue() const { return fValue; }
+  inline ParamType const &getValue() const override { return fValue; }
 
   // getValue
   inline ParamType &getValue() { return fValue; }
@@ -113,10 +136,21 @@ public:
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
    */
-  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener)
+  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const override
   {
     if(getTagID() >= 0)
-      return std::make_unique<GUIParamCx>(static_cast<ParamID>(getTagID()), this, iChangeListener);
+      return std::make_unique<GUIParamCx>(static_cast<ParamID>(getTagID()), const_cast<GUIValParameter *>(this), iChangeListener);
+    else
+      return nullptr;
+  }
+
+  /**
+   * @return a connection that will listen to parameter changes (see GUIParamCx)
+   */
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const override
+  {
+    if(getTagID() >= 0)
+      return std::make_unique<FObjectCxCallback>(const_cast<GUIValParameter *>(this), iChangeCallback);
     else
       return nullptr;
   }

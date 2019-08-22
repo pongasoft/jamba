@@ -32,13 +32,26 @@ GUIState::GUIState(Parameters const &iPluginParameters) :
 }
 
 //------------------------------------------------------------------------
+// GUIState::findParam
+//------------------------------------------------------------------------
+std::shared_ptr<IGUIParameter> GUIState::findParam(ParamID iParamID) const
+{
+  auto rawPtr = getRawVstParameter(iParamID);
+
+  if(rawPtr)
+    return rawPtr;
+
+  return std::dynamic_pointer_cast<IGUIParameter>(getJmbParameter(iParamID));
+}
+
+//------------------------------------------------------------------------
 // GUIState::addJmbParam
 //------------------------------------------------------------------------
-void GUIState::addJmbParam(std::unique_ptr<IGUIJmbParameter> iParameter)
+void GUIState::addJmbParam(std::shared_ptr<IGUIJmbParameter> iParameter)
 {
   DCHECK_F(iParameter != nullptr);
 
-  ParamID paramID = iParameter->getParamID();
+  ParamID paramID = iParameter->getJmbParamID();
 
   DCHECK_F(fPluginParameters.getJmbParamDef(paramID) != nullptr, "jmb parameter [%d] not registered", paramID);
   DCHECK_F(fJmbParams.find(paramID) == fJmbParams.cend(), "duplicate paramID [%d]", paramID);
@@ -185,12 +198,12 @@ std::unique_ptr<GUIParamCxMgr> GUIState::createParamCxMgr()
 //------------------------------------------------------------------------
 // GUIState::getJmbParameter
 //------------------------------------------------------------------------
-IGUIJmbParameter *GUIState::getJmbParameter(ParamID iParamID) const
+std::shared_ptr<IGUIJmbParameter> GUIState::getJmbParameter(ParamID iParamID) const
 {
   auto iter = fJmbParams.find(iParamID);
   if(iter == fJmbParams.cend())
     return nullptr;
-  return iter->second.get();
+  return iter->second;
 }
 
 //------------------------------------------------------------------------

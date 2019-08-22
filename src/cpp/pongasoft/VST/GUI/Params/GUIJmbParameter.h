@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,6 +24,7 @@
 #include <pongasoft/VST/Messaging.h>
 #include <pongasoft/VST/MessageHandler.h>
 #include <pongasoft/VST/MessageProducer.h>
+#include "IGUIParameter.h"
 #include "GUIParamCx.h"
 
 namespace pongasoft {
@@ -46,8 +47,8 @@ public:
   // getParamDef
   inline IJmbParamDef const *getParamDef() const { return fParamDef.get(); }
 
-  // getParamID
-  ParamID getParamID() const { return fParamDef->fParamID; }
+  // getJmbParamID
+  ParamID getJmbParamID() const { return fParamDef->fParamID; }
 
   // readFromStream
   virtual tresult readFromStream(IBStreamer &iStreamer) = 0;
@@ -83,10 +84,11 @@ protected:
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class GUIJmbParameter : public IGUIJmbParameter, public FObject
+class GUIJmbParameter : public ITGUIParameter<T>, public IGUIJmbParameter, public FObject
 {
 public:
   using ParamType = T;
+  using EditorType = typename ITGUIParameter<T>::ITEditor;
 
   using FObject::update; // fixes overload hiding warning
 
@@ -96,6 +98,9 @@ public:
     FObject(),
     fValue{iParamDef->fDefaultValue}
   {}
+
+  // getParamID
+  ParamID getParamID() const override { return getJmbParamID(); }
 
   // getParamDef
   inline JmbParamDef<T> const *getParamDefT() const
@@ -108,7 +113,7 @@ public:
    *
    * @return true if the value was actually updated, false if it is the same
    */
-  bool update(ParamType const &iValue)
+  bool update(ParamType const &iValue) override
   {
     if(fValue != iValue)
     {
@@ -139,7 +144,7 @@ public:
    * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
    * not comparable)
    */
-  tresult setValue(ParamType const &iValue)
+  tresult setValue(ParamType const &iValue) override
   {
     fValue = iValue;
     changed();
@@ -201,30 +206,51 @@ public:
   }
 
   // getValue
-  inline ParamType const &getValue() const { return fValue; }
+  inline ParamType const &getValue() const override { return fValue; }
 
   // getValue
   inline ParamType &getValue() { return fValue; }
 
+  // edit
+  std::unique_ptr<EditorType> edit() override
+  {
+    return std::make_unique<DefaultEditorImpl<T>>(this);
+  }
+
+  /**
+   * Importing other edit method from superclass
+   */
+  using ITGUIParameter<T>::edit;
+
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
    */
-  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener)
+  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const override
   {
-    return std::make_unique<GUIParamCx>(getParamID(), this, iChangeListener);
+    return std::make_unique<GUIParamCx>(getJmbParamID(), const_cast<GUIJmbParameter *>(this), iChangeListener);
   }
 
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
    */
-  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback)
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const override
   {
-    return std::make_unique<FObjectCxCallback>(this, std::move(iChangeCallback));
+    return std::make_unique<FObjectCxCallback>(const_cast<GUIJmbParameter *>(this), std::move(iChangeCallback));
   }
 
 protected:
   ParamType fValue;
 };
+
+/**
+ * Convenient function to cast a generic `IGUIParameter` to a `GUIJmbParameter<T>`. If not the proper type it will
+ * return `nullptr`
+ */
+template<typename T>
+static std::shared_ptr<GUIJmbParameter<T>> castToJmb(std::shared_ptr<IGUIParameter> iParam)
+{
+  return std::dynamic_pointer_cast<GUIJmbParameter<T>>(iParam);
+}
 
 
 //------------------------------------------------------------------------
@@ -240,7 +266,7 @@ template<typename T>
 class GUIJmbParam
 {
 public:
-  GUIJmbParam(GUIJmbParameter<T> *iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
+  GUIJmbParam(std::shared_ptr<GUIJmbParameter<T>> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
     fPtr{iPtr}
   {}
 
@@ -310,7 +336,7 @@ public:
   inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) { return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
-  GUIJmbParameter<T> *fPtr;
+  std::shared_ptr<GUIJmbParameter<T>> fPtr;
 };
 
 }

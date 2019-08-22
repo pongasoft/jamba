@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -36,7 +36,7 @@ tresult IGUIJmbParameter::broadcast() const
 
   if(!getParamDef()->fShared)
   {
-    DLOG_F(WARNING, "broadcast ignored: parameter [%d] is not marked shared", getParamID());
+    DLOG_F(WARNING, "broadcast ignored: parameter [%d] is not marked shared", getJmbParamID());
     return kResultFalse;
   }
 
@@ -49,7 +49,7 @@ tresult IGUIJmbParameter::broadcast() const
     Message m{message.get()};
 
     // sets the message ID
-    m.setMessageID(getParamID());
+    m.setMessageID(getJmbParamID());
 
     // serialize the content
     if(writeToMessage(m) == kResultOk)

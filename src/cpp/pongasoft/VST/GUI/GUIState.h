@@ -21,6 +21,7 @@
 #include "pongasoft/VST/MessageHandler.h"
 #include <pongasoft/VST/GUI/Params/VstParameters.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
+#include <pongasoft/VST/GUI/Params/IGUIParameter.hpp>
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 #include <pongasoft/VST/MessageProducer.h>
 #include "ViewCxMgr.h"
@@ -66,12 +67,20 @@ public:
   inline bool existsJmb(ParamID iParamID) const { return fJmbParams.find(iParamID) != fJmbParams.cend(); }
 
   /**
+   * Generic call which returns a param with the given id or `nullptr` if there isn't one. It can be either
+   * a Vst or Jmb param.
+   */
+  std::shared_ptr<IGUIParameter> findParam(ParamID iParamID) const;
+
+  /**
    * @return the raw parameter given its id
    */
   std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
   {
     if(existsVst(iParamID))
-      return std::make_unique<GUIRawVstParameter>(iParamID, fVstParameters);
+      return std::make_unique<GUIRawVstParameter>(iParamID,
+                                                  fVstParameters,
+                                                  fPluginParameters.getRawVstParamDef(iParamID));
     else
       return nullptr;
   }
@@ -139,7 +148,7 @@ public:
   /**
    * @return the Jmb parameter given its id (nullptr if not found)
    */
-  IGUIJmbParameter *getJmbParameter(ParamID iParamID) const;
+  std::shared_ptr<IGUIJmbParameter> getJmbParameter(ParamID iParamID) const;
 
   /**
    * This method is called from the GUI controller setComponentState method and reads the state coming from RT
@@ -199,7 +208,7 @@ protected:
   MessageHandler fMessageHandler{};
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
-  std::map<ParamID, std::unique_ptr<IGUIJmbParameter>> fJmbParams{};
+  std::map<ParamID, std::shared_ptr<IGUIJmbParameter>> fJmbParams{};
 
   // order in which the parameters were registered
   std::vector<ParamID> fAllRegistrationOrder{};
@@ -209,7 +218,7 @@ protected:
   tresult setParamNormalized(NormalizedState const *iNormalizedState);
 
   // add serializable parameter to the structures
-  void addJmbParam(std::unique_ptr<IGUIJmbParameter> iParameter);
+  void addJmbParam(std::shared_ptr<IGUIJmbParameter> iParameter);
 
   // allocateMessage
   IPtr<IMessage> allocateMessage() override;
@@ -246,7 +255,7 @@ template<typename T>
 GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
 {
   auto rawPtr = new GUIJmbParameter<T>(iParamDef);
-  std::unique_ptr<IGUIJmbParameter> guiParam{rawPtr};
+  std::shared_ptr<IGUIJmbParameter> guiParam{rawPtr};
   addJmbParam(std::move(guiParam));
   if(iParamDef->fShared && iParamDef->fSerializer)
   {
@@ -318,14 +327,10 @@ std::unique_ptr<GUIVstParameter<T>> GUIState::getGUIVstParameter(ParamID iParamI
     return nullptr;
   }
 
-  auto rawParamDef = getRawVstParamDef(iParamID);
+  auto res = param->asVstParameter<T>();
 
-  auto paramDef = std::dynamic_pointer_cast<VstParamDef<T>>(rawParamDef);
-
-  if(paramDef)
-  {
-    return std::make_unique<GUIVstParameter<T>>(std::move(param), paramDef);
-  }
+  if(res)
+    return res;
   else
   {
     DLOG_F(WARNING, "vst param [%d] is not of the requested type", iParamID);

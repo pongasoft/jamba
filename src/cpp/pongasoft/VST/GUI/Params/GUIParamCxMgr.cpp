@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,64 +21,6 @@ namespace pongasoft {
 namespace VST {
 namespace GUI {
 namespace Params {
-
-//------------------------------------------------------------------------
-// GUIParamCxMgr::registerRawOptionalParam
-//------------------------------------------------------------------------
-bool GUIParamCxMgr::registerRawOptionalParam(TagID iParamID,
-                                             GUIRawOptionalParam &oParam,
-                                             Parameters::IChangeListener *iChangeListener)
-{
-  auto previousTagID = oParam.getTagID();
-
-  if(previousTagID != iParamID)
-    unregisterParam(previousTagID);
-
-  bool paramChanged = false;
-
-  // if VST parameter...
-  if(existsVst(iParamID))
-  {
-    paramChanged = oParam.assign(fGUIState->getRawVstParameter(iParamID));
-  }
-
-  // if Jmb parameter...
-  if(!paramChanged && existsJmb(iParamID))
-  {
-    auto param = fGUIState->getJmbParameter(iParamID);
-
-    auto res = dynamic_cast<GUIJmbParameter<ParamValue> *>(param);
-    if(res)
-    {
-      paramChanged = oParam.assign(res);
-    }
-    else
-    {
-      DLOG_F(WARNING, "jmb param [%d] is not of ParamValue type", iParamID);
-    }
-  }
-
-  // no vst or jmb parameter match => using default
-  if(!paramChanged)
-  {
-    paramChanged = oParam.clearAssignment(iParamID, true);
-#ifndef NDEBUG
-    if(iParamID != UNDEFINED_PARAM_ID)
-      DLOG_F(WARNING, "could not find any parameter (vst or jmb) with id [%d]... reverting to default", iParamID);
-#endif
-  }
-
-  if(iChangeListener)
-  {
-    fParamCxs[iParamID] = oParam.connect(iChangeListener);
-  }
-  else
-  {
-    unregisterParam(iParamID);
-  }
-
-  return paramChanged;
-}
 
 //------------------------------------------------------------------------
 // GUIParamCxMgr::invokeAll

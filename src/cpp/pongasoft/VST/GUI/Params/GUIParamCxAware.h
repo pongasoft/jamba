@@ -41,10 +41,6 @@ class GUIParamCxAware : public Parameters::IChangeListener
 public:
   virtual ~GUIParamCxAware();
 
-  bool registerRawOptionalParam(TagID iParamID,
-                                GUIRawOptionalParam &oParam,
-                                bool iSubscribeToChanges = true);
-
   template<typename T>
   bool registerOptionalParam(TagID iParamID,
                              GUIOptionalParam<T> &oParam,

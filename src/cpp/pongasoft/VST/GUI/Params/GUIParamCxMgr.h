@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -49,10 +49,6 @@ public:
   /**
    * Unregisters all parameters */
   void unregisterAll();
-
-  bool registerRawOptionalParam(TagID iParamID,
-                                GUIRawOptionalParam &oParam,
-                                Parameters::IChangeListener *iChangeListener = nullptr);
 
   template<typename T>
   bool registerOptionalParam(TagID iParamID,
@@ -281,36 +277,30 @@ bool GUIParamCxMgr::registerOptionalParam(TagID iParamID,
 
   bool paramChanged = false;
 
-  // if VST parameter...
-  if(existsVst(iParamID))
+  auto param = fGUIState->findParam(iParamID);
+
+  if(param)
   {
-    auto param = fGUIState->getGUIVstParameter<T>(iParamID);
-
-    // although existsVst(iParamID) returned true, param could still be null if T does not match
-    if(param)
-      paramChanged = oParam.assign(std::move(param));
-  }
-
-  // if Jmb parameter...
-  if(!paramChanged && existsJmb(iParamID))
-  {
-    auto param = fGUIState->getJmbParameter(iParamID);
-
-    auto res = dynamic_cast<GUIJmbParameter<T> *>(param);
-    if(res)
+    auto typedParam = param->cast<T>();
+    if(typedParam)
     {
-      paramChanged = oParam.assign(res);
+      oParam.assign(std::move(typedParam));
+      paramChanged = true;
     }
     else
     {
-      DLOG_F(WARNING, "jmb param [%d] is not of the requested type", iParamID);
+      DLOG_F(WARNING, "param [%d] is not of the requested type", iParamID);
     }
   }
 
   // no vst or jmb parameter match => using default
   if(!paramChanged)
   {
-    paramChanged = oParam.clearAssignment(iParamID, true);
+    oParam.clearAssignment(iParamID);
+
+    if(iParamID == UNDEFINED_PARAM_ID)
+      paramChanged = true;
+
 #ifndef NDEBUG
     if(iParamID != UNDEFINED_PARAM_ID)
       DLOG_F(WARNING, "could not find any parameter (vst or jmb) with id [%d]... reverting to default", iParamID);
@@ -418,10 +408,10 @@ GUIJmbParam<T> GUIParamCxMgr::__registerJmbParam(ParamID iParamID, Listener iLis
   if(!param)
   {
     DLOG_F(WARNING, "jmb param [%d] not found", iParamID);
-    return nullptr;
+    return GUIJmbParam<T>{};
   }
 
-  auto res = dynamic_cast<GUIJmbParameter<T> *>(param);
+  auto res = std::dynamic_pointer_cast<GUIJmbParameter<T>>(param);
   if(res)
   {
     if(iListener)

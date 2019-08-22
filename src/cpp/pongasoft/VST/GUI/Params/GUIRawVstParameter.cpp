@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,7 +38,7 @@ GUIRawVstParameter::Editor::Editor(ParamID iParamID, VstParametersSPtr iVstParam
 ///////////////////////////////////////////
 // GUIRawVstParameter::Editor::setValue
 ///////////////////////////////////////////
-tresult GUIRawVstParameter::Editor::setValue(ParamValue iValue)
+tresult GUIRawVstParameter::Editor::setValue(ParamValue const &iValue)
 {
   tresult res = kResultFalse;
   if(fIsEditing)
@@ -48,6 +48,20 @@ tresult GUIRawVstParameter::Editor::setValue(ParamValue iValue)
       fVstParameters->performEdit(fParamID, fVstParameters->getParamNormalized(fParamID));
   }
   return res;
+}
+
+///////////////////////////////////////////
+// GUIRawVstParameter::Editor::updateValue
+///////////////////////////////////////////
+bool GUIRawVstParameter::Editor::updateValue(ParamValue const &iValue)
+{
+  auto previousValue = fVstParameters->getParamNormalized(fParamID);
+  if(previousValue != iValue)
+  {
+    if(setValue(iValue) == kResultOk)
+      return true;
+  }
+  return false;
 }
 
 ///////////////////////////////////////////
@@ -82,9 +96,12 @@ tresult GUIRawVstParameter::Editor::rollback()
 ///////////////////////////////////////////
 // GUIRawVstParameter::GUIRawVstParameter
 ///////////////////////////////////////////
-GUIRawVstParameter::GUIRawVstParameter(ParamID iParamID, VstParametersSPtr iVstParameters)  :
+GUIRawVstParameter::GUIRawVstParameter(ParamID iParamID,
+                                       VstParametersSPtr iVstParameters,
+                                       std::shared_ptr<RawVstParamDef> iParamDef)  :
   fParamID{iParamID},
-  fVstParameters{std::move(iVstParameters)}
+  fVstParameters{std::move(iVstParameters)},
+  fParamDef{std::move(iParamDef)}
 {
   // DLOG_F(INFO, "GUIRawVstParameter::GUIRawVstParameter(%d)", fParamID);
   DCHECK_F(fVstParameters->exists(fParamID), "Missing parameter [%d]", iParamID);

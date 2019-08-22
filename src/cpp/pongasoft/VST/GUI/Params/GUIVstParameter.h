@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@
 #ifndef __PONGASOFT_VST_GUI_PARAMETER_H__
 #define __PONGASOFT_VST_GUI_PARAMETER_H__
 
+#include "IGUIParameter.h"
 #include "GUIRawVstParameter.h"
 #include <pongasoft/VST/ParamConverters.h>
 #include <pongasoft/VST/ParamDef.h>
@@ -31,10 +32,11 @@ namespace Params {
  * This class wraps a GUIRawVstParameter to deal with any type T
  */
 template<typename T>
-class GUIVstParameter
+class GUIVstParameter : public ITGUIParameter<T>
 {
 public:
   using ParamType = T;
+  using EditorType = typename ITGUIParameter<T>::ITEditor;
 
 public:
   /**
@@ -50,14 +52,22 @@ public:
    * // from a CView::onMouseUp/onMouseCancelled callback
    * fMyParamEditor->commit();
    */
-  class Editor
+  class Editor : public EditorType
   {
   public:
-    inline explicit Editor(std::unique_ptr<GUIRawVstParameter::Editor> iRawEditor,
+    inline explicit Editor(GUIRawVstParamEditor iRawEditor,
                            std::shared_ptr<VstParamDef<T>> iVstParamDef) :
       fRawEditor{std::move(iRawEditor)},
       fVstParamDef{std::move(iVstParamDef)}
     {
+    }
+
+    /**
+     * Destructor which calls rollback by default
+     */
+    ~Editor() override
+    {
+      rollback();
     }
 
     // disabling copy
@@ -67,42 +77,40 @@ public:
     /**
      * Change the value of the parameter. Note that nothing happens if you have called commit or rollback already
      */
-    inline tresult setValue(ParamType const &iValue)
+    tresult setValue(ParamType const &iValue) override
     {
       return fRawEditor->setValue(fVstParamDef->normalize(iValue));
     }
 
-    /*
-     * Call when you are done with the modifications.
-     * This has no effect if rollback() has already been called
+    /**
+     * Change the value of the parameter. Note that nothing happens if you have called commit or rollback already
+     * @return `true` if the value was updated
      */
-    inline tresult commit()
+    bool updateValue(ParamType const &iValue) override
     {
-      return fRawEditor->commit();
+      return fRawEditor->updateValue(fVstParamDef->normalize(iValue));
     }
 
     /*
-     * Shortcut to set the value prior to commit
      * Call when you are done with the modifications.
      * This has no effect if rollback() has already been called
      */
-    inline tresult commit(ParamType const &iValue)
+    tresult commit() override
     {
-      setValue(iValue);
-      return commit();
+      return fRawEditor->commit();
     }
 
     /**
      * Call this if you want to revert to the original value of the parameter (when the editor is created).
      * This has no effect if commit() has already been called
      */
-    inline tresult rollback()
+    tresult rollback() override
     {
       return fRawEditor->rollback();
     }
 
   private:
-    std::unique_ptr<GUIRawVstParameter::Editor> fRawEditor;
+    GUIRawVstParamEditor fRawEditor;
     std::shared_ptr<VstParamDef<T>> fVstParamDef;
   };
 
@@ -124,7 +132,7 @@ public:
   }
 
   // getParamID
-  ParamID getParamID() const
+  ParamID getParamID() const override
   {
     return fRawParameter->getParamID();
   }
@@ -132,9 +140,12 @@ public:
   /**
    * @return the current value of the parameter as a T (using the Denormalizer)
    */
-  ParamType getValue() const
+  ParamType const &getValue() const override
   {
-    return fVstParamDef->denormalize(fRawParameter->getValue());
+    // Implementation detail.. due to API must return a reference to an object => so we must initialize it
+    // and we need to remove the constness for that
+    const_cast<GUIVstParameter<T>*>(this)->fValue = fVstParamDef->denormalize(fRawParameter->getValue());
+    return fValue;
   }
 
   /**
@@ -150,7 +161,7 @@ public:
    *
    * @return true if the value was actually updated, false if it is the same
    */
-  bool update(ParamType const &iValue)
+  bool update(ParamType const &iValue) override
   {
     auto const previousValue = getValue();
     if(previousValue != iValue)
@@ -165,7 +176,7 @@ public:
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
-  tresult setValue(ParamType const &iValue)
+  tresult setValue(ParamType const &iValue) override
   {
     return fRawParameter->setValue(fVstParamDef->normalize(iValue));
   }
@@ -203,27 +214,20 @@ public:
   /**
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<Editor> edit()
+  std::unique_ptr<EditorType> edit() override
   {
     return std::make_unique<Editor>(fRawParameter->edit(), fVstParamDef);
   }
 
   /**
-   * Shortcut to create an editor and set the value to it
-   *
-   * @return an editor to modify the parameter (see Editor)
+   * Importing other edit method from superclass
    */
-  std::unique_ptr<Editor> edit(ParamType iValue)
-  {
-    auto editor = edit();
-    editor->setValue(iValue);
-    return editor;
-  }
+  using ITGUIParameter<T>::edit;
 
   /**
    * @return an object maintaining the connection between the parameter and the listener
    */
-  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const
+  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const override
   {
     return fRawParameter->connect(iChangeListener);
   }
@@ -231,12 +235,13 @@ public:
   /**
    * @return an object maintaining the connection between the parameter and the callback
    */
-  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const override
   {
     return fRawParameter->connect(std::move(iChangeCallback));
   }
 
 private:
+  ParamType fValue;
   std::shared_ptr<GUIRawVstParameter> fRawParameter;
   std::shared_ptr<VstParamDef<T>> fVstParamDef;
 };
@@ -320,14 +325,14 @@ public:
   /**
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<typename GUIVstParameter<T>::Editor> edit() { return fPtr->edit(); }
+  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit() { return fPtr->edit(); }
 
   /**
    * Shortcut to create an editor and set the value to it
    *
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<typename GUIVstParameter<T>::Editor> edit(T const &iValue) { return fPtr->edit(iValue); }
+  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit(T const &iValue) { return fPtr->edit(iValue); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
   inline operator T() const { return fPtr->getValue(); } // NOLINT
@@ -355,11 +360,22 @@ private:
   std::unique_ptr<GUIVstParameter<T>> fPtr;
 };
 
+template<typename T>
+std::unique_ptr<GUIVstParameter<T>> GUIRawVstParameter::asVstParameter()
+{
+  auto vstParamDef = std::dynamic_pointer_cast<VstParamDef<T>>(fParamDef);
+  if(vstParamDef)
+    return std::make_unique<GUIVstParameter<T>>(std::dynamic_pointer_cast<GUIRawVstParameter>(shared_from_this()),
+                                                vstParamDef);
+  else
+    return nullptr;
+}
+
 //------------------------------------------------------------------------
 // shortcut notations
 //------------------------------------------------------------------------
 template<typename T>
-using GUIVstParamEditor = std::unique_ptr<typename GUIVstParameter<T>::Editor>;
+using GUIVstParamEditor = std::unique_ptr<typename GUIVstParameter<T>::EditorType>;
 
 using GUIVstBooleanParam = GUIVstParam<bool>;
 using GUIVstPercentParam = GUIVstParam<Percent>;
