@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,9 +18,9 @@
 #pragma once
 
 #include <type_traits>
+#include "Cpp17.h"
 
-namespace pongasoft {
-namespace Utils {
+namespace pongasoft::Utils {
 
 /**
  * dynamic_cast<U *>(x) does not compile if x is not polymorphic. This class can be used instead and it will, at
@@ -32,17 +32,37 @@ class Cast
 {
 public:
   template<typename T>
-  static inline U dynamic(T *iPtr, typename std::enable_if<!std::is_polymorphic<T>::value>::type * = nullptr)
+  static inline U dynamic(T *iPtr)
   {
-    return nullptr;
-  }
-
-  template<typename T>
-  static inline U dynamic(T *iPtr, typename std::enable_if<std::is_polymorphic<T>::value>::type * = nullptr)
-  {
-    return dynamic_cast<U>(iPtr);
+    if constexpr (std::is_polymorphic<T>::value)
+    {
+      return dynamic_cast<U>(iPtr);
+    }
+    else
+    {
+      return nullptr;
+    }
   }
 };
 
-}
+/**
+ * Defines the type for `operator!=`
+ */
+template<typename T>
+using operator_not_eq_t = decltype(std::declval<T const&>() != std::declval<T const&>());
+
+/**
+ * Allows to detect whether a type defines `operator!=` at compile time.
+ *
+ * Example:
+ * ```
+ * if constexpr (is_operator_not_eq_defined<MyType>) {
+ *   // implementation allows to write a != b (with a/b of MyType)
+ * } else {
+ *   // no such operator... alternate implementation
+ * }
+ * ```
+ */
+template<typename T>
+constexpr auto is_operator_not_eq_defined = cpp17::experimental::is_detected_v<operator_not_eq_t, T>;
 }

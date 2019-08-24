@@ -421,7 +421,7 @@ GUIJmbParam<T> GUIParamCxMgr::__registerJmbParam(ParamID iParamID, Listener iLis
   }
   else
   {
-    DLOG_F(WARNING, "jmb param [%d] is not of the requested type", iParamID);
+    DLOG_F(WARNING, "jmb param [%d] is not of the requested type [%s]", iParamID, typeid(T).name());
     unregisterParam(iParamID);
   }
 

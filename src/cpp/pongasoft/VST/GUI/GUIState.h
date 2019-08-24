@@ -109,7 +109,11 @@ public:
    */
   std::unique_ptr<FObjectCx> connect(ParamID iParamID, Parameters::IChangeListener *iChangeListener) const
   {
-    return fVstParameters ? fVstParameters->connect(iParamID, iChangeListener) : nullptr;
+    auto ptr = findParam(iParamID);
+    if(ptr)
+      return ptr->connect(iChangeListener);
+    else
+      return nullptr;
   }
 
   /**
@@ -120,7 +124,11 @@ public:
    */
   std::unique_ptr<FObjectCx> connect(ParamID iParamID, Parameters::ChangeCallback iChangeCallback) const
   {
-    return fVstParameters ? fVstParameters->connect(iParamID, std::move(iChangeCallback)) : nullptr;
+    auto ptr = findParam(iParamID);
+    if(ptr)
+      return ptr->connect(iChangeCallback);
+    else
+      return nullptr;
   }
 
   /**
@@ -255,8 +263,8 @@ template<typename T>
 GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
 {
   auto rawPtr = new GUIJmbParameter<T>(iParamDef);
-  std::shared_ptr<IGUIJmbParameter> guiParam{rawPtr};
-  addJmbParam(std::move(guiParam));
+  std::shared_ptr<GUIJmbParameter<T>> guiParam{rawPtr};
+  addJmbParam(guiParam);
   if(iParamDef->fShared && iParamDef->fSerializer)
   {
     switch(iParamDef->fOwner)
@@ -275,7 +283,7 @@ GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
         break;
     }
   }
-  return rawPtr;
+  return guiParam;
 }
 
 //------------------------------------------------------------------------

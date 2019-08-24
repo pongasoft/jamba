@@ -24,13 +24,11 @@
 #include <pongasoft/VST/Messaging.h>
 #include <pongasoft/VST/MessageHandler.h>
 #include <pongasoft/VST/MessageProducer.h>
+#include <pongasoft/Utils/Metaprogramming.h>
 #include "IGUIParameter.h"
 #include "GUIParamCx.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 /**
  * Base class for a Jamba (Jmb) GUI parameter. This type of parameter is used when it cannot be mapped to a
@@ -115,11 +113,21 @@ public:
    */
   bool update(ParamType const &iValue) override
   {
-    if(fValue != iValue)
+    // Implementation note: because this method is declared virtual the compiler must instantiate it
+    // even if never called and will generate an error if the ParamType does not define operator!=, so we
+    // need to account for this case
+    if constexpr(Utils::is_operator_not_eq_defined<ParamType>)
     {
-      fValue = iValue;
-      changed();
-      return true;
+      if(fValue != iValue)
+      {
+        if(setValue(iValue) == kResultOk)
+          return true;
+      }
+    }
+    else
+    {
+      if(setValue(iValue) == kResultOk)
+        return true;
     }
     return false;
   }
@@ -146,9 +154,20 @@ public:
    */
   tresult setValue(ParamType const &iValue) override
   {
-    fValue = iValue;
-    changed();
-    return kResultOk;
+    // Implementation note: because this method is declared virtual the compiler must instantiate it
+    // even if never called and will generate an error if the ParamType does is not copy assignable, so we
+    // need to account for this case
+    if constexpr(std::is_copy_assignable_v<ParamType>)
+    {
+      fValue = iValue;
+      changed();
+      return kResultOk;
+    }
+    else
+    {
+      DLOG_F(ERROR, "%s is not copy_assignable. Call updateIf instead.", typeid(ParamType).name());
+      return kResultFalse;
+    }
   }
 
   /**
@@ -339,7 +358,4 @@ private:
   std::shared_ptr<GUIJmbParameter<T>> fPtr;
 };
 
-}
-}
-}
 }
