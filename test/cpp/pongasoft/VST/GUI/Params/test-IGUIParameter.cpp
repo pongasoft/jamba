@@ -41,11 +41,15 @@ TEST(IGUIParameter, testCast) {
   // cast should work!
   ASSERT_TRUE(pb.get() != nullptr);
   ASSERT_EQ(1, pb->getParamID());
-  ASSERT_EQ(false, pb->getValue());
+  pb->accessValue([](auto const &iValue) {
+    ASSERT_EQ(false, iValue);
+  });
 
   // making sure that we get a pointer to the SAME object (ref)
   pb->setValue(true);
-  ASSERT_EQ(true, pb->getValue());
+  pb->accessValue([](auto const &iValue) {
+    ASSERT_EQ(true, iValue);
+  });
   ASSERT_EQ(true, ref->getValue());
   ASSERT_EQ(ref.get(), pb.get()); // clearly shows it is the same pointer
 

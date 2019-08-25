@@ -126,15 +126,18 @@ public:
     return fParamID;
   }
 
+  // accessValue
+  void accessValue(ValueAccessor const &iGetter) const override
+  {
+    iGetter(getValue());
+  }
+
   /**
    * @return the current raw value of the parameter
    */
-  inline ParamValue const &getValue() const override
+  inline ParamValue getValue() const
   {
-    // Implementation detail.. due to API must return a reference to an object => so we must initialize it
-    // and we need to remove the constness for that
-    const_cast<GUIRawVstParameter*>(this)->fValue = fVstParameters->getParamNormalized(fParamID);
-    return fValue;
+    return fVstParameters->getParamNormalized(fParamID);
   }
 
   /**
@@ -223,7 +226,6 @@ public:
 
 private:
   ParamID fParamID;
-  ParamValue fValue;
   VstParametersSPtr fVstParameters;
   std::shared_ptr<RawVstParamDef> fParamDef;
 };

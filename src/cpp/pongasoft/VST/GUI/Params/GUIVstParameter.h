@@ -137,15 +137,18 @@ public:
     return fRawParameter->getParamID();
   }
 
+  // accessValue
+  void accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
+  {
+    iGetter(getValue());
+  }
+
   /**
    * @return the current value of the parameter as a T (using the Denormalizer)
    */
-  ParamType const &getValue() const override
+  ParamType getValue() const
   {
-    // Implementation detail.. due to API must return a reference to an object => so we must initialize it
-    // and we need to remove the constness for that
-    const_cast<GUIVstParameter<T>*>(this)->fValue = fVstParamDef->denormalize(fRawParameter->getValue());
-    return fValue;
+    return fVstParamDef->denormalize(fRawParameter->getValue());
   }
 
   /**
@@ -241,7 +244,6 @@ public:
   }
 
 private:
-  ParamType fValue;
   std::shared_ptr<GUIRawVstParameter> fRawParameter;
   std::shared_ptr<VstParamDef<T>> fVstParamDef;
 };

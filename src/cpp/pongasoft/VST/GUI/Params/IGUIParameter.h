@@ -24,10 +24,7 @@
 #include <pongasoft/VST/Parameters.h>
 #include <pongasoft/VST/FObjectCx.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -58,6 +55,9 @@ class ITGUIParameter : public IGUIParameter
 {
 public:
   using ParamType = T;
+  using ValueAccessor = std::function<void(T const &)>;
+
+public:
 
 public:
   class ITEditor : public IGUIParameter::Editor
@@ -82,7 +82,7 @@ public:
   };
 
 public:
-  virtual ParamType const &getValue() const = 0;
+  virtual void accessValue(ValueAccessor const &iGetter) const = 0;
 
   virtual bool update(ParamType const &iValue) = 0;
 
@@ -102,9 +102,9 @@ template<typename T>
 class DefaultEditorImpl : public ITGUIParameter<T>::ITEditor
 {
 public:
-  explicit DefaultEditorImpl(ITGUIParameter<T> *iGUIParameter) :
+  explicit DefaultEditorImpl(ITGUIParameter<T> *iGUIParameter, T const &iDefaultValue) :
     fGUIParameter{iGUIParameter},
-    fInitialValue{iGUIParameter->getValue()}
+    fInitialValue{iDefaultValue}
   {
   }
 
@@ -148,7 +148,4 @@ private:
   bool fDoneEditing{false};
 };
 
-}
-}
-}
 }

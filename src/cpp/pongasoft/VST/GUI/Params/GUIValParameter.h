@@ -86,7 +86,7 @@ public:
    */
   std::unique_ptr<EditorType> edit() override
   {
-    return std::make_unique<DefaultEditorImpl<T>>(this);
+    return std::make_unique<DefaultEditorImpl<T>>(this, getValue());
   }
 
   /**
@@ -127,8 +127,14 @@ public:
     return kResultOk;
   }
 
+  // accessValue
+  void accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
+  {
+    iGetter(fValue);
+  }
+
   // getValue
-  inline ParamType const &getValue() const override { return fValue; }
+  inline ParamType const &getValue() const { return fValue; }
 
   // getValue
   inline ParamType &getValue() { return fValue; }

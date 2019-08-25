@@ -24,13 +24,18 @@
 #include "GUIJmbParameter.h"
 #include "GUIValParameter.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 using namespace Steinberg::Vst;
 
+/**
+ * TODO doc.
+ * Because `GUIOptional` can represent a Vst parameter or a Jmb parameter, there are some restrictions on `T` itself
+ * (which do not exist if you use `GUIJmbParam<T>`):
+ * - `T` must be copy assignable
+ * - others???
+ * @tparam T
+ */
 template<typename T>
 class GUIOptionalParam
 {
@@ -68,9 +73,11 @@ public:
   /**
    * @return the current value of the parameter as a T
    */
-  inline ParamType const &getValue() const
+  inline ParamType getValue() const
   {
-    return fParameter->getValue();
+    ParamType res;
+    fParameter->accessValue([&res](auto const &iValue) { res = iValue; });
+    return res;
   }
 
   /**
@@ -152,7 +159,7 @@ protected:
 
   void clearAssignment(TagID iTagID)
   {
-    fParameter = std::make_shared<GUIValParameter<T>>(iTagID, fParameter->getValue());
+    fParameter = std::make_shared<GUIValParameter<T>>(iTagID, getValue());
   }
 
 private:
@@ -167,7 +174,4 @@ using GUIOptionalParamEditor = std::unique_ptr<typename GUIOptionalParam<T>::Edi
 using GUIRawOptionalParam = GUIOptionalParam<ParamValue>;
 using GUIRawOptionalParamEditor = GUIOptionalParamEditor<ParamValue>;
 
-}
-}
-}
 }
