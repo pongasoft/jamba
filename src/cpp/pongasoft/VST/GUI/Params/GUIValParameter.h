@@ -19,12 +19,10 @@
 
 #include <pluginterfaces/vst/vsttypes.h>
 #include <pongasoft/logging/logging.h>
+#include <pongasoft/Utils/Metaprogramming.h>
 #include "GUIParamCx.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 using namespace Steinberg::Vst;
 
@@ -72,11 +70,21 @@ public:
    */
   bool update(ParamType const &iValue) override
   {
-    if(fValue != iValue)
+    // Implementation note: because this method is declared virtual the compiler must instantiate it
+    // even if never called and will generate an error if the ParamType does not define operator!=, so we
+    // need to account for this case
+    if constexpr(Utils::is_operator_not_eq_defined<ParamType>)
     {
-      fValue = iValue;
-      changed();
-      return true;
+      if(fValue != iValue)
+      {
+        if(setValue(iValue) == kResultOk)
+          return true;
+      }
+    }
+    else
+    {
+      if(setValue(iValue) == kResultOk)
+        return true;
     }
     return false;
   }
@@ -166,7 +174,4 @@ private:
   T fValue;
 };
 
-}
-}
-}
 }

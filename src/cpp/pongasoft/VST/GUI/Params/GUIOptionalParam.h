@@ -32,13 +32,17 @@ using namespace Steinberg::Vst;
  * TODO doc.
  * Because `GUIOptional` can represent a Vst parameter or a Jmb parameter, there are some restrictions on `T` itself
  * (which do not exist if you use `GUIJmbParam<T>`):
- * - `T` must be copy assignable
- * - others???
- * @tparam T
+ * - `T` must have empty constructor: `T()`
+ * - `T` have a copy constructor: `T(T const &)`
+ * - `T` must be copy assignable: `T& operator=(T const &)`
  */
 template<typename T>
 class GUIOptionalParam
 {
+  static_assert(std::is_default_constructible_v<T>, "T must have a default/empty constructor: T()");
+  static_assert(std::is_copy_constructible_v<T>, "T must have a copy constructor: T(T const &)");
+  static_assert(std::is_copy_assignable_v<T>, "T must be copy assignable: T& operator=(T const &)");
+
 public:
   using class_type = GUIOptionalParam<T>;
   using ParamType = T;
