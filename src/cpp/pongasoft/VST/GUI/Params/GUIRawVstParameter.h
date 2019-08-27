@@ -15,8 +15,7 @@
  *
  * @author Yan Pujante
  */
-#ifndef __PONGASOFT_VST_GUI_RAW_PARAMETER_H__
-#define __PONGASOFT_VST_GUI_RAW_PARAMETER_H__
+#pragma once
 
 #include "IGUIParameter.h"
 #include <pongasoft/VST/Parameters.h>
@@ -25,10 +24,7 @@
 
 #include <string>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 template<typename T>
 class GUIVstParameter;
@@ -59,10 +55,12 @@ public:
    * // from a CView::onMouseUp/onMouseCancelled callback
    * fMyParamEditor->commit();
    */
-  class Editor : public ITGUIParameter<ParamValue>::ITEditor
+  class Editor : public EditorType
   {
   public:
     Editor(ParamID iParamID, VstParametersSPtr iVstParameters);
+
+    ~Editor() override { rollback(); }
 
     // disabling copy
     Editor(Editor const &) = delete;
@@ -90,15 +88,6 @@ public:
      * This has no effect if commit() has already been called
      */
     tresult rollback() override;
-
-    /**
-     * Destructor which calls rollback by default
-     */
-    inline ~Editor() override
-    {
-      // DLOG_F(INFO, "~RawParameter::Editor(%d)", fParamID);
-      rollback();
-    }
 
   private:
     ParamID fParamID;
@@ -143,7 +132,7 @@ public:
   /**
    * @return number of steps (for discrete param) or 0 for continuous
    */
-  inline int32 getStepCount() const { return fVstParameters->getParameterInfo(fParamID)->stepCount; }
+  inline int32 getStepCount() const override { return fVstParameters->getParameterInfo(fParamID)->stepCount; }
 
   /**
    * Populates the oString with a string representation of this parameter
@@ -221,8 +210,21 @@ public:
     return fVstParameters->connect(fParamID, std::move(iChangeCallback));
   }
 
+  /**
+   * Converts to a typed parameter
+   * @return `nullptr` if the underlying parameter is not of proper type
+   */
   template<typename T>
-  std::unique_ptr<GUIVstParameter<T>> asVstParameter();
+  std::shared_ptr<GUIVstParameter<T>> asVstParameter();
+
+  /**
+   * This implementation will adapt this parameter to be interpreted as a discrete parameter. If it is already
+   * a discrete parameter, then `iStepCount` is ignored. Otherwise, if `iStepCount` is > 0, then the parameter
+   * will be adapted to be handled as a discrete parameter with `iStepCount` steps even if it is not. For example,
+   * if you have a parameter representing a gain value (which is not a discrete value), it can still be used with a
+   * `DiscreteButtonView` so you can split the range into discrete values and have a button for each.
+   */
+  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override;
 
 private:
   ParamID fParamID;
@@ -243,7 +245,7 @@ public:
   GUIRawVstParam() : fPtr{nullptr} {}
 
   // move constructor
-  explicit GUIRawVstParam(std::unique_ptr<GUIRawVstParameter> &&iPtr) : fPtr{std::move(iPtr)} {}
+  explicit GUIRawVstParam(std::shared_ptr<GUIRawVstParameter> &&iPtr) : fPtr{std::move(iPtr)} {}
 
   // delete copy constructor
   GUIRawVstParam(GUIRawVstParam &iPtr) = delete;
@@ -316,7 +318,7 @@ public:
   inline bool operator!=(const GUIRawVstParam &rhs) const { return fPtr->getValue() != rhs.fPtr->getValue(); }
 
 private:
-  std::unique_ptr<GUIRawVstParameter> fPtr;
+  std::shared_ptr<GUIRawVstParameter> fPtr;
 };
 
 //------------------------------------------------------------------------
@@ -325,8 +327,3 @@ private:
 using GUIRawVstParamEditor = std::unique_ptr<GUIRawVstParameter::EditorType>;
 
 }
-}
-}
-}
-
-#endif //__PONGASOFT_VST_GUI_RAW_PARAMETER_H__

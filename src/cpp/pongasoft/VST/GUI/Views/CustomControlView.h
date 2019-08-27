@@ -92,6 +92,46 @@ public:
  */
 using RawCustomControlView = TCustomControlView<ParamValue>;
 
+/**
+ * Base class for custom views providing a single discrete parameter only (similar to CControl).
+ * This base class automatically registers the custom control and also keeps a control value for the case when
+ * the control does not exist (for example in editor the control tag may not be defined).
+ */
+class CustomDiscreteControlView : public TCustomControlView<int32>
+{
+public:
+  // CustomDiscreteControlView
+  explicit CustomDiscreteControlView(const CRect &iSize) : TCustomControlView<int32>(iSize) {}
+
+  int32 getStepCount() const { return fStepCount; }
+  void setStepCount(int32 iStepCount) { fStepCount = iStepCount; }
+
+public:
+  CLASS_METHODS_NOCOPY(CustomDiscreteControlView, TCustomControlView<int32>)
+
+  // registerParameters
+  void registerParameters() override;
+
+  /**
+   * Compute step count. TODO: describe default behavior
+   */
+  virtual int32 computeStepCount() const;
+
+protected:
+  int32 fStepCount{-1};
+
+public:
+  class Creator : public CustomViewCreator<CustomDiscreteControlView, TCustomControlView<int32>>
+  {
+  public:
+    explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
+      CustomViewCreator(iViewName, iDisplayName)
+    {
+      registerIntegerAttribute<int32>("step-count", &CustomDiscreteControlView::getStepCount, &CustomDiscreteControlView::setStepCount);
+    }
+  };
+};
+
 //------------------------------------------------------------------------
 // TCustomControlView<T>::getControlValue
 //------------------------------------------------------------------------

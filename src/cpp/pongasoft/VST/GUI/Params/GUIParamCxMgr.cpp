@@ -17,10 +17,7 @@
  */
 #include "GUIParamCxMgr.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 //------------------------------------------------------------------------
 // GUIParamCxMgr::invokeAll
@@ -51,8 +48,64 @@ void GUIParamCxMgr::unregisterAll()
   fParamCxs.clear();
 }
 
+//------------------------------------------------------------------------
+// GUIParamCxMgr::registerOptionalDiscreteParam
+//------------------------------------------------------------------------
+bool GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
+                                                  GUIOptionalParam<int32> &oParam,
+                                                  int32 iStepCount,
+                                                  Parameters::IChangeListener *iChangeListener)
+{
+  auto previousTagID = oParam.getTagID();
 
+  if(previousTagID != iParamID)
+    unregisterParam(previousTagID);
+
+  bool paramChanged = false;
+
+  auto param = fGUIState->findParam(iParamID);
+
+  if(param)
+  {
+    auto discreteParam = param->asDiscreteParameter(iStepCount);
+
+    if(discreteParam)
+    {
+      oParam.assign(std::move(discreteParam));
+      paramChanged = true;
+    }
+    else
+    {
+      DLOG_F(WARNING, "param [%d] is not of the requested type", iParamID);
+    }
+  }
+
+  // no vst or jmb parameter match => using default
+  if(!paramChanged)
+  {
+    oParam.clearAssignment(iParamID);
+
+    if(iParamID == UNDEFINED_PARAM_ID)
+      paramChanged = true;
+
+#ifndef NDEBUG
+    if(iParamID != UNDEFINED_PARAM_ID)
+      DLOG_F(WARNING, "could not find any parameter (vst or jmb) with id [%d]... reverting to default", iParamID);
+#endif
+  }
+
+  if(iChangeListener)
+  {
+    fParamCxs[iParamID] = oParam.connect(iChangeListener);
+  }
+  else
+  {
+    unregisterParam(iParamID);
+  }
+
+  return paramChanged;
 }
-}
-}
+
+
+
 }

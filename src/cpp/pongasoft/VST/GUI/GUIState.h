@@ -93,11 +93,11 @@ public:
 
   // getGUIVstParameter
   template<typename T>
-  std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(ParamID iParamID) const;
+  std::shared_ptr<GUIVstParameter<T>> getGUIVstParameter(ParamID iParamID) const;
 
   // getGUIVstParameter
   template<typename T>
-  inline std::unique_ptr<GUIVstParameter<T>> getGUIVstParameter(VstParam<T> iParamDef) const {
+  inline std::shared_ptr<GUIVstParameter<T>> getGUIVstParameter(VstParam<T> iParamDef) const {
     return iParamDef ? getGUIVstParameter<T>(iParamDef->fParamID) : nullptr;
   }
 
@@ -325,9 +325,9 @@ tresult GUIState::broadcast(JmbParam<T> const &iParamDef, const T &iMessage)
 // GUIState::getGUIVstParameter
 //------------------------------------------------------------------------
 template<typename T>
-std::unique_ptr<GUIVstParameter<T>> GUIState::getGUIVstParameter(ParamID iParamID) const
+std::shared_ptr<GUIVstParameter<T>> GUIState::getGUIVstParameter(ParamID iParamID) const
 {
-  auto param = getRawVstParameter(iParamID);
+  std::shared_ptr<GUIRawVstParameter> param = getRawVstParameter(iParamID);
 
   if(!param)
   {

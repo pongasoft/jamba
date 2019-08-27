@@ -160,6 +160,22 @@ void GUIParamCxAware::invokeAll()
     fParamCxMgr->invokeAll();
 }
 
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerOptionalDiscreteParam
+//------------------------------------------------------------------------
+bool GUIParamCxAware::registerOptionalDiscreteParam(TagID iParamID,
+                                                    GUIOptionalParam<int32> &oParam,
+                                                    int32 iStepCount,
+                                                    bool iSubscribeToChanges)
+{
+  if(fParamCxMgr)
+  {
+    return fParamCxMgr->registerOptionalDiscreteParam(iParamID, oParam, iStepCount, iSubscribeToChanges ? this : nullptr);
+  }
+  else
+    return false;
+}
+
 }
 }
 }

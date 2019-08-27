@@ -121,10 +121,7 @@ public:
   /**
    * @return number of steps (for discrete param) or 0 for continuous
    */
-  inline int32 getStepCount() const
-  {
-    return 0;
-  }
+  inline int32 getStepCount() const { return fParameter->getStepCount(); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case T is bool))
   inline operator T() const { return getValue(); } // NOLINT

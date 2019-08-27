@@ -23,10 +23,7 @@
 #include <pongasoft/VST/ParamConverters.h>
 #include <pongasoft/VST/ParamDef.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 /**
  * This class wraps a GUIRawVstParameter to deal with any type T
@@ -56,19 +53,13 @@ public:
   {
   public:
     inline explicit Editor(GUIRawVstParamEditor iRawEditor,
-                           std::shared_ptr<VstParamDef<T>> iVstParamDef) :
+                           std::shared_ptr<IParamConverter<T>> iConverter) :
       fRawEditor{std::move(iRawEditor)},
-      fVstParamDef{std::move(iVstParamDef)}
+      fConverter{std::move(iConverter)}
     {
     }
 
-    /**
-     * Destructor which calls rollback by default
-     */
-    ~Editor() override
-    {
-      rollback();
-    }
+    ~Editor() override { rollback(); }
 
     // disabling copy
     Editor(Editor const &) = delete;
@@ -79,7 +70,7 @@ public:
      */
     tresult setValue(ParamType const &iValue) override
     {
-      return fRawEditor->setValue(fVstParamDef->normalize(iValue));
+      return fRawEditor->setValue(fConverter->normalize(iValue));
     }
 
     /**
@@ -88,7 +79,7 @@ public:
      */
     bool updateValue(ParamType const &iValue) override
     {
-      return fRawEditor->updateValue(fVstParamDef->normalize(iValue));
+      return fRawEditor->updateValue(fConverter->normalize(iValue));
     }
 
     /*
@@ -111,17 +102,18 @@ public:
 
   private:
     GUIRawVstParamEditor fRawEditor;
-    std::shared_ptr<VstParamDef<T>> fVstParamDef;
+    std::shared_ptr<IParamConverter<T>> fConverter;
   };
 
 public:
   // Constructor
   GUIVstParameter(std::shared_ptr<GUIRawVstParameter> iRawParameter,
-                  std::shared_ptr<VstParamDef<T>> iVstParamDef) :
+                  std::shared_ptr<IParamConverter<T>> iConverter) :
     fRawParameter{std::move(iRawParameter)},
-    fVstParamDef{std::move(iVstParamDef)}
+    fConverter{std::move(iConverter)}
   {
     DCHECK_NOTNULL_F(fRawParameter.get());
+    DCHECK_NOTNULL_F(fConverter.get());
     // DLOG_F(INFO, "VSTParameter::VSTParameter(%d)", fRawParameter->getParamID());
   }
 
@@ -148,7 +140,7 @@ public:
    */
   ParamType getValue() const
   {
-    return fVstParamDef->denormalize(fRawParameter->getValue());
+    return fConverter->denormalize(fRawParameter->getValue());
   }
 
   /**
@@ -181,7 +173,7 @@ public:
    */
   tresult setValue(ParamType const &iValue) override
   {
-    return fRawParameter->setValue(fVstParamDef->normalize(iValue));
+    return fRawParameter->setValue(fConverter->normalize(iValue));
   }
 
   /**
@@ -196,7 +188,7 @@ public:
   /**
    * @return number of steps (for discrete param) or 0 for continuous
    */
-  inline int32 getStepCount() const { return fVstParamDef->fStepCount; }
+  inline int32 getStepCount() const override { return fConverter->getStepCount(); }
 
   /**
    * Populates the oString with a string representation of this parameter
@@ -219,7 +211,7 @@ public:
    */
   std::unique_ptr<EditorType> edit() override
   {
-    return std::make_unique<Editor>(fRawParameter->edit(), fVstParamDef);
+    return std::make_unique<Editor>(fRawParameter->edit(), fConverter);
   }
 
   /**
@@ -243,9 +235,15 @@ public:
     return fRawParameter->connect(std::move(iChangeCallback));
   }
 
+  // asDiscreteParameter
+  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
+  {
+    return fRawParameter->asDiscreteParameter(iStepCount);
+  }
+
 private:
   std::shared_ptr<GUIRawVstParameter> fRawParameter;
-  std::shared_ptr<VstParamDef<T>> fVstParamDef;
+  std::shared_ptr<IParamConverter<T>> fConverter;
 };
 
 //------------------------------------------------------------------------
@@ -264,7 +262,7 @@ public:
   GUIVstParam() : fPtr{nullptr} {}
 
   // move constructor
-  explicit GUIVstParam(std::unique_ptr<GUIVstParameter<T>> &&iPtr) : fPtr{std::move(iPtr)} {}
+  explicit GUIVstParam(std::shared_ptr<GUIVstParameter<T>> &&iPtr) : fPtr{std::move(iPtr)} {}
 
   // delete copy constructor
   GUIVstParam(GUIVstParam<T> &iPtr) = delete;
@@ -359,16 +357,19 @@ public:
   std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
-  std::unique_ptr<GUIVstParameter<T>> fPtr;
+  std::shared_ptr<GUIVstParameter<T>> fPtr;
 };
 
+//------------------------------------------------------------------------
+// GUIRawVstParameter::asVstParameter
+//------------------------------------------------------------------------
 template<typename T>
-std::unique_ptr<GUIVstParameter<T>> GUIRawVstParameter::asVstParameter()
+std::shared_ptr<GUIVstParameter<T>> GUIRawVstParameter::asVstParameter()
 {
   auto vstParamDef = std::dynamic_pointer_cast<VstParamDef<T>>(fParamDef);
-  if(vstParamDef)
+  if(vstParamDef && vstParamDef->fConverter)
     return std::make_unique<GUIVstParameter<T>>(std::dynamic_pointer_cast<GUIRawVstParameter>(shared_from_this()),
-                                                vstParamDef);
+                                                vstParamDef->fConverter);
   else
     return nullptr;
 }
@@ -382,9 +383,6 @@ using GUIVstParamEditor = std::unique_ptr<typename GUIVstParameter<T>::EditorTyp
 using GUIVstBooleanParam = GUIVstParam<bool>;
 using GUIVstPercentParam = GUIVstParam<Percent>;
 
-}
-}
-}
 }
 
 #endif // __PONGASOFT_VST_GUI_PARAMETER_H__

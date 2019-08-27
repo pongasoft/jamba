@@ -20,11 +20,11 @@
 
 #include "GUIVstParameter.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
+//------------------------------------------------------------------------
+// IGUIParameter::cast
+//------------------------------------------------------------------------
 template<typename T>
 std::shared_ptr<ITGUIParameter<T>> IGUIParameter::cast()
 {
@@ -42,7 +42,4 @@ std::shared_ptr<ITGUIParameter<T>> IGUIParameter::cast()
   return std::dynamic_pointer_cast<ITGUIParameter<T>>(sft);
 }
 
-}
-}
-}
 }

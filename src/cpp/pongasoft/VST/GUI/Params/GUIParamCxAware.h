@@ -46,6 +46,10 @@ public:
                              GUIOptionalParam<T> &oParam,
                              bool iSubscribeToChanges = true);
 
+  bool registerOptionalDiscreteParam(TagID iParamID,
+                                     GUIOptionalParam<int32> &oParam,
+                                     int32 iStepCount,
+                                     bool iSubscribeToChanges = true);
 
   /**
    * Registers a raw parameter (no conversion)

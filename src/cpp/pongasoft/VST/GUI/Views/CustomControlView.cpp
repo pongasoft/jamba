@@ -18,23 +18,26 @@
 
 #include "CustomControlView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
-////------------------------------------------------------------------------
-//// TCustomControlView<ParamValue, GUIRawOptionalParam>::registerParameters
-////------------------------------------------------------------------------
-//template<>
-//void TCustomControlView<ParamValue, GUIRawOptionalParam>::registerParameters()
-//{
-//  CustomControlView::registerParameters();
-//
-//  registerRawOptionalParam(getControlTag(), fControlParameter);
-//}
+//------------------------------------------------------------------------
+// CustomDiscreteControlView::setControlTag
+//------------------------------------------------------------------------
+void CustomDiscreteControlView::registerParameters()
+{
+  registerOptionalDiscreteParam(getControlTag(), fControlParameter, getStepCount());
+}
 
+//------------------------------------------------------------------------
+// CustomDiscreteControlView::computeStepCount
+//------------------------------------------------------------------------
+int32 CustomDiscreteControlView::computeStepCount() const
+{
+  // TODO: function not needed
+  if(fControlParameter.getStepCount() > 0)
+    return fControlParameter.getStepCount();
+
+  return std::max(0, getStepCount());
 }
-}
-}
+
 }

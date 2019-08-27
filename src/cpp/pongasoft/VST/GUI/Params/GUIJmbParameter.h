@@ -100,6 +100,8 @@ public:
   // getParamID
   ParamID getParamID() const override { return getJmbParamID(); }
 
+  inline int32 getStepCount() const override { return 0; }
+
   // getParamDef
   inline JmbParamDef<T> const *getParamDefT() const
   {
@@ -261,6 +263,12 @@ public:
   std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const override
   {
     return std::make_unique<FObjectCxCallback>(const_cast<GUIJmbParameter *>(this), std::move(iChangeCallback));
+  }
+
+  // asDiscreteParameter
+  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
+  {
+    return nullptr;
   }
 
 protected:

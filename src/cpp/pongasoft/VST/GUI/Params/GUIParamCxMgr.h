@@ -15,16 +15,12 @@
  *
  * @author Yan Pujante
  */
-#ifndef __PONGASOFT_VST_GUI_PARAM_CX_MGR_H__
-#define __PONGASOFT_VST_GUI_PARAM_CX_MGR_H__
+#pragma once
 
 #include <pongasoft/VST/GUI/GUIState.h>
 #include <unordered_map>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 class GUIParamCxMgr
 {
@@ -54,6 +50,11 @@ public:
   bool registerOptionalParam(TagID iParamID,
                              GUIOptionalParam<T> &oParam,
                              Parameters::IChangeListener *iChangeListener = nullptr);
+
+  bool registerOptionalDiscreteParam(TagID iParamID,
+                                     GUIOptionalParam<int32> &oParam,
+                                     int32 iStepCount,
+                                     Parameters::IChangeListener *iChangeListener = nullptr);
 
   /**
    * Registers a raw parameter (no conversion)
@@ -289,7 +290,7 @@ bool GUIParamCxMgr::registerOptionalParam(TagID iParamID,
     }
     else
     {
-      DLOG_F(WARNING, "param [%d] is not of the requested type", iParamID);
+      DLOG_F(WARNING, "param [%d] is not of the requested type [%s]", iParamID, typeid(T).name());
     }
   }
 
@@ -371,7 +372,7 @@ GUIVstParam<T> GUIParamCxMgr::__registerVstParam(VstParam<T> const &iParamDef, L
   auto param = __registerRawVstParameter(iParamDef->fParamID, iListener);
 
   if(param)
-    return GUIVstParam<T>{std::make_unique<GUIVstParameter<T>>(std::move(param), iParamDef)};
+    return GUIVstParam<T>{std::make_unique<GUIVstParameter<T>>(std::move(param), iParamDef->fConverter)};
   else
     return GUIVstParam<T>{};
 }
@@ -468,8 +469,3 @@ bool GUIParamCxMgr::registerVstCallback(VstParam<T> iParamDef,
 }
 
 }
-}
-}
-}
-
-#endif //__PONGASOFT_VST_GUI_PARAM_CX_MGR_H__

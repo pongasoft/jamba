@@ -22,14 +22,12 @@
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include "CustomControlView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
 /**
+ * TODO: change the doc!!!
  * A step button lets you step through the values of a parameter by repeatedly clicking on the button. It works
  * for discrete values (`stepCount > 0`) in which case the increments should be an integer, or continuous values
  * (`stepCount == 0`) in which case the increment should be in the range `]-1.0, 1.0[`
@@ -41,7 +39,7 @@ using namespace VSTGUI;
  * - The `wrap` attribute defines what happens when the value reaches its end of range after being incremented (resp.
  *   decremented). When set to `true` it will wrap around, otherwise it will remain at its max (resp. min).
  */
-class StepButtonView : public RawCustomControlView
+class StepButtonView : public CustomDiscreteControlView
 {
 public:
   /**
@@ -55,7 +53,7 @@ public:
     kLeft
   };
 public:
-  explicit StepButtonView(const CRect &iSize) : RawCustomControlView(iSize)
+  explicit StepButtonView(const CRect &iSize) : CustomDiscreteControlView(iSize)
   {
   }
 
@@ -103,23 +101,23 @@ public:
    * @return the increment value applied every time the step button is released, negative value will be decreasing
    * and positive value will be increasing
    */
-  double getStepIncrement() const { return fStepIncrement; }
+  int32 getStepIncrement() const { return fStepIncrement; }
 
   /**
    * @see getStepIncrement
    */
-  void setStepIncrement(double iStepIncrement) { fStepIncrement = iStepIncrement; fButtonPolygon = nullptr; }
+  void setStepIncrement(int32 iStepIncrement) { fStepIncrement = iStepIncrement; fButtonPolygon = nullptr; }
 
   /**
    * @return the increment value applied every time the step button is released while shift is being selected.
    * Negative value will be decreasing and positive value will be increasing
    */
-  double getShiftStepIncrement() const { return fShiftStepIncrement; }
+  int32 getShiftStepIncrement() const { return fShiftStepIncrement; }
 
   /**
    * @see getShiftStepIncrement
    */
-  void setShiftStepIncrement(double iStepIncrement) { fShiftStepIncrement = iStepIncrement; }
+  void setShiftStepIncrement(int32 iStepIncrement) { fShiftStepIncrement = iStepIncrement; }
 
   /// get/setWrap => whether the discrete value wraps around when it reaches max (or min)
   inline bool getWrap() const { return fWrap; }
@@ -134,12 +132,11 @@ protected:
   void registerParameters() override;
 
   /**
-   * Adds the increment to the current value and wrap if necessary. Note that if the parameter represents a discrete
-   * value (step count > 0), then the increment will be applied to the discrete value!
+   * Adds the increment to the current value and wrap if necessary.
    *
    * @return the next value (which may be the current value if no wrap)
    */
-  virtual ParamValue computeNextValue(double iIncrement) const;
+  virtual int32 computeNextValue(int32 iIncrement) const;
 
   /**
    * @return the polygon used to draw the button (by default a triangle pointing up if `fStepIncrement` is positive).
@@ -166,14 +163,14 @@ protected:
   std::unique_ptr<CDrawContext::PointList> fButtonPolygon{};
 
 public:
-  class Creator : public CustomViewCreator<StepButtonView, RawCustomControlView>
+  class Creator : public CustomViewCreator<StepButtonView, CustomDiscreteControlView>
   {
     public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
       CustomViewCreator(iViewName, iDisplayName)
     {
-      registerDoubleAttribute("step-increment", &StepButtonView::getStepIncrement, &StepButtonView::setStepIncrement);
-      registerDoubleAttribute("shift-step-increment", &StepButtonView::getShiftStepIncrement, &StepButtonView::setShiftStepIncrement);
+      registerIntegerAttribute<int32>("step-increment", &StepButtonView::getStepIncrement, &StepButtonView::setStepIncrement);
+      registerIntegerAttribute<int32>("shift-step-increment", &StepButtonView::getShiftStepIncrement, &StepButtonView::setShiftStepIncrement);
       registerBooleanAttribute("wrap", &StepButtonView::getWrap, &StepButtonView::setWrap);
       registerColorAttribute("held-color", &StepButtonView::getHeldColor, &StepButtonView::setHeldColor);
       registerColorAttribute("released-color", &StepButtonView::getReleasedColor, &StepButtonView::setReleasedColor);
@@ -192,7 +189,4 @@ public:
   };
 };
 
-}
-}
-}
 }

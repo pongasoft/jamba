@@ -15,16 +15,12 @@
  *
  * @author Yan Pujante
  */
-#include "DiscreteButtonView.h"
 
-#include <pongasoft/VST/ParamConverters.h>
+#include "DiscreteButtonView.h"
 
 #include <vstgui4/vstgui/lib/cdrawcontext.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 //------------------------------------------------------------------------
 // DiscreteButtonView::setFrames
@@ -178,7 +174,7 @@ void DiscreteButtonView::setStep(int32 step)
 //------------------------------------------------------------------------
 bool DiscreteButtonView::isOn() const
 {
-  return convertNormalizedValueToDiscreteValue(computeStepCount(), getControlValue()) == fStep;
+  return getControlValue() == fStep;
 }
 
 //------------------------------------------------------------------------
@@ -186,7 +182,7 @@ bool DiscreteButtonView::isOn() const
 //------------------------------------------------------------------------
 void DiscreteButtonView::setOn()
 {
-  setControlValue(convertDiscreteValueToNormalizedValue(computeStepCount(), fStep));
+  setControlValue(fStep);
 }
 
 //------------------------------------------------------------------------
@@ -194,27 +190,11 @@ void DiscreteButtonView::setOn()
 //------------------------------------------------------------------------
 void DiscreteButtonView::registerParameters()
 {
-  TCustomControlView::registerParameters();
+  CustomDiscreteControlView::registerParameters();
 #ifndef NDEBUG
   if(fControlParameter.getStepCount() == 0)
     DLOG_F(WARNING, "%d parameter is not discrete (stepCount == 0)", fControlParameter.getTagID());
 #endif
 }
 
-//------------------------------------------------------------------------
-// DiscreteButtonView::computeStepCount
-//------------------------------------------------------------------------
-int32 DiscreteButtonView::computeStepCount() const
-{
-  auto stepCount = getStepCount();
-  if(stepCount < 0)
-  {
-    return fControlParameter.getStepCount();
-  }
-  return stepCount;
-}
-
-}
-}
-}
 }

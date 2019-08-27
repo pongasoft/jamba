@@ -16,15 +16,13 @@
  * @author Yan Pujante
  */
 #include "GUIRawVstParameter.h"
+#include "GUIVstParameter.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // GUIRawVstParameter::Editor::Editor
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 GUIRawVstParameter::Editor::Editor(ParamID iParamID, VstParametersSPtr iVstParameters) :
   fParamID{iParamID},
   fVstParameters{std::move(iVstParameters)}
@@ -35,9 +33,9 @@ GUIRawVstParameter::Editor::Editor(ParamID iParamID, VstParametersSPtr iVstParam
   fInitialParamValue = fVstParameters->getParamNormalized(fParamID);
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // GUIRawVstParameter::Editor::setValue
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 tresult GUIRawVstParameter::Editor::setValue(ParamValue const &iValue)
 {
   tresult res = kResultFalse;
@@ -50,9 +48,9 @@ tresult GUIRawVstParameter::Editor::setValue(ParamValue const &iValue)
   return res;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // GUIRawVstParameter::Editor::updateValue
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 bool GUIRawVstParameter::Editor::updateValue(ParamValue const &iValue)
 {
   auto previousValue = fVstParameters->getParamNormalized(fParamID);
@@ -64,9 +62,9 @@ bool GUIRawVstParameter::Editor::updateValue(ParamValue const &iValue)
   return false;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // GUIRawVstParameter::Editor::commit
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 tresult GUIRawVstParameter::Editor::commit()
 {
   if(fIsEditing)
@@ -78,9 +76,9 @@ tresult GUIRawVstParameter::Editor::commit()
   return kResultFalse;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // GUIRawVstParameter::Editor::rollback
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 tresult GUIRawVstParameter::Editor::rollback()
 {
   if(fIsEditing)
@@ -93,9 +91,9 @@ tresult GUIRawVstParameter::Editor::rollback()
   return kResultFalse;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // GUIRawVstParameter::GUIRawVstParameter
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 GUIRawVstParameter::GUIRawVstParameter(ParamID iParamID,
                                        VstParametersSPtr iVstParameters,
                                        std::shared_ptr<RawVstParamDef> iParamDef)  :
@@ -107,7 +105,64 @@ GUIRawVstParameter::GUIRawVstParameter(ParamID iParamID,
   DCHECK_F(fVstParameters->exists(fParamID), "Missing parameter [%d]", iParamID);
 }
 
+/**
+ * Simple wrapper to allow to treat any vst parameter as a discrete one: uses the vst sdk definition of
+ * what a discrete property is
+ *
+ * @see convertDiscreteValueToNormalizedValue
+ * @see convertNormalizedValueToDiscreteValue
+ */
+class DiscreteParamConverter : public IParamConverter<int32>
+{
+public:
+  using ParamType = int32;
+
+  explicit DiscreteParamConverter(int32 iStepCount) : fStepCount(iStepCount)
+  {
+    DCHECK_F(iStepCount > 0);
+  }
+
+  int32 getStepCount() const override { return fStepCount; }
+
+  ParamValue normalize(ParamType const &iValue) const override
+  {
+    return convertDiscreteValueToNormalizedValue(fStepCount, iValue);
+  }
+
+  ParamType denormalize(ParamValue iNormalizedValue) const override
+  {
+    return convertNormalizedValueToDiscreteValue(fStepCount, iNormalizedValue);
+  }
+
+protected:
+  int32 fStepCount;
+};
+
+//------------------------------------------------------------------------
+// GUIRawVstParameter::asDiscreteParameter
+//------------------------------------------------------------------------
+std::shared_ptr<ITGUIParameter<int32>> GUIRawVstParameter::asDiscreteParameter(int32 iStepCount)
+{
+  int32 stepCount = getStepCount();
+
+  if(stepCount > 0)
+  {
+    if(iStepCount != -1)
+    {
+      DLOG_F(WARNING, "Parameter step count %d, differs from requested %d. Using parameter step count.", getStepCount(), iStepCount);
+    }
+  }
+  else
+  {
+    stepCount = iStepCount;
+  }
+
+  if(stepCount > 0)
+    return std::make_unique<GUIVstParameter<int32>>(std::dynamic_pointer_cast<GUIRawVstParameter>(shared_from_this()),
+                                                    std::make_shared<DiscreteParamConverter>(stepCount));
+  else
+    return nullptr;
 }
-}
-}
+
+
 }

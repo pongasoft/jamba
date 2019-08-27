@@ -44,10 +44,16 @@ public:
 
 public:
   virtual ParamID getParamID() const = 0;
-  template<typename T>
-  std::shared_ptr<ITGUIParameter<T>> cast();
+  virtual int32 getStepCount() const = 0;
+
   virtual std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const = 0;
   virtual std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const = 0;
+
+public:
+  template<typename T>
+  std::shared_ptr<ITGUIParameter<T>> cast();
+
+  virtual std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) = 0;
 };
 
 template<typename T>
@@ -107,6 +113,8 @@ public:
     fInitialValue{iDefaultValue}
   {
   }
+
+  ~DefaultEditorImpl() override { rollback(); }
 
   bool updateValue(T const &iValue) override
   {

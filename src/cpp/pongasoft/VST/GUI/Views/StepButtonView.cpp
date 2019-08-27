@@ -208,40 +208,45 @@ int32_t StepButtonView::onKeyUp(VstKeyCode &keyCode)
 //------------------------------------------------------------------------
 void StepButtonView::registerParameters()
 {
-  RawCustomControlView::registerParameters();
+  CustomDiscreteControlView::registerParameters();
 
   // this section is only used during dev to display a warning...
 #ifndef NDEBUG
   const auto stepIncrement = getStepIncrement();
 
-  const auto stepCount = fControlParameter.getStepCount();
+  const auto stepCount = computeStepCount();
 
   if(stepCount == 0)
   {
-    // continuous value => step increment should be in the range ]-1.0, 1.0[ otherwise it does not make
-    // much sense
-    if(stepIncrement <= -1.0 || stepIncrement >= 1.0)
-      DLOG_F(WARNING, "parameter [%d] represents a continuous value (stepCount == 0) "
-                      "so step-increment (%f) should be in the ]-1.0, 1.0[ range",
-             fControlParameter.getTagID(),
-             stepIncrement);
-  }
-  else
-  {
-    auto s = std::abs(stepIncrement);
-
-    // discrete value => step increment should be an integer
-    if(std::floor(s) != s)
-      DLOG_F(WARNING, "parameter [%d] represents a discrete value (stepCount == %d) "
-                      "so step-increment (%f) should be an integer",
-             fControlParameter.getTagID(),
-             stepCount,
-             stepIncrement);
+    DLOG_F(WARNING, "computed step count is 0 so this control will have no effect");
   }
 
-  if(stepIncrement == 0.0)
+//  if(stepCount == 0)
+//  {
+//    // continuous value => step increment should be in the range ]-1.0, 1.0[ otherwise it does not make
+//    // much sense
+//    if(stepIncrement <= -1.0 || stepIncrement >= 1.0)
+//      DLOG_F(WARNING, "parameter [%d] represents a continuous value (stepCount == 0) "
+//                      "so step-increment (%f) should be in the ]-1.0, 1.0[ range",
+//             fControlParameter.getTagID(),
+//             stepIncrement);
+//  }
+//  else
+//  {
+//    auto s = std::abs(stepIncrement);
+//
+//    // discrete value => step increment should be an integer
+//    if(std::floor(s) != s)
+//      DLOG_F(WARNING, "parameter [%d] represents a discrete value (stepCount == %d) "
+//                      "so step-increment (%f) should be an integer",
+//             fControlParameter.getTagID(),
+//             stepCount,
+//             stepIncrement);
+//  }
+
+  if(stepIncrement == 0)
   {
-    DLOG_F(WARNING, "step-increment is set to 0.0 so this control will have no effect");
+    DLOG_F(WARNING, "step-increment is set to 0 so this control will have no effect");
   }
 #endif
 
@@ -250,19 +255,17 @@ void StepButtonView::registerParameters()
 //------------------------------------------------------------------------
 // StepButtonView::computeNextValue
 //------------------------------------------------------------------------
-ParamValue StepButtonView::computeNextValue(double iIncrement) const
+int32 StepButtonView::computeNextValue(int32 iIncrement) const
 {
   // no increment, noop
-  if(iIncrement == 0.0)
+  if(iIncrement == 0)
     return getControlValue();
 
-  auto stepCount = fControlParameter.getStepCount();
+  auto stepCount = computeStepCount();
 
   if(stepCount > 0)
   {
-    // Handles discrete value case => convert normalized value to discrete value before applying increment
-    auto discreteValue = convertNormalizedValueToDiscreteValue(stepCount, getControlValue());
-    discreteValue += static_cast<decltype(discreteValue)>(iIncrement);
+    auto discreteValue = getControlValue() + iIncrement;
 
     // handles wrapping
     if(getWrap())
@@ -284,36 +287,12 @@ ParamValue StepButtonView::computeNextValue(double iIncrement) const
       discreteValue = Utils::clamp(discreteValue, Utils::ZERO_INT32, stepCount);
     }
 
-    // converts back to normalized value
-    return convertDiscreteValueToNormalizedValue(stepCount, discreteValue);
+    return discreteValue;
   }
   else
   {
-    // Handles continuous case => use normalized value directly
-    auto value = getControlValue();
-    value += iIncrement;
-
-    // handles wrapping
-    if(getWrap())
-    {
-      if(iIncrement > 0)
-      {
-        while(value > 1.0)
-          value -= 1.0;
-      }
-      else
-      {
-        while(value < 0.0)
-          value += 1.0;
-      }
-    }
-    else
-      // no wrapping => simply clamp the value to the range
-      value = Utils::clamp(value, 0.0, 1.0);
-
-    return value;
+    return getControlValue();
   }
-
 }
 
 //------------------------------------------------------------------------

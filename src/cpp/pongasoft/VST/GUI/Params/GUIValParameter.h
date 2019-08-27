@@ -63,6 +63,8 @@ public:
     return static_cast<ParamID>(fTagID);
   }
 
+  inline int32 getStepCount() const override { return 0; }
+
   /**
    * Update the parameter with a value.
    *
@@ -167,6 +169,12 @@ public:
       return std::make_unique<FObjectCxCallback>(const_cast<GUIValParameter *>(this), iChangeCallback);
     else
       return nullptr;
+  }
+
+  // asDiscreteParameter
+  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
+  {
+    return nullptr;
   }
 
 private:

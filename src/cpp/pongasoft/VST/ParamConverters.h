@@ -15,8 +15,7 @@
  *
  * @author Yan Pujante
  */
-#ifndef __PONGASOFT_VST_PARAM_CONVERTERS_H__
-#define __PONGASOFT_VST_PARAM_CONVERTERS_H__
+#pragma once
 
 #include <pongasoft/Utils/Misc.h>
 #include <pongasoft/VST/Types.h>
@@ -37,8 +36,7 @@
 #include <type_traits>
 #include <pongasoft/Utils/Constants.h>
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -184,8 +182,7 @@ public:
  * Implements the algorithm described in the VST documentation on how to interpret a
  * discrete value into a normalized value
  */
-template<typename IntType = int>
-static inline ParamValue convertDiscreteValueToNormalizedValue(int32 iStepCount, IntType iDiscreteValue)
+static inline ParamValue convertDiscreteValueToNormalizedValue(int32 iStepCount, int32 iDiscreteValue)
 {
   auto value = Utils::clamp<int32, int32>(iDiscreteValue, 0, iStepCount);
   if(value == 0)
@@ -198,13 +195,12 @@ static inline ParamValue convertDiscreteValueToNormalizedValue(int32 iStepCount,
  * Implements the algorithm described in the VST documentation on how to interpret a
  * normalized value as a discrete value
  */
-template<typename IntType = int>
-static inline IntType convertNormalizedValueToDiscreteValue(int32 iStepCount, ParamValue iNormalizedValue)
+static inline int32 convertNormalizedValueToDiscreteValue(int32 iStepCount, ParamValue iNormalizedValue)
 {
   // ParamValue must remain within its bounds
   auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
   auto discreteValue = std::floor(std::min(static_cast<ParamValue>(iStepCount), value * (iStepCount + 1)));
-  return static_cast<IntType>(discreteValue);
+  return static_cast<int32>(discreteValue);
 }
 
 /**
@@ -212,7 +208,7 @@ static inline IntType convertNormalizedValueToDiscreteValue(int32 iStepCount, Pa
  * documentation. Note that the number of steps is always -1 from the number of values.
  * For example for 3 values (0, 1, 2) the number of steps is 2.
  */
-template<int32 StepCount, typename IntType = int>
+template<int32 StepCount, typename IntType = int32>
 class DiscreteValueParamConverter : public IParamConverter<IntType>
 {
 public:
@@ -235,12 +231,12 @@ public:
 
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
-    return convertDiscreteValueToNormalizedValue<IntType>(StepCount, iDiscreteValue);
+    return convertDiscreteValueToNormalizedValue(StepCount, static_cast<int32>(iDiscreteValue));
   }
 
   inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
-    return convertNormalizedValueToDiscreteValue<IntType>(StepCount, iNormalizedValue);
+    return static_cast<ParamType>(convertNormalizedValueToDiscreteValue(StepCount, iNormalizedValue));
   }
 
   // toString
@@ -275,7 +271,7 @@ private:
 
 /**
  * This converters maps a list of values of type `T` to discrete values. It can be used with any `T` that is
- * comparable (note that you can optionally provide your own `Compare`. For example, `T` can be an enum, enum class,
+ * comparable (note that you can optionally provide your own `Compare`). For example, `T` can be an enum, enum class,
  * struct, class, etc...
  *
  * Example:
@@ -290,13 +286,11 @@ private:
  *
  * // ...
  * fTab =
- *   vst<DiscreteTypeParamConverter<ETabs>>(EJambaTestPluginParamID::kTab,
- *                                          STR16("Tab"),
+ *   vst<DiscreteTypeParamConverter<ETabs>>(EJambaTestPluginParamID::kTab, STR16("Tab"),
  *                                          {
  *                                            {ETabs::kTabAll,              STR16("All Controls")},
  *                                            {ETabs::kTabToggleButtonView, STR16("ToggleButtonView")}
  *                                          })
- *     .guiOwned()
  *     .add();
  *
  * ```
@@ -307,10 +301,10 @@ class DiscreteTypeParamConverter : public IParamConverter<T>
 public:
   /**
    * Maintains the map of possible values of T (defined in constructor) */
-  using TMap = std::map<T, std::pair<VstString16, ParamValue>, Compare>;
+  using TMap = std::map<T, std::tuple<VstString16, ParamValue, int32>, Compare>;
 
   /**
-   * Defines the mapping: discrete value [0, stepCount[ to T */
+   * Defines the mapping: discrete value [0, stepCount] to T */
   using TList = std::vector<T>;
 
   /**
@@ -334,8 +328,8 @@ public:
     int32 i = 0;
     for(auto &pair : iInitList)
     {
-      auto paramValue = convertDiscreteValueToNormalizedValue<int32>(stepCount, i);
-      fMap[pair.first] = {pair.second, paramValue};
+      auto paramValue = convertDiscreteValueToNormalizedValue(stepCount, i);
+      fMap[pair.first] = std::make_tuple(pair.second, paramValue, i);
       fList.emplace_back(pair.first);
       i++;
     }
@@ -352,7 +346,7 @@ public:
   {
     auto iter = fMap.find(iValue);
     if(iter != fMap.cend())
-      return iter->second.second;
+      return std::get<1>(iter->second);
     else
     {
       DLOG_F(WARNING, "could not normalize value...");
@@ -363,7 +357,7 @@ public:
   // denormalize
   inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
-    auto index = convertNormalizedValueToDiscreteValue<int32>(getStepCount(), iNormalizedValue);
+    auto index = convertNormalizedValueToDiscreteValue(getStepCount(), iNormalizedValue);
     return fList[index];
   }
 
@@ -374,7 +368,7 @@ public:
     if(iter != fMap.cend())
     {
       Steinberg::UString wrapper(oString, str16BufferSize (String128));
-      wrapper.assign(iter->second.first.c_str());
+      wrapper.assign(std::get<0>(iter->second).c_str());
     }
     else
       oString[0] = 0;
@@ -413,18 +407,22 @@ public:
   // Constructor with all values defined
   explicit EnumParamConverter(ConstructorType iToStringValues) : fConverter{iToStringValues} {}
 
+  // getStepCount
   inline int32 getStepCount() const override { return MaxValue; }
 
+  // normalize
   inline ParamValue normalize(ParamType const &iDiscreteValue) const override
   {
     return fConverter.normalize(static_cast<IntType>(iDiscreteValue));
   }
 
+  // denormalize
   inline ParamType denormalize(ParamValue iNormalizedValue) const override
   {
     return static_cast<Enum>(fConverter.denormalize(iNormalizedValue));
   }
 
+  // toString
   void toString(ParamType const &iValue, String128 oString, int32 iPrecision) const override
   {
     fConverter.toString(static_cast<IntType>(iValue), oString, iPrecision);
@@ -436,6 +434,3 @@ private:
 
 
 }
-}
-
-#endif // __PONGASOFT_VST_PARAM_CONVERTERS_H__
