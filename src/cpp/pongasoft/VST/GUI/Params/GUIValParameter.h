@@ -138,9 +138,10 @@ public:
   }
 
   // accessValue
-  void accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
+  tresult accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
   {
     iGetter(fValue);
+    return kResultOk;
   }
 
   // getValue
@@ -172,14 +173,52 @@ public:
   }
 
   // asDiscreteParameter
-  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
-  {
-    return nullptr;
-  }
+  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override;
 
-private:
+protected:
   TagID fTagID;
   T fValue;
 };
+
+/**
+ * Simple extension class to treat a Val parameter as a discrete one.
+ *
+ * Implementation note: `GUIValParameter` is internal and not shared across views. As a result this implementation
+ * does not wrap another `GUIValParameter` (like `GUIJmbParameter` implementation does) which suffices for the
+ * current need. If `GUIValParameter` gets promoted to api level at a later date, then this implementation will
+ * need to be changed.
+ */
+class GUIDiscreteValParameter : public GUIValParameter<int32>
+{
+public:
+  GUIDiscreteValParameter(TagID iTagId, int32 iDefaultValue, int32 iStepCount) :
+    GUIValParameter(iTagId, iDefaultValue),
+    fStepCount(iStepCount)
+  {
+    DCHECK_F(fStepCount > 0);
+  }
+
+  // getStepCount
+  int32 getStepCount() const override { return fStepCount; }
+
+protected:
+  int32 fStepCount;
+};
+
+//------------------------------------------------------------------------
+// GUIValParameter::asDiscreteParameter
+//------------------------------------------------------------------------
+template<typename T>
+std::shared_ptr<ITGUIParameter<int32>> GUIValParameter<T>::asDiscreteParameter(int32 iStepCount)
+{
+  if(iStepCount > 0)
+  {
+    if constexpr(Utils::is_static_cast_defined<T, int32>)
+    {
+      return std::make_shared<GUIDiscreteValParameter>(fTagID, static_cast<int32>(fValue), iStepCount);
+    }
+  }
+  return nullptr;
+}
 
 }

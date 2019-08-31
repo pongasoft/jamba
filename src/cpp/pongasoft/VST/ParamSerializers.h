@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,18 +18,79 @@
 #pragma once
 
 #include <pongasoft/logging/logging.h>
+#include <pongasoft/Utils/Constants.h>
+#include <pongasoft/Utils/Misc.h>
 #include <pluginterfaces/vst/vsttypes.h>
 #include <base/source/fstreamer.h>
 #include <string>
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <map>
+#include <vector>
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
+
+/**
+ * Interface that defines a converter from a type `T` to an `int32` given a number of steps
+ * (provided by `getStepCount`). Any Jmb parameter providing this interface can be used as a discrete parameter
+ * (for example, in a step button view). Note that this interface does not need to be implemented if `T` can behave
+ * like an `int32` (see `StaticCastDiscreteConverter`).
+ */
+template<typename T>
+class IDiscreteConverter
+{
+public:
+  virtual int32 getStepCount() const = 0;
+  virtual tresult convertFromDiscreteValue(int32 iDiscreteValue, T &oValue) const = 0;
+  virtual tresult convertToDiscreteValue(T const &iValue, int32 &oDiscreteValue) const = 0;
+};
+
+/**
+ * This implementation simply cast `T` to an `int32` (and vice-versa). For example, it works for any numerical types
+ * or enums. And it works for any `struct` or `class` that defines:
+ *
+ * ```
+ *   explicit T(int32 x); // constructor for cast from int32 to T
+ *   explicit operator int32() const; // operator int32 for cast from T to int32
+ * ```
+ */
+template<typename T>
+class StaticCastDiscreteConverter : public IDiscreteConverter<T>
+{
+public:
+  // Constructor
+  explicit StaticCastDiscreteConverter(int32 iStepCount) : fStepCount(iStepCount)
+  {
+    DCHECK_F(fStepCount > 0);
+  }
+
+  // getStepCount
+  int32 getStepCount() const override { return fStepCount; }
+
+  // convertFromDiscreteValue
+  tresult convertFromDiscreteValue(int32 iDiscreteValue, T &oValue) const override
+  {
+    iDiscreteValue = Utils::clamp(iDiscreteValue, Utils::ZERO_INT32, fStepCount);
+    oValue = static_cast<T>(iDiscreteValue);
+    return kResultOk;
+  }
+
+  // convertToDiscreteValue
+  tresult convertToDiscreteValue(T const &iValue, int32 &oDiscreteValue) const override
+  {
+    oDiscreteValue = static_cast<int32>(iValue);
+    oDiscreteValue = Utils::clamp(oDiscreteValue, Utils::ZERO_INT32, fStepCount);
+    return kResultOk;
+  }
+
+protected:
+  int32 fStepCount;
+};
+
 
 /**
  * A vst parameter is represented by a ParamValue type which is a double in the range [0,1].
@@ -235,5 +296,135 @@ public:
   }
 };
 
-}
+/**
+ * This converters maps a list of values of type `T` to discrete values. It can be used with any `T` that is
+ * comparable (note that you can optionally provide your own `Compare`). For example, `T` can be an enum, enum class,
+ * struct, class, etc...
+ *
+ * Example:
+ * ```
+ * enum class ETabs {
+ *  kTabAll = 100,
+ *  kTabToggleButtonView = 150
+ * };
+ *
+ * // ...
+ * JmbParam<ETabs> fTab;
+ *
+ * // ...
+ * fTab =
+ *   jmb<ETabs>(EJambaTestPluginParamID::kTab, STR16("Tab"))
+ *     .serializer<DiscreteTypeParamSerializer<ETabs>>(
+ *                                          {
+ *                                            {ETabs::kTabAll,              "All Controls"},
+ *                                            {ETabs::kTabToggleButtonView, "ToggleButtonView"}
+ *                                          })
+ *     .add();
+ *
+ * ```
+ */
+template<typename T, class Compare = std::less<T>>
+class DiscreteTypeParamSerializer : public IParamSerializer<T>, public IDiscreteConverter<T>
+{
+public:
+  /**
+   * Maintains the map of possible values of T (defined in constructor) */
+  using TMap = std::map<T, std::pair<std::string, int32>, Compare>;
+
+  /**
+   * Defines the mapping: discrete value [0, stepCount] to T */
+  using TList = std::vector<T>;
+
+  /**
+   * Defines the type for the constructor argument : `{ { t, "abc" }, ... }` */
+  using ConstructorType = std::initializer_list<std::pair<const T, std::string>> const &;
+
+  using ParamType = T;
+
+  // DiscreteTypeParamSerializer
+  DiscreteTypeParamSerializer(ConstructorType iInitList)
+  {
+    int32 stepCount = iInitList.size() - 1;
+
+    // by definition, a discrete parameter has a step count > 0
+    DCHECK_F(stepCount > 0);
+
+    int32 i = 0;
+    for(auto &pair : iInitList)
+    {
+      fMap[pair.first] = std::make_pair(pair.second, i);
+      fList.emplace_back(pair.first);
+      i++;
+    }
+
+    // sanity check... if not the same size it means that 2 entries in the list were the same!
+    DCHECK_F(fList.size() == fMap.size());
+  }
+
+  // getStepCount
+  inline int32 getStepCount() const override { return fMap.size() - 1; }
+
+  // convertFromDiscreteValue
+  tresult convertFromDiscreteValue(int32 iDiscreteValue, ParamType &oValue) const override
+  {
+    if(iDiscreteValue < 0 || iDiscreteValue > getStepCount())
+      return kResultFalse;
+    oValue = fList[iDiscreteValue];
+    return kResultOk;
+  }
+
+  // convertToDiscreteValue
+  tresult convertToDiscreteValue(ParamType const &iValue, int32 &oDiscreteValue) const override
+  {
+    auto iter = fMap.find(iValue);
+    if(iter != fMap.cend())
+    {
+      oDiscreteValue = std::get<1>(iter->second);
+      return kResultOk;
+    }
+    else
+    {
+      DLOG_F(WARNING, "could not convertToDiscreteValue...");
+      return kResultFalse;
+    }
+  }
+
+  // readFromStream
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
+  {
+    int32 discreteValue;
+    if(IBStreamHelper::readInt32(iStreamer, discreteValue) == kResultOk)
+    {
+      return convertFromDiscreteValue(discreteValue, oValue);
+    }
+    return kResultFalse;
+  }
+
+  // writeToStream
+  tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const override
+  {
+    int32 discreteValue;
+    if(convertToDiscreteValue(iValue, discreteValue) == kResultOk)
+    {
+      if(oStreamer.writeInt32(discreteValue))
+        return kResultOk;
+    }
+
+    return kResultFalse;
+  }
+
+  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
+  {
+    auto iter = fMap.find(iValue);
+    if(iter != fMap.cend())
+    {
+      oStream << std::get<0>(iter->second);
+    }
+  }
+
+private:
+  TMap fMap{};
+  TList fList{};
+};
+
 }

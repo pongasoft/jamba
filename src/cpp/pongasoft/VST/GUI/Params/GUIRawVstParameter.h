@@ -116,9 +116,10 @@ public:
   }
 
   // accessValue
-  void accessValue(ValueAccessor const &iGetter) const override
+  tresult accessValue(ValueAccessor const &iGetter) const override
   {
     iGetter(getValue());
+    return kResultOk;
   }
 
   /**

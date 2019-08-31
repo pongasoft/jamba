@@ -18,6 +18,7 @@
 #pragma once
 
 #include <type_traits>
+#include <sstream>
 #include "Cpp17.h"
 
 namespace pongasoft::Utils {
@@ -56,7 +57,7 @@ using operator_not_eq_t = decltype(std::declval<T const&>() != std::declval<T co
  *
  * Example:
  * ```
- * if constexpr (is_operator_not_eq_defined<MyType>) {
+ * if constexpr (Utils::is_operator_not_eq_defined<MyType>) {
  *   // implementation allows to write a != b (with a/b of MyType)
  * } else {
  *   // no such operator... alternate implementation
@@ -65,4 +66,44 @@ using operator_not_eq_t = decltype(std::declval<T const&>() != std::declval<T co
  */
 template<typename T>
 constexpr auto is_operator_not_eq_defined = cpp17::experimental::is_detected_v<operator_not_eq_t, T>;
+
+/**
+ * Defines the type for `static_cast<To>(From)`
+ */
+template<typename From, typename To>
+using static_cast_t = decltype(static_cast<To>(std::declval<From>()));
+
+/**
+ * Allows to detect (at compilation time) whether the call `static_cast<To>(from)` (where `from` is of type `From`)
+ * will compile.
+ *
+ * Example:
+ * ```
+ * void f(SomeType &iValue) {
+ * if constexpr(Utils::is_static_cast_defined<SomeType, int>) {
+ *   auto i = static_cast<int>(iValue); // this will compile!
+ *   ...
+ * } else {
+ *   // static_cast<int>(iValue) does NOT compile so do something different
+ * }
+ * ```
+ */
+template<typename From, typename To>
+constexpr auto is_static_cast_defined = cpp17::experimental::is_detected_v<static_cast_t, From, To>;
+
+/**
+ * `typeid(T).name()` does not account for `const` or reference. This function adds the `const` and `&` qualifier
+ * when necessary */
+template<typename T>
+std::string typeString()
+{
+  std::stringstream s;
+  s << typeid(T).name();
+  if(std::is_const_v<typename std::remove_reference<T>::type>)
+    s << " const";
+  if(std::is_reference_v<T>)
+    s << " &";
+  return s.str();
+}
+
 }

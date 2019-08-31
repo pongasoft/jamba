@@ -290,14 +290,14 @@ bool GUIParamCxMgr::registerOptionalParam(TagID iParamID,
     }
     else
     {
-      DLOG_F(WARNING, "param [%d] is not of the requested type [%s]", iParamID, typeid(T).name());
+      DLOG_F(WARNING, "param [%d] is not of the requested type [%s]", iParamID, Utils::typeString<T>().c_str());
     }
   }
 
   // no vst or jmb parameter match => using default
   if(!paramChanged)
   {
-    oParam.clearAssignment(iParamID);
+    oParam.assign(std::make_shared<GUIValParameter<T>>(iParamID, oParam.getValue()));
 
     if(iParamID == UNDEFINED_PARAM_ID)
       paramChanged = true;

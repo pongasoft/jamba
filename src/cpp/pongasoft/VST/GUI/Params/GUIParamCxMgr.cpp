@@ -76,14 +76,19 @@ bool GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
     }
     else
     {
-      DLOG_F(WARNING, "param [%d] is not of the requested type", iParamID);
+      DLOG_F(WARNING, "param [%d] is not a discrete parameter or cannot be interpreted as one", iParamID);
     }
   }
 
   // no vst or jmb parameter match => using default
   if(!paramChanged)
   {
-    oParam.clearAssignment(iParamID);
+    auto pint32 = std::make_shared<GUIValParameter<int32>>(iParamID, oParam.getValue());
+
+    if(iStepCount > 0)
+      oParam.assign(std::move(pint32->asDiscreteParameter(iStepCount)));
+    else
+      oParam.assign(std::move(pint32));
 
     if(iParamID == UNDEFINED_PARAM_ID)
       paramChanged = true;

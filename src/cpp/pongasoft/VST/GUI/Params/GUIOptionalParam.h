@@ -158,11 +158,6 @@ protected:
     fParameter = std::move(iParameter);
   }
 
-  void clearAssignment(TagID iTagID)
-  {
-    fParameter = std::make_shared<GUIValParameter<T>>(iTagID, getValue());
-  }
-
 private:
   std::shared_ptr<ITGUIParameter<T>> fParameter;
 };

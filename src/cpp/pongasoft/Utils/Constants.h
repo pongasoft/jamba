@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,11 +18,9 @@
 #pragma once
 #include <pluginterfaces/base/ftypes.h>
 
-namespace pongasoft {
-namespace Utils {
+namespace pongasoft::Utils {
 
 constexpr Steinberg::int32 MAX_INT32 = 0x7fffffff;
 constexpr auto ZERO_INT32 = static_cast<Steinberg::int32>(0);
 
-}
 }

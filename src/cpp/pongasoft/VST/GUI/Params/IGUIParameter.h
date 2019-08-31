@@ -88,7 +88,16 @@ public:
   };
 
 public:
-  virtual void accessValue(ValueAccessor const &iGetter) const = 0;
+  /**
+   * `getValue()` has a different api depending on the type of param (Vst and Jmb). As a result this interface
+   * only provides a common way to access it in both case via an accessor which allows to:
+   *
+   * - avoid copy in the case of Jmb
+   * - avoid duplicating values in the case of Vst
+   *
+   * @return `kResultOk` if the getter is called, and `kResultFalse` if the getter is not called for some reason
+   */
+  virtual tresult accessValue(ValueAccessor const &iGetter) const = 0;
 
   virtual bool update(ParamType const &iValue) = 0;
 

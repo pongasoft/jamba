@@ -227,9 +227,10 @@ public:
   }
 
   // accessValue
-  void accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
+  tresult accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
   {
     iGetter(fValue);
+    return kResultOk;
   }
 
   // getValue
@@ -266,10 +267,7 @@ public:
   }
 
   // asDiscreteParameter
-  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
-  {
-    return nullptr;
-  }
+  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override;
 
 protected:
   ParamType fValue;
@@ -285,6 +283,175 @@ static std::shared_ptr<GUIJmbParameter<T>> castToJmb(std::shared_ptr<IGUIParamet
   return std::dynamic_pointer_cast<GUIJmbParameter<T>>(iParam);
 }
 
+/**
+ *  Wraps a `GUIJmbParameter<T>` to interpret it as a discrete parameter using the converter
+ */
+template<typename T>
+class GUIDiscreteJmbParameter : public ITGUIParameter<int32>
+{
+public:
+  using EditorType = typename ITGUIParameter<int32>::ITEditor;
+
+public:
+  GUIDiscreteJmbParameter(std::shared_ptr<GUIJmbParameter<T>> iJmbParameter,
+                          std::shared_ptr<IDiscreteConverter<T>> iConverter) :
+    fJmbParameter{std::move(iJmbParameter)},
+    fConverter{iConverter}
+  {
+    DCHECK_F(fJmbParameter != nullptr);
+    DCHECK_F(fConverter != nullptr);
+  }
+
+  // getParamID
+  ParamID getParamID() const override
+  {
+    return fJmbParameter->getParamID();
+  }
+
+  // getStepCount
+  int32 getStepCount() const override
+  {
+    return fConverter->getStepCount();
+  }
+
+  // connect
+  std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const override
+  {
+    return fJmbParameter->connect(iChangeListener);
+  }
+
+  // connect
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const override
+  {
+    return fJmbParameter->connect(iChangeCallback);
+  }
+
+  // asDiscreteParameter
+  std::shared_ptr <ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
+  {
+    return fJmbParameter->asDiscreteParameter(iStepCount);
+  }
+
+  /**
+   * Because converting the current Jmb value to an `int32` may fail this api returns `kResultOk` if it works in which
+   * case, `oDiscreteValue` contains the value. Otherwise it returns `kResultFalse` and `oDiscreteValue` is left
+   * untouched.
+   */
+  tresult getValue(int32 &oDiscreteValue) const
+  {
+    auto res = fConverter->convertToDiscreteValue(fJmbParameter->getValue(), oDiscreteValue);
+    if(res == kResultFalse)
+      DLOG_F(WARNING, "Cannot convert current value of Jmb param [%d] to a discrete value", getParamID());
+    return res;
+  }
+
+  // accessValue
+  tresult accessValue(ValueAccessor const &iGetter) const override
+  {
+    int32 discreteValue;
+    if(getValue(discreteValue) == kResultOk)
+    {
+      iGetter(discreteValue);
+      return kResultOk;
+    }
+    return kResultFalse;
+  }
+
+  // update
+  bool update(int32 const &iDiscreteValue) override
+  {
+    int32 currentDiscreteValue;
+    tresult res = getValue(currentDiscreteValue);
+
+    if(res == kResultOk)
+    {
+      if(iDiscreteValue != currentDiscreteValue)
+      {
+        if(setValue(iDiscreteValue) == kResultOk)
+          return true;
+      }
+    }
+
+    return false;
+  }
+
+  // setValue
+  tresult setValue(int32 const &iDiscreteValue) override
+  {
+    int32 currentDiscreteValue;
+    tresult res = getValue(currentDiscreteValue);
+    if(res == kResultOk)
+    {
+      if(iDiscreteValue != currentDiscreteValue)
+      {
+        res = kResultFalse;
+        if constexpr(std::is_copy_assignable_v<T>)
+        {
+          T jmbValue = fJmbParameter->getValue();
+          if(fConverter->convertFromDiscreteValue(iDiscreteValue, jmbValue) == kResultOk)
+            res = fJmbParameter->setValue(jmbValue);
+          else
+            DLOG_F(WARNING, "Cannot convert discrete value [%d] to a [%s] value of Jmb param [%d]",
+              iDiscreteValue,
+              typeid(T).name(),
+              getParamID());
+        }
+      }
+    }
+
+    return res;
+  }
+
+  // edit
+  std::unique_ptr<EditorType> edit() override
+  {
+    int32 currentDiscreteValue;
+    tresult res = getValue(currentDiscreteValue);
+    if(res == kResultOk)
+      return std::make_unique<DefaultEditorImpl<int32>>(this, currentDiscreteValue);
+    else
+      return nullptr;
+  }
+
+protected:
+  std::shared_ptr<GUIJmbParameter<T>> fJmbParameter;
+  std::shared_ptr<IDiscreteConverter<T>> fConverter;
+};
+
+//------------------------------------------------------------------------
+// GUIJmbParameter<T>::asDiscreteParameter
+//------------------------------------------------------------------------
+template<typename T>
+std::shared_ptr<ITGUIParameter<int32>> GUIJmbParameter<T>::asDiscreteParameter(int32 iStepCount)
+{
+  // Step 1: check if the Jmb param provide a discrete converter
+  auto converter = getParamDefT()->getDiscreteConverter();
+
+  if(converter && converter->getStepCount() > 0)
+    return std::make_shared<GUIDiscreteJmbParameter<T>>(std::dynamic_pointer_cast<GUIJmbParameter<T>>(ITGUIParameter<T>::shared_from_this()),
+                                                        std::move(converter));
+  else
+  {
+    // Step 2: no discrete converter, so we check if T can be automatically converted to an int32 (case where
+    // T is a numeric value, an enum, or a type that offers a "constructor(int32)" and "operator int32()" methods)
+    if(iStepCount > 0)
+    {
+      if constexpr(Utils::is_static_cast_defined<int32, T> && Utils::is_static_cast_defined<T, int32>)
+      {
+        converter = std::make_shared<StaticCastDiscreteConverter<T>>(iStepCount);
+        return std::make_shared<GUIDiscreteJmbParameter<T>>(std::dynamic_pointer_cast<GUIJmbParameter<T>>(ITGUIParameter<T>::shared_from_this()),
+                                                            std::move(converter));
+      }
+      else
+      {
+        DLOG_F(WARNING, "Jmb param [%d] (type [%s]) cannot be converted to a discrete parameter",
+               getParamID(),
+               Utils::typeString<T>().c_str());
+      }
+    }
+    return nullptr;
+  }
+}
 
 //------------------------------------------------------------------------
 // GUIJmbParam - wrapper to make writing the code much simpler and natural

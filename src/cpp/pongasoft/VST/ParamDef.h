@@ -258,6 +258,16 @@ public:
   // writeToMessage
   tresult writeToMessage(ParamType const &iValue, Message &oMessage) const;
 
+  /**
+   * @return the discrete converter associated with this param def or `nullptr` if there isn't one.
+   */
+  std::shared_ptr<IDiscreteConverter<T>> getDiscreteConverter() const
+  {
+    // Implementation note: at this moment, only checks if the serializer also implements the API.
+    // But possible to add an additional separate field to set it explicitly if there is a need
+    return std::dynamic_pointer_cast<IDiscreteConverter<T>>(fSerializer);
+  }
+
   // computeMessageAttrID
   std::string computeMessageAttrID() const
   {

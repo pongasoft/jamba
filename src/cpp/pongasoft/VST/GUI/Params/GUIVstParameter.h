@@ -130,9 +130,10 @@ public:
   }
 
   // accessValue
-  void accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
+  tresult accessValue(typename ITGUIParameter<T>::ValueAccessor const &iGetter) const override
   {
     iGetter(getValue());
+    return kResultOk;
   }
 
   /**
