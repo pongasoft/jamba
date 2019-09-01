@@ -33,9 +33,7 @@
 
 #include <pluginterfaces/vst/ivstaudioprocessor.h>
 
-namespace pongasoft {
-namespace test {
-namespace jamba {
+namespace pongasoft::test::jamba {
 
 using namespace pongasoft::VST;
 using namespace GUI::Params;
@@ -51,9 +49,31 @@ constexpr uint16 CONTROLLER_STATE_VERSION = 1;
 class JambaTestPluginParameters : public Parameters
 {
 public:
-  VstParam<bool> fBypassParam; // the bypass toggle (bypasses the processing if Fx)
+  VstParam<bool> fBypass; // the bypass toggle (bypasses the processing if Fx)
 
   VstParam<ETabs> fTab;        // multiple tabs to test different aspects of the framework
+
+  // various flavors of Vst parameters
+  RawVstParam fRawVst;
+  VstParam<ParamValue> fParamValueVst;
+  VstParam<int32> fInt32Vst;
+  VstParam<int64> fInt64Vst;
+  VstParam<bool> fBoolVst;
+  VstParam<EEnum> fEnumVst;
+  VstParam<EEnumClass> fEnumClassVst;
+  VstParam<ENonContiguousEnum> fNonContiguousEnumVst;
+  VstParam<Gain> fGainVst;
+
+  // various flavors of Jmb parameters
+  JmbParam<ParamValue> fParamValueJmb;
+  JmbParam<int32> fInt32Jmb;
+  JmbParam<int64> fInt64Jmb;
+  JmbParam<bool> fBoolJmb;
+  JmbParam<EEnum> fEnumJmb;
+  JmbParam<EEnumClass> fEnumClassJmb;
+  JmbParam<ENonContiguousEnum> fNonContiguousEnumJmb;
+  JmbParam<Gain> fGainJmb;
+  JmbParam<UTF8String> fUTF8String;
 
 public:
   JambaTestPluginParameters();
@@ -68,11 +88,29 @@ class JambaTestPluginRTState : public RTState
 {
 public:
   RTVstParam<bool> fBypass;
+  RTRawVstParam fRawVst;
+  RTVstParam<ParamValue> fParamValueVst;
+  RTVstParam<int32> fInt32Vst;
+  RTVstParam<int64> fInt64Vst;
+  RTVstParam<bool> fBoolVst;
+  RTVstParam<EEnum> fEnumVst;
+  RTVstParam<EEnumClass> fEnumClassVst;
+  RTVstParam<ENonContiguousEnum> fNonContiguousEnumVst;
+  RTVstParam<Gain> fGainVst;
 
 public:
   explicit JambaTestPluginRTState(JambaTestPluginParameters const &iParams) :
     RTState(iParams),
-    fBypass{add(iParams.fBypassParam)}
+    fBypass{add(iParams.fBypass)},
+    fRawVst{add(iParams.fRawVst)},
+    fParamValueVst{add(iParams.fParamValueVst)},
+    fInt32Vst{add(iParams.fInt32Vst)},
+    fInt64Vst{add(iParams.fInt64Vst)},
+    fBoolVst{add(iParams.fBoolVst)},
+    fEnumVst{add(iParams.fEnumVst)},
+    fEnumClassVst{add(iParams.fEnumClassVst)},
+    fNonContiguousEnumVst{add(iParams.fNonContiguousEnumVst)},
+    fGainVst{add(iParams.fGainVst)}
   {
   }
 
@@ -107,13 +145,28 @@ using namespace GUI;
 class JambaTestPluginGUIState : public GUIPluginState<JambaTestPluginParameters>
 {
 public:
-  //------------------------------------------------------------------------
-  // GUI Parameters go here...
-  //------------------------------------------------------------------------
+  GUIJmbParam<ParamValue> fParamValueJmb;
+  GUIJmbParam<int32> fInt32Jmb;
+  GUIJmbParam<int64> fInt64Jmb;
+  GUIJmbParam<bool> fBoolJmb;
+  GUIJmbParam<EEnum> fEnumJmb;
+  GUIJmbParam<EEnumClass> fEnumClassJmb;
+  GUIJmbParam<ENonContiguousEnum> fNonContiguousEnumJmb;
+  GUIJmbParam<Gain> fGainJmb;
+  GUIJmbParam<UTF8String> fUTF8String;
 
 public:
   explicit JambaTestPluginGUIState(JambaTestPluginParameters const &iParams) :
-    GUIPluginState(iParams)
+    GUIPluginState(iParams),
+    fParamValueJmb{add(iParams.fParamValueJmb)},
+    fInt32Jmb{add(iParams.fInt32Jmb)},
+    fInt64Jmb{add(iParams.fInt64Jmb)},
+    fBoolJmb{add(iParams.fBoolJmb)},
+    fEnumJmb{add(iParams.fEnumJmb)},
+    fEnumClassJmb{add(iParams.fEnumClassJmb)},
+    fNonContiguousEnumJmb{add(iParams.fNonContiguousEnumJmb)},
+    fGainJmb{add(iParams.fGainJmb)},
+    fUTF8String{add(iParams.fUTF8String)}
   {};
 
 //------------------------------------------------------------------------
@@ -150,6 +203,4 @@ protected:
 
 };
 
-}
-}
 }

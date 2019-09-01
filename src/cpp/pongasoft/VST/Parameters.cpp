@@ -18,8 +18,7 @@
 #include <base/source/fstring.h>
 #include "Parameters.h"
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 /**
  * Internal class which extends the Vst::Parameter to override toString and delegate to the param def
@@ -312,7 +311,7 @@ tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSave
     {
       paramOk = kResultFalse;
       DLOG_F(ERROR,
-             "Param [%d] was not registered as a vst or ser parameter",
+             "Param [%d] was not registered as a vst or jmb parameter",
              id);
     }
     else
@@ -401,5 +400,4 @@ Parameters::RawVstParamDefBuilder Parameters::raw(ParamID iParamID, VstString16 
   return Parameters::RawVstParamDefBuilder(this, iParamID, std::move(iTitle));
 }
 
-}
 }

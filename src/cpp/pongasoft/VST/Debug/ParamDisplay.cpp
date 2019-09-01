@@ -25,9 +25,7 @@
 #include <iomanip>
 #include <map>
 
-namespace pongasoft {
-namespace VST {
-namespace Debug {
+namespace pongasoft::VST::Debug {
 
 
 //------------------------------------------------------------------------
@@ -480,6 +478,4 @@ ParamDisplay ParamDisplay::from(GUI::GUIState const *iState, bool iSaveStateOnly
     ;
 }
 
-}
-}
 }

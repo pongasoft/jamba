@@ -246,6 +246,86 @@ public:
 };
 
 /**
+ * This parameter handles serializing a int32 parameter
+ */
+class Int32ParamSerializer : public IParamSerializer<int32>
+{
+public:
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
+  {
+    return IBStreamHelper::readInt32(iStreamer, oValue);
+  }
+
+  tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const override
+  {
+    oStreamer.writeInt32(iValue);
+    return kResultOk;
+  }
+
+  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
+  {
+    oStream << iValue;
+  }
+};
+
+/**
+ * This parameter handles serializing a int64 parameter
+ */
+class Int64ParamSerializer : public IParamSerializer<int64>
+{
+public:
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
+  {
+    return IBStreamHelper::readInt64(iStreamer, oValue);
+  }
+
+  tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const override
+  {
+    oStreamer.writeInt64(iValue);
+    return kResultOk;
+  }
+
+  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
+  {
+    oStream << iValue;
+  }
+};
+
+/**
+ * This parameter handles serializing a bool parameter
+ */
+class BooleanParamSerializer : public IParamSerializer<bool>
+{
+public:
+  explicit BooleanParamSerializer(std::string iFalseString = "Off",
+                                  std::string iTrueString = "On") :
+    fFalseString{std::move(iFalseString)},
+    fTrueString{std::move(iTrueString)}
+  {}
+
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
+  {
+    return IBStreamHelper::readBool(iStreamer, oValue);
+  }
+
+  tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const override
+  {
+    oStreamer.writeBool(iValue);
+    return kResultOk;
+  }
+
+  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
+  {
+    oStream << (iValue ? fTrueString : fFalseString);
+  }
+
+protected:
+  std::string fFalseString;
+  std::string fTrueString;
+};
+
+
+/**
  * A parameter backed by a C type string (char[size]). No memory allocation happens in this case.
  *
  * @tparam size of the string saved/restored

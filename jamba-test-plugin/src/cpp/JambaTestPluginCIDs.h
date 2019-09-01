@@ -20,9 +20,7 @@
 #include <pluginterfaces/base/funknown.h>
 #include <pluginterfaces/vst/vsttypes.h>
 
-namespace pongasoft {
-namespace test {
-namespace jamba {
+namespace pongasoft::test::jamba {
 
 //------------------------------------------------------------------------
 // These 2 IDs are used in JambaTestPlugin_VST2.cpp and JambaTestPlugin_VST3.cpp to create
@@ -46,8 +44,28 @@ enum EJambaTestPluginParamID : Steinberg::Vst::ParamID
 
   // represents which tab is currently shown in the UI
   kTab = 1100,
+
+  kRawVst = 2000,
+  kParamValueVst = 2010,
+  kInt32Vst = 2020,
+  kInt64Vst = 2030,
+  kBoolVst = 2040,
+  kEnumVst = 2050,
+  kEnumClassVst = 2060,
+  kNonContiguousEnumVst = 2070,
+  kGainVst = 2080,
+
+  kParamValueJmb = 3000,
+  kInt32Jmb = 3010,
+  kInt64Jmb = 3020,
+  kBoolJmb = 3030,
+  kEnumJmb = 3040,
+  kEnumClassJmb = 3050,
+  kNonContiguousEnumJmb = 3060,
+  kGainJmb = 3070,
+  kUTF8StringJmb = 3080,
+
+
 };
 
-}
-}
 }

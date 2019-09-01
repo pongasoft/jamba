@@ -133,7 +133,14 @@ public:
   /**
    * @return number of steps (for discrete param) or 0 for continuous
    */
-  inline int32 getStepCount() const override { return fVstParameters->getParameterInfo(fParamID)->stepCount; }
+  inline int32 getStepCount() const override
+  {
+    auto parameterInfo = fVstParameters->getParameterInfo(fParamID);
+    if(parameterInfo)
+      return parameterInfo->stepCount;
+    else
+      return 0;
+  }
 
   /**
    * Populates the oString with a string representation of this parameter

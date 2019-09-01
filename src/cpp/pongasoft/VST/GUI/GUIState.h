@@ -26,8 +26,8 @@
 #include <pongasoft/VST/MessageProducer.h>
 #include "ViewCxMgr.h"
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
+
 namespace Debug { class ParamDisplay; }
 namespace GUI {
 
@@ -62,7 +62,7 @@ public:
   inline bool existsVst(ParamID iParamID) const { return fVstParameters && fVstParameters->exists(iParamID); }
 
   /**
-   * @return true if there is a ser param with the provided ID
+   * @return true if there is a jmb param with the provided ID
    */
   inline bool existsJmb(ParamID iParamID) const { return fJmbParams.find(iParamID) != fJmbParams.cend(); }
 
@@ -347,7 +347,6 @@ std::shared_ptr<GUIVstParameter<T>> GUIState::getGUIVstParameter(ParamID iParamI
 }
 
 
-}
 }
 }
 

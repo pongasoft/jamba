@@ -15,8 +15,7 @@
  *
  * @author Yan Pujante
  */
-#ifndef __PONGASOFT_VST_PARAMETERS_H__
-#define __PONGASOFT_VST_PARAMETERS_H__
+#pragma once
 
 #include "ParamDef.h"
 #include "NormalizedState.h"
@@ -28,8 +27,7 @@
 
 #include <public.sdk/source/vst/vstparameters.h>
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 namespace Debug { class ParamDisplay; }
 
@@ -234,6 +232,14 @@ public:
    */
   template<typename ParamSerializer, typename... Args>
   JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(ParamID iParamID, VstString16 iTitle, Args&& ...iSerializerArgs);
+
+  /**
+   * This flavor allows the `ParamSerializer` to provide an actual type for the primary constructor
+   */
+  template<typename ParamSerializer>
+  JmbParamDefBuilder<typename ParamSerializer::ParamType> jmb(int32 iParamID,
+                                                              VstString16 iTitle,
+                                                              typename ParamSerializer::ConstructorType initValue);
 
   /**
    * Used from derived classes to build a non vst parameter (not convertible to a ParamValue). Use this version
@@ -532,6 +538,18 @@ Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::
 }
 
 //------------------------------------------------------------------------
+// Parameters::jmb
+//------------------------------------------------------------------------
+template<typename ParamSerializer>
+Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::jmb(int32 iParamID,
+                                                                                    VstString16 iTitle,
+                                                                                    typename ParamSerializer::ConstructorType initValue) {
+  auto builder = jmbFromType<typename ParamSerializer::ParamType>(iParamID, std::move(iTitle));
+  builder.template serializer<ParamSerializer>(initValue);
+  return builder;
+}
+
+//------------------------------------------------------------------------
 // Parameters::buildParamIDs
 //------------------------------------------------------------------------
 template<typename... Args>
@@ -576,6 +594,3 @@ tresult Parameters::setGUISaveStateOrder(int16 iVersion, Args&& ...args)
 }
 
 }
-}
-
-#endif // __PONGASOFT_VST_PARAMETERS_H__

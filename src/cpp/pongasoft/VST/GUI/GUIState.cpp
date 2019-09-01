@@ -19,9 +19,7 @@
 #include "GUIState.h"
 #include <pongasoft/VST/GUI/Params/GUIParamCxMgr.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
+namespace pongasoft::VST::GUI {
 
 //------------------------------------------------------------------------
 // GUIState::GUIState
@@ -125,6 +123,8 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
     auto iter = fJmbParams.find(paramID);
     if(iter == fJmbParams.cend())
     {
+      DCHECK_F(existsVst(paramID)); // sanity check
+
       // not found => regular parameter
       ParamValue value = fPluginParameters.readNormalizedValue(paramID, iStreamer);
       fVstParameters->setParamNormalized(paramID, value);
@@ -160,6 +160,8 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
     auto iter = fJmbParams.find(paramID);
     if(iter == fJmbParams.cend())
     {
+      DCHECK_F(existsVst(paramID)); // sanity check
+      
       ParamValue value = fVstParameters->getParamNormalized(paramID);
       oStreamer.writeDouble(value);
     }
@@ -184,6 +186,25 @@ tresult GUIState::init(VstParametersSPtr iVstParameters, IMessageProducer *iMess
   {
     DLOG_F(WARNING, "GUI Save State version is using the default entry order. Use Parameters::setGUISaveStateOrder to set explicitly.");
   }
+
+#ifndef NDEBUG
+  bool regOk = true;
+  for(int i = 0; i < saveOrder.getCount(); i++)
+  {
+    auto paramID = saveOrder.fOrder[i];
+    if(!fPluginParameters.getRawVstParamDef(paramID))
+    {
+      // no vst parameter registered with this id
+      if(!getJmbParameter(paramID))
+      {
+        regOk = false;
+        DLOG_F(ERROR, "Expected parameter [%d] used in GUISaveStateOrder not registered. If it is a Vst parameter, make sure you have added it to Parameters. If it is a Jmb parameter, make sure you have added it to the GUIState.", paramID);
+      }
+    }
+  }
+  DCHECK_F(regOk, "GUI state sanity check failed: some Jmb parameters are part of the save order but have not been added to GUIState.");
+#endif
+
   return kResultOk;
 }
 
@@ -228,6 +249,4 @@ tresult GUIState::sendMessage(IPtr<IMessage> iMessage)
     return kResultFalse;
 }
 
-}
-}
 }

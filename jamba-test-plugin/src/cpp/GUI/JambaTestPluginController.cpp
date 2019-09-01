@@ -18,10 +18,7 @@
 
 #include "JambaTestPluginController.h"
 
-namespace pongasoft {
-namespace test {
-namespace jamba {
-namespace GUI {
+namespace pongasoft::test::jamba::GUI {
 
 //------------------------------------------------------------------------
 // Constructor
@@ -63,7 +60,4 @@ tresult JambaTestPluginController::initialize(FUnknown *context)
   return res;
 }
 
-}
-}
-}
 }
