@@ -19,6 +19,7 @@
 
 #include <type_traits>
 #include <sstream>
+#include <ostream>
 #include "Cpp17.h"
 
 namespace pongasoft::Utils {
@@ -90,6 +91,27 @@ using static_cast_t = decltype(static_cast<To>(std::declval<From>()));
  */
 template<typename From, typename To>
 constexpr auto is_static_cast_defined = cpp17::experimental::is_detected_v<static_cast_t, From, To>;
+
+/**
+ * Defines the type for `operator<<`
+ */
+template<typename T>
+using operator_write_to_ostream_t = decltype(std::declval<std::ostream &>() << std::declval<T const&>());
+
+/**
+ * Allows to detect whether a type defines `ostream << x` at compile time.
+ *
+ * Example:
+ * ```
+ * if constexpr (Utils::is_operator_write_to_ostream_defined<MyType>) {
+ *   // implementation allows to write std::cout << x // (with x of type MyType)
+ * } else {
+ *   // no such operator... alternate implementation
+ * }
+ * ```
+ */
+template<typename T>
+constexpr auto is_operator_write_to_ostream_defined = cpp17::experimental::is_detected_v<operator_write_to_ostream_t, T>;
 
 /**
  * `typeid(T).name()` does not account for `const` or reference. This function adds the `const` and `&` qualifier

@@ -211,6 +211,12 @@ public:
     getParamDefT()->writeToStream(fValue, oStream);
   }
 
+  // toUTF8String
+  std::string toUTF8String(int32 iPrecision) const override
+  {
+    return getParamDefT()->toUTF8String(getValue(), iPrecision);
+  }
+
   // readFromMessage
   tresult readFromMessage(Message const &iMessage) override
   {
@@ -411,6 +417,12 @@ public:
       return std::make_unique<DefaultEditorImpl<int32>>(this, currentDiscreteValue);
     else
       return nullptr;
+  }
+
+  // toUTF8String
+  std::string toUTF8String(int32 iPrecision) const override
+  {
+    return fJmbParameter->toUTF8String(iPrecision);
   }
 
 protected:

@@ -207,6 +207,12 @@ public:
     return fRawParameter->toString();
   }
 
+  // toUTF8String
+  std::string toUTF8String(int32 iPrecision) const override
+  {
+    return fConverter->toString(getValue(), iPrecision);
+  }
+
   /**
    * @return an editor to modify the parameter (see Editor)
    */

@@ -150,6 +150,12 @@ public:
   // getValue
   inline ParamType &getValue() { return fValue; }
 
+  // toUTF8String
+  std::string toUTF8String(int32 iPrecision) const override
+  {
+    return VstUtils::toUTF8String(getValue(), iPrecision);
+  }
+
   /**
    * @return a connection that will listen to parameter changes (see GUIParamCx)
    */

@@ -46,6 +46,14 @@ public:
   virtual ParamID getParamID() const = 0;
   virtual int32 getStepCount() const = 0;
 
+  /**
+   * Return the current value of the parameter as a string (which is properly UTF-8 encoded).
+   *
+   * @param iPrecision if `iPrecision` < 0 the parameter is free to use whichever precision is tied to the parameter
+   *                   otherwise it should use the one provided
+   */
+  virtual std::string toUTF8String(int32 iPrecision) const = 0;
+
   virtual std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const = 0;
   virtual std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const = 0;
 

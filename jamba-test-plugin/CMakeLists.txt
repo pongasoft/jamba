@@ -89,6 +89,7 @@ set(JAMBA_TEST_SRC_FILES
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-SampleRateBasedClock.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-Utils.cpp
     )
 
 set(JAMBA_CPP_FOR_TEST_SOURCES

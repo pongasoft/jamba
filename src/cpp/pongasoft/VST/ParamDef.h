@@ -30,8 +30,7 @@
 #include <string>
 #include <memory>
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -112,6 +111,19 @@ public:
     RawParamConverter::staticToString(iNormalizedValue, iString, fPrecision);
   }
 
+  /**
+   * Return the value as a utf-8 string
+   *
+   * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
+   */
+  std::string toUTF8String(ParamValue iNormalizedValue, int32 iPrecision) const
+  {
+    String128 s;
+    s[0] = 0;
+    RawParamConverter::staticToString(iNormalizedValue, s, iPrecision >= 0 ? iPrecision : fPrecision);
+    return VstUtils::toUT8String(s);
+  }
+
 public:
   const VstString16 fUnits;
   const ParamValue fDefaultValue;
@@ -188,6 +200,19 @@ public:
       RawVstParamDef::toString(iNormalizedValue, iString);
   }
 
+  /**
+   * Return the value as a utf-8 string
+   *
+   * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
+   */
+  std::string toUTF8String(ParamType const &iValue, int32 iPrecision) const
+  {
+    if(fConverter)
+      return fConverter->toString(iValue, iPrecision >= 0 ? iPrecision : fPrecision);
+    else
+      return RawVstParamDef::toUTF8String(normalize(iValue), iPrecision);
+  }
+
 public:
   const ParamType fDefaultValue;
   const std::shared_ptr<IParamConverter<ParamType>> fConverter;
@@ -257,6 +282,19 @@ public:
 
   // writeToMessage
   tresult writeToMessage(ParamType const &iValue, Message &oMessage) const;
+
+  /**
+   * Return the value as a utf-8 string
+   *
+   * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
+   */
+  std::string toUTF8String(ParamType const &iValue, int32 iPrecision) const
+  {
+    if(fSerializer)
+      return fSerializer->toString(iValue, iPrecision);
+    else
+      return "";
+  }
 
   /**
    * @return the discrete converter associated with this param def or `nullptr` if there isn't one.
@@ -374,7 +412,6 @@ using RawVstParam = std::shared_ptr<RawVstParamDef>;
 template<typename T>
 using JmbParam = std::shared_ptr<JmbParamDef<T>>;
 
-}
 }
 
 #endif // __PONGASOFT_VST_PARAM_DEF_H__

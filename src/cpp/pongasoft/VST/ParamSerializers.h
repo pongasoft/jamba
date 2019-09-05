@@ -20,6 +20,7 @@
 #include <pongasoft/logging/logging.h>
 #include <pongasoft/Utils/Constants.h>
 #include <pongasoft/Utils/Misc.h>
+#include <pongasoft/Utils/Metaprogramming.h>
 #include <pluginterfaces/vst/vsttypes.h>
 #include <base/source/fstreamer.h>
 #include <string>
@@ -107,13 +108,28 @@ public:
   using ParamType = T;
   virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const = 0;
   virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const = 0;
-  // by default does nothing -- subclasses can override
-  virtual void writeToStream(ParamType const &iValue, std::ostream &oStream) const {}
+
+  /**
+   * By default, this implementation simply writes the value to the stream IF it is
+   * possible (determined at compilation time). Doesn't do anything if not.
+   * Subclasses can redefine this behavior.
+   */
+  virtual void writeToStream(ParamType const &iValue, std::ostream &oStream) const
+  {
+    if constexpr(Utils::is_operator_write_to_ostream_defined<ParamType>)
+    {
+      oStream << iValue;
+    }
+  }
+
   virtual std::string toString(ParamType const &iValue, int32 iPrecision) const
   {
     std::ostringstream s;
-    s.precision(iPrecision);
-    s.setf(std::ios::fixed);
+    if(iPrecision >= 0)
+    {
+      s.precision(iPrecision);
+      s.setf(std::ios::fixed);
+    }
     writeToStream(iValue, s);
     return s.str();
   }
@@ -215,11 +231,6 @@ public:
     oStreamer.writeDouble(iValue);
     return kResultOk;
   }
-
-  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
-  {
-    oStream << iValue;
-  }
 };
 
 /**
@@ -237,11 +248,6 @@ public:
   {
     oStreamer.writeDouble(iValue);
     return kResultOk;
-  }
-
-  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
-  {
-    oStream << iValue;
   }
 };
 
@@ -261,11 +267,6 @@ public:
     oStreamer.writeInt32(iValue);
     return kResultOk;
   }
-
-  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
-  {
-    oStream << iValue;
-  }
 };
 
 /**
@@ -283,11 +284,6 @@ public:
   {
     oStreamer.writeInt64(iValue);
     return kResultOk;
-  }
-
-  void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
-  {
-    oStream << iValue;
   }
 };
 
@@ -493,6 +489,7 @@ public:
     return kResultFalse;
   }
 
+  // writeToStream
   void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
   {
     auto iter = fMap.find(iValue);

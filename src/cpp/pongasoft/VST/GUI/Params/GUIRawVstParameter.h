@@ -147,9 +147,7 @@ public:
    */
   void toString(String128 oString)
   {
-    auto parameter = fVstParameters->getParameterObject(fParamID);
-    if(parameter)
-      parameter->toString(getValue(), oString);
+    fParamDef->toString(getValue(), oString);
   }
 
   /**
@@ -160,6 +158,12 @@ public:
     String128 s;
     toString(s);
     return String(s);
+  }
+
+  // toUTF8String
+  std::string toUTF8String(int32 iPrecision) const override
+  {
+    return fParamDef->toUTF8String(getValue(), iPrecision);
   }
 
   /**

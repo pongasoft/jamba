@@ -19,6 +19,7 @@
 
 #include <pongasoft/Utils/Misc.h>
 #include <pongasoft/VST/Types.h>
+#include <pongasoft/VST/VstUtils/Utils.h>
 
 #include <pluginterfaces/vst/vsttypes.h>
 #include <pluginterfaces/vst/ivstparameterchanges.h>
@@ -62,7 +63,7 @@ public:
     String128 s;
     s[0] = 0;
     toString(iValue, s, iPrecision);
-    return String(s).text8();
+    return VstUtils::toUT8String(s);
   }
 };
 
