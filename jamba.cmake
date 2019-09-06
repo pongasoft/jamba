@@ -119,6 +119,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/GlobalKeyboardHook.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamDisplayView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/PluginAccessor.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.h
@@ -165,6 +166,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewFactory.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/DiscreteButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamDisplayView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/StepButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/SwitchViewContainer.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.cpp

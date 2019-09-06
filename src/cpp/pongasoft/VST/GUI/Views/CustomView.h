@@ -25,10 +25,7 @@
 #include "CustomViewCreator.h"
 #include "PluginAccessor.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 using namespace Params;
@@ -126,7 +123,9 @@ protected:
 
 protected:
   TagID fTag;
-  bool fEditorMode;
+#if EDITOR_MODE
+  bool fEditorMode{false};
+#endif
   CColor fBackColor;
 
 public:
@@ -186,6 +185,9 @@ using PluginCustomView = PluginView<CustomView, TGUIPluginState>;
 template<typename TView>
 class CustomViewAdapter : public TView, public GUIParamCxAware
 {
+  // ensures that TView is a subclass of CView
+  static_assert(std::is_convertible<TView *, CView*>::value, "TView must be a subclass of CView");
+
 public:
   // Constructor
   template<typename... Args>
@@ -198,6 +200,37 @@ public:
   void setCustomViewTag (TagID iTag) { fTag = iTag; }
   TagID getCustomViewTag () const { return fTag; }
 
+  // setEditorMode
+  void setEditorMode(bool iEditorMode)
+  {
+#if EDITOR_MODE
+    if(fEditorMode != iEditorMode)
+    {
+      fEditorMode = iEditorMode;
+      onEditorModeChanged();
+    }
+#endif
+
+    // when not in editor mode, this does nothing...
+  }
+
+  // getEditorMode
+  bool getEditorMode() const
+  {
+#if EDITOR_MODE
+    return fEditorMode;
+#else
+    return false;
+#endif
+  }
+
+  /**
+   * Implement this if you want to have a specific behavior when editor mode is changed.
+   */
+#if EDITOR_MODE
+  virtual void onEditorModeChanged() {}
+#endif
+
   /**
    * Callback when a parameter changes. By default simply marks the view as dirty.
    */
@@ -205,15 +238,23 @@ public:
 
 protected:
   TagID fTag;
+#if EDITOR_MODE
+  bool fEditorMode{false};
+#endif
 
 public:
-  class Creator : public TCustomViewCreator<CustomViewAdapter>
+  using creator_super_type = TCustomViewCreator<CustomViewAdapter>;
+
+  class Creator : public creator_super_type
   {
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
-      TCustomViewCreator<CustomViewAdapter>(iViewName, iDisplayName)
+      creator_super_type(iViewName, iDisplayName)
     {
-      TCustomViewCreator<CustomViewAdapter>::registerTagAttribute("custom-view-tag", &CustomViewAdapter::getCustomViewTag, &CustomViewAdapter::setCustomViewTag);
+      creator_super_type::registerTagAttribute("custom-view-tag", &CustomViewAdapter::getCustomViewTag, &CustomViewAdapter::setCustomViewTag);
+#if EDITOR_MODE
+      creator_super_type::registerBooleanAttribute("editor-mode", &CustomViewAdapter::getEditorMode, &CustomViewAdapter::setEditorMode);
+#endif
     }
   };
 };
@@ -243,7 +284,4 @@ protected:
 };
 
 
-}
-}
-}
 }

@@ -25,11 +25,10 @@
 #include "ScrollbarView.h"
 #include "DiscreteButtonView.h"
 #include "SwitchViewContainer.h"
+#include "ParamDisplayView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+
+namespace pongasoft::VST::GUI::Views {
 
 /**
  * Defines/Registers the views exported by the framework (since jamba is a static library defining the creators
@@ -39,6 +38,7 @@ struct JambaViews : public FObject
 {
   SINGLETON(JambaViews);
 
+  const ParamDisplayView::Creator fParamDisplayView{"jamba::ParamDisplay", "Jamba - Param Display"};
   const ToggleButtonView::Creator fToggleButtonCreator{"jamba::ToggleButton", "Jamba - Toggle Button (on/off)"};
   const MomentaryButtonView::Creator fMomentaryButtonCreator{"jamba::MomentaryButton", "Jamba - Momentary Button (on when pressed)"};
   const DiscreteButtonView::Creator fDiscreteButtonCreator{"jamba::DiscreteButton", "Jamba - Discrete Button (for discrete/step properties)"};
@@ -49,7 +49,4 @@ struct JambaViews : public FObject
   const SwitchViewContainer::Creator fSwitchViewContainerCreator{"jamba::SwitchViewContainer", "Jamba - Switch View Container (dynamic template selection)"};
 };
 
-}
-}
-}
 }

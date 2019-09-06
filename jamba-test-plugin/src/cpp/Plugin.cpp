@@ -95,10 +95,10 @@ JambaTestPluginParameters::JambaTestPluginParameters()
   fEnumClassVst =
     vst<DiscreteTypeParamConverter<EEnumClass>>(EJambaTestPluginParamID::kEnumClassVst, STR16("EnumClassVst"),
                                                 {
-                                                  {EEnumClass::kEnumClass0, STR16("kEnumClass0 (vst)")},
-                                                  {EEnumClass::kEnumClass1, STR16("kEnumClass1 (vst)")},
-                                                  {EEnumClass::kEnumClass2, STR16("kEnumClass2 (vst)")},
-                                                  {EEnumClass::kEnumClass3, STR16("kEnumClass3 (vst)")},
+                                                  {EEnumClass::kEnumClass0, STR16("kEC0 (vst)")},
+                                                  {EEnumClass::kEnumClass1, STR16("kEC1 (vst)")},
+                                                  {EEnumClass::kEnumClass2, STR16("kEC2 (vst)")},
+                                                  {EEnumClass::kEnumClass3, STR16("kEC3 (vst)")},
                                                 }) // converter argument
       .add();
 
@@ -106,10 +106,10 @@ JambaTestPluginParameters::JambaTestPluginParameters()
   fNonContiguousEnumVst =
     vst<DiscreteTypeParamConverter<ENonContiguousEnum>>(EJambaTestPluginParamID::kNonContiguousEnumVst, STR16("NonContiguousEnumVst"),
                                                 {
-                                                  {ENonContiguousEnum::kNonContiguousEnum0, STR16("kNonContiguousEnum0 (vst)")},
-                                                  {ENonContiguousEnum::kNonContiguousEnum1, STR16("kNonContiguousEnum1 (vst)")},
-                                                  {ENonContiguousEnum::kNonContiguousEnum2, STR16("kNonContiguousEnum2 (vst)")},
-                                                  {ENonContiguousEnum::kNonContiguousEnum3, STR16("kNonContiguousEnum3 (vst)")},
+                                                  {ENonContiguousEnum::kNonContiguousEnum0, STR16("kNCE0 (vst)")},
+                                                  {ENonContiguousEnum::kNonContiguousEnum1, STR16("kNCE1 (vst)")},
+                                                  {ENonContiguousEnum::kNonContiguousEnum2, STR16("kNCE2 (vst)")},
+                                                  {ENonContiguousEnum::kNonContiguousEnum3, STR16("kNCE3 (vst)")},
                                                 }) // converter argument
       .defaultValue(ENonContiguousEnum::kNonContiguousEnum0)
       .add();
@@ -166,10 +166,10 @@ JambaTestPluginParameters::JambaTestPluginParameters()
   fEnumClassJmb =
     jmb<DiscreteTypeParamSerializer<EEnumClass>>(EJambaTestPluginParamID::kEnumClassJmb, STR16("EnumClassJmb"),
                                                 {
-                                                  {EEnumClass::kEnumClass0, "kEnumClass0 (jmb)"},
-                                                  {EEnumClass::kEnumClass1, "kEnumClass1 (jmb)"},
-                                                  {EEnumClass::kEnumClass2, "kEnumClass2 (jmb)"},
-                                                  {EEnumClass::kEnumClass3, "kEnumClass3 (jmb)"},
+                                                  {EEnumClass::kEnumClass0, "kEC0 (jmb)"},
+                                                  {EEnumClass::kEnumClass1, "kEC1 (jmb)"},
+                                                  {EEnumClass::kEnumClass2, "kEC2 (jmb)"},
+                                                  {EEnumClass::kEnumClass3, "kEC3 (jmb)"},
                                                 }) // converter argument
       .add();
 
@@ -177,10 +177,10 @@ JambaTestPluginParameters::JambaTestPluginParameters()
   fNonContiguousEnumJmb =
     jmb<DiscreteTypeParamSerializer<ENonContiguousEnum>>(EJambaTestPluginParamID::kNonContiguousEnumJmb, STR16("NonContiguousEnumJmb"),
                                                          {
-                                                           {ENonContiguousEnum::kNonContiguousEnum0, "kNonContiguousEnum0 (jmb)"},
-                                                           {ENonContiguousEnum::kNonContiguousEnum1, "kNonContiguousEnum1 (jmb)"},
-                                                           {ENonContiguousEnum::kNonContiguousEnum2, "kNonContiguousEnum2 (jmb)"},
-                                                           {ENonContiguousEnum::kNonContiguousEnum3, "kNonContiguousEnum3 (jmb)"},
+                                                           {ENonContiguousEnum::kNonContiguousEnum0, "kNCE0 (jmb)"},
+                                                           {ENonContiguousEnum::kNonContiguousEnum1, "kNCE1 (jmb)"},
+                                                           {ENonContiguousEnum::kNonContiguousEnum2, "kNCE2 (jmb)"},
+                                                           {ENonContiguousEnum::kNonContiguousEnum3, "kNCE3 (jmb)"},
                                                          }) // converter argument
       .defaultValue(ENonContiguousEnum::kNonContiguousEnum0)
       .add();

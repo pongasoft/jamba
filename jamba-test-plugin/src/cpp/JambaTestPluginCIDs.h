@@ -45,6 +45,7 @@ enum EJambaTestPluginParamID : Steinberg::Vst::ParamID
   // represents which tab is currently shown in the UI
   kTab = 1100,
 
+  // vst
   kRawVst = 2000,
   kParamValueVst = 2010,
   kInt32Vst = 2020,
@@ -55,6 +56,7 @@ enum EJambaTestPluginParamID : Steinberg::Vst::ParamID
   kNonContiguousEnumVst = 2070,
   kGainVst = 2080,
 
+  // jmb
   kParamValueJmb = 3000,
   kInt32Jmb = 3010,
   kInt64Jmb = 3020,

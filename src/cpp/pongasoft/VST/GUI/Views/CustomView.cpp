@@ -15,15 +15,11 @@
  *
  * @author Yan Pujante
  */
-#include <vstgui4/vstgui/uidescription/iviewcreator.h>
 #include <vstgui4/vstgui/lib/cdrawcontext.h>
 #include "CustomView.h"
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
@@ -34,7 +30,6 @@ CustomView::CustomView(const CRect &iSize)
   : CView(iSize),
     GUIParamCxAware(),
     fTag{UNDEFINED_TAG_ID},
-    fEditorMode{false},
     fBackColor{0, 0, 0}
 {
 }
@@ -118,7 +113,4 @@ bool CustomView::getEditorMode() const
 #endif
 }
 
-}
-}
-}
 }

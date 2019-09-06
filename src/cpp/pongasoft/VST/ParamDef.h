@@ -116,7 +116,7 @@ public:
    *
    * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
    */
-  std::string toUTF8String(ParamValue iNormalizedValue, int32 iPrecision) const
+  virtual std::string toUTF8String(ParamValue iNormalizedValue, int32 iPrecision) const
   {
     String128 s;
     s[0] = 0;
@@ -205,12 +205,17 @@ public:
    *
    * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
    */
-  std::string toUTF8String(ParamType const &iValue, int32 iPrecision) const
+  std::string toUTF8String(ParamValue iNormalizedValue, int32 iPrecision) const override
   {
     if(fConverter)
-      return fConverter->toString(iValue, iPrecision >= 0 ? iPrecision : fPrecision);
+    {
+      String128 s;
+      s[0] = 0;
+      fConverter->toString(fConverter->denormalize(iNormalizedValue), s, iPrecision >= 0 ? iPrecision : fPrecision);
+      return VstUtils::toUT8String(s);
+    }
     else
-      return RawVstParamDef::toUTF8String(normalize(iValue), iPrecision);
+      return RawVstParamDef::toUTF8String(iNormalizedValue, iPrecision);
   }
 
 public:
