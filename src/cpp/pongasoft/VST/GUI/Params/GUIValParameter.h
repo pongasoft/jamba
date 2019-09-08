@@ -40,15 +40,27 @@ public:
   using FObject::update; // fixes overload hiding warning
 
 public:
+  // Constructor
   explicit GUIValParameter(TagID iTagID, ParamType const &iDefaultValue) :
     fTagID{iTagID},
     fValue(iDefaultValue)
-  {};
+  {
+//    DLOG_F(INFO, "GUIValParameter(%p)", this);
+  };
 
+  // Constructor
   explicit GUIValParameter(TagID iTagID, ParamType &&iDefaultValue) :
     fTagID{iTagID},
     fValue(std::move(iDefaultValue))
-  {};
+  {
+//    DLOG_F(INFO, "GUIValParameter(%p)", this);
+  };
+
+  // Destructor
+  ~GUIValParameter() override
+  {
+//    DLOG_F(INFO, "~GUIValParameter(%p)", this);
+  }
 
   // getTagID
   TagID getTagID() const { return fTagID; }
@@ -221,7 +233,7 @@ std::shared_ptr<ITGUIParameter<int32>> GUIValParameter<T>::asDiscreteParameter(i
   {
     if constexpr(Utils::is_static_cast_defined<T, int32>)
     {
-      return std::make_shared<GUIDiscreteValParameter>(fTagID, static_cast<int32>(fValue), iStepCount);
+      return VstUtils::make_sfo<GUIDiscreteValParameter>(fTagID, static_cast<int32>(fValue), iStepCount);
     }
   }
   return nullptr;

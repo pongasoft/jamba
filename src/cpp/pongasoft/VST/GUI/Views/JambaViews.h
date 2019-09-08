@@ -26,6 +26,7 @@
 #include "DiscreteButtonView.h"
 #include "SwitchViewContainer.h"
 #include "ParamDisplayView.h"
+#include "DebugParamDisplayView.h"
 
 
 namespace pongasoft::VST::GUI::Views {
@@ -39,6 +40,7 @@ struct JambaViews : public FObject
   SINGLETON(JambaViews);
 
   const ParamDisplayView::Creator fParamDisplayView{"jamba::ParamDisplay", "Jamba - Param Display"};
+  const DebugParamDisplayView::Creator fDebugParamDisplayView{"jamba::DebugParamDisplay", "Jamba - Param Display + highlight (for debug)"};
   const ToggleButtonView::Creator fToggleButtonCreator{"jamba::ToggleButton", "Jamba - Toggle Button (on/off)"};
   const MomentaryButtonView::Creator fMomentaryButtonCreator{"jamba::MomentaryButton", "Jamba - Momentary Button (on when pressed)"};
   const DiscreteButtonView::Creator fDiscreteButtonCreator{"jamba::DiscreteButton", "Jamba - Discrete Button (for discrete/step properties)"};

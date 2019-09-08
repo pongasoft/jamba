@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,8 +21,7 @@
 #include <base/source/timer.h>
 #include <memory>
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 /**
  * Simple wrapper class around Steinberg::Timer which will automatically release the timer on delete
@@ -31,7 +30,7 @@ class AutoReleaseTimer
 {
 public:
   // Constructor
-  AutoReleaseTimer(Steinberg::Timer *iTimer) : fTimer{iTimer} {}
+  explicit AutoReleaseTimer(Steinberg::Timer *iTimer) : fTimer{iTimer} {}
 
   // Destructor => auto release
   ~AutoReleaseTimer()
@@ -66,5 +65,4 @@ private:
   Steinberg::Timer *fTimer;
 };
 
-}
 }

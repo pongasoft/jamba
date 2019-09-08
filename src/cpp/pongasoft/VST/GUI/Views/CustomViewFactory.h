@@ -20,10 +20,7 @@
 #include <vstgui4/vstgui/uidescription/uiviewfactory.h>
 #include <pongasoft/VST/GUI/GUIState.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace Params;
 
@@ -55,7 +52,4 @@ private:
 };
 
 
-}
-}
-}
 }

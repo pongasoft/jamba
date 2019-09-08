@@ -63,4 +63,23 @@ std::string toUTF8String(T const &iValue, Steinberg::int32 iPrecision)
     return "";
 }
 
+/**
+ * The VST SDK uses the concept of `FObject` (which are self contained reference counted objects) but require to be
+ * manually managed (by calling `addRef` and `release`). In a few instances (`GUIValParameter` and `GUIJmbParameter`),
+ * Jamba creates and manages `std::shared_ptr` while using the underlying raw pointer with VST SDK classes. So
+ * in order to marry the 2 worlds, this util method creates a `shared_ptr` whose deleter simply delegates to the
+ * `FObject::release` method:
+ * - if the internal ref count is 1 and the shared_ptr goes away, `p->release()` will destroy the object
+ * - if the internal ref count is > 1 (for example, `FObjectCx` still holds a reference) and the shared_ptr goes away,
+ *   then `p->release()` only decrements the counter and whenever `FObjectCx` goes away, it will call `p->release()`
+ *   which will then destroy the object
+ */
+template<typename T, typename... Args>
+std::shared_ptr<T> make_sfo(Args&& ...iArgs)
+{
+  auto ptr = new T(std::forward<Args>(iArgs)...);
+  std::shared_ptr<T> sptr(ptr, [](auto p) { p->release(); });
+  return sptr;
+}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,10 +33,7 @@
 #include <pongasoft/Utils/StringUtils.h>
 #include <pongasoft/VST/Types.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
@@ -108,7 +105,7 @@ private:
 template<typename TView>
 inline TView *createCustomView(CRect const &iSize,
                                const UIAttributes &iAttributes,
-                               const IUIDescription *iDescription) { return new TView(iSize); }
+                               const IUIDescription * /* iDescription */) { return new TView(iSize); }
 
 /**
  * Defines a map of `string` to attribute value */
@@ -1239,7 +1236,4 @@ public:
   }
 };
 
-}
-}
-}
 }

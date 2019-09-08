@@ -41,7 +41,7 @@ void ParamDisplayView::draw(CDrawContext *iContext)
 void ParamDisplayView::registerParameters()
 {
   // Implementation note: this parameter does not call any "register" method on fParamCxMgr because it does not
-  // know (nor care) about the type of the underlying type of the parameter (aka ParamType).
+  // know (nor care) about the underlying type of the parameter (aka ParamType).
   // Since this is highly specialized, at the moment I did not add (yet another) method on
   // fParamCxMgr and simply implemented it here:
   // - fParam is of the generic type IGUIParameter

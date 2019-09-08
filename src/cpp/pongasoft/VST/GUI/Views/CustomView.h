@@ -24,6 +24,7 @@
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include "CustomViewCreator.h"
 #include "PluginAccessor.h"
+#include "CustomViewLifecycle.h"
 
 namespace pongasoft::VST::GUI::Views {
 
@@ -38,7 +39,7 @@ using namespace Params;
  * redrawn: the CustomView::onParameterChange method can be overridden to react differently (or additionally) to handle parameter changes.
  * You use the convenient `registerParam` or `registerCallback` methods to register each parameter.
  */
-class CustomView : public CView, public GUIParamCxAware
+class CustomView : public CView, public GUIParamCxAware, public ICustomViewLifecycle
 {
 public:
   // Constructor
@@ -89,6 +90,15 @@ public:
 
   // markDirty
   inline void markDirty() { setDirty(true); }
+
+  /**
+   * Once all the attributes have been set, we call `registerParameters`. Subclasses can extend the behavior
+   * but should end up calling this method otherwise the view will most likely not behave as expected. */
+  void afterApplyAttributes() override
+  {
+    registerParameters();
+    markDirty();
+  }
 
 public:
   CLASS_METHODS_NOCOPY(CustomView, CControl)
@@ -183,7 +193,7 @@ using PluginCustomView = PluginView<CustomView, TGUIPluginState>;
  * @tparam TView the view class (for ex: CTextEdit)
  */
 template<typename TView>
-class CustomViewAdapter : public TView, public GUIParamCxAware
+class CustomViewAdapter : public TView, public GUIParamCxAware, public ICustomViewLifecycle
 {
   // ensures that TView is a subclass of CView
   static_assert(std::is_convertible<TView *, CView*>::value, "TView must be a subclass of CView");
@@ -235,6 +245,15 @@ public:
    * Callback when a parameter changes. By default simply marks the view as dirty.
    */
   void onParameterChange(ParamID iParamID) override { markDirty(); };
+
+  /**
+   * Once all the attributes have been set, we call `registerParameters`. Subclasses can extend the behavior
+   * but should end up calling this method otherwise the view will most likely not behave as expected. */
+  void afterApplyAttributes() override
+  {
+    registerParameters();
+    markDirty();
+  }
 
 protected:
   TagID fTag;

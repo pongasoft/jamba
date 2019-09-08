@@ -297,7 +297,7 @@ bool GUIParamCxMgr::registerOptionalParam(TagID iParamID,
   // no vst or jmb parameter match => using default
   if(!paramChanged)
   {
-    oParam.assign(std::make_shared<GUIValParameter<T>>(iParamID, oParam.getValue()));
+    oParam.assign(VstUtils::make_sfo<GUIValParameter<T>>(iParamID, oParam.getValue()));
 
     if(iParamID == UNDEFINED_PARAM_ID)
       paramChanged = true;

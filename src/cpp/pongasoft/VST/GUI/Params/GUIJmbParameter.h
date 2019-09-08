@@ -95,7 +95,15 @@ public:
     IGUIJmbParameter(iParamDef),
     FObject(),
     fValue{iParamDef->fDefaultValue}
-  {}
+  {
+//    DLOG_F(INFO, "GUIJmbParameter(%p)", this);
+  }
+
+  // Destructor
+  ~GUIJmbParameter() override
+  {
+//    DLOG_F(INFO, "~GUIJmbParameter(%p)", this);
+  }
 
   // getParamID
   ParamID getParamID() const override { return getJmbParamID(); }

@@ -115,6 +115,8 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewCreator.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewFactory.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/CustomViewLifecycle.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/DebugParamDisplayView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/DiscreteButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/GlobalKeyboardHook.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h

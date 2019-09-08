@@ -50,10 +50,10 @@ public:
 
 public:
   GUIOptionalParam() :
-    fParameter{std::make_shared<GUIValParameter<T>>(UNDEFINED_TAG_ID, T{})} {}
+    fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_TAG_ID, T{})} {}
 
   explicit GUIOptionalParam(T const &iDefaultValue) :
-    fParameter{std::make_shared<GUIValParameter<T>>(UNDEFINED_TAG_ID, iDefaultValue)} {}
+    fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_TAG_ID, iDefaultValue)} {}
 
   // delete copy constructor
   GUIOptionalParam(class_type &iPtr) = delete;

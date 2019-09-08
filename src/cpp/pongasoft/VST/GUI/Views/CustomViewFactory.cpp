@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,12 +16,11 @@
  * @author Yan Pujante
  */
 #include "CustomViewFactory.h"
+#include "CustomView.h"
+#include "CustomViewLifecycle.h"
 #include <vstgui4/vstgui/lib/cview.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace Params;
 
@@ -33,9 +32,11 @@ bool CustomUIViewFactory::applyAttributeValues(CView *view,
                                                const IUIDescription *desc) const
 {
   auto res = UIViewFactory::applyAttributeValues(view, attributes, desc);
-  auto paramAware = dynamic_cast<GUIParamCxAware *>(view);
-  if(paramAware)
-    paramAware->registerParameters();
+
+  auto lifecycle = dynamic_cast<ICustomViewLifecycle *>(view);
+  if(lifecycle)
+    lifecycle->afterApplyAttributes();
+
   return res;
 }
 
@@ -48,9 +49,11 @@ bool CustomUIViewFactory::applyCustomViewAttributeValues(CView *customView,
                                                          const IUIDescription *desc) const
 {
   auto res = UIViewFactory::applyCustomViewAttributeValues(customView, baseViewName, attributes, desc);
-  auto paramAware = dynamic_cast<GUIParamCxAware *>(customView);
-  if(paramAware)
-    paramAware->registerParameters();
+
+  auto lifecycle = dynamic_cast<ICustomViewLifecycle *>(customView);
+  if(lifecycle)
+    lifecycle->afterApplyAttributes();
+
   return res;
 }
 
@@ -60,16 +63,16 @@ bool CustomUIViewFactory::applyCustomViewAttributeValues(CView *customView,
 CView *CustomUIViewFactory::createView(const UIAttributes &attributes, const IUIDescription *description) const
 {
   auto view = UIViewFactory::createView(attributes, description);
+
   auto paramAware = dynamic_cast<GUIParamCxAware *>(view);
   if(paramAware)
-  {
     paramAware->initState(fGUIState);
-    paramAware->registerParameters();
-  }
+
+  auto lifecycle = dynamic_cast<ICustomViewLifecycle *>(view);
+  if(lifecycle)
+    lifecycle->afterApplyAttributes();
+
   return view;
 }
 
-}
-}
-}
 }

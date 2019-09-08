@@ -83,7 +83,7 @@ bool GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
   // no vst or jmb parameter match => using default
   if(!paramChanged)
   {
-    auto pint32 = std::make_shared<GUIValParameter<int32>>(iParamID, oParam.getValue());
+    auto pint32 = VstUtils::make_sfo<GUIValParameter<int32>>(iParamID, oParam.getValue());
 
     if(iStepCount > 0)
       oParam.assign(std::move(pint32->asDiscreteParameter(iStepCount)));

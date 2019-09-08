@@ -262,8 +262,8 @@ public:
 template<typename T>
 GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
 {
-  auto rawPtr = new GUIJmbParameter<T>(iParamDef);
-  std::shared_ptr<GUIJmbParameter<T>> guiParam{rawPtr};
+  auto guiParam = VstUtils::make_sfo<GUIJmbParameter<T>>(iParamDef);
+  auto rawPtr = guiParam.get();
   addJmbParam(guiParam);
   if(iParamDef->fShared && iParamDef->fSerializer)
   {
