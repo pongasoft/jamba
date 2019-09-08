@@ -159,8 +159,9 @@ public:
    */
   bool update(ParamType const &iValue) override
   {
-    auto const previousValue = getValue();
-    if(previousValue != iValue)
+    // Implementation note: because ParamType may not define `operator!=` we use the normalized value instead
+    auto previousValue = getNormalizedValue();
+    if(previousValue != fConverter->normalize(iValue))
     {
       setValue(iValue);
       return true;
