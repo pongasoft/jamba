@@ -1,7 +1,6 @@
 #include "[-name-]Controller.h"
 
-[-namespace_start-]
-namespace GUI {
+namespace [-namespace-]::GUI {
 
 //------------------------------------------------------------------------
 // Constructor
@@ -44,4 +43,3 @@ tresult [-name-]Controller::initialize(FUnknown *context)
 }
 
 }
-[-namespace_end-]

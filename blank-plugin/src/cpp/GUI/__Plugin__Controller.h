@@ -3,8 +3,7 @@
 #include <pongasoft/VST/GUI/GUIController.h>
 #include "../[-name-].h"
 
-[-namespace_start-]
-namespace GUI {
+namespace [-namespace-]::GUI {
 
 using namespace pongasoft::VST::GUI;
 
@@ -42,5 +41,4 @@ private:
 };
 
 }
-[-namespace_end-]
 

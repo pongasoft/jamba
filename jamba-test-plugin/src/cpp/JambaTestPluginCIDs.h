@@ -27,8 +27,13 @@ namespace pongasoft::test::jamba {
 // the processor (RT) and controller (GUI). Those IDs are unique and have
 // been generated automatically.
 //------------------------------------------------------------------------
+#ifndef NDEBUG
+static const ::Steinberg::FUID JambaTestPluginProcessorUID(0x1a410f8a, 0xbfb94a04, 0x9cf832e0, 0xd3f0e2ee);
+static const ::Steinberg::FUID JambaTestPluginControllerUID(0xf831107a, 0x489b4284, 0xbe16d9db, 0xe12bb012);
+#else
 static const ::Steinberg::FUID JambaTestPluginProcessorUID(0xaa3926ff, 0x6d324b93, 0x80f3f867, 0x9545fa05);
 static const ::Steinberg::FUID JambaTestPluginControllerUID(0xbe691f77, 0x73d04d92, 0x9ef55ad4, 0x4cc563c8);
+#endif
 
 //------------------------------------------------------------------------
 // Parameters and Custom view ids

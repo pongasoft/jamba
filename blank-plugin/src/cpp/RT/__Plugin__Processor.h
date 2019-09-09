@@ -3,8 +3,7 @@
 #include <pongasoft/VST/RT/RTProcessor.h>
 #include "../[-name-].h"
 
-[-namespace_start-]
-namespace RT {
+namespace [-namespace-]::RT {
 
 using namespace pongasoft::VST::RT;
 
@@ -59,5 +58,4 @@ private:
 };
 
 }
-[-namespace_end-]
 

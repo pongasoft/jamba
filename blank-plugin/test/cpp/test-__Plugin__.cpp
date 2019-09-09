@@ -1,8 +1,7 @@
 #include <pongasoft/logging/logging.h>
 #include <gtest/gtest.h>
 
-[-namespace_start-]
-namespace Test {
+namespace [-namespace-]::Test {
 
 // PluginTest - Test1
 TEST(PluginTest, Test1)
@@ -13,4 +12,3 @@ TEST(PluginTest, Test1)
 }
 
 }
-[-namespace_end-]

@@ -8,8 +8,7 @@
 #include "version.h"
 #include "jamba_version.h"
 
-[-namespace_start-]
-namespace RT {
+namespace [-namespace-]::RT {
 
 //------------------------------------------------------------------------
 // Constructor
@@ -119,4 +118,3 @@ tresult [-name-]Processor::genericProcessInputs(ProcessData &data)
 }
 
 }
-[-namespace_end-]

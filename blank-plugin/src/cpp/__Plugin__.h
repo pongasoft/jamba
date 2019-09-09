@@ -14,7 +14,7 @@
 
 #include <pluginterfaces/vst/ivstaudioprocessor.h>
 
-[-namespace_start-]
+namespace [-namespace-] {
 
 using namespace pongasoft::VST;
 using namespace GUI::Params;
@@ -143,4 +143,4 @@ protected:
 
 };
 
-[-namespace_end-]
+}

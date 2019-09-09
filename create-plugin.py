@@ -146,10 +146,10 @@ def generate_uuid():
     return f"0x{a[0:8]}, 0x{a[8:16]}, 0x{a[16:24]}, 0x{a[24:32]}"
 
 
-plugin['namespace_start'] = '\n'.join(list(map(lambda x: f"namespace {x} {{", plugin['namespace'].split('::'))))
-plugin['namespace_end'] = '\n'.join(list(map(lambda x: '}', plugin['namespace'].split('::'))))
 plugin['processor_uuid'] = generate_uuid()
 plugin['controller_uuid'] = generate_uuid()
+plugin['debug_processor_uuid'] = generate_uuid()
+plugin['debug_controller_uuid'] = generate_uuid()
 plugin['year'] = datetime.datetime.now().year
 
 ignoredFiles = ['.DS_Store']

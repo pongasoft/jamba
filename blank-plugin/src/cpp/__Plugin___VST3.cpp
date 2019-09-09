@@ -15,8 +15,12 @@
 
 using namespace Steinberg::Vst;
 
-
+#ifndef NDEBUG
+#define stringPluginName "[-name-]_Debug"
+#else
 #define stringPluginName "[-name-]"
+#endif
+
 
 //------------------------------------------------------------------------
 //  Module init/exit
