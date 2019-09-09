@@ -64,6 +64,8 @@ target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
 #------------------------------------------------------------------------
 jamba_add_vst3_resource(${target} DATA "JambaTestPlugin.uidesc")
 jamba_add_vst3_resource(${target} PNG "button_2frames.png")
+jamba_add_vst3_resource(${target} PNG "button_3frames.png")
+jamba_add_vst3_resource(${target} PNG "button_4frames.png")
 
 # this must be called after you are done calling jamba_add_vst3_resource for all resources
 jamba_gen_vst3_resources(${target} "JambaTestPlugin")

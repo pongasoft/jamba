@@ -31,7 +31,8 @@ using namespace Steinberg::Vst;
 
 enum class ETabs {
   kTabAll,
-  kTabToggleButtonView
+  kTabToggleButtonView,
+  kTabMomentaryButtonView,
 };
 
 enum EEnum {

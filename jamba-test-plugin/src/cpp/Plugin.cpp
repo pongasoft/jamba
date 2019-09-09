@@ -42,7 +42,8 @@ JambaTestPluginParameters::JambaTestPluginParameters()
                                            STR16("Tab"),
                                            {
                                              {ETabs::kTabAll,              STR16("All Controls")},
-                                             {ETabs::kTabToggleButtonView, STR16("ToggleButtonView")}
+                                             {ETabs::kTabToggleButtonView, STR16("ToggleButtonView")},
+                                             {ETabs::kTabMomentaryButtonView, STR16("MomentaryButtonView")}
                                            })
       .guiOwned()
       .add();
