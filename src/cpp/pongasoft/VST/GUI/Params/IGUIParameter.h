@@ -150,7 +150,7 @@ public:
 
   /**
    * Importing other commit method from superclass */
-  using ITGUIParameter<T>::Editor::commit;
+  using ITGUIParameter<T>::ITEditor::commit;
 
   tresult commit() override
   {

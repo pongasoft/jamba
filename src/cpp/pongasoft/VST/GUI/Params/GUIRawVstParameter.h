@@ -83,6 +83,9 @@ public:
      */
     tresult commit() override;
 
+    // importing superclass commit methods
+    using EditorType::commit;
+
     /**
      * Call this if you want to revert to the original value of the parameter (when the editor is created).
      * This has no effect if commit() has already been called
