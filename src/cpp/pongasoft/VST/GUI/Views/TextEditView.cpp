@@ -58,15 +58,6 @@ void TextEditView::valueChanged()
 }
 
 //------------------------------------------------------------------------
-// TextEditView::setTag
-//------------------------------------------------------------------------
-void TextEditView::setTag(TagID val)
-{
-  CTextEdit::setTag(val);
-  registerParameters();
-}
-
-//------------------------------------------------------------------------
 // TextEditView::onParameterChange
 //------------------------------------------------------------------------
 void TextEditView::onParameterChange(ParamID iParamID)

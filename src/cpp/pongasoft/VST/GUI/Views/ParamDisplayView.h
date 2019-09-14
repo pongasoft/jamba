@@ -44,13 +44,6 @@ public:
   // draw - overridden to handle any parameter
   void draw(CDrawContext *iContext) override;
 
-  // setTag
-  void setTag(int32_t val) override
-  {
-    CControl::setTag(val);
-    registerParameters();
-  }
-
   // get/set precision-override
   int32 getPrecisionOverride() const { return fPrecisionOverride; }
   void setPrecisionOverride(int32 iPrecisionOverride) { fPrecisionOverride = iPrecisionOverride; markDirty(); }

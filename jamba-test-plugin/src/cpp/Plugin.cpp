@@ -41,9 +41,10 @@ JambaTestPluginParameters::JambaTestPluginParameters()
     vst<DiscreteTypeParamConverter<ETabs>>(EJambaTestPluginParamID::kTab,
                                            STR16("Tab"),
                                            {
-                                             {ETabs::kTabAll,              STR16("All Controls")},
-                                             {ETabs::kTabToggleButtonView, STR16("ToggleButtonView")},
-                                             {ETabs::kTabMomentaryButtonView, STR16("MomentaryButtonView")}
+                                             {ETabs::kTabAll,                 STR16("All Controls")},
+                                             {ETabs::kTabToggleButtonView,    STR16("ToggleButtonView")},
+                                             {ETabs::kTabMomentaryButtonView, STR16("MomentaryButtonView")},
+                                             {ETabs::kTabStepButtonView,      STR16("StepButtonView")}
                                            })
       .guiOwned()
       .add();

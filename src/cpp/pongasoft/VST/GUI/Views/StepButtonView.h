@@ -27,10 +27,8 @@ namespace pongasoft::VST::GUI::Views {
 using namespace VSTGUI;
 
 /**
- * TODO: change the doc!!!
  * A step button lets you step through the values of a parameter by repeatedly clicking on the button. It works
- * for discrete values (`stepCount > 0`) in which case the increments should be an integer, or continuous values
- * (`stepCount == 0`) in which case the increment should be in the range `]-1.0, 1.0[`
+ * for any parameter (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter.
  *
  * - The `step-increment` attribute defines whether this button will increment (positive) or decrement (negative)
  *   the value and by which amount.
@@ -38,6 +36,8 @@ using namespace VSTGUI;
  *   having bigger steps or smaller steps).
  * - The `wrap` attribute defines what happens when the value reaches its end of range after being incremented (resp.
  *   decremented). When set to `true` it will wrap around, otherwise it will remain at its max (resp. min).
+ *
+ * @see CustomDiscreteControlView for details on discrete parameters
  */
 class StepButtonView : public CustomDiscreteControlView
 {

@@ -28,16 +28,4 @@ void CustomDiscreteControlView::registerParameters()
   registerOptionalDiscreteParam(getControlTag(), fControlParameter, getStepCount());
 }
 
-//------------------------------------------------------------------------
-// CustomDiscreteControlView::computeStepCount
-//------------------------------------------------------------------------
-int32 CustomDiscreteControlView::computeStepCount() const
-{
-  // TODO: function not needed
-  if(fControlParameter.getStepCount() > 0)
-    return fControlParameter.getStepCount();
-
-  return std::max(0, getStepCount());
-}
-
 }

@@ -212,41 +212,9 @@ void StepButtonView::registerParameters()
 
   // this section is only used during dev to display a warning...
 #ifndef NDEBUG
-  const auto stepIncrement = getStepIncrement();
-
-  const auto stepCount = computeStepCount();
-
-  if(stepCount == 0)
+  if(fControlParameter.getStepCount() == 0)
   {
-    DLOG_F(WARNING, "computed step count is 0 so this control will have no effect");
-  }
-
-//  if(stepCount == 0)
-//  {
-//    // continuous value => step increment should be in the range ]-1.0, 1.0[ otherwise it does not make
-//    // much sense
-//    if(stepIncrement <= -1.0 || stepIncrement >= 1.0)
-//      DLOG_F(WARNING, "parameter [%d] represents a continuous value (stepCount == 0) "
-//                      "so step-increment (%f) should be in the ]-1.0, 1.0[ range",
-//             fControlParameter.getTagID(),
-//             stepIncrement);
-//  }
-//  else
-//  {
-//    auto s = std::abs(stepIncrement);
-//
-//    // discrete value => step increment should be an integer
-//    if(std::floor(s) != s)
-//      DLOG_F(WARNING, "parameter [%d] represents a discrete value (stepCount == %d) "
-//                      "so step-increment (%f) should be an integer",
-//             fControlParameter.getTagID(),
-//             stepCount,
-//             stepIncrement);
-//  }
-
-  if(stepIncrement == 0)
-  {
-    DLOG_F(WARNING, "step-increment is set to 0 so this control will have no effect");
+    DLOG_F(WARNING, "step count is 0 so this control will have no effect");
   }
 #endif
 
@@ -261,7 +229,7 @@ int32 StepButtonView::computeNextValue(int32 iIncrement) const
   if(iIncrement == 0)
     return getControlValue();
 
-  auto stepCount = computeStepCount();
+  auto stepCount = fControlParameter.getStepCount();
 
   if(stepCount > 0)
   {

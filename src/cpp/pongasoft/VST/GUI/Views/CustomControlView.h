@@ -69,9 +69,6 @@ public:
 public:
   CLASS_METHODS_NOCOPY(TCustomControlView, CustomControlView)
 
-  // when the control tag changes we need to handle it
-  void setControlTag(TagID iTag) override;
-
   // set/getControlValue
   T getControlValue() const;
   virtual void setControlValue(T const &iControlValue);
@@ -95,7 +92,22 @@ using RawCustomControlView = TCustomControlView<ParamValue>;
 /**
  * Base class for custom views providing a single discrete parameter only (similar to CControl).
  * This base class automatically registers the custom control and also keeps a control value for the case when
- * the control does not exist (for example in editor the control tag may not be defined).
+ * the control does not exist (for example in editor the control tag may not be defined). This type of view is
+ * designed to work with any parameter (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter
+ * which means:
+ *
+ * - for Vst parameters
+ *   - a discrete parameter (which is a parameter where `IGUIParameter::getStepCount()` > 0). Note that in this case
+ *     the attribute `step-count` is ignored (and should be set to its default `-1`).
+ *   - a non discrete parameter (which is a parameter where `IGUIParameter::getStepCount()` = 0) can be interpreted
+ *     as a discrete parameter by defining the number of steps `step-count`. For example, setting `step-count` to `10`
+ *     will "split" the continuous range into 11 values (0.0, 0.1, 0.2, 0.3, 0.4, ..., 1.0).
+ * - for Jmb parameters
+ *   - a discrete parameter (which is a parameter where `IGUIParameter::getStepCount()` > 0, which is the case if
+ *     a discrete converter is defined, like for `DiscreteTypeParamSerializer` that handle enums). Note that in this
+ *     case the attribute `step-count` is  ignored (and should be set to its default `-1`).
+ *   - a parameter whose underlying type (`T`) is convertible (both ways) to an `int32` can be interpreted as a
+ *     discrete parameter by defining the number of steps `step-count`.
  */
 class CustomDiscreteControlView : public TCustomControlView<int32>
 {
@@ -111,11 +123,6 @@ public:
 
   // registerParameters
   void registerParameters() override;
-
-  /**
-   * Compute step count. TODO: describe default behavior
-   */
-  virtual int32 computeStepCount() const;
 
 protected:
   int32 fStepCount{-1};
@@ -159,16 +166,6 @@ void TCustomControlView<T>::registerParameters()
   CustomControlView::registerParameters();
 
   registerOptionalParam(getControlTag(), fControlParameter);
-}
-
-//------------------------------------------------------------------------
-// TCustomControlView<T>::setControlTag
-//------------------------------------------------------------------------
-template<typename T>
-void TCustomControlView<T>::setControlTag(TagID iTag)
-{
-  CustomControlView::setControlTag(iTag);
-  registerParameters();
 }
 
 }

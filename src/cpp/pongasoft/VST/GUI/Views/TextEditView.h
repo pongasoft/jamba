@@ -47,9 +47,6 @@ public:
   explicit TextEditView(const CRect &iSize) : CustomViewAdapter(iSize)
   {}
 
-  // setTag => overridden to be able to change the param (in the editor)
-  void setTag(TagID val) override;
-
   // registerParameters
   void registerParameters() override;
 
