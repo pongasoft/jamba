@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,38 +21,35 @@
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include "CustomControlView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
-// TODO TODO TODO
-/* at this time I am still getting unexplained behavior (if the mouse click/release is too fast)
-2018-06-11 10:47:59.350 ( 177.197s) [           1F4B2]    MomentaryButton.cpp:60       0| MomentaryButton::onMouseDown
-2018-06-11 10:47:59.356 ( 177.204s) [           1F561]      VAC6Processor.cpp:263      0| VAC6Processor::processParameters => kMaxLevelReset=1.000000
-2018-06-11 10:47:59.397 ( 177.244s) [           1F4B2]    MomentaryButton.cpp:78       0| MomentaryButton::onMouseUp
-2018-06-11 10:47:59.399 ( 177.246s) [           1F561]      VAC6Processor.cpp:263      0| VAC6Processor::processParameters => kMaxLevelReset=0.000000
-2018-06-11 10:47:59.432 ( 177.280s) [           1F4B2]      VAC6Processor.cpp:307      0| VAC6Processor::getState => fSoftClippingLevel=0.170968
-2018-06-11 10:47:59.432 ( 177.280s) [           1F4B2]     VAC6Controller.cpp:168      0| VAC6Controller::getState()
-2018-06-11 10:47:59.433 ( 177.281s) [           1F4B2]      VAC6Processor.cpp:307      0| VAC6Processor::getState => fSoftClippingLevel=0.170968
-2018-06-11 10:47:59.433 ( 177.281s) [           1F4B2]     VAC6Controller.cpp:168      0| VAC6Controller::getState()
-2018-06-11 10:47:59.441 ( 177.289s) [           1F561]      VAC6Processor.cpp:263      0| VAC6Processor::processParameters => kMaxLevelReset=1.000000
-
- Update 2018/07/12 Cannot reproduce with Editor or Maschine 2... only happens in Reason so may just be an implementation
-                   issue with VST plugins in Reason
- */
-
 /**
- * Represents a momentary button: a button which is "on" only when pressed. The VSTGUI sdk has a class called
- * CKickButton which is similar but it behaves improperly (for example, the button gets stuck in "pressed" state
- * for some reason...)
+ * A momentary button is a button that lets you set the value of a parameter to its "on" value when
+ * pressed, otherwise its "off" value.
+ *
+ * This view is designed to handle parameters which are backed by a `bool` representation but it works for any parameter
+ * (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter.
+ *
+ * - `on-step` maps to the "on" value unless it is set to its default (-1) value in which case it maps to "stepCount"
+ *   (should be `-1` or [0, stepCount])
+ * - `off-step` maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0`
+ *   (should be `-1` or [0, stepCount])
+ * - `inverse` inverses the meaning of "on" and "off" in regards to drawing the view/image
+ *
+ * Note that this view defines the "on" state as being the opposite of the "off" state and so the "off" state is the one
+ * being checked against the off value (otherwise we could end up in a situation where both `isOn` and `isOff` are
+ * `true`...). The consequence is that the underlying parameter might have a value that is neither the "off" value
+ * nor the "on" value, but for the sake of this view it will be treated as "on" (similarly to C/C++ where `0` is
+ * `false` and any non-zero is `true`).
+ *
+ * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
-class MomentaryButtonView : public TCustomControlView<bool>
+class MomentaryButtonView : public CustomDiscreteControlView
 {
 public:
-  explicit MomentaryButtonView(const CRect &iSize) : TCustomControlView(iSize)
+  explicit MomentaryButtonView(const CRect &iSize) : CustomDiscreteControlView(iSize)
   {
     // off color is grey
     fBackColor = CColor{200,200,200};
@@ -77,9 +74,23 @@ public:
   // sizeToFit
   bool sizeToFit() override;
 
+  /**
+   * Attribute `off-step`
+   */
+  int32 getOffStep() const { return fOffStep; }
+  void setOffStep(int32 iStep) { fOffStep = iStep; markDirty(); }
+  int32 getComputedOffStep() const { return std::max(0, getOffStep()); }
+
+  /**
+   * Attribute `on-step`
+   */
+  int32 getOnStep() const { return fOnStep; }
+  void setOnStep(int32 iStep) { fOnStep = iStep; markDirty(); }
+  int32 getComputedOnStep() const;
+
   // is on or off
-  bool isOn() const { return getControlValue(); }
-  bool isOff() const { return !isOn(); }
+  bool isOff() const { return getControlValue() == getComputedOffStep(); }
+  bool isOn() const { return !isOff(); }
 
   // get/setOnColor (the off color is the back color...)
   CColor const &getOnColor() const { return fOnColor; }
@@ -109,33 +120,38 @@ public:
   bool getImageHasDisabledState() const { return fImageHasDisabledState; }
   void setImageHasDisabledState(bool iValue) { fImageHasDisabledState = iValue; }
 
-public:
-  CLASS_METHODS_NOCOPY(MomentaryButtonView, TCustomControlView<bool>)
+  // get/setInverse (toggles which image is on and which is off)
+  bool getInverse() const { return fInverse; }
+  void setInverse(bool iInverse) { fInverse = iInverse; }
 
 protected:
+  int32 fOffStep{-1};
+  int32 fOnStep{-1};
+
   CColor fOnColor{kRedCColor};
   CColor fDisabledColor{kBlackCColor};
   BitmapSPtr fImage{nullptr};
+  bool fInverse{false};
 
   // whether the image has disabled state (3 frames) or not (2 frames)
   bool fImageHasDisabledState{false};
 
 public:
-  class Creator : public CustomViewCreator<MomentaryButtonView, TCustomControlView<bool>>
+  class Creator : public CustomViewCreator<MomentaryButtonView, CustomDiscreteControlView>
   {
     public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
       CustomViewCreator(iViewName, iDisplayName)
     {
+      registerIntegerAttribute<int32>("on-step", &MomentaryButtonView::getOnStep, &MomentaryButtonView::setOnStep);
+      registerIntegerAttribute<int32>("off-step", &MomentaryButtonView::getOffStep, &MomentaryButtonView::setOffStep);
       registerColorAttribute("on-color", &MomentaryButtonView::getOnColor, &MomentaryButtonView::setOnColor);
       registerColorAttribute("disabled-color", &MomentaryButtonView::getDisabledColor, &MomentaryButtonView::setDisabledColor);
       registerBitmapAttribute("button-image", &MomentaryButtonView::getImage, &MomentaryButtonView::setImage);
       registerBooleanAttribute("button-image-has-disabled-state", &MomentaryButtonView::getImageHasDisabledState, &MomentaryButtonView::setImageHasDisabledState);
+      registerBooleanAttribute("inverse", &MomentaryButtonView::getInverse, &MomentaryButtonView::setInverse);
     }
   };
 };
 
-}
-}
-}
 }

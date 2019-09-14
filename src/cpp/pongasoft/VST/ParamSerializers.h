@@ -290,7 +290,7 @@ public:
 /**
  * This parameter handles serializing a bool parameter
  */
-class BooleanParamSerializer : public IParamSerializer<bool>
+class BooleanParamSerializer : public IParamSerializer<bool>, public IDiscreteConverter<bool>
 {
 public:
   explicit BooleanParamSerializer(std::string iFalseString = "Off",
@@ -313,6 +313,21 @@ public:
   void writeToStream(ParamType const &iValue, std::ostream &oStream) const override
   {
     oStream << (iValue ? fTrueString : fFalseString);
+  }
+
+private:
+  inline int32 getStepCount() const override { return 1; }
+
+  tresult convertFromDiscreteValue(int32 iDiscreteValue, bool &oValue) const override
+  {
+    oValue = iDiscreteValue != 0;
+    return kResultOk;
+  }
+
+  tresult convertToDiscreteValue(const bool &iValue, int32 &oDiscreteValue) const override
+  {
+    oDiscreteValue = iValue ? 1 : 0;
+    return kResultOk;
   }
 
 protected:

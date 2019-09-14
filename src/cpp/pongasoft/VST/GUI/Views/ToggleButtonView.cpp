@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,14 +19,11 @@
 
 #include <vstgui4/vstgui/lib/cdrawcontext.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::setFrames
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 void ToggleButtonView::setFrames(int iFrames)
 {
   if(iFrames != 2 && iFrames != 4)
@@ -37,9 +34,9 @@ void ToggleButtonView::setFrames(int iFrames)
     fFrames = iFrames;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::draw
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 void ToggleButtonView::draw(CDrawContext *iContext)
 {
   CustomView::draw(iContext);
@@ -88,9 +85,9 @@ void ToggleButtonView::draw(CDrawContext *iContext)
   setDirty(false);
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::onMouseDown
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 CMouseEventResult ToggleButtonView::onMouseDown(CPoint &where, const CButtonState &buttons)
 {
   if(!(buttons & kLButton))
@@ -101,23 +98,23 @@ CMouseEventResult ToggleButtonView::onMouseDown(CPoint &where, const CButtonStat
   return kMouseEventHandled;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::onMouseUp
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 CMouseEventResult ToggleButtonView::onMouseUp(CPoint &where, const CButtonState &buttons)
 {
   if(!(buttons & kLButton))
     return kMouseEventNotHandled;
 
   fPressed = false;
-  setControlValue(!getControlValue());
+  toggleControlValue();
   setDirty(true);
   return kMouseEventHandled;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::onMouseCancel
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 CMouseEventResult ToggleButtonView::onMouseCancel()
 {
   fPressed = false;
@@ -125,9 +122,9 @@ CMouseEventResult ToggleButtonView::onMouseCancel()
   return kMouseEventHandled;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::onKeyDown
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 int32_t ToggleButtonView::onKeyDown(VstKeyCode &keyCode)
 {
   if(keyCode.virt == VKEY_RETURN && keyCode.modifier == 0)
@@ -139,30 +136,55 @@ int32_t ToggleButtonView::onKeyDown(VstKeyCode &keyCode)
   return -1;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::onKeyUp
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 int32_t ToggleButtonView::onKeyUp(VstKeyCode &keyCode)
 {
   if(keyCode.virt == VKEY_RETURN && keyCode.modifier == 0)
   {
     fPressed = false;
-    setControlValue(!getControlValue());
+    toggleControlValue();
     setDirty(true);
     return 1;
   }
   return -1;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // ToggleButtonView::sizeToFit
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 bool ToggleButtonView::sizeToFit()
 {
   return CustomView::sizeToFit(getImage(), fFrames);
 }
 
+//------------------------------------------------------------------------
+// ToggleButtonView::getComputedOnStep
+//------------------------------------------------------------------------
+int32 ToggleButtonView::getComputedOnStep() const
+{
+  auto onStep = getOnStep();
+
+  if(onStep > -1)
+    return onStep;
+
+  onStep = fControlParameter.getStepCount();
+
+  if(onStep > 0)
+    return onStep;
+  else
+    return 1;
 }
+
+//------------------------------------------------------------------------
+// ToggleButtonView::toggleControlValue
+//------------------------------------------------------------------------
+int32 ToggleButtonView::toggleControlValue()
+{
+  auto newControlValue = isOff() ? getComputedOnStep() : getComputedOffStep();
+  setControlValue(newControlValue);
+  return newControlValue;
 }
-}
+
 }

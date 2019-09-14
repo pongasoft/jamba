@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,21 +19,22 @@
 
 #include <vstgui4/vstgui/lib/cdrawcontext.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::draw
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 void MomentaryButtonView::draw(CDrawContext *iContext)
 {
   CustomView::draw(iContext);
 
-  if(isOn())
+  bool on = isOn();
+  if(fInverse)
+    on = !on;
+
+  if(on)
     drawOn(iContext);
   else
     drawOff(iContext);
@@ -41,9 +42,9 @@ void MomentaryButtonView::draw(CDrawContext *iContext)
   setDirty(false);
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::drawOn
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 void MomentaryButtonView::drawOn(CDrawContext *iContext)
 {
   if(fImage)
@@ -73,9 +74,9 @@ void MomentaryButtonView::drawOn(CDrawContext *iContext)
   }
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::drawOff
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 void MomentaryButtonView::drawOff(CDrawContext *iContext)
 {
   if(fImage)
@@ -107,80 +108,95 @@ void MomentaryButtonView::drawOff(CDrawContext *iContext)
   }
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::onMouseDown
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 CMouseEventResult MomentaryButtonView::onMouseDown(CPoint &where, const CButtonState &buttons)
 {
   if(!(buttons & kLButton))
     return kMouseEventNotHandled;
 
-  setControlValue(true);
+  setControlValue(getComputedOnStep());
   setDirty(true);
   return kMouseEventHandled;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::onMouseUp
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 CMouseEventResult MomentaryButtonView::onMouseUp(CPoint &where, const CButtonState &buttons)
 {
   if(!(buttons & kLButton))
     return kMouseEventNotHandled;
 
-  setControlValue(false);
+  setControlValue(getComputedOffStep());
   setDirty(true);
   return kMouseEventHandled;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::onMouseCancel
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 CMouseEventResult MomentaryButtonView::onMouseCancel()
 {
-  setControlValue(false);
+  setControlValue(getComputedOffStep());
   setDirty(true);
   return kMouseEventHandled;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::onKeyDown
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 int32_t MomentaryButtonView::onKeyDown(VstKeyCode &keyCode)
 {
   if(keyCode.virt == VKEY_RETURN && keyCode.modifier == 0)
   {
-    setControlValue(true);
+    setControlValue(getComputedOnStep());
     setDirty(true);
     return 1;
   }
   return -1;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::onKeyUp
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 int32_t MomentaryButtonView::onKeyUp(VstKeyCode &keyCode)
 {
   if(keyCode.virt == VKEY_RETURN && keyCode.modifier == 0)
   {
-    setControlValue(false);
+    setControlValue(getComputedOffStep());
     setDirty(true);
     return 1;
   }
   return -1;
 }
 
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 // MomentaryButtonView::sizeToFit
-///////////////////////////////////////////
+//------------------------------------------------------------------------
 bool MomentaryButtonView::sizeToFit()
 {
   DLOG_F(INFO, "MomentaryButtonView::sizeToFit");
   return CustomView::sizeToFit(getImage(), 2);
 }
 
+//------------------------------------------------------------------------
+// MomentaryButtonView::getComputedOnStep
+//------------------------------------------------------------------------
+int32 MomentaryButtonView::getComputedOnStep() const
+{
+  auto onStep = getOnStep();
+
+  if(onStep > -1)
+    return onStep;
+
+  onStep = fControlParameter.getStepCount();
+
+  if(onStep > 0)
+    return onStep;
+  else
+    return 1;
 }
-}
-}
+
 }
