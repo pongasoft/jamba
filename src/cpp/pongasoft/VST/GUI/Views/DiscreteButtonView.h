@@ -20,20 +20,24 @@
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
 #include "CustomControlView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 using namespace Params;
 
 /**
- * A discrete button behaves like a toggle button except that it is `on` only if the control value (tied to a vst
- * parameter) is equal to the `step` value (DiscreteButtonView::getStep() / `step` property in the xml).
- * Selecting the button will set the underlying vst parameter to `step`. This button is designed to be used with a
- * discrete parameter (where the raw param value is divided into steps) and uses the underlying
- * GUIVstParameter::getStepCount() method to determine how many steps to account for.
+ * A discrete button behaves like a toggle button except that it is `on` only if the control value (tied to a parameter)
+ * is equal to the `step` value (DiscreteButtonView::getStep() / `step` property in the xml).
+ * Selecting the button will set the underlying parameter to `step`. This button can be used to implement a radio group
+ * button behavior (only one selected at a time).
+ *
+ * This view works for any parameter (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter.
+ *
+ * - `step` is the value used to check whether the button is on or off as well as the value to set the parameter to
+ *   when the button is selected
+ * - `inverse` inverses the meaning of "on" and "off" in regards to drawing the view/image
+ *
+ * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
 class DiscreteButtonView : public CustomDiscreteControlView
 {
@@ -129,7 +133,4 @@ public:
   };
 };
 
-}
-}
-}
 }

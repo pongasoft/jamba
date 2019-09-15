@@ -174,6 +174,9 @@ void DiscreteButtonView::setStep(int32 step)
 //------------------------------------------------------------------------
 bool DiscreteButtonView::isOn() const
 {
+  if(fControlParameter.getStepCount() == 0)
+    return false;
+
   return getControlValue() == fStep;
 }
 
@@ -182,6 +185,9 @@ bool DiscreteButtonView::isOn() const
 //------------------------------------------------------------------------
 void DiscreteButtonView::setOn()
 {
+  if(fControlParameter.getStepCount() == 0)
+    return;
+
   setControlValue(fStep);
 }
 
@@ -192,7 +198,7 @@ void DiscreteButtonView::registerParameters()
 {
   CustomDiscreteControlView::registerParameters();
 #ifndef NDEBUG
-  if(fControlParameter.getStepCount() == 0)
+  if(fControlParameter.getStepCount() == 0 && getControlTag() != UNDEFINED_TAG_ID)
     DLOG_F(WARNING, "%d parameter is not discrete (stepCount == 0)", fControlParameter.getTagID());
 #endif
 }
