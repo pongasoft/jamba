@@ -75,10 +75,10 @@ public:
   /**
    * @return the raw parameter given its id
    */
-  std::unique_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
+  std::shared_ptr<GUIRawVstParameter> getRawVstParameter(ParamID iParamID) const
   {
     if(existsVst(iParamID))
-      return std::make_unique<GUIRawVstParameter>(iParamID,
+      return std::make_shared<GUIRawVstParameter>(iParamID,
                                                   fVstParameters,
                                                   fPluginParameters.getRawVstParamDef(iParamID));
     else

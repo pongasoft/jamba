@@ -25,7 +25,7 @@ namespace pongasoft::VST::GUI::Views {
 //------------------------------------------------------------------------
 void CustomDiscreteControlView::registerParameters()
 {
-  registerOptionalDiscreteParam(getControlTag(), fControlParameter, getStepCount());
+  fControlParameter = registerOptionalDiscreteParam(getControlTag(), getStepCount());
 }
 
 }

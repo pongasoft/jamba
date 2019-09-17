@@ -29,7 +29,7 @@ namespace pongasoft::VST::GUI::Params {
 using namespace Steinberg::Vst;
 
 /**
- * TODO doc.
+ * // TODO doc.
  * Because `GUIOptional` can represent a Vst parameter or a Jmb parameter, there are some restrictions on `T` itself
  * (which do not exist if you use `GUIJmbParam<T>`):
  * - `T` must have empty constructor: `T()`
@@ -49,20 +49,21 @@ public:
   using EditorType = typename ITGUIParameter<T>::ITEditor;
 
 public:
+  // Constructor
   GUIOptionalParam() :
     fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_TAG_ID, T{})} {}
 
+  // Constructor
   explicit GUIOptionalParam(T const &iDefaultValue) :
     fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_TAG_ID, iDefaultValue)} {}
 
-  // delete copy constructor
-  GUIOptionalParam(class_type &iPtr) = delete;
+  // Constructor
+  explicit GUIOptionalParam(std::shared_ptr<ITGUIParameter<T>> iParameter) : fParameter{std::move(iParameter) } {
+    DCHECK_F(fParameter != nullptr);
+  }
 
-  // move copy constructor
-  GUIOptionalParam(class_type &&iPtr) noexcept = delete;
-
-  // move assignment constructor
-  GUIOptionalParam &operator=(class_type &&iPtr) noexcept = delete;
+  // exists (used by templated code... by definition an optional parameter ALWAYS exist)
+  inline bool exists() const { return true; }
 
   // getTagID
   inline TagID getTagID() const
@@ -73,6 +74,9 @@ public:
     else
       return fParameter->getParamID();
   }
+
+  // getParamID
+  inline ParamID getParamID() const { return fParameter->getParamID(); }
 
   /**
    * @return the current value of the parameter as a T
@@ -146,16 +150,6 @@ public:
   inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const
   {
     return fParameter->connect(iChangeCallback);
-  }
-
-public:
-  friend class GUIParamCxMgr;
-
-protected:
-  void assign(std::shared_ptr<ITGUIParameter<T>> iParameter)
-  {
-    DCHECK_F(iParameter != nullptr);
-    fParameter = std::move(iParameter);
   }
 
 private:

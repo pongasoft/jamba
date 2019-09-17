@@ -30,6 +30,7 @@
 	</control-tags>
 	<template background-color="~ WhiteCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" name="view" opacity="1" origin="0, 0" size="720, 600" transparent="false" wants-focus="false">
 		<view class="jamba::SwitchViewContainer" editor-mode="false" mouse-enabled="true" opacity="1" origin="0, 40" size="720, 360" switch-control-tag="kTab" template-names="tab_AllControls,tab_ToggleButtonView,tab_MomentaryButtonView,tab_StepButtonView,tab_DiscreteButtonView" transparent="false" wants-focus="false">
+			<view background-color="~ BlueCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" opacity="1" origin="0, 0" size="720, 360" template="tab_AllControls" transparent="false" wants-focus="false"/>
 		</view>
 		<view arrow-direction="right" back-color="~ TransparentCColor" class="jamba::StepButton" control-tag="kTab" editor-mode="false" held-color="~ RedCColor" mouse-enabled="true" opacity="1" origin="700, 10" released-color="~ GreyCColor" shift-step-increment="0" size="10, 15" step-count="-1" step-increment="1" transparent="false" wants-focus="false" wrap="true"/>
 		<view arrow-direction="left" back-color="~ TransparentCColor" class="jamba::StepButton" control-tag="kTab" editor-mode="false" held-color="~ RedCColor" mouse-enabled="true" opacity="1" origin="685, 10" released-color="~ GreyCColor" shift-step-increment="0" size="10, 15" step-count="-1" step-increment="-1" transparent="false" wants-focus="false" wrap="true"/>
@@ -85,7 +86,7 @@
 		<attributes SelectedTemplate="tab_AllControls" name="UITemplateController"/>
 		<attributes EditViewScale="1" EditorSize="0, 0, 1522, 818" SplitViewSize_0_0="0.5345043914680049912391268662759102880955" SplitViewSize_0_1="0.4404015056461731414394478179019642993808" SplitViewSize_1_0="0.5156838143036386323814213028526864945889" SplitViewSize_1_1="0.4780426599749059146660101760062389075756" SplitViewSize_2_0="0.7332457293035479217735428392188623547554" SplitViewSize_2_1="0.2634691195795006435353968754498055204749" TabSwitchValue="0" Version="1" name="UIEditController"/>
 		<attributes name="UIAttributesController"/>
-		<attributes SelectedRow="6" name="UIViewCreatorDataSource"/>
+		<attributes SelectedRow="13" name="UIViewCreatorDataSource"/>
 		<attributes SelectedRow="-1" name="UITagsDataSource"/>
 		<attributes SelectedRow="0" name="UIBitmapsDataSource"/>
 		<attributes SelectedRow="0" name="UIColorsDataSource"/>
@@ -103,6 +104,7 @@
 		<view back-color="Light Gray" class="jamba::DiscreteButton" control-tag="kNonContiguousEnumVst" editor-mode="false" frames="4" inverse="false" mouse-enabled="true" on-color="~ RedCColor" opacity="1" origin="170, 120" size="20, 20" step="1" step-count="-1" transparent="false" wants-focus="false"/>
 		<view back-color="Light Gray" class="jamba::DiscreteButton" control-tag="kNonContiguousEnumVst" editor-mode="false" frames="4" inverse="false" mouse-enabled="true" on-color="~ RedCColor" opacity="1" origin="200, 120" size="20, 20" step="2" step-count="-1" transparent="false" wants-focus="false"/>
 		<view back-color="Light Gray" class="jamba::DiscreteButton" control-tag="kNonContiguousEnumVst" editor-mode="false" frames="4" inverse="false" mouse-enabled="true" on-color="~ RedCColor" opacity="1" origin="230, 120" size="20, 20" step="3" step-count="-1" transparent="false" wants-focus="false"/>
+		<view background-offset="0, 0" button-image-has-disabled-state="false" class="jamba::TextButton" default-value="0.5" disabled-text-color="~ WhiteCColor" editor-mode="false" font="~ SystemFont" frame-color="~ BlackCColor" frame-color-highlighted="~ BlackCColor" frame-width="1" icon-position="left" icon-text-margin="0" kick-style="true" max-value="1" min-value="0" mouse-enabled="true" opacity="1" origin="130, 190" round-radius="6" size="90, 20" text-alignment="center" text-color="~ BlackCColor" text-color-highlighted="~ WhiteCColor" title="Hello" transparent="false" wants-focus="true" wheel-inc-value="0.1"/>
 	</template>
 	<template background-color="~ BlueCColor" background-color-draw-style="filled and stroked" class="CViewContainer" mouse-enabled="true" name="tab_ToggleButtonView" opacity="1" origin="0, 0" size="720, 360" transparent="false" wants-focus="false">
 		<view back-color="#c8c8c8ff" class="jamba::ToggleButton" control-tag="kBoolVst" editor-mode="false" frames="4" inverse="false" mouse-enabled="true" off-step="-1" on-color="~ RedCColor" on-step="-1" opacity="1" origin="100, 40" size="20, 20" step-count="-1" transparent="false" wants-focus="false"/>
@@ -294,4 +296,5 @@
 		<view back-color="~ TransparentCColor" background-offset="0, 0" class="CTextLabel" default-value="0.5" font="~ NormalFont" font-antialias="true" font-color="~ WhiteCColor" frame-color="~ TransparentCColor" frame-width="1" max-value="1" min-value="0" mouse-enabled="true" opacity="1" origin="500, 180" round-rect-radius="6" shadow-color="~ TransparentCColor" size="60, 20" style-3D-in="false" style-3D-out="false" style-no-draw="false" style-no-frame="false" style-no-text="false" style-round-rect="false" style-shadow-text="false" text-alignment="right" text-inset="0, 0" text-rotation="0" text-shadow-offset="1, 1" title="playground" transparent="false" value-precision="2" wants-focus="false" wheel-inc-value="0.1"/>
 		<view back-color="Light Gray" class="jamba::DiscreteButton" editor-mode="false" frames="4" inverse="false" mouse-enabled="true" on-color="~ RedCColor" opacity="1" origin="580, 180" size="20, 20" step="1" step-count="-1" transparent="false" wants-focus="false"/>
 	</template>
+	<gradients/>
 </vstgui-ui-description>

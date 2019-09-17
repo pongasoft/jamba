@@ -158,7 +158,7 @@ std::shared_ptr<ITGUIParameter<int32>> GUIRawVstParameter::asDiscreteParameter(i
   }
 
   if(stepCount > 0)
-    return std::make_unique<GUIVstParameter<int32>>(std::dynamic_pointer_cast<GUIRawVstParameter>(shared_from_this()),
+    return std::make_shared<GUIVstParameter<int32>>(std::dynamic_pointer_cast<GUIRawVstParameter>(shared_from_this()),
                                                     std::make_shared<DiscreteParamConverter>(stepCount));
   else
     return nullptr;

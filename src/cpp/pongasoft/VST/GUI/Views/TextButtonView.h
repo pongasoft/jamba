@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,10 +20,7 @@
 #include <vstgui4/vstgui/lib/controls/cbuttons.h>
 #include <pongasoft/VST/GUI/Views/CustomView.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 using namespace Params;
@@ -99,6 +96,10 @@ public:
   bool getImageHasDisabledState() const { return fImageHasDisabledState; }
   void setImageHasDisabledState(bool iValue) { fImageHasDisabledState = iValue; }
 
+  // get/set precision-override
+  int32 getPrecisionOverride() const { return fPrecisionOverride; }
+  void setPrecisionOverride(int32 iPrecisionOverride) { fPrecisionOverride = iPrecisionOverride; markDirty(); }
+
 protected:
   /**
    * Called when the button should be drawn entirely (background + text + icon)
@@ -118,8 +119,8 @@ protected:
   CColor fDisabledTextColor;
   GradientSPtr fDisabledGradient;
 
-  // the underlying jmb parameter of type UTF8String
-  GUIJmbParam<UTF8String> fTitle{};
+  // the underlying parameter => use its string representation to display the text of the button
+  int32 fPrecisionOverride{-1};
 
   // the image to use (in place of text)
   BitmapSPtr fImage{nullptr};
@@ -142,12 +143,10 @@ public:
       registerGradientAttribute("disabled-gradient", &TextButtonView::getDisabledGradient, &TextButtonView::setDisabledGradient);
       registerBitmapAttribute("button-image", &TextButtonView::getImage, &TextButtonView::setImage);
       registerBooleanAttribute("button-image-has-disabled-state", &TextButtonView::getImageHasDisabledState, &TextButtonView::setImageHasDisabledState);
+      registerIntAttribute("precision-override", &TextButtonView::getPrecisionOverride, &TextButtonView::setPrecisionOverride);
     }
   };
 };
 
-}
-}
-}
 }
 

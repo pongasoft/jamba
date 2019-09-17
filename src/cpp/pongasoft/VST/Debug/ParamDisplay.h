@@ -85,7 +85,7 @@ protected:
   Value getValue(std::unique_ptr<RT::RTRawVstParameter> const &iParam, Key iKey) const;
   Value getValue(std::unique_ptr<RT::IRTJmbInParameter> const &iParam, Key iKey) const;
   Value getValue(std::unique_ptr<RT::IRTJmbOutParameter> const &iParam, Key iKey) const;
-  Value getValue(std::unique_ptr<GUI::GUIRawVstParameter> const &iParam, Key iKey, Parameters const *iParameters) const;
+  Value getValue(std::shared_ptr<GUI::GUIRawVstParameter> const &iParam, Key iKey, Parameters const *iParameters) const;
   Value getValue(GUI::IGUIJmbParameter const &iParam, Key iKey) const;
 
   Value getValue(Parameters const *iParams, ParamID iParamID, Key iKey) const;

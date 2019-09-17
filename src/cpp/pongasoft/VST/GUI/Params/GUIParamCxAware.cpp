@@ -20,10 +20,7 @@
 
 #include <pongasoft/VST/GUI/GUIState.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 //------------------------------------------------------------------------
 // GUIParamCxAware::~GUIParamCxAware
@@ -53,50 +50,23 @@ GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubs
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerParam
+// GUIParamCxAware::registerRawVstCallback
 //------------------------------------------------------------------------
-bool GUIParamCxAware::registerParam(int32_t iParamID, GUIRawVstParam &oGUIRawVstParam)
-{
-  ParamValue unused;
-  return __internal__registerRawVstControl(iParamID, unused, oGUIRawVstParam);
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::__internal__registerRawVstControl
-//------------------------------------------------------------------------
-bool GUIParamCxAware::__internal__registerRawVstControl(int32_t iParamID,
-                                                        ParamValue &oControlValue,
-                                                        GUIRawVstParam &oGUIRawVstParam)
+GUIRawVstParam GUIParamCxAware::registerRawVstCallback(ParamID iParamID,
+                                                       Parameters::ChangeCallback iChangeCallback,
+                                                       bool iInvokeCallback)
 {
   if(!fParamCxMgr)
-    return false; // not set yet
+    return GUIRawVstParam{};
 
-  if(iParamID < 0)
-  {
-    if(oGUIRawVstParam.exists())
-    {
-      oControlValue = oGUIRawVstParam.getValue();
-      oGUIRawVstParam = unregisterParam(oGUIRawVstParam);
-    }
-  }
-  else
-  {
-    if(!oGUIRawVstParam.exists() || oGUIRawVstParam.getParamID() != iParamID)
-    {
-      unregisterParam(oGUIRawVstParam);
-      oGUIRawVstParam = registerRawVstParam(static_cast<ParamID>(iParamID));
-      return true;
-    }
-  }
-
-  return false;
+  return fParamCxMgr->registerRawVstCallback(iParamID, std::move(iChangeCallback), iInvokeCallback);
 }
 
 //------------------------------------------------------------------------
 // GUIParamCxAware::registerRawVstCallback
 //------------------------------------------------------------------------
 GUIRawVstParam GUIParamCxAware::registerRawVstCallback(ParamID iParamID,
-                                                       Parameters::ChangeCallback iChangeCallback,
+                                                       Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
                                                        bool iInvokeCallback)
 {
   if(!fParamCxMgr)
@@ -120,7 +90,6 @@ GUIVstParam<Percent> GUIParamCxAware::registerVstPercentParam(ParamID iParamID, 
 {
   return registerVstParam<Percent>(iParamID, iSubscribeToChanges);
 }
-
 
 //------------------------------------------------------------------------
 // GUIParamCxAware::unregisterParam
@@ -163,20 +132,87 @@ void GUIParamCxAware::invokeAll()
 //------------------------------------------------------------------------
 // GUIParamCxAware::registerOptionalDiscreteParam
 //------------------------------------------------------------------------
-bool GUIParamCxAware::registerOptionalDiscreteParam(TagID iParamID,
-                                                    GUIOptionalParam<int32> &oParam,
-                                                    int32 iStepCount,
-                                                    bool iSubscribeToChanges)
+GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteParam(TagID iParamID,
+                                                                       int32 iStepCount,
+                                                                       bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
   {
-    return fParamCxMgr->registerOptionalDiscreteParam(iParamID, oParam, iStepCount, iSubscribeToChanges ? this : nullptr);
+    return fParamCxMgr->registerOptionalDiscreteParam(iParamID, iStepCount, iSubscribeToChanges ? this : nullptr);
   }
   else
-    return false;
+    return GUIOptionalParam<int32>();
 }
 
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerOptionalDiscreteCallback
+//------------------------------------------------------------------------
+GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteCallback(TagID iParamID,
+                                                                          int32 iStepCount,
+                                                                          Parameters::ChangeCallback iChangeCallback,
+                                                                          bool iInvokeCallback)
+{
+  if(fParamCxMgr)
+  {
+    return fParamCxMgr->registerOptionalDiscreteCallback(iParamID, iStepCount, std::move(iChangeCallback), iInvokeCallback);
+  }
+  else
+    return GUIOptionalParam<int32>();
 }
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerOptionalDiscreteCallback
+//------------------------------------------------------------------------
+GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteCallback(TagID iParamID,
+                                                                          int32 iStepCount,
+                                                                          Parameters::ChangeCallback1<GUIOptionalParam<int32>> iChangeCallback,
+                                                                          bool iInvokeCallback)
+{
+  if(fParamCxMgr)
+  {
+    return fParamCxMgr->registerOptionalDiscreteCallback(iParamID, iStepCount, std::move(iChangeCallback), iInvokeCallback);
+  }
+  else
+    return GUIOptionalParam<int32>();
 }
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerBaseParam
+//------------------------------------------------------------------------
+IGUIParam GUIParamCxAware::registerBaseParam(TagID iParamID, bool iSubscribeToChanges)
+{
+  if(fParamCxMgr)
+    return fParamCxMgr->registerBaseParam(iParamID, iSubscribeToChanges ? this : nullptr);
+  else
+    return IGUIParam();
 }
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerBaseCallback
+//------------------------------------------------------------------------
+IGUIParam GUIParamCxAware::registerBaseCallback(TagID iParamID,
+                                                Parameters::ChangeCallback iChangeCallback,
+                                                bool iInvokeCallback)
+{
+  if(fParamCxMgr)
+    return fParamCxMgr->registerBaseCallback(iParamID, std::move(iChangeCallback), iInvokeCallback);
+  else
+    return IGUIParam();
+}
+
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerBaseCallback
+//------------------------------------------------------------------------
+IGUIParam GUIParamCxAware::registerBaseCallback(TagID iParamID,
+                                                Parameters::ChangeCallback1<IGUIParam> iChangeCallback,
+                                                bool iInvokeCallback)
+{
+  if(fParamCxMgr)
+    return fParamCxMgr->registerBaseCallback(iParamID, std::move(iChangeCallback), iInvokeCallback);
+  else
+    return IGUIParam();
+}
+
+
 }

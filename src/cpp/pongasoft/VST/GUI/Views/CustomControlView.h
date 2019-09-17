@@ -164,8 +164,7 @@ template<typename T>
 void TCustomControlView<T>::registerParameters()
 {
   CustomControlView::registerParameters();
-
-  registerOptionalParam(getControlTag(), fControlParameter);
+  fControlParameter = registerOptionalParam<T>(getControlTag());
 }
 
 }

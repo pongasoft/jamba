@@ -257,19 +257,10 @@ private:
 class GUIRawVstParam
 {
 public:
-  GUIRawVstParam() : fPtr{nullptr} {}
-
-  // move constructor
-  explicit GUIRawVstParam(std::shared_ptr<GUIRawVstParameter> &&iPtr) : fPtr{std::move(iPtr)} {}
-
-  // delete copy constructor
-  GUIRawVstParam(GUIRawVstParam &iPtr) = delete;
-
-  // move copy constructor
-  GUIRawVstParam(GUIRawVstParam &&iPtr) noexcept : fPtr{std::move(iPtr.fPtr)} {}
-
-  // move assignment constructor
-  GUIRawVstParam &operator=(GUIRawVstParam &&iPtr) noexcept { fPtr = std::move(iPtr.fPtr); return *this; }
+  // Constructor
+  GUIRawVstParam(std::shared_ptr<GUIRawVstParameter> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
+    fPtr{std::move(iPtr)}
+  {}
 
   // exists
   inline bool exists() const { return (bool) fPtr; }
@@ -331,6 +322,16 @@ public:
 
   // allow to write param1 != param2
   inline bool operator!=(const GUIRawVstParam &rhs) const { return fPtr->getValue() != rhs.fPtr->getValue(); }
+
+  /**
+   * @return an object maintaining the connection between the parameter and the listener
+   */
+  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { return fPtr->connect(iChangeListener); }
+
+  /**
+   * @return an object maintaining the connection between the parameter and the callback
+   */
+  inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
   std::shared_ptr<GUIRawVstParameter> fPtr;

@@ -54,7 +54,7 @@ void SwitchViewContainer::afterCreate(IUIDescription const *iDescription, IContr
 //------------------------------------------------------------------------
 void SwitchViewContainer::registerParameters()
 {
-  registerParam(getSwitchControlTag(), fControlSwitch);
+  fControlSwitch = registerRawVstParam(getSwitchControlTag());
 
 #ifndef NDEBUG
   if(fControlSwitch.exists())

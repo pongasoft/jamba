@@ -337,7 +337,7 @@ std::string ParamDisplay::getValue(IJmbParamDef const *iParamDef, Key iKey) cons
 //------------------------------------------------------------------------
 // ParamDisplay::getValue - GUIRawVstParameter
 //------------------------------------------------------------------------
-std::string ParamDisplay::getValue(std::unique_ptr<GUI::GUIRawVstParameter> const &iParam,
+std::string ParamDisplay::getValue(std::shared_ptr<GUI::GUIRawVstParameter> const &iParam,
                                    Key iKey,
                                    Parameters const *iParameters) const
 {

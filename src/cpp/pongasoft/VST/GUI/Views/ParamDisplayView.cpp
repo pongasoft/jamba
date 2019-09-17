@@ -28,7 +28,7 @@ void ParamDisplayView::draw(CDrawContext *iContext)
   if(style & kNoDrawStyle)
     return;
 
-  auto string = fParam ? fParam->toUTF8String(fPrecisionOverride) : "";
+  auto string = fParam.exists() ? fParam.toUTF8String(fPrecisionOverride) : "";
 
   drawBack(iContext);
   drawPlatformText(iContext, UTF8String(string).getPlatformString());
@@ -40,21 +40,7 @@ void ParamDisplayView::draw(CDrawContext *iContext)
 //------------------------------------------------------------------------
 void ParamDisplayView::registerParameters()
 {
-  // Implementation note: this parameter does not call any "register" method on fParamCxMgr because it does not
-  // know (nor care) about the underlying type of the parameter (aka ParamType).
-  // Since this is highly specialized, at the moment I did not add (yet another) method on
-  // fParamCxMgr and simply implemented it here:
-  // - fParam is of the generic type IGUIParameter
-  // - fParamCx maintains the connection so that updates to the parameter by another view (or RT) will end up redrawing
-  //   the view.
-
-  fParamCx = nullptr;
-
-  if(fParamCxMgr)
-    fParam = fParamCxMgr->getGUIState()->findParam(getTag());
-
-  if(fParam)
-    fParamCx = fParam->connect(this);
+  fParam = registerBaseParam(getTag());
 }
 
 

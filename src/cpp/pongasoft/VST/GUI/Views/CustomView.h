@@ -96,6 +96,7 @@ public:
    * but should end up calling this method otherwise the view will most likely not behave as expected. */
   void afterApplyAttributes() override
   {
+    unregisterAll();
     registerParameters();
     markDirty();
   }
@@ -251,6 +252,7 @@ public:
    * but should end up calling this method otherwise the view will most likely not behave as expected. */
   void afterApplyAttributes() override
   {
+    unregisterAll();
     registerParameters();
     markDirty();
   }

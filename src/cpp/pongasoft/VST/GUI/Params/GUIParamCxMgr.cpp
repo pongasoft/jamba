@@ -51,19 +51,12 @@ void GUIParamCxMgr::unregisterAll()
 //------------------------------------------------------------------------
 // GUIParamCxMgr::registerOptionalDiscreteParam
 //------------------------------------------------------------------------
-bool GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
-                                                  GUIOptionalParam<int32> &oParam,
-                                                  int32 iStepCount,
-                                                  Parameters::IChangeListener *iChangeListener)
+GUIOptionalParam<int32> GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
+                                                                     int32 iStepCount,
+                                                                     Parameters::IChangeListener *iChangeListener)
 {
-  auto previousTagID = oParam.getTagID();
-
-  if(previousTagID != iParamID)
-    unregisterParam(previousTagID);
-
-  bool paramChanged = false;
-
   auto param = fGUIState->findParam(iParamID);
+  std::shared_ptr<ITGUIParameter<int32>> optionalParam = nullptr;
 
   if(param)
   {
@@ -71,8 +64,7 @@ bool GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
 
     if(discreteParam)
     {
-      oParam.assign(std::move(discreteParam));
-      paramChanged = true;
+      optionalParam = std::move(discreteParam);
     }
     else
     {
@@ -81,17 +73,14 @@ bool GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
   }
 
   // no vst or jmb parameter match => using default
-  if(!paramChanged)
+  if(!optionalParam)
   {
-    auto pint32 = VstUtils::make_sfo<GUIValParameter<int32>>(iParamID, oParam.getValue());
+    auto pint32 = VstUtils::make_sfo<GUIValParameter<int32>>(iParamID, 0);
 
     if(iStepCount > 0)
-      oParam.assign(std::move(pint32->asDiscreteParameter(iStepCount)));
+      optionalParam = std::move(pint32->asDiscreteParameter(iStepCount));
     else
-      oParam.assign(std::move(pint32));
-
-    if(iParamID == UNDEFINED_PARAM_ID)
-      paramChanged = true;
+      optionalParam = std::move(pint32);
 
 #ifndef NDEBUG
     if(iParamID != UNDEFINED_PARAM_ID)
@@ -99,18 +88,32 @@ bool GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
 #endif
   }
 
-  if(iChangeListener)
-  {
-    fParamCxs[iParamID] = oParam.connect(iChangeListener);
-  }
-  else
-  {
-    unregisterParam(iParamID);
-  }
-
-  return paramChanged;
+  return __registerListener(GUIOptionalParam<int32>(std::move(optionalParam)), iChangeListener);
 }
 
+//------------------------------------------------------------------------
+// GUIParamCxMgr::registerBaseParam
+//------------------------------------------------------------------------
+IGUIParam GUIParamCxMgr::registerBaseParam(TagID iParamID, Parameters::IChangeListener *iChangeListener)
+{
+  auto param = iParamID >= 0 ? fGUIState->findParam(static_cast<ParamID>(iParamID)) : nullptr;
 
+  return __registerListener(IGUIParam(param), iChangeListener);
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxMgr::registerRawVstParam
+//------------------------------------------------------------------------
+GUIRawVstParam GUIParamCxMgr::registerRawVstParam(ParamID iParamID, Parameters::IChangeListener *iChangeListener)
+{
+  auto param = fGUIState->getRawVstParameter(iParamID);
+
+  if(!param)
+  {
+    DLOG_F(WARNING, "vst param [%d] not found", iParamID);
+  }
+
+  return __registerListener(GUIRawVstParam(std::move(param)), iChangeListener);
+}
 
 }

@@ -23,9 +23,7 @@
 #include "GUIVstParameter.h"
 #include "GUIOptionalParam.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
+namespace pongasoft::VST::GUI {
 
 class GUIState;
 
@@ -41,33 +39,149 @@ class GUIParamCxAware : public Parameters::IChangeListener
 public:
   virtual ~GUIParamCxAware();
 
-  template<typename T>
-  bool registerOptionalParam(TagID iParamID,
-                             GUIOptionalParam<T> &oParam,
-                             bool iSubscribeToChanges = true);
+  //------------------------------------------------------------------------
+  // Base Param
+  //------------------------------------------------------------------------
 
-  bool registerOptionalDiscreteParam(TagID iParamID,
-                                     GUIOptionalParam<int32> &oParam,
-                                     int32 iStepCount,
-                                     bool iSubscribeToChanges = true);
+  /**
+   * Registers the "base" param for the most generic use case but as a result is fairly limited and mainly gives access
+   * to the string representation of the param.
+   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   *
+   * @return empty param if not found
+   */
+  IGUIParam registerBaseParam(TagID iParamID, bool iSubscribeToChanges = true);
+
+  /**
+   * Registers a callback for the "base" param for the most generic use case. As a result it is fairly limited and
+   * mainly gives access to the string representation of the param.
+   *
+   * @return empty param if not found
+   */
+  IGUIParam registerBaseCallback(TagID iParamID,
+                                 Parameters::ChangeCallback iChangeCallback,
+                                 bool iInvokeCallback);
+
+  /**
+   * Registers a callback for the "base" param for the most generic use case. As a result it is fairly limited and
+   * mainly gives access to the string representation of the param.
+   *
+   * @return empty param if not found
+   */
+  IGUIParam registerBaseCallback(TagID iParamID,
+                                 Parameters::ChangeCallback1<IGUIParam> iChangeCallback,
+                                 bool iInvokeCallback);
+
+  //------------------------------------------------------------------------
+  // Optional Param
+  //------------------------------------------------------------------------
+
+  /**
+   * Registers an optional parameter which handles Vst, Jmb or no parameter at all. This parameter is particularly
+   * useful to write very generic views that can accept "any" kind of parameter (Vst or Jmb) while still being
+   * usable if no parameter is assigned at all.
+   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   * Note that this parameter has a very different signature since it is designed to be more dynamic (changed in the
+   * UI editor) and the previous value gets propagated if the
+   *
+   * @return param (never empty!)
+   */
+  template<typename T>
+  GUIOptionalParam<T> registerOptionalParam(TagID iParamID,
+                                            bool iSubscribeToChanges = true);
+
+  /**
+   * Registers an optional parameter which handles Vst, Jmb or no parameter at all. This parameter is particularly
+   * useful to write very generic views that can accept "any" kind of parameter (Vst or Jmb) while still being
+   * usable if no parameter is assigned at all.
+   * The callback will be invoked when the parameter changes.
+   * Note that this parameter has a very different signature since it is designed to be more dynamic (changed in the
+   * UI editor) and the previous value gets propagated if the
+   *
+   * @return param (never empty!)
+   */
+  template<typename T>
+  GUIOptionalParam<T> registerOptionalCallback(TagID iParamID,
+                                               Parameters::ChangeCallback iChangeCallback,
+                                               bool iInvokeCallback = false);
+
+  /**
+   * Registers an optional parameter which handles Vst, Jmb or no parameter at all. This parameter is particularly
+   * useful to write very generic views that can accept "any" kind of parameter (Vst or Jmb) while still being
+   * usable if no parameter is assigned at all.
+   * The callback will be invoked when the parameter changes.
+   * Note that this parameter has a very different signature since it is designed to be more dynamic (changed in the
+   * UI editor) and the previous value gets propagated if the
+   *
+   * @return param (never empty!)
+   */
+  template<typename T>
+  GUIOptionalParam<T> registerOptionalCallback(TagID iParamID,
+                                               Parameters::ChangeCallback1<GUIOptionalParam<T>> iChangeCallback,
+                                               bool iInvokeCallback = false);
+
+  //------------------------------------------------------------------------
+  // Optional Discrete Param
+  //------------------------------------------------------------------------
+
+  /**
+   * Registers an optional discrete parameter which handles Vst, Jmb or no parameter at all. The underlying parameter
+   * will be converted to a discrete parameter if possible.
+   * This parameter is particularly useful to write very generic views that can accept "any" kind of parameter
+   * (Vst or Jmb) while still being usable if no parameter is assigned at all.
+   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   *
+   * @return param (never empty!)
+   */
+  GUIOptionalParam<int32> registerOptionalDiscreteParam(TagID iParamID,
+                                                        int32 iStepCount,
+                                                        bool iSubscribeToChanges = true);
+
+  /**
+   * Registers an optional discrete parameter which handles Vst, Jmb or no parameter at all. The underlying parameter
+   * will be converted to a discrete parameter if possible.
+   * This parameter is particularly useful to write very generic views that can accept "any" kind of parameter
+   * (Vst or Jmb) while still being usable if no parameter is assigned at all.
+   * The callback will be invoked when the parameter changes.
+   *
+   * @return param (never empty!)
+   */
+  GUIOptionalParam<int32> registerOptionalDiscreteCallback(TagID iParamID,
+                                                           int32 iStepCount,
+                                                           Parameters::ChangeCallback iChangeCallback,
+                                                           bool iInvokeCallback = false);
+
+  /**
+   * Registers an optional discrete parameter which handles Vst, Jmb or no parameter at all. The underlying parameter
+   * will be converted to a discrete parameter if possible.
+   * This parameter is particularly useful to write very generic views that can accept "any" kind of parameter
+   * (Vst or Jmb) while still being usable if no parameter is assigned at all.
+   * The callback will be invoked when the parameter changes.
+   *
+   * @return param (never empty!)
+   */
+  GUIOptionalParam<int32> registerOptionalDiscreteCallback(TagID iParamID,
+                                                           int32 iStepCount,
+                                                           Parameters::ChangeCallback1<GUIOptionalParam<int32>> iChangeCallback,
+                                                           bool iInvokeCallback = false);
+
+  //------------------------------------------------------------------------
+  // Raw Vst Param / ParamID
+  //------------------------------------------------------------------------
 
   /**
    * Registers a raw parameter (no conversion)
+   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   *
+   * @return empty param if not found
    */
   GUIRawVstParam registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
-   * Registers a raw parameter (no conversion). This version will properly unregister a previously registered
-   * param.
-   *
-   * @param iParamID `UNDEFINED_PARAM_ID` when there is no parameter to use
-   * @param oGUIRawVstParam the reference to the backed parameter
-   * @return true if a new parameter was registered, false otherwise
-   */
-  bool registerParam(TagID iParamID, GUIRawVstParam &oGUIRawVstParam);
-
-  /**
    * Registers a raw parameter (no conversion)
+   * The callback will be invoked when the parameter changes.
+   *
+   * @return empty param if not found
    */
   GUIRawVstParam registerRawVstCallback(ParamID iParamID,
                                         Parameters::ChangeCallback iChangeCallback,
@@ -75,40 +189,67 @@ public:
 
   /**
    * Registers a raw parameter (no conversion)
+   * The callback will be invoked when the parameter changes.
+   *
+   * @return empty param if not found
    */
-  GUIRawVstParam registerParam(RawVstParam const &iParamDef, bool iSubscribeToChanges = true) {
+  GUIRawVstParam registerRawVstCallback(ParamID iParamID,
+                                        Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
+                                        bool iInvokeCallback = false);
+
+
+  //------------------------------------------------------------------------
+  // Raw Vst Param / param definition (RawVstParam)
+  //------------------------------------------------------------------------
+
+  /**
+   * Registers a raw parameter (no conversion). Convenient call using the param def
+   * (accessible in param-aware views via `fParams->fMyParam`).
+   */
+  inline GUIRawVstParam registerParam(RawVstParam const &iParamDef, bool iSubscribeToChanges = true) {
     return registerRawVstParam(iParamDef->fParamID, iSubscribeToChanges);
   }
 
   /**
-   * Registers a raw parameter (no conversion)
+   * Registers a raw parameter (no conversion). Convenient call using the param def
+   * (accessible in param-aware views via `fParams->fMyParam`).
    */
-  GUIRawVstParam registerCallback(RawVstParam const &iParamDef,
-                                  Parameters::ChangeCallback iChangeCallback,
-                                  bool iInvokeCallback = false) {
+  inline GUIRawVstParam registerCallback(RawVstParam const &iParamDef,
+                                         Parameters::ChangeCallback iChangeCallback,
+                                         bool iInvokeCallback = false) {
     return registerRawVstCallback(iParamDef->fParamID, std::move(iChangeCallback), iInvokeCallback);
   }
 
   /**
-   * Convenient method to register a parameter which is backed by a value when the parameter does not exist.
-   *
-   * IMPORTANT: this api should be considered internal as this is not the right concept... It will be removed!
-   *
-   * @param iParamID -1 when there is no parameter to use
-   * @param oControlValue the reference to the value
-   * @param oGUIRawVstParam the reference to the backed parameter
-   * @return true if a new parameter was registered, false otherwise
+   * Registers a raw parameter (no conversion). Convenient call using the param def
+   * (accessible in param-aware views via `fParams->fMyParam`).
    */
-  bool __internal__registerRawVstControl(TagID iParamID, ParamValue &oControlValue, GUIRawVstParam &oGUIRawVstParam);
+  inline GUIRawVstParam registerCallback(RawVstParam const &iParamDef,
+                                         Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
+                                         bool iInvokeCallback = false) {
+    return registerRawVstCallback(iParamDef->fParamID, std::move(iChangeCallback), iInvokeCallback);
+  }
 
-  // shortcut for BooleanParameter
+  //------------------------------------------------------------------------
+  // Shortcut Vst Param bool/Percent
+  //------------------------------------------------------------------------
+
+  // shortcut for BooleanParameter (will be removed => not very useful)
+  [[deprecated("deprecated since 4.0.0 => use registerVstParam<bool> directly")]]
   GUIVstParam<bool> registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
-  // shortcut for PercentParameter
+  // shortcut for PercentParameter (will be removed => not very useful)
+  [[deprecated("deprecated since 4.0.0 => use registerVstParam<Percent> directly")]]
   GUIVstParam<Percent> registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges = true);
+
+  //------------------------------------------------------------------------
+  // Vst Param (Typed) / ParamID
+  //------------------------------------------------------------------------
 
   /**
    * Register a Vst parameter simply given its id
+   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   *
    * @return empty param  if not found or not proper type
    */
   template<typename T>
@@ -116,6 +257,8 @@ public:
 
   /**
    * Register a callback for a Vst parameter simply given its id
+   * The callback will be invoked when the parameter changes.
+   *
    * @return empty param if not found or not proper type
    */
   template<typename T>
@@ -124,80 +267,70 @@ public:
                                      bool iInvokeCallback = false);
 
   /**
-   * Convenient call to register a Vst param simply by using its description. Takes care of the type due to method API
+   * Register a callback for a Vst parameter simply given its id
+   * The callback will be invoked when the parameter changes.
+   *
+   * @return empty param if not found or not proper type
+   */
+  template<typename T>
+  GUIVstParam<T> registerVstCallback(ParamID iParamID,
+                                     Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
+                                     bool iInvokeCallback = false);
+
+  //------------------------------------------------------------------------
+  // Vst Param (Typed) / param definition (VstParam<T>)
+  //------------------------------------------------------------------------
+
+  /**
+   * Convenient call to register a Vst param simply by using its description (accessible in param-aware views
+   * via `fParams->fMyParam`). Takes care of the type due to method API.
+   *
    * @return empty param  if not found or not proper type
    */
   template<typename T>
-  GUIVstParam<T> registerParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges = true);
+  inline GUIVstParam<T> registerParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges = true) {
+    return registerVstParam<T>(iParamDef.getParamID(), iSubscribeToChanges);
+  }
 
   /**
-   * Convenient call to register a callback for the Vst param simply by using its description. Takes care of the
-   * type due to method API
+   * Convenient call to register a callback for the Vst param simply by using its description (accessible in
+   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API
    *
    * @return empty param  if not found or not proper type
    */
   template<typename T>
-  GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef,
-                                  Parameters::ChangeCallback iChangeCallback,
-                                  bool iInvokeCallback = false);
+  inline GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef,
+                                         Parameters::ChangeCallback iChangeCallback,
+                                         bool iInvokeCallback = false) {
+    return registerVstCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+  }
 
   /**
-   * Convenient call to register a callback for the Vst param simply by using its description. Takes care of
-   * the type due to method API. Since the callback (Parameters::ChangeCallback1) is providing the param, it is not
-   * returned by this api.
+   * Convenient call to register a callback for the Vst param simply by using its description (accessible in
+   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
    *
    * Example:
    *
-   *     registerCallback<int>(fParams->fMyParam, [] (GUIVstParam<int> &iParam) { iParam.getValue()...; });
+   * ```
+   * registerCallback<int>(fParams->fMyParam, [] (GUIVstParam<int> &iParam) { iParam.getValue()...; });
+   * ```
    *
-   * Note how the compiler requires the type (which seems that it could be inferred).
-   *
-   * @return `false` if not found or not proper type
+   * @return empty param  if not found or not proper type
    */
   template<typename T>
-  bool registerCallback(VstParam<T> const &iParamDef,
-                        Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
-                        bool iInvokeCallback = false);
+  inline GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef,
+                                         Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
+                                         bool iInvokeCallback = false) {
+    return registerVstCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+  }
 
-  /**
-   * This method registers this class to be notified of the GUIJmbParam changes. Note that GUIJmbParam is already
-   * a wrapper directly accessible from the view and as a result there is no need to call this method unless you
-   * want to subscribe to the changes, hence there isn't a second optional parameter
-   *
-   * @return a copy of `iParamDef` for convenience and symmetry of the APIs or empty wrapper if GUIParamCxAware::initState has not
-   *         been called
-   */
-  template<typename T>
-  GUIJmbParam<T> registerParam(GUIJmbParam<T> &iParamDef);
-
-  /**
-   * This method registers the callback to be invoked on GUIJmbParam changes.
-   *
-   * @return a copy of `iParamDef` for convenience and symmetry of the APIs or empty wrapper if GUIParamCxAware::initState has not
-   *         been called
-   */
-  template<typename T>
-  GUIJmbParam<T> registerCallback(GUIJmbParam<T> &iParamDef,
-                                  Parameters::ChangeCallback iChangeCallback,
-                                  bool iInvokeCallback = false);
-
-  /**
-   * This method registers the callback to be invoked on GUIJmbParam changes. Since the callback
-   * (Parameters::ChangeCallback1) is providing the param, it is not returned by this api.
-   *
-   * Example:
-   *
-   *     registerCallback<Range>(fState->fMyParam, [] (GUIJmbParam<Range> &iParam) { iParam.getValue()...; });
-   *
-   * @return `false` if GUIParamCxAware::initState has not been called
-   */
-  template<typename T>
-  bool registerCallback(GUIJmbParam<T> &iParamDef,
-                        Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
-                        bool iInvokeCallback = false);
+  //------------------------------------------------------------------------
+  // Jmb Param (Typed) / ParamID
+  //------------------------------------------------------------------------
 
   /**
    * Registers the Jmb param only given its id and return the wrapper to the param.
+   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
    *
    * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
    */
@@ -206,6 +339,7 @@ public:
 
   /**
    * Registers a callback for this Jmb param only given its id and return the wrapper to the param.
+   * The callback will be invoked when the parameter changes.
    *
    * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
    */
@@ -213,6 +347,111 @@ public:
   GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
                                      Parameters::ChangeCallback iChangeCallback,
                                      bool iInvokeCallback = false);
+
+
+  /**
+   * Registers a callback for this Jmb param only given its id and return the wrapper to the param.
+   * The callback will be invoked when the parameter changes.
+   *
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
+   */
+  template<typename T>
+  GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
+                                     Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
+                                     bool iInvokeCallback = false);
+
+  //------------------------------------------------------------------------
+  // Jmb Param (Typed) / Param definition (JmbParam<T>)
+  //------------------------------------------------------------------------
+
+  /**
+   * Convenient call to register a Jmb param simply by using its description (accessible in param-aware views
+   * via `fParams->fMyParam`). Takes care of the type due to method API.
+   *
+   * @return empty param  if not found or not proper type
+   */
+  template<typename T>
+  inline GUIJmbParam<T> registerParam(JmbParam<T> const &iParamDef, bool iSubscribeToChanges = true) {
+    return registerJmbParam<T>(iParamDef.getParamID(), iSubscribeToChanges);
+  }
+
+  /**
+   * Convenient call to register a callback for the Jmb param simply by using its description (accessible in
+   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API
+   *
+   * @return empty param  if not found or not proper type
+   */
+  template<typename T>
+  inline GUIJmbParam<T> registerCallback(JmbParam<T> const &iParamDef,
+                                         Parameters::ChangeCallback iChangeCallback,
+                                         bool iInvokeCallback = false) {
+    return registerJmbCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+
+  }
+
+  /**
+   * Convenient call to register a callback for the Jmb param simply by using its description (accessible in
+   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
+   *
+   * Example:
+   *
+   * ```
+   * registerCallback<int>(fParams->fMyParam, [] (GUIJmbParam<int> &iParam) { iParam.getValue()...; });
+   * ```
+   * @return empty param  if not found or not proper type
+   */
+  template<typename T>
+  inline GUIJmbParam<T> registerCallback(JmbParam<T> const &iParamDef,
+                                         Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
+                                         bool iInvokeCallback = false) {
+    return registerJmbCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+  }
+
+  //------------------------------------------------------------------------
+  // Jmb Param (Typed) / Param (GUIJmbParam<T>)
+  //------------------------------------------------------------------------
+
+  /**
+   * Convenient call to register a Jmb param simply by using the param from the state (accessible in state-aware views
+   * via `fState->fMyParam`). Takes care of the type due to method API.
+   *
+   * @return empty param  if not found or not proper type
+   */
+  template<typename T>
+  inline GUIJmbParam<T> registerParam(GUIJmbParam<T> &iParam, bool iSubscribeToChanges = true) {
+    return registerJmbParam<T>(iParam.getParamID(), true);
+  }
+
+  /**
+   * Convenient call to register a callback for the Jmb param simply by using the param from the state
+   * (accessible in state-aware views via `fState->fMyParam`). Takes care of the type due to method API.
+   *
+   * @return empty param  if not found or not proper type
+   */
+  template<typename T>
+  inline GUIJmbParam<T> registerCallback(GUIJmbParam<T> &iParam,
+                                         Parameters::ChangeCallback iChangeCallback,
+                                         bool iInvokeCallback = false) {
+    return registerJmbCallback<T>(iParam.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+  }
+
+  /**
+   * Convenient call to register a callback for the Jmb param simply by using the param from the state
+   * (accessible in state-aware views via `fState->fMyParam`). Takes care of the type due to method API.
+   *
+   * Example:
+   *
+   * ```
+   * registerCallback<int>(fParams->fMyParam, [] (GUIJmbParam<int> &iParam) { iParam.getValue()...; });
+   * ```
+   * @return empty param  if not found or not proper type
+   */
+  template<typename T>
+  inline bool registerCallback(GUIJmbParam<T> &iParam,
+                               Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
+                               bool iInvokeCallback = false) {
+    return registerJmbCallback<T>(iParam.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+  }
 
   /**
    * Called during initialization
@@ -359,7 +598,5 @@ protected:
   ChangeListener fListener;
 };
 
-}
-}
 }
 }

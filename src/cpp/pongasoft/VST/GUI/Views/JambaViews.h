@@ -39,7 +39,7 @@ struct JambaViews : public FObject
 {
   SINGLETON(JambaViews);
 
-  const ParamDisplayView::Creator fParamDisplayView{"jamba::ParamDisplay", "Jamba - Param Display"};
+  const ParamDisplayView::Creator fParamDisplayView{"jamba::ParamDisplay", "Jamba - Param Display (Vst & Jmb)"};
   const DebugParamDisplayView::Creator fDebugParamDisplayView{"jamba::DebugParamDisplay", "Jamba - Param Display + highlight (for debug)"};
   const ToggleButtonView::Creator fToggleButtonCreator{"jamba::ToggleButton", "Jamba - Toggle Button (on/off)"};
   const MomentaryButtonView::Creator fMomentaryButtonCreator{"jamba::MomentaryButton", "Jamba - Momentary Button (on when pressed)"};

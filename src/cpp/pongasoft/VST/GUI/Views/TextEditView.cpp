@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,10 +18,7 @@
 
 #include "TextEditView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
@@ -32,9 +29,6 @@ void TextEditView::registerParameters()
 {
   if(!fParamCxMgr || getTag() < 0)
     return;
-
-  if(fText.exists())
-    unregisterParam(fText.getParamID());
 
   auto paramID = static_cast<ParamID>(getTag());
 
@@ -70,7 +64,4 @@ void TextEditView::onParameterChange(ParamID iParamID)
   CustomViewAdapter::onParameterChange(iParamID);
 }
 
-}
-}
-}
 }

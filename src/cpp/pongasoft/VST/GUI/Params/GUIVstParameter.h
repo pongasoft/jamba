@@ -270,19 +270,10 @@ template<typename T>
 class GUIVstParam
 {
 public:
-  GUIVstParam() : fPtr{nullptr} {}
-
-  // move constructor
-  explicit GUIVstParam(std::shared_ptr<GUIVstParameter<T>> &&iPtr) : fPtr{std::move(iPtr)} {}
-
-  // delete copy constructor
-  GUIVstParam(GUIVstParam<T> &iPtr) = delete;
-
-  // move copy constructor
-  GUIVstParam(GUIVstParam<T> &&iPtr) noexcept : fPtr{std::move(iPtr.fPtr)} {}
-
-  // move assignment constructor
-  GUIVstParam<T> &operator=(GUIVstParam<T> &&iPtr) noexcept { fPtr = std::move(iPtr.fPtr); return *this; }
+  // Constructor
+  GUIVstParam(std::shared_ptr<GUIVstParameter<T>> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
+    fPtr{std::move(iPtr)}
+  {}
 
   // exists
   inline bool exists() const { return (bool) fPtr; }
@@ -365,7 +356,7 @@ public:
   /**
    * @return an object maintaining the connection between the parameter and the callback
    */
-  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
+  inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
   std::shared_ptr<GUIVstParameter<T>> fPtr;
@@ -379,7 +370,7 @@ std::shared_ptr<GUIVstParameter<T>> GUIRawVstParameter::asVstParameter()
 {
   auto vstParamDef = std::dynamic_pointer_cast<VstParamDef<T>>(fParamDef);
   if(vstParamDef && vstParamDef->fConverter)
-    return std::make_unique<GUIVstParameter<T>>(std::dynamic_pointer_cast<GUIRawVstParameter>(shared_from_this()),
+    return std::make_shared<GUIVstParameter<T>>(std::dynamic_pointer_cast<GUIRawVstParameter>(shared_from_this()),
                                                 vstParamDef->fConverter);
   else
     return nullptr;

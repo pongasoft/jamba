@@ -487,7 +487,7 @@ class GUIJmbParam
 {
 public:
   GUIJmbParam(std::shared_ptr<GUIJmbParameter<T>> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
-    fPtr{iPtr}
+    fPtr{std::move(iPtr)}
   {}
 
   // exists

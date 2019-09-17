@@ -20,26 +20,54 @@
 #include "GUIParamCxAware.h"
 #include "GUIParamCxMgr.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Params {
+namespace pongasoft::VST::GUI::Params {
 
 
 //------------------------------------------------------------------------
 // GUIParamCxAware::registerOptionalParam
 //------------------------------------------------------------------------
 template<typename T>
-bool GUIParamCxAware::registerOptionalParam(TagID iParamID, GUIOptionalParam<T> &oParam, bool iSubscribeToChanges)
+GUIOptionalParam<T> GUIParamCxAware::registerOptionalParam(TagID iParamID, bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
   {
-    return fParamCxMgr->registerOptionalParam(iParamID, oParam, iSubscribeToChanges ? this : nullptr);
+    return fParamCxMgr->registerOptionalParam<T>(iParamID, iSubscribeToChanges ? this : nullptr);
   }
   else
-    return false;
+    return GUIOptionalParam<T>();
 }
 
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerOptionalCallback
+//------------------------------------------------------------------------
+template<typename T>
+GUIOptionalParam<T> GUIParamCxAware::registerOptionalCallback(TagID iParamID,
+                                                              Parameters::ChangeCallback iChangeCallback,
+                                                              bool iInvokeCallback)
+{
+  if(fParamCxMgr)
+  {
+    return fParamCxMgr->registerOptionalCallback<T>(iParamID, std::move(iChangeCallback), iInvokeCallback);
+  }
+  else
+    return GUIOptionalParam<T>();
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerOptionalCallback
+//------------------------------------------------------------------------
+template<typename T>
+GUIOptionalParam<T> GUIParamCxAware::registerOptionalCallback(TagID iParamID,
+                                                              Parameters::ChangeCallback1<GUIOptionalParam<T>> iChangeCallback,
+                                                              bool iInvokeCallback)
+{
+  if(fParamCxMgr)
+  {
+    return fParamCxMgr->registerOptionalCallback<T>(iParamID, std::move(iChangeCallback), iInvokeCallback);
+  }
+  else
+    return GUIOptionalParam<T>();
+}
 
 //------------------------------------------------------------------------
 // GUIParamCxAware::registerVstParam
@@ -68,84 +96,17 @@ GUIVstParam<T> GUIParamCxAware::registerVstCallback(ParamID iParamID,
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerParam
+// GUIParamCxAware::registerVstCallback
 //------------------------------------------------------------------------
 template<typename T>
-GUIVstParam<T> GUIParamCxAware::registerParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges)
+GUIVstParam<T> GUIParamCxAware::registerVstCallback(ParamID iParamID,
+                                                    Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
+                                                    bool iInvokeCallback)
 {
   if(fParamCxMgr)
-    return fParamCxMgr->registerVstParam(iParamDef, iSubscribeToChanges ? this : nullptr);
+    return fParamCxMgr->registerVstCallback<T>(iParamID, std::move(iChangeCallback), iInvokeCallback);
   else
     return GUIVstParam<T>{};
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::registerCallback
-//------------------------------------------------------------------------
-template<typename T>
-GUIVstParam<T>
-GUIParamCxAware::registerCallback(VstParam<T> const &iParamDef,
-                                  Parameters::ChangeCallback iChangeCallback,
-                                  bool iInvokeCallback)
-{
-  if(fParamCxMgr)
-    return fParamCxMgr->registerVstCallback(iParamDef, std::move(iChangeCallback), iInvokeCallback);
-  else
-    return GUIVstParam<T>{};
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::registerCallback
-//------------------------------------------------------------------------
-template<typename T>
-bool GUIParamCxAware::registerCallback(VstParam<T> const &iParamDef,
-                                       Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
-                                       bool iInvokeCallback)
-{
-  return fParamCxMgr ? fParamCxMgr->registerVstCallback(iParamDef, std::move(iChangeCallback), iInvokeCallback) : false;
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::registerParam
-//------------------------------------------------------------------------
-template<typename T>
-GUIJmbParam<T> GUIParamCxAware::registerParam(GUIJmbParam<T> &iParamDef)
-{
-  if(fParamCxMgr)
-    return fParamCxMgr->registerJmbParam(iParamDef, this);
-  else
-    return GUIJmbParam<T>{};
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::registerCallback
-//------------------------------------------------------------------------
-template<typename T>
-GUIJmbParam<T> GUIParamCxAware::registerCallback(GUIJmbParam<T> &iParamDef,
-                                                 Parameters::ChangeCallback iChangeCallback,
-                                                 bool iInvokeCallback)
-{
-  if(fParamCxMgr)
-    return fParamCxMgr->registerJmbCallback(iParamDef, std::move(iChangeCallback), iInvokeCallback);
-  else
-    return GUIJmbParam<T>{};
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxAware::registerCallback
-//------------------------------------------------------------------------
-template<typename T>
-bool GUIParamCxAware::registerCallback(GUIJmbParam<T> &iParamDef,
-                                       Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
-                                       bool iInvokeCallback)
-{
-  if(fParamCxMgr)
-  {
-    fParamCxMgr->registerJmbCallback(iParamDef, std::move(iChangeCallback), iInvokeCallback);
-    return true;
-  }
-  else
-    return false;
 }
 
 //------------------------------------------------------------------------
@@ -166,6 +127,20 @@ GUIJmbParam<T> GUIParamCxAware::registerJmbParam(ParamID iParamID, bool iSubscri
 template<typename T>
 GUIJmbParam<T> GUIParamCxAware::registerJmbCallback(ParamID iParamID,
                                                     Parameters::ChangeCallback iChangeCallback,
+                                                    bool iInvokeCallback)
+{
+  if(fParamCxMgr)
+    return fParamCxMgr->registerJmbCallback<T>(iParamID, std::move(iChangeCallback), iInvokeCallback);
+  else
+    return GUIJmbParam<T>{};
+}
+
+//------------------------------------------------------------------------
+// GUIParamCxAware::registerJmbCallback
+//------------------------------------------------------------------------
+template<typename T>
+GUIJmbParam<T> GUIParamCxAware::registerJmbCallback(ParamID iParamID,
+                                                    Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
                                                     bool iInvokeCallback)
 {
   if(fParamCxMgr)
@@ -196,7 +171,4 @@ GUIJmbParam<T> GUIParamCxAware::unregisterParam(GUIJmbParam<T> const &iParam)
   return GUIJmbParam<T>{};
 }
 
-}
-}
-}
 }

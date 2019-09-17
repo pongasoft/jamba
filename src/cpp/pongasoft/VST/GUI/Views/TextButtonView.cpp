@@ -19,10 +19,7 @@
 #include <vstgui4/vstgui/lib/cdrawcontext.h>
 #include "TextButtonView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
@@ -31,18 +28,10 @@ using namespace VSTGUI;
 //------------------------------------------------------------------------
 void TextButtonView::registerParameters()
 {
-  if(!fParamCxMgr || getTitleTag() < 0)
-    return;
-
-  if(fTitle.exists())
-    unregisterParam(fTitle.getParamID());
-
-  auto paramID = static_cast<ParamID>(getTitleTag());
-
-  fTitle =
-    registerJmbCallback<UTF8String>(paramID, [this] {
-      setTitle(fTitle);
-    }, true); // make sure to invoke the callback when the param exists to set the title right away
+  registerBaseCallback(getTitleTag(),
+                       [this](IGUIParam &iParam) {
+                         setTitle(iParam.toUTF8String(fPrecisionOverride));
+                       }, true);
 }
 
 //------------------------------------------------------------------------
@@ -180,9 +169,4 @@ void TextButtonView::unClick()
   setValue(getMin());
 }
 
-
-
-}
-}
-}
 }

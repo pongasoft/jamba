@@ -102,6 +102,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxAware.hpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxMgr.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCxMgr.hpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamSerializers.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIRawVstParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIVstParameter.h

@@ -173,4 +173,50 @@ private:
   bool fDoneEditing{false};
 };
 
+//------------------------------------------------------------------------
+// IGUIParam - wrapper to make writing the code much simpler and natural
+//------------------------------------------------------------------------
+/**
+ * This is the main class that the plugin should use as it exposes only the necessary methods of the param
+ * as well as redefine a couple of operators which helps in writing simpler and natural code.
+ */
+class IGUIParam
+{
+public:
+  IGUIParam(std::shared_ptr<IGUIParameter> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
+    fPtr{std::move(iPtr)}
+  {}
+
+  // exists
+  inline bool exists() const { return (bool) fPtr; }
+
+  // getParamID
+  inline ParamID getParamID() const { return fPtr->getParamID(); }
+
+  // getStepCount
+  inline int32 getStepCount() const { return fPtr->getStepCount(); }
+
+  /**
+   * Return the current value of the parameter as a string (which is properly UTF-8 encoded).
+   *
+   * @param iPrecision if `iPrecision` < 0 the parameter is free to use whichever precision is tied to the parameter
+   *                   otherwise it should use the one provided
+   */
+  inline std::string toUTF8String(int32 iPrecision) const { return fPtr->toUTF8String(iPrecision); }
+
+  /**
+   * @return an object maintaining the connection between the parameter and the listener
+   */
+  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { return fPtr->connect(iChangeListener); }
+
+  /**
+   * @return an object maintaining the connection between the parameter and the callback
+   */
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
+
+private:
+  std::shared_ptr<IGUIParameter> fPtr;
+};
+
+
 }

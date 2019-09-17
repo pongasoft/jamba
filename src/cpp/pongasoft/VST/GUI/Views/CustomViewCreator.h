@@ -281,9 +281,12 @@ private:
           }
         }
         oValue = tag;
-        return true;
       }
-      return false;
+      else
+        // when selecting "NONE" iAttributeValue is an empty string
+        oValue = UNDEFINED_TAG_ID;
+
+      return true;
     }
 
 #ifdef EDITOR_MODE

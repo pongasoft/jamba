@@ -54,8 +54,7 @@ public:
 protected:
   int32 fPrecisionOverride{-1};
 
-  std::shared_ptr<IGUIParameter> fParam{};
-  std::unique_ptr<FObjectCx> fParamCx{};
+  IGUIParam fParam{};
 
 public:
   class Creator : public CustomViewCreator<ParamDisplayView, super_type>
