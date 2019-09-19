@@ -142,6 +142,7 @@ std::shared_ptr<RawVstParamDef> Parameters::getRawVstParamDef(ParamID iParamID) 
 std::shared_ptr<IJmbParamDef> Parameters::getJmbParamDef(ParamID iParamID) const
 {
   auto iter = fJmbParams.find(iParamID);
+
   if(iter == fJmbParams.cend())
     return nullptr;
 

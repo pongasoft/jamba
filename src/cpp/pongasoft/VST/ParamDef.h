@@ -15,8 +15,7 @@
  *
  * @author Yan Pujante
  */
-#ifndef __PONGASOFT_VST_PARAM_DEF_H__
-#define __PONGASOFT_VST_PARAM_DEF_H__
+#pragma once
 
 #include "ParamConverters.h"
 #include "ParamSerializers.h"
@@ -35,10 +34,15 @@ namespace pongasoft::VST {
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 
+// forward declaration required for API
+namespace GUI::Params {
+class IGUIJmbParameter;
+}
+
 /**
  * Base class for all ParamDef
  */
-class IParamDef
+class IParamDef : public std::enable_shared_from_this<IParamDef>
 {
 public:
   enum class Owner
@@ -56,6 +60,8 @@ public:
     fOwner{iOwner},
     fTransient{iTransient}
   {}
+
+  virtual ~IParamDef() = default;
 
 public:
   const ParamID fParamID;
@@ -238,10 +244,20 @@ public:
       fShared{iShared}
   {}
 
-  virtual ~IJmbParamDef() = default;
+  ~IJmbParamDef() override = default;
 
   // writeDefaultValue
   virtual void writeDefaultValue(std::ostream &oStreamer) const = 0;
+
+  /**
+   * Create a new `IGUIJmbParameter` of the proper subtype.
+   */
+  virtual std::shared_ptr<GUI::Params::IGUIJmbParameter> newGUIParam() = 0;
+
+  /**
+   * @return `true` if the parameter can be serialized (so provides a means to be serialized)
+   */
+  virtual bool isSerializable() const = 0;
 
 public:
   bool const fShared;
@@ -316,6 +332,19 @@ public:
   {
     return "__param__" + std::to_string(fParamID);
   }
+
+  /**
+   * Create a new `IGUIJmbParameter` of the proper subtype.
+   *
+   * Implementation note: because `IGUIJmbParameter` depends on `ParamDef` the implementation of
+   * this templated method is defined in `GUIState.h`.
+   */
+  std::shared_ptr<GUI::Params::IGUIJmbParameter> newGUIParam() override;
+
+  /**
+   * @return `true` if a serializer was provided
+   */
+  bool isSerializable() const override { return fSerializer != nullptr; }
 
 public:
   const ParamType fDefaultValue;
@@ -418,5 +447,3 @@ template<typename T>
 using JmbParam = std::shared_ptr<JmbParamDef<T>>;
 
 }
-
-#endif // __PONGASOFT_VST_PARAM_DEF_H__

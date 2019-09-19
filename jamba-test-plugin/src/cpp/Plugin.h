@@ -145,27 +145,11 @@ using namespace GUI;
 class JambaTestPluginGUIState : public GUIPluginState<JambaTestPluginParameters>
 {
 public:
-  GUIJmbParam<ParamValue> fParamValueJmb;
-  GUIJmbParam<int32> fInt32Jmb;
-  GUIJmbParam<int64> fInt64Jmb;
-  GUIJmbParam<bool> fBoolJmb;
-  GUIJmbParam<EEnum> fEnumJmb;
-  GUIJmbParam<EEnumClass> fEnumClassJmb;
-  GUIJmbParam<ENonContiguousEnum> fNonContiguousEnumJmb;
-  GUIJmbParam<Gain> fGainJmb;
   GUIJmbParam<UTF8String> fUTF8String;
 
 public:
   explicit JambaTestPluginGUIState(JambaTestPluginParameters const &iParams) :
     GUIPluginState(iParams),
-    fParamValueJmb{add(iParams.fParamValueJmb)},
-    fInt32Jmb{add(iParams.fInt32Jmb)},
-    fInt64Jmb{add(iParams.fInt64Jmb)},
-    fBoolJmb{add(iParams.fBoolJmb)},
-    fEnumJmb{add(iParams.fEnumJmb)},
-    fEnumClassJmb{add(iParams.fEnumClassJmb)},
-    fNonContiguousEnumJmb{add(iParams.fNonContiguousEnumJmb)},
-    fGainJmb{add(iParams.fGainJmb)},
     fUTF8String{add(iParams.fUTF8String)}
   {};
 

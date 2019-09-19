@@ -54,6 +54,27 @@ void GUIState::addJmbParam(std::shared_ptr<IGUIJmbParameter> iParameter)
   DCHECK_F(fPluginParameters.getJmbParamDef(paramID) != nullptr, "jmb parameter [%d] not registered", paramID);
   DCHECK_F(fJmbParams.find(paramID) == fJmbParams.cend(), "duplicate paramID [%d]", paramID);
 
+  auto rawPtr = iParameter.get();
+  auto paramDef = iParameter->getParamDef();
+  if(paramDef->fShared && paramDef->isSerializable())
+  {
+    switch(paramDef->fOwner)
+    {
+      case IJmbParamDef::Owner::kRT:
+        fMessageHandler.registerHandler(paramID, rawPtr);
+        break;
+
+      case IJmbParamDef::Owner::kGUI:
+        rawPtr->setMessageProducer(this);
+        break;
+
+      default:
+        // not reached
+        DLOG_F(ERROR, "not reached");
+        break;
+    }
+  }
+
   fJmbParams[paramID] = std::move(iParameter);
   fAllRegistrationOrder.emplace_back(paramID);
 }
@@ -221,10 +242,24 @@ std::unique_ptr<GUIParamCxMgr> GUIState::createParamCxMgr()
 //------------------------------------------------------------------------
 std::shared_ptr<IGUIJmbParameter> GUIState::getJmbParameter(ParamID iParamID) const
 {
+  // 1. we locate it in the map
   auto iter = fJmbParams.find(iParamID);
-  if(iter == fJmbParams.cend())
-    return nullptr;
-  return iter->second;
+  if(iter != fJmbParams.cend())
+    return iter->second;
+
+  // 2. not found => create it from its definition
+  auto paramDef = fPluginParameters.getJmbParamDef(iParamID);
+  if(paramDef)
+  {
+    auto param = paramDef->newGUIParam();
+    // implementation note: method is defined const and this is an implementation detail, it does not change
+    // the GUIState per se
+    const_cast<GUIState *>(this)->addJmbParam(param);
+    return param;
+  }
+
+  // 3. not such Jmb param
+  return nullptr;
 }
 
 //------------------------------------------------------------------------

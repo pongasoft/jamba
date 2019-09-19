@@ -64,7 +64,9 @@ public:
   /**
    * @return true if there is a jmb param with the provided ID
    */
-  inline bool existsJmb(ParamID iParamID) const { return fJmbParams.find(iParamID) != fJmbParams.cend(); }
+  inline bool existsJmb(ParamID iParamID) const { return fJmbParams.find(iParamID) != fJmbParams.cend()
+                                                         ||
+                                                         fPluginParameters.getJmbParamDef(iParamID) != nullptr; }
 
   /**
    * Generic call which returns a param with the given id or `nullptr` if there isn't one. It can be either
@@ -262,28 +264,9 @@ public:
 template<typename T>
 GUIJmbParam<T> GUIState::add(JmbParam<T> iParamDef)
 {
-  auto guiParam = VstUtils::make_sfo<GUIJmbParameter<T>>(iParamDef);
-  auto rawPtr = guiParam.get();
+  auto guiParam = iParamDef->newGUIParam();
   addJmbParam(guiParam);
-  if(iParamDef->fShared && iParamDef->fSerializer)
-  {
-    switch(iParamDef->fOwner)
-    {
-      case IJmbParamDef::Owner::kRT:
-        fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);
-        break;
-
-      case IJmbParamDef::Owner::kGUI:
-        rawPtr->setMessageProducer(this);
-        break;
-
-      default:
-        // not reached
-        DLOG_F(ERROR, "not reached");
-        break;
-    }
-  }
-  return guiParam;
+  return GUIJmbParam<T>(std::dynamic_pointer_cast<GUIJmbParameter<T>>(guiParam));
 }
 
 //------------------------------------------------------------------------
@@ -347,6 +330,24 @@ std::shared_ptr<GUIVstParameter<T>> GUIState::getGUIVstParameter(ParamID iParamI
 }
 
 
+}
+}
+
+//------------------------------------------------------------------------
+// Implementation note: because of the circular dependency between
+// JmbParamDef and IGUIJmbParameter, this templated method is defined
+// here in GUIState.h since GUIState.cpp is the primary user of this
+// method.
+//------------------------------------------------------------------------
+namespace pongasoft::VST {
+//------------------------------------------------------------------------
+// JmbParamDef<T>::newGUIParam
+//------------------------------------------------------------------------
+template<typename T>
+std::shared_ptr<GUI::Params::IGUIJmbParameter> JmbParamDef<T>::newGUIParam()
+{
+  auto ptr = std::dynamic_pointer_cast<JmbParamDef<T>>(IParamDef::shared_from_this());
+  return VstUtils::make_sfo<GUI::Params::GUIJmbParameter<T>>(ptr);
 }
 }
 
