@@ -23,7 +23,7 @@
 #include <vstgui4/vstgui/lib/iviewlistener.h>
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 #include <pongasoft/VST/GUI/Params/GUIVstParameter.h>
-#include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
+#include <pongasoft/VST/GUI/Params/ParamAware.h>
 #include <pongasoft/VST/GUI/Views/GlobalKeyboardHook.h>
 
 namespace pongasoft::VST::GUI {
@@ -32,14 +32,14 @@ using namespace VSTGUI;
 using namespace Params;
 
 /**
- * This class will manage the callbacks registered against a view (CView). The idea is to be able to register callbacks
- * for the life of a view without having to inherit from the view to implement a similar behavior (which is much more
- * involved).
+ * This class manages the views that have been made "param aware". This means that callbacks can be registered against
+ * a view (CView). The idea is to be able to register callbacks for the life of a view without having to inherit from
+ * the view to implement a similar behavior (which is much more involved).
  *
  * Example1 usage:
  *
  *     TextButtonView *button = ....;
- *     fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
+ *     fState->makeParamAware(button)->registerCallback<int>(fParams->fMyParam,
  *       [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
  *       iButton->setMouseEnabled(iParam > 3);
  *     });
@@ -52,16 +52,16 @@ using namespace Params;
  * Example2 usage:
  *
  *     TextButtonView *button = ....;
- *     auto cx = fState->registerConnectionFor(button);
- *     cx->registerParam(fParams->fMyVstParam);
- *     cx->registerParam(fState->fMyJmbParam);
- *     cx->registerListener([this] (TextButtonView *iButton, ParamID iParamID) {
+ *     auto pa = fState->makeParamAware(button);
+ *     pa->registerParam(fParams->fMyVstParam);
+ *     pa->registerParam(fState->fMyJmbParam);
+ *     pa->registerListener([this] (TextButtonView *iButton, ParamID iParamID) {
  *       if(iParamID == fParams->fMyVstParam.getParamID())
  *         // do something... iButton->xxx
  *       if(iParamID == fParams->fState->fMyJmbParam())
  *         // do something else... iButton->xxx
  *      });
- *      cx->invokeAll(); // optionally invoke the listener right away to initialize the button
+ *      pa->invokeAll(); // optionally invoke the listener right away to initialize the button
  *
  * This examples sets up the button view as being interested in changes to 2 parameters and when they change,
  * the listener will be invoked.
@@ -69,7 +69,7 @@ using namespace Params;
  * An alternative would be to inherit from the view which is more work (especially if the only purpose is add a
  * simple callback like behavior):
  *
- *     class MyView : public TextButtonView, PluginAccessor<MyGUIState>
+ *     class MyView : public TextButtonView, StateAware<MyGUIState>
  *     {
  *       public:
  *         // constructor
@@ -83,7 +83,7 @@ using namespace Params;
  *         }
  *     };
  */
-class ViewCxMgr : private IViewListenerAdapter
+class ParamAwareViews : private IViewListenerAdapter
 {
 public:
   /**
@@ -93,7 +93,7 @@ public:
    *         when the view goes away.
    */
   template<typename TView>
-  ViewGUIParamCxAware<TView> *registerConnectionFor(TView *iView, GUIState *iGUIState);
+  ParamAwareView<TView> *makeParamAware(TView *iView, GUIState *iGUIState);
 
   /**
    * Close all previously established connections
@@ -107,31 +107,28 @@ private:
   void viewWillDelete(CView *iView) override;
 
 private:
-  std::unordered_map<CView *, std::unique_ptr<GUIParamCxAware>> fViewConnections{};
+  std::unordered_map<CView *, std::unique_ptr<ParamAware>> fParamAwareViews{};
 };
 
 //------------------------------------------------------------------------
-// ViewCxMgr::registerConnectionFor
+// ParamAwareViews::makeParamAware
 //------------------------------------------------------------------------
 template<typename TView>
-ViewGUIParamCxAware<TView> *ViewCxMgr::registerConnectionFor(TView *iView, GUIState *iGUIState)
+ParamAwareView<TView> *ParamAwareViews::makeParamAware(TView *iView, GUIState *iGUIState)
 {
-  // enforces at compilation time that TView should be a subclass of VSTGUI::CView
-  static_assert(std::is_convertible_v<TView *, CView *>);
-
   if(iView == nullptr)
     return nullptr;
 
-  auto iter = fViewConnections.find(iView);
+  auto iter = fParamAwareViews.find(iView);
 
-  if(iter == fViewConnections.end())
+  if(iter == fParamAwareViews.end())
   {
     iView->registerViewListener(this);
-    fViewConnections[iView] = std::make_unique<ViewGUIParamCxAware<TView>>(iView);
-    fViewConnections[iView]->initState(iGUIState);
+    fParamAwareViews[iView] = std::make_unique<ParamAwareView<TView>>(iView);
+    fParamAwareViews[iView]->initState(iGUIState);
   }
 
-  return static_cast<ViewGUIParamCxAware<TView> *>(fViewConnections[iView].get());
+  return static_cast<ParamAwareView<TView> *>(fParamAwareViews[iView].get());
 }
 
 

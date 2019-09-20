@@ -28,10 +28,10 @@ using namespace pongasoft::VST::GUI;
 
 /**
  * Controller which handles adding listener to the text buttons */
-class JTPTextButtonController : public Views::PluginCustomController<JambaTestPluginGUIState>
+class JTPTextButtonController : public Views::StateAwareCustomController<JambaTestPluginGUIState>
 {
 public:
-  explicit JTPTextButtonController(IController *iBaseController) : PluginCustomController(iBaseController) {}
+  explicit JTPTextButtonController(IController *iBaseController) : StateAwareCustomController(iBaseController) {}
 
   // verifyView
   CView *verifyView(CView *iView, const UIAttributes &attributes, const IUIDescription *description) override
@@ -85,12 +85,11 @@ private:
   // addDisableStateHandling -> button can be disabled based on state of fState->fBoolJmb
   void addDisableStateHandling(Views::TextButtonView *iButton)
   {
-    registerConnectionFor(iButton)->registerCallback<bool>(fState->fBoolJmb,
-                                                           [](Views::TextButtonView *iButton, GUIJmbParam<bool> &iParam) {
-                                                             iButton->setMouseEnabled(iParam);
-                                                           },
-                                                           true);
-
+    makeParamAware(iButton)->registerCallback<bool>(fState->fBoolJmb,
+                                                    [](Views::TextButtonView *iButton, GUIJmbParam<bool> &iParam) {
+                                                      iButton->setMouseEnabled(iParam);
+                                                    },
+                                                    true);
   }
 
   // appends a counter to the original message

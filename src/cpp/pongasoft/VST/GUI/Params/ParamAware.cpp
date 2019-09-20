@@ -15,33 +15,33 @@
  *
  * @author Yan Pujante
  */
-#include "GUIParamCxAware.hpp"
-#include "GUIParamCxAware.h"
+#include "ParamAware.h"
+#include "ParamAware.hpp"
 
 #include <pongasoft/VST/GUI/GUIState.h>
 
 namespace pongasoft::VST::GUI::Params {
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::~GUIParamCxAware
+// ParamAware::~ParamAware
 //------------------------------------------------------------------------
-GUIParamCxAware::~GUIParamCxAware()
+ParamAware::~ParamAware()
 {
   fParamCxMgr = nullptr;
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::initState
+// ParamAware::initState
 //------------------------------------------------------------------------
-void GUIParamCxAware::initState(GUIState *iGUIState)
+void ParamAware::initState(GUIState *iGUIState)
 {
   fParamCxMgr = iGUIState->createParamCxMgr();
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerRawVstParam
+// ParamAware::registerRawVstParam
 //------------------------------------------------------------------------
-GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges)
+GUIRawVstParam ParamAware::registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges)
 {
   if(!fParamCxMgr)
     return GUIRawVstParam{};
@@ -50,11 +50,11 @@ GUIRawVstParam GUIParamCxAware::registerRawVstParam(ParamID iParamID, bool iSubs
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerRawVstCallback
+// ParamAware::registerRawVstCallback
 //------------------------------------------------------------------------
-GUIRawVstParam GUIParamCxAware::registerRawVstCallback(ParamID iParamID,
-                                                       Parameters::ChangeCallback iChangeCallback,
-                                                       bool iInvokeCallback)
+GUIRawVstParam ParamAware::registerRawVstCallback(ParamID iParamID,
+                                                  Parameters::ChangeCallback iChangeCallback,
+                                                  bool iInvokeCallback)
 {
   if(!fParamCxMgr)
     return GUIRawVstParam{};
@@ -63,11 +63,11 @@ GUIRawVstParam GUIParamCxAware::registerRawVstCallback(ParamID iParamID,
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerRawVstCallback
+// ParamAware::registerRawVstCallback
 //------------------------------------------------------------------------
-GUIRawVstParam GUIParamCxAware::registerRawVstCallback(ParamID iParamID,
-                                                       Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
-                                                       bool iInvokeCallback)
+GUIRawVstParam ParamAware::registerRawVstCallback(ParamID iParamID,
+                                                  Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
+                                                  bool iInvokeCallback)
 {
   if(!fParamCxMgr)
     return GUIRawVstParam{};
@@ -76,25 +76,25 @@ GUIRawVstParam GUIParamCxAware::registerRawVstCallback(ParamID iParamID,
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerVstBooleanParam
+// ParamAware::registerVstBooleanParam
 //------------------------------------------------------------------------
-GUIVstParam<bool> GUIParamCxAware::registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges)
+GUIVstParam<bool> ParamAware::registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges)
 {
   return registerVstParam<bool>(iParamID, iSubscribeToChanges);
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerVstPercentParam
+// ParamAware::registerVstPercentParam
 //------------------------------------------------------------------------
-GUIVstParam<Percent> GUIParamCxAware::registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges)
+GUIVstParam<Percent> ParamAware::registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges)
 {
   return registerVstParam<Percent>(iParamID, iSubscribeToChanges);
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::unregisterParam
+// ParamAware::unregisterParam
 //------------------------------------------------------------------------
-bool GUIParamCxAware::unregisterParam(ParamID iParamID)
+bool ParamAware::unregisterParam(ParamID iParamID)
 {
   if(fParamCxMgr)
     return fParamCxMgr->unregisterParam(iParamID);
@@ -102,9 +102,9 @@ bool GUIParamCxAware::unregisterParam(ParamID iParamID)
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::unregisterParam
+// ParamAware::unregisterParam
 //------------------------------------------------------------------------
-GUIRawVstParam GUIParamCxAware::unregisterParam(GUIRawVstParam const &iParam)
+GUIRawVstParam ParamAware::unregisterParam(GUIRawVstParam const &iParam)
 {
   if(iParam.exists() && fParamCxMgr)
     fParamCxMgr->unregisterParam(iParam.getParamID());
@@ -112,29 +112,29 @@ GUIRawVstParam GUIParamCxAware::unregisterParam(GUIRawVstParam const &iParam)
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::unregisterAll
+// ParamAware::unregisterAll
 //------------------------------------------------------------------------
-void GUIParamCxAware::unregisterAll()
+void ParamAware::unregisterAll()
 {
   if(fParamCxMgr)
     fParamCxMgr->unregisterAll();
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::invokeAll
+// ParamAware::invokeAll
 //------------------------------------------------------------------------
-void GUIParamCxAware::invokeAll()
+void ParamAware::invokeAll()
 {
   if(fParamCxMgr)
     fParamCxMgr->invokeAll();
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerOptionalDiscreteParam
+// ParamAware::registerOptionalDiscreteParam
 //------------------------------------------------------------------------
-GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteParam(TagID iParamID,
-                                                                       int32 iStepCount,
-                                                                       bool iSubscribeToChanges)
+GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteParam(TagID iParamID,
+                                                                  int32 iStepCount,
+                                                                  bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
   {
@@ -145,12 +145,12 @@ GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteParam(TagID iPa
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerOptionalDiscreteCallback
+// ParamAware::registerOptionalDiscreteCallback
 //------------------------------------------------------------------------
-GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteCallback(TagID iParamID,
-                                                                          int32 iStepCount,
-                                                                          Parameters::ChangeCallback iChangeCallback,
-                                                                          bool iInvokeCallback)
+GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(TagID iParamID,
+                                                                     int32 iStepCount,
+                                                                     Parameters::ChangeCallback iChangeCallback,
+                                                                     bool iInvokeCallback)
 {
   if(fParamCxMgr)
   {
@@ -161,12 +161,12 @@ GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteCallback(TagID 
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerOptionalDiscreteCallback
+// ParamAware::registerOptionalDiscreteCallback
 //------------------------------------------------------------------------
-GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteCallback(TagID iParamID,
-                                                                          int32 iStepCount,
-                                                                          Parameters::ChangeCallback1<GUIOptionalParam<int32>> iChangeCallback,
-                                                                          bool iInvokeCallback)
+GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(TagID iParamID,
+                                                                     int32 iStepCount,
+                                                                     Parameters::ChangeCallback1<GUIOptionalParam<int32>> iChangeCallback,
+                                                                     bool iInvokeCallback)
 {
   if(fParamCxMgr)
   {
@@ -177,9 +177,9 @@ GUIOptionalParam<int32> GUIParamCxAware::registerOptionalDiscreteCallback(TagID 
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerBaseParam
+// ParamAware::registerBaseParam
 //------------------------------------------------------------------------
-IGUIParam GUIParamCxAware::registerBaseParam(TagID iParamID, bool iSubscribeToChanges)
+IGUIParam ParamAware::registerBaseParam(TagID iParamID, bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
     return fParamCxMgr->registerBaseParam(iParamID, iSubscribeToChanges ? this : nullptr);
@@ -188,11 +188,11 @@ IGUIParam GUIParamCxAware::registerBaseParam(TagID iParamID, bool iSubscribeToCh
 }
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerBaseCallback
+// ParamAware::registerBaseCallback
 //------------------------------------------------------------------------
-IGUIParam GUIParamCxAware::registerBaseCallback(TagID iParamID,
-                                                Parameters::ChangeCallback iChangeCallback,
-                                                bool iInvokeCallback)
+IGUIParam ParamAware::registerBaseCallback(TagID iParamID,
+                                           Parameters::ChangeCallback iChangeCallback,
+                                           bool iInvokeCallback)
 {
   if(fParamCxMgr)
     return fParamCxMgr->registerBaseCallback(iParamID, std::move(iChangeCallback), iInvokeCallback);
@@ -202,11 +202,11 @@ IGUIParam GUIParamCxAware::registerBaseCallback(TagID iParamID,
 
 
 //------------------------------------------------------------------------
-// GUIParamCxAware::registerBaseCallback
+// ParamAware::registerBaseCallback
 //------------------------------------------------------------------------
-IGUIParam GUIParamCxAware::registerBaseCallback(TagID iParamID,
-                                                Parameters::ChangeCallback1<IGUIParam> iChangeCallback,
-                                                bool iInvokeCallback)
+IGUIParam ParamAware::registerBaseCallback(TagID iParamID,
+                                           Parameters::ChangeCallback1<IGUIParam> iChangeCallback,
+                                           bool iInvokeCallback)
 {
   if(fParamCxMgr)
     return fParamCxMgr->registerBaseCallback(iParamID, std::move(iChangeCallback), iInvokeCallback);

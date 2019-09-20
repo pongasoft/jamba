@@ -28,7 +28,7 @@ using namespace VSTGUI;
 ///////////////////////////////////////////
 CustomView::CustomView(const CRect &iSize)
   : CView(iSize),
-    GUIParamCxAware(),
+    ParamAware(),
     fTag{UNDEFINED_TAG_ID},
     fBackColor{0, 0, 0}
 {

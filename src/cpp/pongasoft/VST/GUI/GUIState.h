@@ -24,7 +24,7 @@
 #include <pongasoft/VST/GUI/Params/IGUIParameter.hpp>
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 #include <pongasoft/VST/MessageProducer.h>
-#include "ViewCxMgr.h"
+#include "ParamAwareViews.h"
 
 namespace pongasoft::VST {
 
@@ -140,7 +140,7 @@ public:
    * Example usage:
    *
    *     TextButtonView *button = ....;
-   *     fState->registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
+   *     fState->makeParamAware(button)->registerCallback<int>(fParams->fMyParam,
    *       [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
    *       iButton->setMouseEnabled(iParam > 3);
    *     });
@@ -151,8 +151,16 @@ public:
    *         goes away.
    */
   template<typename TView>
-  inline ViewGUIParamCxAware<TView> *registerConnectionFor(TView *iView) {
-    return fViewCxMgr.registerConnectionFor(iView, this);
+  inline ParamAwareView<TView> *makeParamAware(TView *iView) {
+    return fParamAwareViews.makeParamAware(iView, this);
+  }
+
+  /**
+   * @deprecated Use makeParamAware instead */
+  template<typename TView>
+  [[deprecated("Use makeParamAware instead")]]
+  inline ParamAwareView<TView> *registerConnectionFor(TView *iView) {
+    return makeParamAware(iView, this);
   }
 
   /**
@@ -208,8 +216,8 @@ protected:
   // raw vst parameters
   VstParametersSPtr fVstParameters{};
 
-  // view connection mgr
-  ViewCxMgr fViewCxMgr{};
+  // param aware views
+  ParamAwareViews fParamAwareViews{};
 
   // message producer (to send messages)
   IMessageProducer *fMessageProducer{};

@@ -18,15 +18,15 @@
 #pragma once
 
 #include <vstgui4/vstgui/uidescription/delegationcontroller.h>
-#include <pongasoft/VST/GUI/Params/GUIParamCxAware.hpp>
-#include "PluginAccessor.h"
+#include <pongasoft/VST/GUI/Params/ParamAware.hpp>
+#include "StateAware.h"
 
 namespace pongasoft::VST::GUI::Views {
 
 /**
  * Base class that a custom controller can inherit from, providing access to params
  */
-class CustomController : public VSTGUI::DelegationController, public GUIParamCxAware
+class CustomController : public VSTGUI::DelegationController, public ParamAware
 {
 public:
   // Constructor
@@ -38,25 +38,28 @@ public:
  * When implementing a CustomController specific to a given plugin, you can use this class instead to get direct
  * access to the state and parameters registered with the plugin via the fState/fParams member.
  *
- * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+ * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
  */
-template<typename TGUIPluginState>
-class PluginCustomController : public CustomController, public PluginAccessor<TGUIPluginState>
+template<typename TGUIState>
+class StateAwareCustomController : public CustomController, public StateAware<TGUIState>
 {
+  // ensures that TGUIState is a subclass of GUIState
+  static_assert(std::is_convertible<TGUIState *, GUIState*>::value, "TGUIState must be a subclass of GUIState");
+
 public:
   // Constructor
-  explicit PluginCustomController(IController *iBaseController) : CustomController(iBaseController) {}
+  explicit StateAwareCustomController(IController *iBaseController) : CustomController(iBaseController) {}
 
   /**
    * Allow for registering an arbitrary callback on an arbitrary view without having to inherit from the view.
    * The registration will automatically be discarded when the view is deleted. This is a convenient call
-   * that simpply delegates to the state.
+   * that simply delegates to the state.
    *
    * Example usage:
    *
    * ```
    * TextButtonView *button = ....;
-   * registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
+   * makeParamAware(button)->registerCallback<int>(fParams->fMyParam,
    *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
    *   iButton->setMouseEnabled(iParam > 3);
    * });
@@ -68,8 +71,8 @@ public:
    *         goes away.
    */
   template<typename TView>
-  inline ViewGUIParamCxAware<TView> *registerConnectionFor(TView *iView) {
-    return PluginAccessor<TGUIPluginState>::fState->registerConnectionFor(iView);
+  inline ParamAwareView<TView> *makeParamAware(TView *iView) {
+    return StateAware<TGUIState>::fState->makeParamAware(iView);
   }
 
 protected:
@@ -77,8 +80,19 @@ protected:
   void initState(GUIState *iGUIState) override
   {
     CustomController::initState(iGUIState);
-    PluginAccessor<TGUIPluginState>::initState(iGUIState);
+    StateAware<TGUIState>::initState(iGUIState);
   }
 };
 
+/**
+ * @deprecated Use StateAwareCustomController instead
+ */
+template<typename TGUIState>
+class [[deprecated("Use StateAwareCustomController instead")]] PluginCustomController : public StateAwareCustomController<TGUIState>
+{
+public:
+  explicit PluginCustomController(IController *iBaseController) :
+    StateAwareCustomController<TGUIState>(iBaseController)
+  {}
+};
 }

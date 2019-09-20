@@ -64,7 +64,7 @@ CView *CustomUIViewFactory::createView(const UIAttributes &attributes, const IUI
 {
   auto view = UIViewFactory::createView(attributes, description);
 
-  auto paramAware = dynamic_cast<GUIParamCxAware *>(view);
+  auto paramAware = dynamic_cast<ParamAware *>(view);
   if(paramAware)
     paramAware->initState(fGUIState);
 

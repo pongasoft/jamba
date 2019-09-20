@@ -20,10 +20,10 @@
 #include <vstgui4/vstgui/lib/cview.h>
 #include <map>
 #include <pongasoft/VST/GUI/GUIState.h>
-#include <pongasoft/VST/GUI/Params/GUIParamCxAware.hpp>
+#include <pongasoft/VST/GUI/Params/ParamAware.hpp>
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include "CustomViewCreator.h"
-#include "PluginAccessor.h"
+#include "StateAware.h"
 #include "CustomViewLifecycle.h"
 
 namespace pongasoft::VST::GUI::Views {
@@ -39,7 +39,7 @@ using namespace Params;
  * redrawn: the CustomView::onParameterChange method can be overridden to react differently (or additionally) to handle parameter changes.
  * You use the convenient `registerParam` or `registerCallback` methods to register each parameter.
  */
-class CustomView : public CView, public GUIParamCxAware, public ICustomViewLifecycle
+class CustomView : public CView, public ParamAware, public ICustomViewLifecycle
 {
 public:
   // Constructor
@@ -159,22 +159,28 @@ public:
  * When implementing a View specific to a given plugin, you can use this class instead to get direct
  * access to the state and parameters registered with the plugin via the fState/fParams member.
  *
- * @tparam TView the parent view (should be a subclass of GUIParamCxAware
- * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+ * @tparam TView the parent view (should be a subclass of `CView`)
+ * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
  */
-template<typename TView, typename TGUIPluginState>
-class PluginView : public TView, public PluginAccessor<TGUIPluginState>
+template<typename TView, typename TGUIState>
+class StateAwareView : public TView, public StateAware<TGUIState>
 {
+  // ensures that TView is a subclass of CView
+  static_assert(std::is_convertible<TView *, CView*>::value, "TView must be a subclass of CView");
+
+  // ensures that TGUIState is a subclass of GUIState
+  static_assert(std::is_convertible<TGUIState *, GUIState*>::value, "TGUIState must be a subclass of GUIState");
+
 public:
   // Constructor
-  explicit PluginView(const CRect &iSize) : TView(iSize) {}
+  explicit StateAwareView(const CRect &iSize) : TView(iSize) {}
 
 protected:
   // initState - overridden to extract fParams
   void initState(GUIState *iGUIState) override
   {
     TView::initState(iGUIState);
-    PluginAccessor<TGUIPluginState>::initState(iGUIState);
+    StateAware<TGUIState>::initState(iGUIState);
   }
 };
 
@@ -182,10 +188,10 @@ protected:
  * When implementing a CustomView specific to a given plugin, you can use this class instead to get direct
  * access to the state and parameters registered with the plugin via the fState/fParams member.
  *
- * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+ * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
  */
-template<typename TGUIPluginState>
-using PluginCustomView = PluginView<CustomView, TGUIPluginState>;
+template<typename TGUIState>
+using StateAwareCustomView = StateAwareView<CustomView, TGUIState>;
 
 /**
  * This class can be used to extend VST SDK classes directly while still benefiting from the extensions added by
@@ -194,7 +200,7 @@ using PluginCustomView = PluginView<CustomView, TGUIPluginState>;
  * @tparam TView the view class (for ex: CTextEdit)
  */
 template<typename TView>
-class CustomViewAdapter : public TView, public GUIParamCxAware, public ICustomViewLifecycle
+class CustomViewAdapter : public TView, public ParamAware, public ICustomViewLifecycle
 {
   // ensures that TView is a subclass of CView
   static_assert(std::is_convertible<TView *, CView*>::value, "TView must be a subclass of CView");
@@ -285,24 +291,63 @@ public:
  * this framework (multiple param access and state access)
  *
  * @tparam TView the view class (for ex: CTextEdit)
- * @tparam TGUIPluginState type of the plugin parameters class (should be a subclass of GUIPluginState<>)
+ * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
  */
-template<typename TView, typename TGUIPluginState>
-class PluginCustomViewAdapter : public CustomViewAdapter<TView>, public PluginAccessor<TGUIPluginState>
+template<typename TView, typename TGUIState>
+class StateAwareCustomViewAdapter : public CustomViewAdapter<TView>, public StateAware<TGUIState>
 {
+  // ensures that TView is a subclass of CView
+  static_assert(std::is_convertible<TView *, CView*>::value, "TView must be a subclass of CView");
+
+  // ensures that TGUIState is a subclass of GUIState
+  static_assert(std::is_convertible<TGUIState *, GUIState*>::value, "TGUIState must be a subclass of GUIState");
+
 public:
   // Constructor
   template<typename... Args>
-  explicit PluginCustomViewAdapter(const CRect &iSize, Args&& ...args) : CustomViewAdapter<TView>(iSize, std::forward<Args>(args)...) {}
+  explicit StateAwareCustomViewAdapter(const CRect &iSize, Args&& ...args) :
+    CustomViewAdapter<TView>(iSize, std::forward<Args>(args)...) {}
 
 protected:
   // initState - overridden to extract fParams
   void initState(GUIState *iGUIState) override
   {
-    GUIParamCxAware::initState(iGUIState);
-    PluginAccessor<TGUIPluginState>::initState(iGUIState);
+    ParamAware::initState(iGUIState);
+    StateAware<TGUIState>::initState(iGUIState);
   }
 };
 
+/**
+ * @deprecated Use StateAwareView instead
+ */
+template<typename TView, typename TGUIState>
+class [[deprecated("Use StateAwareView instead")]] PluginView : public StateAwareView<TView, TGUIState>
+{
+public:
+  explicit PluginView(const CRect &iSize) : StateAwareView<TView, TGUIState>(iSize) {}
+};
+
+/**
+ * @deprecated Use StateAwareCustomView instead
+ */
+template<typename TView, typename TGUIState>
+class [[deprecated("Use StateAwareCustomView instead")]] PluginCustomView : public StateAwareCustomView<TGUIState>
+{
+public:
+  explicit PluginCustomView(const CRect &iSize) : StateAwareCustomView<TGUIState>(iSize) {}
+};
+
+/**
+ * @deprecated Use StateAwareCustomViewAdapter instead
+ */
+template<typename TView, typename TGUIState>
+class [[deprecated("Use StateAwareCustomViewAdapter instead")]] PluginCustomViewAdapter : public StateAwareCustomViewAdapter<TView, TGUIState>
+{
+public:
+  template<typename... Args>
+  explicit PluginCustomViewAdapter(const CRect &iSize, Args &&... args) :
+    StateAwareCustomViewAdapter<TView, TGUIState>(iSize, std::forward<Args>(args)...)
+  {}
+};
 
 }

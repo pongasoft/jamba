@@ -24,13 +24,11 @@
 #include <pongasoft/VST/GUI/Views/CustomViewFactory.h>
 #include <pongasoft/VST/GUI/GUIState.h>
 #include <pongasoft/VST/MessageProducer.h>
-#include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
+#include <pongasoft/VST/GUI/Params/ParamAware.h>
 #include <pongasoft/VST/MessageHandler.h>
 #include <vstgui4/vstgui/plugin-bindings/vst3editor.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
+namespace pongasoft::VST::GUI {
 
 using namespace Params;
 
@@ -96,7 +94,7 @@ protected:
                                    VST3Editor *iEditor) override;
 
   // registerParameters (if not nullptr)
-  void registerParameters(GUIParamCxAware *iGUIParamCxAware);
+  void registerParameters(ParamAware *iParamAware);
 
   /**
    * This method should be called to display a totally different (root) view.
@@ -150,6 +148,4 @@ private:
 
 };
 
-}
-}
 }

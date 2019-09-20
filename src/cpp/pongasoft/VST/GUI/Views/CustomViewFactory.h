@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,16 +35,16 @@ public:
   }
 
 protected:
-  // overridden to detect GUIParamCxAware instances
+  // overridden to detect ParamAware instances
   bool applyAttributeValues(CView *view, const UIAttributes &attributes, const IUIDescription *desc) const override;
 
-  // overridden to detect GUIParamCxAware instances
+  // overridden to detect ParamAware instances
   bool applyCustomViewAttributeValues(CView *customView,
                                       IdStringPtr baseViewName,
                                       const UIAttributes &attributes,
                                       const IUIDescription *desc) const override;
 
-  // overridden to detect GUIParamCxAware instances
+  // overridden to detect ParamAware instances
   CView *createView(const UIAttributes &attributes, const IUIDescription *description) const override;
 
 private:

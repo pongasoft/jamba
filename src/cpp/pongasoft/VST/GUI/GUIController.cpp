@@ -77,7 +77,7 @@ tresult GUIController::initialize(FUnknown *context)
 
   fViewFactory = new CustomUIViewFactory(guiState);
 
-  registerParameters(dynamic_cast<GUIParamCxAware *>(this));
+  registerParameters(dynamic_cast<ParamAware *>(this));
 
   return result;
 }
@@ -85,12 +85,12 @@ tresult GUIController::initialize(FUnknown *context)
 //------------------------------------------------------------------------
 // GUIController::registerParameters
 //------------------------------------------------------------------------
-void GUIController::registerParameters(GUIParamCxAware *iGUIParamCxAware)
+void GUIController::registerParameters(ParamAware *iParamAware)
 {
-  if(iGUIParamCxAware)
+  if(iParamAware)
   {
-    iGUIParamCxAware->initState(getGUIState());
-    iGUIParamCxAware->registerParameters();
+    iParamAware->initState(getGUIState());
+    iParamAware->registerParameters();
   }
 }
 
@@ -105,7 +105,7 @@ tresult GUIController::terminate()
 
   tresult res = EditController::terminate();
 
-  auto gpa = dynamic_cast<GUIParamCxAware *>(this);
+  auto gpa = dynamic_cast<ParamAware *>(this);
   if(gpa)
     gpa->unregisterAll();
 
@@ -219,7 +219,7 @@ IController *GUIController::createSubController(UTF8StringPtr iName,
                                                 VST3Editor *iEditor)
 {
   auto customController = createCustomController(iName, iDescription, iEditor);
-  registerParameters(dynamic_cast<GUIParamCxAware *>(customController));
+  registerParameters(dynamic_cast<ParamAware *>(customController));
   return customController;
 }
 
