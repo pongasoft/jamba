@@ -49,6 +49,10 @@ public:
   // getGUIState
   GUIState *getGUIState() override { return &fState; }
 
+  // createCustomController
+  IController *createCustomController(UTF8StringPtr iName, IUIDescription const *iDescription,
+                                      IController *iBaseController) override;
+
 protected:
   // initialize
   tresult PLUGIN_API initialize(FUnknown *context) override;

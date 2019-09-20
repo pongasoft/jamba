@@ -145,11 +145,13 @@ using namespace GUI;
 class JambaTestPluginGUIState : public GUIPluginState<JambaTestPluginParameters>
 {
 public:
+  GUIJmbParam<bool> fBoolJmb;
   GUIJmbParam<UTF8String> fUTF8String;
 
 public:
   explicit JambaTestPluginGUIState(JambaTestPluginParameters const &iParams) :
     GUIPluginState(iParams),
+    fBoolJmb{add(iParams.fBoolJmb)},
     fUTF8String{add(iParams.fUTF8String)}
   {};
 

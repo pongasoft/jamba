@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,10 +21,7 @@
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.hpp>
 #include "PluginAccessor.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 /**
  * Base class that a custom controller can inherit from, providing access to params
@@ -50,6 +47,31 @@ public:
   // Constructor
   explicit PluginCustomController(IController *iBaseController) : CustomController(iBaseController) {}
 
+  /**
+   * Allow for registering an arbitrary callback on an arbitrary view without having to inherit from the view.
+   * The registration will automatically be discarded when the view is deleted. This is a convenient call
+   * that simpply delegates to the state.
+   *
+   * Example usage:
+   *
+   * ```
+   * TextButtonView *button = ....;
+   * registerConnectionFor(button)->registerCallback<int>(fParams->fMyParam,
+   *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
+   *   iButton->setMouseEnabled(iParam > 3);
+   * });
+   *```
+   *
+   * @tparam TView should be a subclass of VSTGUI::CView
+   * @return a pointer to an object for registering callbacks, listener and params.
+   *         Note: You should not keep this pointer around as it be will automatically be deleted when the view
+   *         goes away.
+   */
+  template<typename TView>
+  inline ViewGUIParamCxAware<TView> *registerConnectionFor(TView *iView) {
+    return PluginAccessor<TGUIPluginState>::fState->registerConnectionFor(iView);
+  }
+
 protected:
   // initState - overridden to extract fParams
   void initState(GUIState *iGUIState) override
@@ -59,7 +81,4 @@ protected:
   }
 };
 
-}
-}
-}
 }

@@ -19,10 +19,7 @@
 
 #include "CustomView.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 /**
  * Base class for custom views providing one parameter only (similar to CControl)
@@ -167,7 +164,4 @@ void TCustomControlView<T>::registerParameters()
   fControlParameter = registerOptionalParam<T>(getControlTag());
 }
 
-}
-}
-}
 }

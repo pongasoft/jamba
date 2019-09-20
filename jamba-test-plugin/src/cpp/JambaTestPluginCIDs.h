@@ -72,6 +72,14 @@ enum EJambaTestPluginParamID : Steinberg::Vst::ParamID
   kGainJmb = 3070,
   kUTF8StringJmb = 3080,
 
+  //------------------------------------------------------------------------
+  // Custom View Tag (not tied to params)
+  //------------------------------------------------------------------------
+  kButton1Action = 5000,
+  kButton2Action = 5001,
+  kButton3Action = 5002,
+  kButton4Action = 5003,
+  kButton5Action = 5004,
 
 };
 

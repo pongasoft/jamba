@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,9 +26,7 @@
 #include <pongasoft/VST/GUI/Params/GUIParamCxAware.h>
 #include <pongasoft/VST/GUI/Views/GlobalKeyboardHook.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
+namespace pongasoft::VST::GUI {
 
 using namespace VSTGUI;
 using namespace Params;
@@ -118,6 +116,9 @@ private:
 template<typename TView>
 ViewGUIParamCxAware<TView> *ViewCxMgr::registerConnectionFor(TView *iView, GUIState *iGUIState)
 {
+  // enforces at compilation time that TView should be a subclass of VSTGUI::CView
+  static_assert(std::is_convertible_v<TView *, CView *>);
+
   if(iView == nullptr)
     return nullptr;
 
@@ -134,6 +135,4 @@ ViewGUIParamCxAware<TView> *ViewCxMgr::registerConnectionFor(TView *iView, GUISt
 }
 
 
-}
-}
 }

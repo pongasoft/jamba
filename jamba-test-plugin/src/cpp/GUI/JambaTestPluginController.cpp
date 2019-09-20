@@ -17,6 +17,7 @@
  */
 
 #include "JambaTestPluginController.h"
+#include "JTPTextButtonController.h"
 
 namespace pongasoft::test::jamba::GUI {
 
@@ -58,6 +59,21 @@ tresult JambaTestPluginController::initialize(FUnknown *context)
 #endif
 
   return res;
+}
+
+//------------------------------------------------------------------------
+// JambaTestPluginController::createCustomController
+//------------------------------------------------------------------------
+IController *JambaTestPluginController::createCustomController(UTF8StringPtr iName,
+                                                               IUIDescription const *iDescription,
+                                                               IController *iBaseController)
+{
+  if(UTF8StringView(iName) == "TextButtonController")
+  {
+    return new JTPTextButtonController(iBaseController);
+  }
+
+  return nullptr;
 }
 
 }

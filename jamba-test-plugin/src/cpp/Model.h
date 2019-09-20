@@ -35,6 +35,7 @@ enum class ETabs {
   kTabMomentaryButtonView,
   kTabStepButtonView,
   kTabDiscreteButtonView,
+  kTabTextButtonView,
 };
 
 enum EEnum {
