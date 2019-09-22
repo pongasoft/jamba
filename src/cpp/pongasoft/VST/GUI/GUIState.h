@@ -160,7 +160,7 @@ public:
   template<typename TView>
   [[deprecated("Use makeParamAware instead")]]
   inline ParamAwareView<TView> *registerConnectionFor(TView *iView) {
-    return makeParamAware(iView, this);
+    return makeParamAware<TView>(iView, this);
   }
 
   /**

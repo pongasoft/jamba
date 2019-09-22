@@ -558,9 +558,9 @@ public:
    * @return `false` if not found or not proper type
    */
   template<typename T>
-  inline bool registerCallback(VstParam<T> const &iParamDef,
-                               Parameters::ChangeCallback2<TView, GUIVstParam<T>> iChangeCallback,
-                               bool iInvokeCallback = false)
+  inline GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef,
+                                         Parameters::ChangeCallback2<TView, GUIVstParam<T>> iChangeCallback,
+                                         bool iInvokeCallback = false)
   {
     auto callback = [view = this->fView, cb2 = std::move(iChangeCallback)] (GUIVstParam<T> &iParam) {
       cb2(view, iParam);
@@ -580,9 +580,9 @@ public:
    * @return `false` if not found or not proper type
    */
   template<typename T>
-  inline bool registerCallback(GUIJmbParam<T> &iParam,
-                               Parameters::ChangeCallback2<TView, GUIJmbParam<T>> iChangeCallback,
-                               bool iInvokeCallback = false)
+  inline GUIJmbParam<T> registerCallback(GUIJmbParam<T> &iParam,
+                                         Parameters::ChangeCallback2<TView, GUIJmbParam<T>> iChangeCallback,
+                                         bool iInvokeCallback = false)
   {
     auto callback = [view = this->fView, cb2 = std::move(iChangeCallback)] (GUIJmbParam<T> &iParam) {
       cb2(view, iParam);

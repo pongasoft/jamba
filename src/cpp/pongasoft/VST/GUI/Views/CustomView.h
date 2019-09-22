@@ -330,7 +330,7 @@ public:
 /**
  * @deprecated Use StateAwareCustomView instead
  */
-template<typename TView, typename TGUIState>
+template<typename TGUIState>
 class [[deprecated("Use StateAwareCustomView instead")]] PluginCustomView : public StateAwareCustomView<TGUIState>
 {
 public:
