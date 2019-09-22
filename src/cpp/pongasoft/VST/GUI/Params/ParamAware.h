@@ -291,7 +291,7 @@ public:
    */
   template<typename T>
   inline GUIVstParam<T> registerParam(VstParam<T> const &iParamDef, bool iSubscribeToChanges = true) {
-    return registerVstParam<T>(iParamDef.getParamID(), iSubscribeToChanges);
+    return registerVstParam<T>(iParamDef->fParamID, iSubscribeToChanges);
   }
 
   /**
@@ -304,7 +304,7 @@ public:
   inline GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef,
                                          Parameters::ChangeCallback iChangeCallback,
                                          bool iInvokeCallback = false) {
-    return registerVstCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+    return registerVstCallback<T>(iParamDef->fParamID, std::move(iChangeCallback), iInvokeCallback);
   }
 
   /**
@@ -323,7 +323,7 @@ public:
   inline GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef,
                                          Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
                                          bool iInvokeCallback = false) {
-    return registerVstCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+    return registerVstCallback<T>(iParamDef->fParamID, std::move(iChangeCallback), iInvokeCallback);
   }
 
   //------------------------------------------------------------------------
@@ -374,7 +374,7 @@ public:
    */
   template<typename T>
   inline GUIJmbParam<T> registerParam(JmbParam<T> const &iParamDef, bool iSubscribeToChanges = true) {
-    return registerJmbParam<T>(iParamDef.getParamID(), iSubscribeToChanges);
+    return registerJmbParam<T>(iParamDef->fParamID, iSubscribeToChanges);
   }
 
   /**
@@ -387,7 +387,7 @@ public:
   inline GUIJmbParam<T> registerCallback(JmbParam<T> const &iParamDef,
                                          Parameters::ChangeCallback iChangeCallback,
                                          bool iInvokeCallback = false) {
-    return registerJmbCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+    return registerJmbCallback<T>(iParamDef->fParamID, std::move(iChangeCallback), iInvokeCallback);
 
   }
 
@@ -406,7 +406,7 @@ public:
   inline GUIJmbParam<T> registerCallback(JmbParam<T> const &iParamDef,
                                          Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
                                          bool iInvokeCallback = false) {
-    return registerJmbCallback<T>(iParamDef.getParamID(), std::move(iChangeCallback), iInvokeCallback);
+    return registerJmbCallback<T>(iParamDef->fParamID, std::move(iChangeCallback), iInvokeCallback);
   }
 
   //------------------------------------------------------------------------
@@ -421,7 +421,7 @@ public:
    */
   template<typename T>
   inline GUIJmbParam<T> registerParam(GUIJmbParam<T> &iParam, bool iSubscribeToChanges = true) {
-    return registerJmbParam<T>(iParam.getParamID(), true);
+    return registerJmbParam<T>(iParam.getParamID(), iSubscribeToChanges);
   }
 
   /**
@@ -449,9 +449,9 @@ public:
    * @return empty param  if not found or not proper type
    */
   template<typename T>
-  inline bool registerCallback(GUIJmbParam<T> &iParam,
-                               Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
-                               bool iInvokeCallback = false) {
+  inline GUIJmbParam<T> registerCallback(GUIJmbParam<T> &iParam,
+                                         Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
+                                         bool iInvokeCallback = false) {
     return registerJmbCallback<T>(iParam.getParamID(), std::move(iChangeCallback), iInvokeCallback);
   }
 
@@ -517,10 +517,10 @@ protected:
 };
 
 /**
- * This subclass allows for registering callbacks to any kind of view without having to inherit from it
- * (see GUIState::registerConnectionFor)
+ * This subclass allows for registering callbacks to any kind of view without having to inherit from it.
  *
  * @tparam TView should be a subclass of VSTGUI::CView
+ * @see GUIState::makeParamAware
  */
 template<typename TView>
 class ParamAwareView : public ParamAware
