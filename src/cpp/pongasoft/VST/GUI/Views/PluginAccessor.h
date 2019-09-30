@@ -22,7 +22,7 @@
 namespace pongasoft::VST::GUI::Views {
 
 template<typename TGUIState>
-class [[deprecated("Use StateAware instead")]] PluginAccessor : public StateAware<TGUIState>
+class [[deprecated("Since 4.0.0 - Use StateAware instead")]] PluginAccessor : public StateAware<TGUIState>
 {
 };
 

@@ -18,7 +18,7 @@
 #pragma once
 
 #include <pongasoft/VST/GUI/GUIState.h>
-#include <unordered_map>
+#include <vector>
 
 namespace pongasoft::VST::GUI::Params {
 
@@ -34,13 +34,6 @@ public:
    * @return true if the param actually exists
    */
   inline bool existsJmb(ParamID iParamID) const { return fGUIState->existsJmb(iParamID); }
-
-  /**
-   * Removes the registration of the provided param (closing the connection/stopping to listen)
-   *
-   * @return true if the param was present, false otherwise
-   */
-  bool unregisterParam(TagID iParamID);
 
   /**
    * Unregisters all parameters */
@@ -198,7 +191,7 @@ public:
   }
 
   // getGUIState
-  GUIState *getGUIState() const { return fGUIState; };
+  inline GUIState *getGUIState() const { return fGUIState; };
 
   /**
    * Invoke all registered callbacks and listeners */
@@ -216,7 +209,7 @@ protected:
   inline TParam __registerListener(TParam iParam, Parameters::IChangeListener *iChangeListener)
   {
     if(iParam.exists() && iChangeListener)
-      fParamCxs[iParam.getParamID()] = iParam.connect(iChangeListener);
+      fParamCxs.emplace_back(iParam.connect(iChangeListener));
     return iParam;
   }
 
@@ -230,8 +223,8 @@ private:
   // the gui state
   GUIState *fGUIState;
 
-  // Maintains the connections for the listeners... will be automatically discarded in the destructor
-  std::unordered_map<ParamID, std::unique_ptr<FObjectCx>> fParamCxs{};
+  // Maintains the connections for the listeners and callbacks... will be automatically discarded in the destructor
+  std::vector<std::unique_ptr<FObjectCx>> fParamCxs{};
 };
 
 }

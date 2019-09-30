@@ -257,13 +257,13 @@ protected:
 
   // offsetPercent tag/param/value + editor and editor value ("value" is used when no param)
   TagID fOffsetPercentTag{UNDEFINED_PARAM_ID};
-  GUIRawOptionalParam fOffsetPercentParam{};
-  GUIRawOptionalParamEditor fOffsetPercentEditor{};
+  GUIOptionalParam<ParamValue> fOffsetPercentParam{};
+  GUIOptionalParamEditor<ParamValue> fOffsetPercentEditor{};
 
   // zoomPercent tag/param/value + editor and editor value ("value" is used when no param)
   TagID fZoomPercentTag{UNDEFINED_PARAM_ID};
-  GUIRawOptionalParam fZoomPercentParam{};
-  GUIRawOptionalParamEditor fZoomPercentEditor{};
+  GUIOptionalParam<ParamValue> fZoomPercentParam{};
+  GUIOptionalParamEditor<ParamValue> fZoomPercentEditor{};
 
   // used when dragging
   RelativeCoord fDragGestureX{-1.0};

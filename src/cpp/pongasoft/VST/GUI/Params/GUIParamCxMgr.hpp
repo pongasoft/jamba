@@ -107,7 +107,7 @@ inline TParam GUIParamCxMgr::__registerCallback(TParam iParam, Parameters::Chang
     if(iInvokeCallback)
       iCallback();
 
-    fParamCxs[iParam.getParamID()] = iParam.connect(std::move(iCallback));
+    fParamCxs.emplace_back(iParam.connect(std::move(iCallback)));
   }
 
   return iParam;
@@ -136,7 +136,7 @@ inline TParam GUIParamCxMgr::__registerCallback1(TParam iParam,
     if(iInvokeCallback)
       callback();
 
-    fParamCxs[iParam.getParamID()] = iParam.connect(std::move(callback));
+    fParamCxs.emplace_back(iParam.connect(std::move(callback)));
   }
 
   return iParam;

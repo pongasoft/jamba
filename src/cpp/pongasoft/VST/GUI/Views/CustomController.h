@@ -88,7 +88,7 @@ protected:
  * @deprecated Use StateAwareCustomController instead
  */
 template<typename TGUIState>
-class [[deprecated("Use StateAwareCustomController instead")]] PluginCustomController : public StateAwareCustomController<TGUIState>
+class [[deprecated("Since 4.0.0 - Use StateAwareCustomController instead")]] PluginCustomController : public StateAwareCustomController<TGUIState>
 {
 public:
   explicit PluginCustomController(IController *iBaseController) :

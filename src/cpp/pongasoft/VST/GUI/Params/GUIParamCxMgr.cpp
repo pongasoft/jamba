@@ -26,18 +26,8 @@ void GUIParamCxMgr::invokeAll()
 {
   for(auto &it: fParamCxs)
   {
-    it.second->onTargetChange();
+    it->onTargetChange();
   }
-}
-
-//------------------------------------------------------------------------
-// GUIParamCxMgr::unregisterParam
-//------------------------------------------------------------------------
-bool GUIParamCxMgr::unregisterParam(TagID iParamID)
-{
-  if(iParamID >= 0)
-    return fParamCxs.erase(static_cast<ParamID>(iParamID)) == 1;
-  return false;
 }
 
 //------------------------------------------------------------------------

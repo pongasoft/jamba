@@ -149,26 +149,4 @@ GUIJmbParam<T> ParamAware::registerJmbCallback(ParamID iParamID,
     return GUIJmbParam<T>{};
 }
 
-//------------------------------------------------------------------------
-// ParamAware::unregisterParam
-//------------------------------------------------------------------------
-template<typename T>
-GUIVstParam<T> ParamAware::unregisterParam(GUIVstParam<T> const &iParam)
-{
-  if(iParam.exists())
-    fParamCxMgr->unregisterParam(iParam.getParamID());
-  return GUIVstParam<T>{};
-}
-
-//------------------------------------------------------------------------
-// ParamAware::unregisterParam
-//------------------------------------------------------------------------
-template<typename T>
-GUIJmbParam<T> ParamAware::unregisterParam(GUIJmbParam<T> const &iParam)
-{
-  if(iParam.exists())
-    fParamCxMgr->unregisterParam(iParam.getParamID());
-  return GUIJmbParam<T>{};
-}
-
 }

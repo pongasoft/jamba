@@ -321,7 +321,7 @@ protected:
  * @deprecated Use StateAwareView instead
  */
 template<typename TView, typename TGUIState>
-class [[deprecated("Use StateAwareView instead")]] PluginView : public StateAwareView<TView, TGUIState>
+class [[deprecated("Since 4.0.0 - Use StateAwareView instead")]] PluginView : public StateAwareView<TView, TGUIState>
 {
 public:
   explicit PluginView(const CRect &iSize) : StateAwareView<TView, TGUIState>(iSize) {}
@@ -331,7 +331,7 @@ public:
  * @deprecated Use StateAwareCustomView instead
  */
 template<typename TGUIState>
-class [[deprecated("Use StateAwareCustomView instead")]] PluginCustomView : public StateAwareCustomView<TGUIState>
+class [[deprecated("Since 4.0.0 - Use StateAwareCustomView instead")]] PluginCustomView : public StateAwareCustomView<TGUIState>
 {
 public:
   explicit PluginCustomView(const CRect &iSize) : StateAwareCustomView<TGUIState>(iSize) {}
@@ -341,7 +341,7 @@ public:
  * @deprecated Use StateAwareCustomViewAdapter instead
  */
 template<typename TView, typename TGUIState>
-class [[deprecated("Use StateAwareCustomViewAdapter instead")]] PluginCustomViewAdapter : public StateAwareCustomViewAdapter<TView, TGUIState>
+class [[deprecated("Since 4.0.0 - Use StateAwareCustomViewAdapter instead")]] PluginCustomViewAdapter : public StateAwareCustomViewAdapter<TView, TGUIState>
 {
 public:
   template<typename... Args>

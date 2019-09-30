@@ -26,7 +26,7 @@ namespace pongasoft::VST::GUI::Params {
  *
  * @deprecated Use ParamAware instead
  */
-class [[deprecated("Use ParamAware instead")]] GUIParamCxAware : public ParamAware
+class [[deprecated("Since 4.0.0 - Use ParamAware instead")]] GUIParamCxAware : public ParamAware
 {
 };
 
@@ -35,7 +35,7 @@ class [[deprecated("Use ParamAware instead")]] GUIParamCxAware : public ParamAwa
  * @deprecated Use ParamAwareView instead
  */
 template<typename TView>
-class [[deprecated("Use ParamAwareView instead")]] ViewGUIParamCxAware : public ParamAwareView<TView>
+class [[deprecated("Since 4.0.0 - Use ParamAwareView instead")]] ViewGUIParamCxAware : public ParamAwareView<TView>
 {
 };
 

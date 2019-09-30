@@ -92,26 +92,6 @@ GUIVstParam<Percent> ParamAware::registerVstPercentParam(ParamID iParamID, bool 
 }
 
 //------------------------------------------------------------------------
-// ParamAware::unregisterParam
-//------------------------------------------------------------------------
-bool ParamAware::unregisterParam(ParamID iParamID)
-{
-  if(fParamCxMgr)
-    return fParamCxMgr->unregisterParam(iParamID);
-  return false;
-}
-
-//------------------------------------------------------------------------
-// ParamAware::unregisterParam
-//------------------------------------------------------------------------
-GUIRawVstParam ParamAware::unregisterParam(GUIRawVstParam const &iParam)
-{
-  if(iParam.exists() && fParamCxMgr)
-    fParamCxMgr->unregisterParam(iParam.getParamID());
-  return GUIRawVstParam{};
-}
-
-//------------------------------------------------------------------------
 // ParamAware::unregisterAll
 //------------------------------------------------------------------------
 void ParamAware::unregisterAll()

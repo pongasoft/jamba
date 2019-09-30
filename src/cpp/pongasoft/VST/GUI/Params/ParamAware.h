@@ -237,11 +237,11 @@ public:
   //------------------------------------------------------------------------
 
   // shortcut for BooleanParameter (will be removed => not very useful)
-  [[deprecated("deprecated since 4.0.0 => use registerVstParam<bool> directly")]]
+  [[deprecated("Since 4.0.0 -  use registerVstParam<bool> directly")]]
   GUIVstParam<bool> registerVstBooleanParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   // shortcut for PercentParameter (will be removed => not very useful)
-  [[deprecated("deprecated since 4.0.0 => use registerVstParam<Percent> directly")]]
+  [[deprecated("Since 4.0.0 -  use registerVstParam<Percent> directly")]]
   GUIVstParam<Percent> registerVstPercentParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   //------------------------------------------------------------------------
@@ -477,14 +477,16 @@ public:
    *
    * @return `true` if the param was present, `false` otherwise
    */
-  bool unregisterParam(ParamID iParamID);
+   [[deprecated("Since 4.0.0 - If you need this kind of granularity, maintain your own connections")]]
+  bool unregisterParam(ParamID iParamID) { return false; }
 
   /**
    * Removes the registration of the provided param (closing the connection/stopping to listen)
    *
    * @return an empty param so that you can write `param = unregisterParam(param)`
    */
-  GUIRawVstParam unregisterParam(GUIRawVstParam const &iParam);
+  [[deprecated("Since 4.0.0 - If you need this kind of granularity, maintain your own connections")]]
+  GUIRawVstParam unregisterParam(GUIRawVstParam const &iParam) { return iParam; }
 
   /**
    * Removes the registration of the provided param (closing the connection/stopping to listen)
@@ -492,7 +494,8 @@ public:
    * @return an empty param so that you can write `param = unregisterParam(param)`
    */
   template<typename T>
-  GUIVstParam<T> unregisterParam(GUIVstParam<T> const &iParam);
+  [[deprecated("Since 4.0.0 - If you need this kind of granularity, maintain your own connections")]]
+  GUIVstParam<T> unregisterParam(GUIVstParam<T> const &iParam) { return iParam; }
 
   /**
  * Removes the registration of the provided param (closing the connection/stopping to listen)
@@ -500,7 +503,8 @@ public:
  * @return an empty param so that you can write `param = unregisterParam(param)`
  */
   template<typename T>
-  GUIJmbParam<T> unregisterParam(GUIJmbParam<T> const &iParam);
+  [[deprecated("Since 4.0.0 - If you need this kind of granularity, maintain your own connections")]]
+  GUIJmbParam<T> unregisterParam(GUIJmbParam<T> const &iParam) { return iParam; }
 
   /**
    * Callback when a parameter changes. Empty default implementation

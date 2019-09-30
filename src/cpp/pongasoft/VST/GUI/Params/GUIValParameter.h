@@ -67,11 +67,13 @@ public:
   void setTagID(TagID iTagID) { fTagID = iTagID; }
 
   /**
-   * In order to comply with the api, we return 0 when tag id is undefined... */
+   * In order to comply with the api, we return max value for ParamID when tag id is undefined... */
   ParamID getParamID() const override
   {
     if(fTagID < 0)
-      return 0;
+    {
+      return std::numeric_limits<ParamID>::max();
+    }
     return static_cast<ParamID>(fTagID);
   }
 
@@ -173,10 +175,7 @@ public:
    */
   std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const override
   {
-    if(getTagID() >= 0)
-      return std::make_unique<GUIParamCx>(static_cast<ParamID>(getTagID()), const_cast<GUIValParameter *>(this), iChangeListener);
-    else
-      return nullptr;
+    return std::make_unique<GUIParamCx>(getParamID(), const_cast<GUIValParameter *>(this), iChangeListener);
   }
 
   /**
@@ -184,10 +183,7 @@ public:
    */
   std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const override
   {
-    if(getTagID() >= 0)
-      return std::make_unique<FObjectCxCallback>(const_cast<GUIValParameter *>(this), iChangeCallback);
-    else
-      return nullptr;
+    return std::make_unique<FObjectCxCallback>(const_cast<GUIValParameter *>(this), iChangeCallback);
   }
 
   // asDiscreteParameter

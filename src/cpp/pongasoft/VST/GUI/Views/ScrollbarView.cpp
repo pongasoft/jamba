@@ -19,10 +19,7 @@
 #include "ScrollbarView.h"
 #include <pongasoft/VST/GUI/GUIUtils.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 //------------------------------------------------------------------------
 // ScrollbarView::draw
@@ -322,9 +319,6 @@ void ScrollbarView::setZoomPercent(double iZoomPercent)
 //------------------------------------------------------------------------
 void ScrollbarView::registerParameters()
 {
-  if(!fParamCxMgr)
-    return; // not set yet
-
   fOffsetPercentParam = registerOptionalParam<ParamValue>(fOffsetPercentTag);
   fZoomPercentParam = registerOptionalParam<ParamValue>(fZoomPercentTag);
 }
@@ -351,9 +345,7 @@ void ScrollbarView::setZoomPercentTag(TagID zoomPercentTag)
 //------------------------------------------------------------------------
 void ScrollbarView::onParameterChange(ParamID iParamID)
 {
-  if(iParamID == fZoomPercentTag || iParamID == fOffsetPercentTag)
-    needsRecomputing();
-
+  needsRecomputing();
   CustomView::onParameterChange(iParamID);
 }
 
@@ -541,9 +533,4 @@ CMouseEventResult ScrollbarView::onMouseCancel()
   return kMouseEventHandled;
 }
 
-
-
-}
-}
-}
 }
