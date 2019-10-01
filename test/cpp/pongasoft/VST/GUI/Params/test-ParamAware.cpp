@@ -25,7 +25,7 @@
 
 namespace pongasoft::VST::GUI::Params::TestParamAware {
 
-enum ParamIDs : ParamID {
+enum ParamIDs : TagID {
   kRawVst = 1000,
   kInt64Vst = 2000,
   kInt32Jmb = 3000,
@@ -113,6 +113,14 @@ public:
     };
   }
 
+  Parameters::ChangeCallback changeCallback(TagID iParamID) {
+    if(iParamID >= 0)
+      return changeCallback(static_cast<ParamID>(iParamID));
+    return []() {
+      ABORT_F("should not be called!");
+    };
+  }
+
   template<typename Param>
   Parameters::ChangeCallback1<Param> changeCallback1(ParamID iParamID) {
     fExpectedCallback = CallbackType::kChangeCallback1;
@@ -120,6 +128,15 @@ public:
       CHECK_EQ_F(iParamID, iParam.getParamID());
       CHECK_EQ_F(CallbackType::kChangeCallback1, fExpectedCallback);
       fCallbacks.emplace_back(iParamID);
+    };
+  }
+
+  template<typename Param>
+  Parameters::ChangeCallback1<Param> changeCallback1(TagID iParamID) {
+    if(iParamID >= 0)
+      return changeCallback1<Param>(static_cast<ParamID>(iParamID));
+    return [](Param &iParam) {
+      ABORT_F("should not be called!");
     };
   }
 
@@ -805,6 +822,11 @@ TEST(ParamAware, testRawParam_ParamID)
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
+  // undefined param
+  param = c.registerRawVstParam(UNDEFINED_TAG_ID);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
   //------------------------------------------------------------------------
   // registerRawVstCallback - Parameters::ChangeCallback
   //------------------------------------------------------------------------
@@ -862,6 +884,13 @@ TEST(ParamAware, testRawParam_ParamID)
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
+  // undefined param
+  param = c.registerRawVstCallback(UNDEFINED_TAG_ID,
+                                   c.changeCallback(UNDEFINED_TAG_ID),
+                                   false);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
   //------------------------------------------------------------------------
   // registerRawVstCallback - Parameters::ChangeCallback1
   //------------------------------------------------------------------------
@@ -915,6 +944,13 @@ TEST(ParamAware, testRawParam_ParamID)
   // not a valid param
   param = c.registerRawVstCallback(ParamIDs::kInvalid,
                                    c.changeCallback1<GUIRawVstParam>(ParamIDs::kInvalid),
+                                   false);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
+  // undefined param
+  param = c.registerRawVstCallback(UNDEFINED_TAG_ID,
+                                   c.changeCallback1<GUIRawVstParam>(UNDEFINED_TAG_ID),
                                    false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
@@ -1125,6 +1161,11 @@ TEST(ParamAware, testVstParam_ParamID)
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
+  // undefined param
+  param = c.registerVstParam<int64>(UNDEFINED_TAG_ID);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
   //------------------------------------------------------------------------
   // registerVstCallback - Parameters::ChangeCallback
   //------------------------------------------------------------------------
@@ -1182,6 +1223,13 @@ TEST(ParamAware, testVstParam_ParamID)
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
+  // undefined param
+  param = c.registerVstCallback<int64>(UNDEFINED_TAG_ID,
+                                       c.changeCallback(UNDEFINED_TAG_ID),
+                                       false);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
   //------------------------------------------------------------------------
   // registerVstCallback - Parameters::ChangeCallback1
   //------------------------------------------------------------------------
@@ -1235,6 +1283,13 @@ TEST(ParamAware, testVstParam_ParamID)
   // not a valid param
   param = c.registerVstCallback<int64>(ParamIDs::kInvalid,
                                        c.changeCallback1<GUIVstParam<int64>>(ParamIDs::kInvalid),
+                                       false);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
+  // undefined param
+  param = c.registerVstCallback<int64>(UNDEFINED_TAG_ID,
+                                       c.changeCallback1<GUIVstParam<int64>>(UNDEFINED_TAG_ID),
                                        false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
@@ -1438,6 +1493,11 @@ TEST(ParamAware, testJmbParam_ParamID)
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
+  // undefined param
+  param = c.registerJmbParam<int32>(UNDEFINED_TAG_ID);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
   //------------------------------------------------------------------------
   // registerJmbParam - Parameters::ChangeCallback
   //------------------------------------------------------------------------
@@ -1494,6 +1554,13 @@ TEST(ParamAware, testJmbParam_ParamID)
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
+  // undefined param
+  param = c.registerJmbCallback<int32>(UNDEFINED_TAG_ID,
+                                       c.changeCallback(UNDEFINED_TAG_ID),
+                                       false);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
   //------------------------------------------------------------------------
   // registerVstCallback - Parameters::ChangeCallback1
   //------------------------------------------------------------------------
@@ -1546,6 +1613,13 @@ TEST(ParamAware, testJmbParam_ParamID)
   // not a valid param
   param = c.registerJmbCallback<int32>(ParamIDs::kInvalid,
                                        c.changeCallback1<GUIJmbParam<int32>>(ParamIDs::kInvalid),
+                                       false);
+  ASSERT_FALSE(param.exists());
+  CHECK_EMPTY(c);
+
+  // undefined param
+  param = c.registerJmbCallback<int32>(UNDEFINED_TAG_ID,
+                                       c.changeCallback1<GUIJmbParam<int32>>(UNDEFINED_TAG_ID),
                                        false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);

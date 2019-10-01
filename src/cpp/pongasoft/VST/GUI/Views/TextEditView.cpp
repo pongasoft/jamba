@@ -27,16 +27,11 @@ using namespace VSTGUI;
 //------------------------------------------------------------------------
 void TextEditView::registerParameters()
 {
-  if(!fParamCxMgr || getTag() < 0)
-    return;
-
-  auto paramID = static_cast<ParamID>(getTag());
-
-  fText = registerJmbParam<UTF8String>(paramID);
-  if(fText.exists())
-  {
-    setText(fText);
-  }
+  fText = registerJmbCallback<UTF8String>(getTag(),
+                                          [this](GUIJmbParam<UTF8String> &iParam) {
+                                            setText(iParam);
+                                          },
+                                          true);
 }
 
 //------------------------------------------------------------------------
@@ -49,19 +44,6 @@ void TextEditView::valueChanged()
   {
     fText.update(getText());
   }
-}
-
-//------------------------------------------------------------------------
-// TextEditView::onParameterChange
-//------------------------------------------------------------------------
-void TextEditView::onParameterChange(ParamID iParamID)
-{
-  if(fText.exists() && fText.getParamID() == iParamID)
-  {
-    setText(fText);
-  }
-
-  CustomViewAdapter::onParameterChange(iParamID);
 }
 
 }

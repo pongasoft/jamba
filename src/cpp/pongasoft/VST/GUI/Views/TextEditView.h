@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,10 +20,7 @@
 #include <vstgui4/vstgui/lib/controls/ctextedit.h>
 #include <pongasoft/VST/GUI/Views/CustomView.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 using namespace Params;
@@ -53,11 +50,6 @@ public:
   // valueChanged
   void valueChanged() override;
 
-  // onParameterChange
-  void onParameterChange(ParamID iParamID) override;
-
-  CLASS_METHODS_NOCOPY(TextEditView, CustomViewAdapter<TextEdit>)
-
 protected:
   // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fText{};
@@ -73,8 +65,5 @@ public:
   };
 };
 
-}
-}
-}
 }
 

@@ -20,6 +20,8 @@
 #include <vstgui/lib/cview.h>
 
 #include <pongasoft/VST/Parameters.h>
+
+#include <utility>
 #include "GUIRawVstParameter.h"
 #include "GUIJmbParameter.h"
 #include "GUIVstParameter.h"
@@ -180,6 +182,13 @@ public:
   GUIRawVstParam registerRawVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
+   * Convenient version to handle `TagID` */
+  inline GUIRawVstParam registerRawVstParam(TagID iTagID, bool iSubscribeToChanges = true)
+  {
+    return __invoke<GUIRawVstParam>(iTagID, &ParamAware::registerRawVstParam, iSubscribeToChanges);
+  }
+
+  /**
    * Registers a raw parameter (no conversion)
    * The callback will be invoked when the parameter changes.
    *
@@ -188,6 +197,15 @@ public:
   GUIRawVstParam registerRawVstCallback(ParamID iParamID,
                                         Parameters::ChangeCallback iChangeCallback,
                                         bool iInvokeCallback = false);
+
+  /**
+   * Convenient version to handle `TagID` */
+  inline GUIRawVstParam registerRawVstCallback(TagID iTagID,
+                                               Parameters::ChangeCallback iChangeCallback,
+                                               bool iInvokeCallback = false)
+  {
+    return __invoke<GUIRawVstParam>(iTagID, &ParamAware::registerRawVstCallback, std::move(iChangeCallback), iInvokeCallback);
+  }
 
   /**
    * Registers a raw parameter (no conversion)
@@ -199,6 +217,15 @@ public:
                                         Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
                                         bool iInvokeCallback = false);
 
+
+  /**
+   * Convenient version to handle `TagID` */
+  inline GUIRawVstParam registerRawVstCallback(TagID iTagID,
+                                               Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
+                                               bool iInvokeCallback = false)
+  {
+    return __invoke<GUIRawVstParam>(iTagID, &ParamAware::registerRawVstCallback, std::move(iChangeCallback), iInvokeCallback);
+  }
 
   //------------------------------------------------------------------------
   // Raw Vst Param / param definition (RawVstParam)
@@ -258,6 +285,14 @@ public:
   GUIVstParam<T> registerVstParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
+   * Convenient version to handle `TagID` */
+  template<typename T>
+  inline GUIVstParam<T> registerVstParam(TagID iTagID, bool iSubscribeToChanges = true)
+  {
+    return __invoke<GUIVstParam<T>>(iTagID, &ParamAware::registerVstParam, iSubscribeToChanges);
+  }
+
+  /**
    * Register a callback for a Vst parameter simply given its id
    * The callback will be invoked when the parameter changes.
    *
@@ -269,6 +304,16 @@ public:
                                      bool iInvokeCallback = false);
 
   /**
+   * Convenient version to handle `TagID` */
+  template<typename T>
+  inline GUIVstParam<T> registerVstCallback(TagID iTagID,
+                                            Parameters::ChangeCallback iChangeCallback,
+                                            bool iInvokeCallback = false)
+  {
+    return __invoke<GUIVstParam<T>>(iTagID, &ParamAware::registerVstCallback, iChangeCallback, iInvokeCallback);
+  }
+
+  /**
    * Register a callback for a Vst parameter simply given its id
    * The callback will be invoked when the parameter changes.
    *
@@ -278,6 +323,16 @@ public:
   GUIVstParam<T> registerVstCallback(ParamID iParamID,
                                      Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
                                      bool iInvokeCallback = false);
+
+  /**
+   * Convenient version to handle `TagID` */
+  template<typename T>
+  inline GUIVstParam<T> registerVstCallback(TagID iTagID,
+                                            Parameters::ChangeCallback1<GUIVstParam<T>> iChangeCallback,
+                                            bool iInvokeCallback = false)
+  {
+    return __invoke<GUIVstParam<T>>(iTagID, &ParamAware::registerVstCallback, iChangeCallback, iInvokeCallback);
+  }
 
   //------------------------------------------------------------------------
   // Vst Param (Typed) / param definition (VstParam<T>)
@@ -340,6 +395,14 @@ public:
   GUIJmbParam<T> registerJmbParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
+   * Convenient version to handle `TagID` */
+  template<typename T>
+  inline GUIJmbParam<T> registerJmbParam(TagID iTagID, bool iSubscribeToChanges = true)
+  {
+    return __invoke<GUIJmbParam<T>>(iTagID, &ParamAware::registerJmbParam, iSubscribeToChanges);
+  }
+
+  /**
    * Registers a callback for this Jmb param only given its id and return the wrapper to the param.
    * The callback will be invoked when the parameter changes.
    *
@@ -349,6 +412,16 @@ public:
   GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
                                      Parameters::ChangeCallback iChangeCallback,
                                      bool iInvokeCallback = false);
+
+  /**
+   * Convenient version to handle `TagID` */
+  template<typename T>
+  inline GUIJmbParam<T> registerJmbCallback(TagID iTagID,
+                                            Parameters::ChangeCallback iChangeCallback,
+                                            bool iInvokeCallback = false)
+  {
+    return __invoke<GUIJmbParam<T>>(iTagID, &ParamAware::registerJmbCallback, iChangeCallback, iInvokeCallback);
+  }
 
 
   /**
@@ -361,6 +434,16 @@ public:
   GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
                                      Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
                                      bool iInvokeCallback = false);
+
+  /**
+   * Convenient version to handle `TagID` */
+  template<typename T>
+  inline GUIJmbParam<T> registerJmbCallback(TagID iTagID,
+                                            Parameters::ChangeCallback1<GUIJmbParam<T>> iChangeCallback,
+                                            bool iInvokeCallback = false)
+  {
+    return __invoke<GUIJmbParam<T>>(iTagID, &ParamAware::registerJmbCallback, iChangeCallback, iInvokeCallback);
+  }
 
   //------------------------------------------------------------------------
   // Jmb Param (Typed) / Param definition (JmbParam<T>)
@@ -518,6 +601,67 @@ public:
 protected:
   // Access to parameters
   std::unique_ptr<GUIParamCxMgr> fParamCxMgr{};
+
+private:
+  /**
+   * Listener method type */
+  template<typename T>
+  using TListenerMethod = T (ParamAware::*)(ParamID, bool);
+
+  /**
+   * ChangeCallback method type */
+  template<typename T>
+  using TChangeCallbackMethod = T (ParamAware::*)(ParamID, Parameters::ChangeCallback, bool);
+
+  /**
+   * ChangeCallback1 method type */
+  template<typename T>
+  using TChangeCallback1Method = T (ParamAware::*)(ParamID, Parameters::ChangeCallback1<T>, bool);
+
+  /**
+   * Generic method to test whether `iTagID` is a valid `ParamID`. If yes, delegate to the `ParamID` flavor
+   * otherwise returns empty param. Listener API.
+   */
+  template<typename T>
+  inline T __invoke(TagID iTagID, TListenerMethod<T> f, bool iSubscribeToChanges)
+  {
+    if(iTagID < 0)
+      return {};
+    else
+      return (this->*f)(static_cast<ParamID>(iTagID), iSubscribeToChanges);
+  }
+
+  /**
+   * Generic method to test whether `iTagID` is a valid `ParamID`. If yes, delegate to the `ParamID` flavor
+   * otherwise returns empty param. ChangeCallback API.
+   */
+  template<typename T>
+  inline T __invoke(TagID iTagID,
+                    TChangeCallbackMethod<T> f,
+                    Parameters::ChangeCallback iChangeCallback,
+                    bool iInvokeCallback)
+  {
+    if(iTagID < 0)
+      return {};
+    else
+      return (this->*f)(static_cast<ParamID>(iTagID), std::move(iChangeCallback), iInvokeCallback);
+  }
+
+  /**
+   * Generic method to test whether `iTagID` is a valid `ParamID`. If yes, delegate to the `ParamID` flavor
+   * otherwise returns empty param. ChangeCallback1 API.
+   */
+  template<typename T>
+  inline T __invoke(TagID iTagID,
+                    TChangeCallback1Method<T> f,
+                    Parameters::ChangeCallback1<T> iChangeCallback,
+                    bool iInvokeCallback)
+  {
+    if(iTagID < 0)
+      return {};
+    else
+      return (this->*f)(static_cast<ParamID>(iTagID), std::move(iChangeCallback), iInvokeCallback);
+  }
 };
 
 /**
