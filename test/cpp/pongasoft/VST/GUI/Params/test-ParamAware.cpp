@@ -25,12 +25,24 @@
 
 namespace pongasoft::VST::GUI::Params::TestParamAware {
 
+
+namespace ParamIDs {
+  constexpr TagID kRawVst = 1000;
+  constexpr TagID kInt64Vst = 2000;
+  constexpr TagID kInt32Jmb = 3000;
+  constexpr TagID kInvalid = 666;
+}
+
+/*
+// for some reason, this does not work on Windows...
+// see issue https://stackoverflow.com/questions/58223117/visual-studio-2017-build-tools-issue-with-enum-type
 enum ParamIDs : TagID {
   kRawVst = 1000,
   kInt64Vst = 2000,
   kInt32Jmb = 3000,
   kInvalid = 666
 };
+*/
 
 constexpr int kInt64Vst_StepCount = 5; // [0 => 0.0, 1 => 0.2, 2 => 0.4, 3 => 0.6, 4 => 0.8, 5 => 1.0]
 
@@ -210,7 +222,7 @@ public:
 //
 //};
 
-#define CHECK(c, id) ASSERT_EQ(c.fCallbacks, std::vector<ParamID>{id}); \
+#define CHECK(c, id) ASSERT_EQ(c.fCallbacks, std::vector<ParamID>{static_cast<ParamID>(id)}); \
                      c.fCallbacks.clear()
 
 #define CHECK_EMPTY(c) ASSERT_TRUE(c.empty())

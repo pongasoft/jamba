@@ -78,7 +78,7 @@ template<typename T, typename... Args>
 std::shared_ptr<T> make_sfo(Args&& ...iArgs)
 {
   auto ptr = new T(std::forward<Args>(iArgs)...);
-  std::shared_ptr<T> sptr(ptr, [](auto p) { p->release(); });
+  std::shared_ptr<T> sptr(ptr, [](T *p) { p->release(); });
   return sptr;
 }
 

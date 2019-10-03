@@ -63,7 +63,7 @@ public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
       CustomViewCreator(iViewName, iDisplayName, VSTGUI::UIViewCreator::kCParamDisplay)
     {
-      registerIntAttribute("precision-override", &ParamDisplayView::getPrecisionOverride, &ParamDisplayView::setPrecisionOverride);
+      registerIntegerAttribute<int32>("precision-override", &ParamDisplayView::getPrecisionOverride, &ParamDisplayView::setPrecisionOverride);
     }
   };
 };

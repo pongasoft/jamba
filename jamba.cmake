@@ -30,7 +30,7 @@ option(JAMBA_DEBUG_LOGGING "Enable debug logging for jamba framework" OFF)
 #------------------------------------------------------------------------
 if (WIN32)
   message(STATUS "Adding compiler options")
-  add_compile_options("/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING" "/EHsc")
+  add_compile_options("/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING" "/EHsc" "/D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING")
 endif ()
 
 #------------------------------------------------------------------------

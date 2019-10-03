@@ -321,7 +321,7 @@ public:
    */
   DiscreteTypeParamConverter(ConstructorType iInitList)
   {
-    int32 stepCount = iInitList.size() - 1;
+    int32 stepCount = static_cast<int32>(iInitList.size() - 1);
 
     // by definition, a discrete parameter has a step count > 0
     DCHECK_F(stepCount > 0);
@@ -340,7 +340,7 @@ public:
   }
 
   // getStepCount
-  inline int32 getStepCount() const override { return fMap.size() - 1; }
+  inline int32 getStepCount() const override { return static_cast<int32>(fMap.size() - 1); }
 
   // normalize
   inline ParamValue normalize(ParamType const &iValue) const override

@@ -76,7 +76,7 @@ public:
    */
   int32 getOffStep() const { return fOffStep; }
   void setOffStep(int32 iStep) { fOffStep = iStep; markDirty(); }
-  int32 getComputedOffStep() const { return std::max(0, getOffStep()); }
+  int32 getComputedOffStep() const { return std::max(Utils::ZERO_INT32, getOffStep()); }
 
   /**
    * Attribute `on-step`

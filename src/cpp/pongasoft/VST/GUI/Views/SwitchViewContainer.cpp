@@ -137,8 +137,9 @@ void SwitchViewContainer::viewContainerViewAdded(CViewContainer * /* unused */, 
 //------------------------------------------------------------------------
 std::string SwitchViewContainer::computeTemplateName(int iIndex)
 {
-  if(iIndex >= 0 && iIndex < fTemplateNames.size())
-    return fTemplateNames[iIndex];
+  auto index = static_cast<decltype(fTemplateNames.size())>(iIndex);
+  if(index >= 0 && index < fTemplateNames.size())
+    return fTemplateNames[index];
 
   return "";
 }

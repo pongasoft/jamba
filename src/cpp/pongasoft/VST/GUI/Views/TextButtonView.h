@@ -143,7 +143,7 @@ public:
       registerGradientAttribute("disabled-gradient", &TextButtonView::getDisabledGradient, &TextButtonView::setDisabledGradient);
       registerBitmapAttribute("button-image", &TextButtonView::getImage, &TextButtonView::setImage);
       registerBooleanAttribute("button-image-has-disabled-state", &TextButtonView::getImageHasDisabledState, &TextButtonView::setImageHasDisabledState);
-      registerIntAttribute("precision-override", &TextButtonView::getPrecisionOverride, &TextButtonView::setPrecisionOverride);
+      registerIntegerAttribute<int32>("precision-override", &TextButtonView::getPrecisionOverride, &TextButtonView::setPrecisionOverride);
     }
   };
 };
