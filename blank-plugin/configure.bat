@@ -8,4 +8,4 @@ Echo SRC_DIR=%SRC_DIR%
 mkdir %BUILD_DIR%
 cd %BUILD_DIR%
 
-cmake -G"Visual Studio 15 2017 Win64" %SRC_DIR%
+cmake -G"Visual Studio 16 2019" %SRC_DIR%
