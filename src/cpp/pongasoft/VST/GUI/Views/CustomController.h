@@ -63,11 +63,11 @@ public:
    *   [] (TextButtonView *iButton, GUIVstParam<int> &iParam) {
    *   iButton->setMouseEnabled(iParam > 3);
    * });
-   *```
+   * ```
    *
-   * @tparam TView should be a subclass of VSTGUI::CView
+   * @tparam TView must be a subclass of `VSTGUI::CView`
    * @return a pointer to an object for registering callbacks, listener and params.
-   *         Note: You should not keep this pointer around as it be will automatically be deleted when the view
+   *         Note: You should not keep this pointer around as it will be automatically deleted when the view
    *         goes away.
    */
   template<typename TView>

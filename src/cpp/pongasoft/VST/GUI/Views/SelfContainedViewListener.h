@@ -90,7 +90,7 @@ public:
    * @tparam T the actual type (should be a subtype of SelfContainedViewListener)
    * @tparam Args optional arguments templates for the `T` constructor
    * @param iView the view on which this class will be registered as a listener (must not be `nullptr`)
-   * @param args optional arguments for the `T` constructor
+   * @param iArgs optional arguments for the `T` constructor
    * @return the shared pointer which may be kept around (scenario 2) but is NOT required
    */
   template<typename T, typename ...Args>

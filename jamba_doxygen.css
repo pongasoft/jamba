@@ -1,0 +1,284 @@
+:root{
+    --JAMBA-PURPLE-color:#7145c7;
+    --JAMBA-YELLOW-color:#ffbf20;
+    --JAMBA-DARK-PURPLE-color:#492d81;
+    --JAMBA-WHITE-color:white;
+    --NAV-TREE-BG-color:#252c31;
+    --NAV-TREE-LINK-color: #ccc;
+    --NAV-TREE-LINK-HOVER-color: #e6e6e6;
+    --JAMBA-TEXT-MONOSPACE-font: "Courier", "menlo", monospace;
+    --JAMBA-TEXT-font: 400 14px/22px Roboto, sans-serif;
+}
+
+/* Title */
+#titlearea {
+  border: none;
+}
+
+#titlearea table {
+  width: 100%;
+}
+
+#projectlogo {
+  text-align: left;
+}
+
+#projectname {
+  text-align: right;
+  margin-right: 5px;
+}
+
+#projectlogo img {
+  height: 55px;
+}
+
+/* Top nav bar */
+.sm-dox {
+  background: var(--JAMBA-PURPLE-color);
+  color: var(--JAMBA-WHITE-color);
+  border: solid 1px var(--JAMBA-DARK-PURPLE-color);
+}
+
+.sm-dox ul {
+  background: var(--JAMBA-DARK-PURPLE-color);
+}
+
+.sm-dox ul a {
+  background: var(--JAMBA-DARK-PURPLE-color);
+}
+
+.sm-dox a {
+  color: var(--JAMBA-WHITE-color) !important;
+  background-image: none;
+  border-right: solid 1px var(--JAMBA-DARK-PURPLE-color) !important;
+  text-shadow: none !important;
+}
+
+.sm-dox a:hover {
+  color: var(--JAMBA-PURPLE-color) !important;
+  background: var(--JAMBA-WHITE-color) !important;
+  text-shadow: none !important;
+}
+
+/* Left nav tree */
+#nav-tree {
+  background: var(--NAV-TREE-BG-color);
+  text-shadow: none;
+}
+
+#nav-tree .selected {
+  background: var(--JAMBA-YELLOW-color);
+  color: var(--JAMBA-DARK-PURPLE-color);
+  text-shadow: none;
+}
+
+#nav-tree .selected a {
+  color: var(--JAMBA-DARK-PURPLE-color);
+}
+
+#nav-tree a {
+  color: var(--NAV-TREE-LINK-color);
+}
+
+#nav-tree a:hover {
+  color: var(--NAV-TREE-LINK-HOVER-color);
+}
+
+.ui-resizable-e {
+  background: var(--JAMBA-PURPLE-color);
+  border-right: solid 1px black;
+  border-left: solid 1px black;
+}
+
+/* Footer / nav path */
+#nav-path ul {
+  background: var(--JAMBA-PURPLE-color);
+  color: var(--JAMBA-WHITE-color);
+  border: solid 1px var(--JAMBA-DARK-PURPLE-color);
+}
+
+.navpath li.navelem a {
+  color: var(--JAMBA-WHITE-color);
+  text-shadow: none;
+}
+
+.navpath li.navelem a:hover {
+  background: var(--JAMBA-WHITE-color);
+  color: var(--JAMBA-PURPLE-color);
+  text-shadow: none;
+}
+
+/* Content / Header */
+div.header {
+  background: none;
+  background: var(--JAMBA-YELLOW-color);
+  color: var(--JAMBA-DARK-PURPLE-color);
+  border-bottom: solid 1px var(--JAMBA-DARK-PURPLE-color);
+}
+
+/* Content / Class */
+.contents .memberdecls tr:not(.heading) {
+  font-family: var(--JAMBA-TEXT-MONOSPACE-font);
+}
+
+.contents .memtitle {
+  font-family: var(--JAMBA-TEXT-MONOSPACE-font);
+  background: var(--JAMBA-YELLOW-color);
+  color: var(--JAMBA-DARK-PURPLE-color);
+  border-bottom: solid 1px var(--JAMBA-DARK-PURPLE-color);
+}
+
+.contents .memproto {
+  text-shadow: none;
+  background: var(--JAMBA-YELLOW-color);
+  border-bottom: solid 1px var(--JAMBA-DARK-PURPLE-color);
+}
+
+.contents .memproto div, .contents .memproto table {
+  font-family: var(--JAMBA-TEXT-MONOSPACE-font);
+}
+
+.contents .memproto table.memname td.memname {
+  font-family: var(--JAMBA-TEXT-MONOSPACE-font);
+  white-space: nowrap
+}
+
+.contents .memdoc {
+  background: white;
+}
+
+.contents .memdoc dl.params dt {
+  border-bottom: solid 1px var(--JAMBA-DARK-PURPLE-color);
+}
+
+.contents .memdoc dl.return dt {
+  border-bottom: solid 1px var(--JAMBA-DARK-PURPLE-color);
+}
+
+.contents .paramname {
+  font-family: var(--JAMBA-TEXT-MONOSPACE-font);
+  color: var(--JAMBA-DARK-PURPLE-color);
+}
+
+div.summary {
+  width: 100%;
+}
+
+pre.fragment, div.fragment {
+  padding: 1rem;
+  margin: 2rem 0;
+  background: #d4d4d4;
+  border: 0;
+  border-radius: 2px;
+  line-height: 1.15;
+  color: black;
+}
+
+span.keyword {
+  color: #0000fa;
+}
+
+span.keywordtype {
+  color: #0402cc
+}
+
+span.keywordflow {
+  color: #0000fa;
+}
+
+span.comment {
+  color: #838383;
+  font-style: italic;
+}
+
+span.preprocessor {
+  color: #800080;
+}
+
+span.stringliteral {
+  color: #fc1694;
+}
+
+span.charliteral {
+  color: #008080;
+}
+
+span.lineno {
+  border-right: solid 2px var(--JAMBA-DARK-PURPLE-color);
+}
+
+/* For enumeration */
+.fieldtable th {
+  background: var(--JAMBA-DARK-PURPLE-color);
+  color: var(--JAMBA-WHITE-color);
+  border-radius: 0;
+}
+
+/* For lists (todo/deprecated) */
+.contents dl.reflist dt {
+  background: var(--JAMBA-YELLOW-color);
+  color: var(--JAMBA-DARK-PURPLE-color);
+  border-bottom: solid 1px var(--JAMBA-DARK-PURPLE-color);
+  text-shadow: none;
+}
+
+.contents dl.reflist dd {
+  background: white;
+}
+
+/* General */
+code {
+  font-family: var(--JAMBA-TEXT-MONOSPACE-font);
+  background: #dcdcdc;
+  color: black;
+  border: solid 1px #cdcdcd;
+  font-size: 0.9rem;
+  border-radius: 2px;
+  white-space: nowrap;
+  padding: 0px 2px;
+}
+
+a {
+  color: var(--JAMBA-PURPLE-color);
+}
+
+.contents a:visited {
+  color: var(--JAMBA-PURPLE-color);
+}
+
+/* Media is smaller than 768px */
+@media only all and (max-width: 768px) {
+  /* Top nav bar */
+  .sm-dox a {
+    border-bottom: solid 1px var(--JAMBA-DARK-PURPLE-color);
+    border-right: none;
+  }
+  
+  .sm-dox > li:first-child > a {
+    border-radius: 0;
+  }
+  
+  .sm-dox ul li a {
+    background: var(--JAMBA-DARK-PURPLE-color) !important;
+    color: var(--JAMBA-WHITE-color) !important;
+    border-bottom: solid 1px var(--JAMBA-PURPLE-color);
+    text-shadow: none;
+  }
+  
+  .sm-dox ul li a:hover {
+    background: var(--JAMBA-WHITE-color) !important;
+    color: var(--JAMBA-DARK-PURPLE-color) !important;
+    text-shadow: none;
+  }
+  
+  /* Left nav tree */
+  #side-nav {
+    display: none;
+  }
+  
+  /* Content */
+  #doc-content {
+    margin-left: 0 !important;
+    height: auto !important;
+  }
+}

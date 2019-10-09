@@ -41,11 +41,15 @@ get_directory_property(JAMBA_VERSION DIRECTORY jamba-test-plugin DEFINITION JAMB
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}")
+  file(COPY jamba_doxygen.css DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
   add_custom_target(doc
       ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       COMMENT "Generating API documentation with Doxygen" VERBATIM
+      )
+  add_custom_command(TARGET doc POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/jamba_doxygen.css ${CMAKE_CURRENT_BINARY_DIR}
       )
   add_custom_command(TARGET doc POST_BUILD
                      COMMAND ${CMAKE_COMMAND} -E echo "Documentation generated and available @ ${CMAKE_CURRENT_BINARY_DIR}/docs/${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}/html/index.html"
