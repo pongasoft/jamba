@@ -309,7 +309,7 @@ public:
   using TList = std::vector<T>;
 
   /**
-   * Defines the type for the constructor argument : `{ { t, STR16("abc") }, ... }` */
+   * Defines the type for the constructor argument. Example: `{ { t, STR16("abc") }, ... }` */
   using ConstructorType = std::initializer_list<std::pair<const T, VstString16>> const &;
 
   using ParamType = T;
@@ -321,7 +321,7 @@ public:
    */
   DiscreteTypeParamConverter(ConstructorType iInitList)
   {
-    int32 stepCount = static_cast<int32>(iInitList.size() - 1);
+    auto stepCount = static_cast<int32>(iInitList.size() - 1);
 
     // by definition, a discrete parameter has a step count > 0
     DCHECK_F(stepCount > 0);
@@ -396,7 +396,7 @@ public:
   using IParamConverter<Enum>::toString;
 
   /**
-   * Defines the type for the constructor argument : `{ STR16("abc"), ... }` */
+   * Defines the type for the constructor argument. Example: `{ STR16("abc"), ... }` */
   using ConstructorType = std::array<VstString16, MaxValue + 1> const &;
 
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)

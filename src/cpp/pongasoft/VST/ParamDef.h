@@ -120,6 +120,7 @@ public:
   /**
    * Return the value as a utf-8 string
    *
+   * @param iNormalizedValue the (normalized) value to process
    * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
    */
   virtual std::string toUTF8String(ParamValue iNormalizedValue, int32 iPrecision) const
@@ -196,7 +197,7 @@ public:
   }
 
   /**
-   * Using fConverter::toString
+   * Using `fConverter::toString`
    */
   void toString(ParamValue iNormalizedValue, String128 iString) const override
   {
@@ -209,7 +210,8 @@ public:
   /**
    * Return the value as a utf-8 string
    *
-   * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
+   * @param iNormalizedValue the (normalized) value to process
+   * @param iPrecision if `< 0` uses `fPrecision` otherwise use the one provided
    */
   std::string toUTF8String(ParamValue iNormalizedValue, int32 iPrecision) const override
   {
@@ -307,6 +309,7 @@ public:
   /**
    * Return the value as a utf-8 string
    *
+   * @param iValue the value to process
    * @param iPrecision if < 0 uses `fPrecision` otherwise use the one provided
    */
   std::string toUTF8String(ParamType const &iValue, int32 iPrecision) const

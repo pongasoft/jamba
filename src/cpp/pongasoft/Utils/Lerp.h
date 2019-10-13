@@ -19,8 +19,7 @@
 
 #include "Misc.h"
 
-namespace pongasoft {
-namespace Utils {
+namespace pongasoft::Utils {
 
 /**
  * Util class to compute linear interpolation. Use SPLerp/DPLerp and mapValueSP/mapRangeSP (resp mapValueDP/mapRangeDP)
@@ -53,9 +52,9 @@ public:
   }
 
   /**
-   * Inspired by the map function in Processing language, another way to look at Lerp is to map a range of values
-   * into another range: [iFromLow, iFromHigh] -> [iToLow, iToHigh]. Note that low can be greater than high: for
-   * example you can map [1, -1] to the range [0, height] (display where 0 is at the top and height is the bottom)
+   * Inspired by the `map` function in Processing language, another way to look at Lerp is to map a range of values
+   * into another range: `[iFromLow, iFromHigh] -> [iToLow, iToHigh]`. Note that low can be greater than high: for
+   * example you can map `[1, -1]` to the range `[0, height]` (display where 0 is at the top and height is the bottom)
    */
   static inline Lerp mapRange(X iFromLow, X iFromHigh, Y iToLow, Y iToHigh)
   {
@@ -63,15 +62,19 @@ public:
   }
 
   /**
-   * Inspired by the map function in Processing language, another way to look at Lerp is to map a range of values
-   * into another range: [iFromLow, iFromHigh] -> [iToLow, iToHigh]. This function then return the iValue mapped from
-   * the first range into the second range. When iClamp is set to true, the incoming value will first be clamped
+   * Inspired by the `map` function in Processing language, another way to look at Lerp is to map a range of values
+   * into another range: `[iFromLow, iFromHigh] -> [iToLow, iToHigh]`. This function then returns the `iValue` mapped from
+   * the first range into the second range. When `iClamp` is set to `true`, the incoming value will first be clamped
    * to the from range. ex:
    *
-   * mapValue(5, 10, 20, 100, 200, true) returns 100
-   * mapValue(5, 10, 20, 100, 200, false) returns 50
+   * ```
+   * // 15 is inside "from" range
+   * mapValue(15, 10, 20, 100, 200); // returns 150
    *
-   * @param iValue will be constrained to the range [min(iFromLow, iFromHigh), max(iFromLow, iFromHigh)]
+   * // 5 is outside "from" range
+   * mapValue(5, 10, 20, 100, 200, true); // returns 100
+   * mapValue(5, 10, 20, 100, 200, false); // returns 50
+   * ```
    */
   static Y mapValue(X iValue, X iFromLow, X iFromHigh, Y iToLow, Y iToHigh, bool iClamp = true)
   {
@@ -244,8 +247,10 @@ struct Range
   /**
    * This method assumes that `fFrom` and `fTo` are part of the range or another way to put it:
    *
-   *     range.contains(range.fFrom) // returns true
-   *     range.contains(range.fTo) // returns true
+   * ```
+   * range.contains(range.fFrom) // returns true
+   * range.contains(range.fTo) // returns true
+   * ```
    *
    * @return `true` if the range contains the value
    */
@@ -260,7 +265,7 @@ struct Range
   /**
    * Clamp the value to this range
    *
-   * @return a value between fFrom and fTo
+   * @return a value between `fFrom` and `fTo`
    */
   T clamp(T iValue) const
   {
@@ -270,8 +275,9 @@ struct Range
   /**
    * Map the value from this range into the provide range
    *
-   * @param iValue the value from *this* range [fFrom, fTo]
-   * @param iRange the range to map the iValue into
+   * @param iValue the value from *this* range `[fFrom, fTo]`
+   * @param iRange the range to map the `iValue` into
+   * @param iClampToRange determines whether `iValue` should first be clamped to *this* range
    * @return the new value
    */
   template<typename U, typename TLerp = DPLerpXY<T, U>>
@@ -283,19 +289,22 @@ struct Range
   /**
    * Map this range to the other range
    *
-   * @param iRange the range to map the iValue into
+   * @param iRange the range to map *this* range into
    * @return the new range
    */
   template<typename U, typename TLerp = DPLerpXY<T, U>>
-  inline Range<U> mapRange(Range<U> const &iRange, bool iClampToRange = true) const
+  inline Range<U> mapRange(Range<U> const &iRange) const
   {
-    return mapSubRange<U,TLerp>(*this, iRange, iClampToRange);
+    // obviously *this* range is already clamped...
+    return mapSubRange<U,TLerp>(*this, iRange, true);
   }
 
   /**
    * Map a sub range of this range to the other range
    *
-   * @param iRange the range to map the iValue into
+   * @param iSubRange the sub-range of *this* range to use as source
+   * @param iRange the range to map `iSubRange` into
+   * @param iClampToRange determines whether `iSubRange` should first be clamped to *this* range
    * @return the new range
    */
   template<typename U, typename TLerp = DPLerpXY<T, U>>
@@ -332,5 +341,4 @@ public:
   T fTo{};
 };
 
-}
 }

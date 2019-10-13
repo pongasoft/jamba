@@ -247,7 +247,7 @@ public:
   }
 
   // asDiscreteParameter
-  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
+  std::shared_ptr<GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) override
   {
     return fRawParameter->asDiscreteParameter(iStepCount);
   }

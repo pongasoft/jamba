@@ -46,7 +46,7 @@ GUIOptionalParam<int32> GUIParamCxMgr::registerOptionalDiscreteParam(TagID iPara
                                                                      Parameters::IChangeListener *iChangeListener)
 {
   auto param = fGUIState->findParam(iParamID);
-  std::shared_ptr<ITGUIParameter<int32>> optionalParam = nullptr;
+  std::shared_ptr<GUIDiscreteParameter> optionalParam = nullptr;
 
   if(param)
   {

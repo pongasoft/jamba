@@ -281,7 +281,7 @@ public:
   }
 
   // asDiscreteParameter
-  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override;
+  std::shared_ptr<GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) override;
 
 protected:
   ParamType fValue;
@@ -301,10 +301,10 @@ static std::shared_ptr<GUIJmbParameter<T>> castToJmb(std::shared_ptr<IGUIParamet
  *  Wraps a `GUIJmbParameter<T>` to interpret it as a discrete parameter using the converter
  */
 template<typename T>
-class GUIDiscreteJmbParameter : public ITGUIParameter<int32>
+class GUIDiscreteJmbParameter : public GUIDiscreteParameter
 {
 public:
-  using EditorType = typename ITGUIParameter<int32>::ITEditor;
+  using EditorType = typename GUIDiscreteParameter::ITEditor;
 
 public:
   GUIDiscreteJmbParameter(std::shared_ptr<GUIJmbParameter<T>> iJmbParameter,
@@ -341,7 +341,7 @@ public:
   }
 
   // asDiscreteParameter
-  std::shared_ptr <ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override
+  std::shared_ptr <GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) override
   {
     return fJmbParameter->asDiscreteParameter(iStepCount);
   }
@@ -442,7 +442,7 @@ protected:
 // GUIJmbParameter<T>::asDiscreteParameter
 //------------------------------------------------------------------------
 template<typename T>
-std::shared_ptr<ITGUIParameter<int32>> GUIJmbParameter<T>::asDiscreteParameter(int32 iStepCount)
+std::shared_ptr<GUIDiscreteParameter> GUIJmbParameter<T>::asDiscreteParameter(int32 iStepCount)
 {
   // Step 1: check if the Jmb param provide a discrete converter
   auto converter = getParamDefT()->getDiscreteConverter();

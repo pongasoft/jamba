@@ -29,39 +29,120 @@ namespace pongasoft::VST::GUI::Params {
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 
+// forward declaration required for compilation
 template<typename T> class ITGUIParameter;
 
+/**
+ * A discrete parameter is defined by a parameter whose underlying backing type is an `int32` and whose number
+ * of steps is `> 0`.
+ */
+using GUIDiscreteParameter = ITGUIParameter<int32>;
+
+/**
+ * This is the base class of all %GUI parameters. The API defined by this class is fairly limited since the
+ * underlying type `T` is not known or exposed by this generic API.
+ *
+ * \note %GUI parameters are usually "shared" and subclasses will return shared pointers, that may potentially
+ * be shared pointers on `this`.
+ */
 class IGUIParameter : public std::enable_shared_from_this<IGUIParameter>
 {
 public:
+  /**
+   * Defines the basic and common API of all parameter editors (allow to commit/rollback)
+   */
   class Editor
   {
   public:
+    /**
+     * Commits all the changes applied to the parameter.
+     *
+     * \note If `commit()` or `rollback()` has already been called this method does nothing. */
     virtual tresult commit() = 0;
+
+    /**
+     * Rollback all the changes that were made to this parameter (since this editor was created).
+     *
+     * \note If `commit()` or `rollback()` has already been called this method does nothing. */
     virtual tresult rollback() = 0;
+
+    /**
+     * Technically the destructor must only call `rollback()`, but due to the fact that it is a virtual
+     * method, it needs to be implemented by each subclass...
+     */
     virtual ~Editor() = default;
   };
 
 public:
+  /**
+   * Each parameter has a unique ID returned by this method.
+   */
   virtual ParamID getParamID() const = 0;
+
+  /**
+   * When a parameter is a discrete parameter (which means its underlying backing type is an `int32` with values
+   * in the discrete range `[0, getStepCount()]`), this method will return the number of steps (`> 0`).
+   *
+   * \note Although a parameter may not be a discrete parameter itself, the method `asDiscreteParameter(int32)` may
+   * be able to convert/adapt it to one.
+   *
+   * @return the number of steps which is `> 0` if and only if this parameter is a discrete parameter.
+   */
   virtual int32 getStepCount() const = 0;
 
   /**
    * Return the current value of the parameter as a string (which is properly UTF-8 encoded).
    *
-   * @param iPrecision if `iPrecision` < 0 the parameter is free to use whichever precision is tied to the parameter
+   * @param iPrecision if `iPrecision < 0` the parameter is free to use whichever precision is tied to the parameter
    *                   otherwise it should use the one provided
    */
   virtual std::string toUTF8String(int32 iPrecision) const = 0;
 
+  /**
+   * Creates a connection between this parameter and the change listener: whenever the parameter changes, the
+   * listener will be notified of the changes (`Parameters::IChangeListener::onParameterChange(ParamID)`).
+   *
+   * \note This method is usually invoked by the framework but it may be used in the rare cases when the caller
+   * requires to handle the duration of the connection in a more granular fashion
+   *
+   * @param iChangeListener the listener that will be notified on parameter changes. `nullptr` is allowed and will be a noop.
+   * @return the connection between this parameter and the listener and is maintained for as long as this pointer exists
+   */
   virtual std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const = 0;
+
+  /**
+   * Creates a connection between this parameter and the callback: whenever the parameter changes, the
+   * callback will be invoked (`std::function<void()>`).
+   *
+   * \note This method is usually invoked by the framework but it may be used in the rare cases when the caller
+   * requires to handle the duration of the connection in a more granular fashion
+   *
+   * @param iChangeCallback the callback that will be invoked on parameter changes.
+   * @return the connection between this parameter and the callback and is maintained for as long as this pointer exists
+   */
   virtual std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const = 0;
 
 public:
+  /**
+   * Downcasts this parameter into a typed version.
+   *
+   * @tparam T the underlying backing type of the parameter
+   * @return the downcasted parameter of `nullptr` if the cast is not possible
+   */
   template<typename T>
   std::shared_ptr<ITGUIParameter<T>> cast();
 
-  virtual std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) = 0;
+  /**
+   * Converts this parameter into a discrete parameter. The discrete parameter returned is a parameter with an
+   * underlying backing type `int32` and values in the discrete range `[0, getStepCount()]` or
+   * `[0, iStepCount]` if `getStepCount() <= 0`.
+   *
+   * @param iStepCount if this parameter already defines a step count (`getStepCount() > 0`), then this parameter
+   *                   is ignored, otherwise it is used to convert this parameter into a discrete parameter
+   *                   with `iStepCount` steps.
+   * @return the discrete parameter or `nullptr` if this parameter cannot be converted to a discrete parameter.
+   */
+  virtual std::shared_ptr<GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) = 0;
 };
 
 template<typename T>

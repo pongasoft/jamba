@@ -239,7 +239,7 @@ public:
    * if you have a parameter representing a gain value (which is not a discrete value), it can still be used with a
    * `DiscreteButtonView` so you can split the range into discrete values and have a button for each.
    */
-  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override;
+  std::shared_ptr<GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) override;
 
 private:
   ParamID fParamID;

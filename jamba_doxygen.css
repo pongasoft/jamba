@@ -214,7 +214,7 @@ span.lineno {
   border-radius: 0;
 }
 
-/* For lists (todo/deprecated) */
+/* For lists (todos/deprecated) */
 .contents dl.reflist dt {
   background: var(--JAMBA-YELLOW-color);
   color: var(--JAMBA-DARK-PURPLE-color);
@@ -244,6 +244,29 @@ a {
 
 .contents a:visited {
   color: var(--JAMBA-PURPLE-color);
+}
+
+/* Notices */
+h3.release-note.notice.warning {
+  background: rgba(217, 83, 79, 0.8);
+  color: white !important;
+  margin-bottom: 0;
+  text-align: center;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  font-size: 1.3rem;
+}
+
+h3.release-note.notice.warning + h4 {
+  background: #FAE2E2;
+  font-size: 1rem;
+  padding: 15px;
+  margin-top: 0;
+  text-align: center;
+}
+
+dl.note {
+  border-color: var(--JAMBA-PURPLE-color);
 }
 
 /* Media is smaller than 768px */

@@ -187,7 +187,7 @@ public:
   }
 
   // asDiscreteParameter
-  std::shared_ptr<ITGUIParameter<int32>> asDiscreteParameter(int32 iStepCount) override;
+  std::shared_ptr<GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) override;
 
 protected:
   TagID fTagID;
@@ -223,7 +223,7 @@ protected:
 // GUIValParameter::asDiscreteParameter
 //------------------------------------------------------------------------
 template<typename T>
-std::shared_ptr<ITGUIParameter<int32>> GUIValParameter<T>::asDiscreteParameter(int32 iStepCount)
+std::shared_ptr<GUIDiscreteParameter> GUIValParameter<T>::asDiscreteParameter(int32 iStepCount)
 {
   if(iStepCount > 0)
   {

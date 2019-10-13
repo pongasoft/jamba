@@ -27,8 +27,7 @@
 
 #include "ParamSerializers.h"
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -83,6 +82,9 @@ public:
 
   /**
    * Sets a binary message.
+   *
+   * @param id attribute id
+   * @param iData the array from which the binary data will be copied
    * @param iSize the number of elements in iData array (NOT the size in bytes!)
    */
   template<typename T>
@@ -93,6 +95,8 @@ public:
 
   /**
    * Gets a binary message.
+   *
+   * @param id attribute id
    * @param iData the array into which the binary data will be copied
    * @param iSize the number of elements in iData array (NOT the size in bytes!)
    * @return -1 if cannot ready binary otherwise number of elements read (always <= iSize)
@@ -196,5 +200,4 @@ tresult Message::getSerializableValue(IAttributeList::AttrID id, const IParamSer
   return iSerializer.readFromStream(streamer, oValue);
 }
 
-}
 }

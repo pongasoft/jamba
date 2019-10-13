@@ -427,7 +427,7 @@ public:
   using TList = std::vector<T>;
 
   /**
-   * Defines the type for the constructor argument : `{ { t, "abc" }, ... }` */
+   * Defines the type for the constructor argument. Example: `{ { t, "abc" }, ... }` */
   using ConstructorType = std::initializer_list<std::pair<const T, std::string>> const &;
 
   using ParamType = T;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,12 +20,12 @@
 
 #include <pongasoft/logging/logging.h>
 
-namespace pongasoft {
-namespace Utils {
+namespace pongasoft::Utils {
 
 /**
  * Make sure that the value remains within its bounds
  *
+ * @param iValue the value to clamp between `iLower` and `iUpper`
  * @param iLower the lower bound (must be <= iUpper)
  * @param iUpper the upper bound (must be >= iLower)
  */
@@ -63,7 +63,6 @@ inline static T clampE(const U &value, const T &lower, const T &upper)
 }
 
 
-}
 }
 
 #endif // __PONGASOFT_UTILS_MISC_H__

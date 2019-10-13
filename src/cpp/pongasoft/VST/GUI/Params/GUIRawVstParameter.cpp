@@ -141,7 +141,7 @@ protected:
 //------------------------------------------------------------------------
 // GUIRawVstParameter::asDiscreteParameter
 //------------------------------------------------------------------------
-std::shared_ptr<ITGUIParameter<int32>> GUIRawVstParameter::asDiscreteParameter(int32 iStepCount)
+std::shared_ptr<GUIDiscreteParameter> GUIRawVstParameter::asDiscreteParameter(int32 iStepCount)
 {
   int32 stepCount = getStepCount();
 
