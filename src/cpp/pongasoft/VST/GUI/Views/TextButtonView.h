@@ -40,8 +40,8 @@ public:
   explicit TextButtonView(const CRect &iSize) : CustomViewAdapter(iSize) {}
 
   // get/set titleTag to (optionally) tie the title of this text button to a (Jmb) parameter
-  virtual void setTitleTag(TagID iValue);
-  TagID getTitleTag() const { return fTitleTag; };
+  virtual void setTitleTag(ParamID iValue);
+  ParamID getTitleTag() const { return fTitleTag; };
 
   // get/set disabled text color (color to use when button is disabled)
   CColor const &getDisabledTextColor() const { return fDisabledTextColor; }
@@ -113,7 +113,7 @@ protected:
 
 protected:
   // (optionally) tie the title of this text button to a (Jmb) parameter
-  TagID fTitleTag{UNDEFINED_TAG_ID};
+  ParamID fTitleTag{UNDEFINED_PARAM_ID};
 
   // Which color and gradient to use when disabled
   CColor fDisabledTextColor;

@@ -30,14 +30,14 @@ public:
   explicit CustomControlView(const CRect &iSize) : CustomView(iSize) {}
 
   // get/setControlTag
-  virtual void setControlTag (TagID iTag) { fControlTag = iTag; };
-  TagID getControlTag () const { return fControlTag; }
+  virtual void setControlTag (ParamID iTag) { fControlTag = iTag; };
+  ParamID getControlTag () const { return fControlTag; }
 
 public:
   CLASS_METHODS_NOCOPY(CustomControlView, CustomView)
 
 protected:
-  TagID fControlTag{UNDEFINED_PARAM_ID};
+  ParamID fControlTag{UNDEFINED_PARAM_ID};
 
 public:
   class Creator : public CustomViewCreator<CustomControlView, CustomView>

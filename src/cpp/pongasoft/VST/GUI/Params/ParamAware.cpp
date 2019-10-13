@@ -112,7 +112,7 @@ void ParamAware::invokeAll()
 //------------------------------------------------------------------------
 // ParamAware::registerOptionalDiscreteParam
 //------------------------------------------------------------------------
-GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteParam(TagID iParamID,
+GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteParam(ParamID iParamID,
                                                                   int32 iStepCount,
                                                                   bool iSubscribeToChanges)
 {
@@ -127,7 +127,7 @@ GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteParam(TagID iParamID
 //------------------------------------------------------------------------
 // ParamAware::registerOptionalDiscreteCallback
 //------------------------------------------------------------------------
-GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(TagID iParamID,
+GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(ParamID iParamID,
                                                                      int32 iStepCount,
                                                                      Parameters::ChangeCallback iChangeCallback,
                                                                      bool iInvokeCallback)
@@ -143,7 +143,7 @@ GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(TagID iPara
 //------------------------------------------------------------------------
 // ParamAware::registerOptionalDiscreteCallback
 //------------------------------------------------------------------------
-GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(TagID iParamID,
+GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(ParamID iParamID,
                                                                      int32 iStepCount,
                                                                      Parameters::ChangeCallback1<GUIOptionalParam<int32>> iChangeCallback,
                                                                      bool iInvokeCallback)
@@ -159,7 +159,7 @@ GUIOptionalParam<int32> ParamAware::registerOptionalDiscreteCallback(TagID iPara
 //------------------------------------------------------------------------
 // ParamAware::registerBaseParam
 //------------------------------------------------------------------------
-IGUIParam ParamAware::registerBaseParam(TagID iParamID, bool iSubscribeToChanges)
+IGUIParam ParamAware::registerBaseParam(ParamID iParamID, bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
     return fParamCxMgr->registerBaseParam(iParamID, iSubscribeToChanges ? this : nullptr);
@@ -170,7 +170,7 @@ IGUIParam ParamAware::registerBaseParam(TagID iParamID, bool iSubscribeToChanges
 //------------------------------------------------------------------------
 // ParamAware::registerBaseCallback
 //------------------------------------------------------------------------
-IGUIParam ParamAware::registerBaseCallback(TagID iParamID,
+IGUIParam ParamAware::registerBaseCallback(ParamID iParamID,
                                            Parameters::ChangeCallback iChangeCallback,
                                            bool iInvokeCallback)
 {
@@ -184,7 +184,7 @@ IGUIParam ParamAware::registerBaseCallback(TagID iParamID,
 //------------------------------------------------------------------------
 // ParamAware::registerBaseCallback
 //------------------------------------------------------------------------
-IGUIParam ParamAware::registerBaseCallback(TagID iParamID,
+IGUIParam ParamAware::registerBaseCallback(ParamID iParamID,
                                            Parameters::ChangeCallback1<IGUIParam> iChangeCallback,
                                            bool iInvokeCallback)
 {

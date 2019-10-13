@@ -198,8 +198,8 @@ void DiscreteButtonView::registerParameters()
 {
   CustomDiscreteControlView::registerParameters();
 #ifndef NDEBUG
-  if(fControlParameter.getStepCount() == 0 && getControlTag() != UNDEFINED_TAG_ID)
-    DLOG_F(WARNING, "%d parameter is not discrete (stepCount == 0)", fControlParameter.getTagID());
+  if(fControlParameter.getStepCount() == 0 && getControlTag() != UNDEFINED_PARAM_ID)
+    DLOG_F(WARNING, "%d parameter is not discrete (stepCount == 0)", fControlParameter.getParamID());
 #endif
 }
 

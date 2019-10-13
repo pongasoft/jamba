@@ -68,6 +68,7 @@ This release contains a lot of big changes. Although I tried my best to be backw
 * `StepButtonView` and `DiscreteButtonView` now use discrete values only (no longer `double`). Check the documentation
   on how to use it instead (ex: an increment of `0.1` can be converted to an increment of `1` 
   with a step count of `10`).
+* Use of `ParamID` instead of `TagID` in all APIs (`TagID` is now deprecated)
 * Although care has been taken with renaming/adding deprecation warnings for old names, there is a chance (mostly 
   with templated parameters) that it may impact compilation.
 

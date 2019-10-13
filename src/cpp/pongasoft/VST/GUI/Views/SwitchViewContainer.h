@@ -46,8 +46,8 @@ public:
   ~SwitchViewContainer() override;
 
   // get/setSwitchControlTag
-  virtual void setSwitchControlTag (TagID iTag) { fSwitchControlTag = iTag; };
-  TagID getSwitchControlTag () const { return fSwitchControlTag; }
+  virtual void setSwitchControlTag (ParamID iTag) { fSwitchControlTag = iTag; };
+  ParamID getSwitchControlTag () const { return fSwitchControlTag; }
 
   // get/setTemplateNames
   const std::vector<std::string> &getTemplateNames() const { return fTemplateNames; }
@@ -89,7 +89,7 @@ protected:
   IUIDescription const *fUIDescription{};
   IController *fUIController{};
 
-  TagID fSwitchControlTag{UNDEFINED_TAG_ID};
+  ParamID fSwitchControlTag{UNDEFINED_PARAM_ID};
   GUIRawVstParam fControlSwitch{};
 
   std::vector<std::string> fTemplateNames;

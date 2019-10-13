@@ -30,7 +30,7 @@ using namespace Params;
 class TextEdit : public CTextEdit
 {
 public:
-  explicit TextEdit(const CRect &iSize) : CTextEdit(iSize, nullptr, UNDEFINED_TAG_ID) {};
+  explicit TextEdit(const CRect &iSize) : CTextEdit(iSize, nullptr, UNDEFINED_PARAM_ID) {};
 };
 
 /**

@@ -29,7 +29,7 @@ using namespace VSTGUI;
 CustomView::CustomView(const CRect &iSize)
   : CView(iSize),
     ParamAware(),
-    fTag{UNDEFINED_TAG_ID},
+    fTag{UNDEFINED_PARAM_ID},
     fBackColor{0, 0, 0}
 {
 }

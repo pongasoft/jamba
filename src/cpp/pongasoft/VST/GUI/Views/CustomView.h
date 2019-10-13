@@ -53,8 +53,8 @@ public:
   CColor const &getBackColor() const { return fBackColor; }
 
   // setCustomViewTag / getCustomViewTag
-  void setCustomViewTag (TagID iTag) { fTag = iTag; }
-  TagID getCustomViewTag () const { return fTag; }
+  void setCustomViewTag (ParamID iTag) { fTag = iTag; }
+  ParamID getCustomViewTag () const { return fTag; }
 
   // setEditorMode / getEditorMode
   void setEditorMode(bool iEditorMode);
@@ -133,7 +133,7 @@ protected:
   }
 
 protected:
-  TagID fTag;
+  ParamID fTag;
 #if EDITOR_MODE
   bool fEditorMode{false};
 #endif
@@ -208,14 +208,14 @@ class CustomViewAdapter : public TView, public ParamAware, public ICustomViewLif
 public:
   // Constructor
   template<typename... Args>
-  explicit CustomViewAdapter(const CRect &iSize, Args&& ...args) : TView(iSize, std::forward<Args>(args)...), fTag{UNDEFINED_TAG_ID} {}
+  explicit CustomViewAdapter(const CRect &iSize, Args&& ...args) : TView(iSize, std::forward<Args>(args)...), fTag{UNDEFINED_PARAM_ID} {}
 
   // markDirty
   inline void markDirty() { TView::setDirty(true); }
 
   // setCustomViewTag / getCustomViewTag
-  void setCustomViewTag (TagID iTag) { fTag = iTag; }
-  TagID getCustomViewTag () const { return fTag; }
+  void setCustomViewTag (ParamID iTag) { fTag = iTag; }
+  ParamID getCustomViewTag () const { return fTag; }
 
   // setEditorMode
   void setEditorMode(bool iEditorMode)
@@ -264,7 +264,7 @@ public:
   }
 
 protected:
-  TagID fTag;
+  ParamID fTag;
 #if EDITOR_MODE
   bool fEditorMode{false};
 #endif

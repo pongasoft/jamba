@@ -23,7 +23,7 @@ namespace pongasoft::VST::GUI::Params {
 // GUIParamCxMgr::registerOptionalParam
 //------------------------------------------------------------------------
 template<typename T>
-GUIOptionalParam<T> GUIParamCxMgr::registerOptionalParam(TagID iParamID,
+GUIOptionalParam<T> GUIParamCxMgr::registerOptionalParam(ParamID iParamID,
                                                          Parameters::IChangeListener *iChangeListener)
 {
   auto param = fGUIState->findParam(iParamID);

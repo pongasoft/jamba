@@ -51,11 +51,11 @@ public:
 public:
   // Constructor
   GUIOptionalParam() :
-    fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_TAG_ID, T{})} {}
+    fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_PARAM_ID, T{})} {}
 
   // Constructor
   explicit GUIOptionalParam(T const &iDefaultValue) :
-    fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_TAG_ID, iDefaultValue)} {}
+    fParameter{VstUtils::make_sfo<GUIValParameter<T>>(UNDEFINED_PARAM_ID, iDefaultValue)} {}
 
   // Constructor
   explicit GUIOptionalParam(std::shared_ptr<ITGUIParameter<T>> iParameter) : fParameter{std::move(iParameter) } {
@@ -64,16 +64,6 @@ public:
 
   // exists (used by templated code... by definition an optional parameter ALWAYS exist)
   inline bool exists() const { return true; }
-
-  // getTagID
-  inline TagID getTagID() const
-  {
-    auto valParameter = dynamic_cast<GUIValParameter<T> *>(fParameter.get());
-    if(valParameter)
-      return valParameter->getTagID();
-    else
-      return fParameter->getParamID();
-  }
 
   // getParamID
   inline ParamID getParamID() const { return fParameter->getParamID(); }

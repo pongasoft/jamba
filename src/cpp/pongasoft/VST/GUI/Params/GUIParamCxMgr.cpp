@@ -41,7 +41,7 @@ void GUIParamCxMgr::unregisterAll()
 //------------------------------------------------------------------------
 // GUIParamCxMgr::registerOptionalDiscreteParam
 //------------------------------------------------------------------------
-GUIOptionalParam<int32> GUIParamCxMgr::registerOptionalDiscreteParam(TagID iParamID,
+GUIOptionalParam<int32> GUIParamCxMgr::registerOptionalDiscreteParam(ParamID iParamID,
                                                                      int32 iStepCount,
                                                                      Parameters::IChangeListener *iChangeListener)
 {
@@ -84,9 +84,9 @@ GUIOptionalParam<int32> GUIParamCxMgr::registerOptionalDiscreteParam(TagID iPara
 //------------------------------------------------------------------------
 // GUIParamCxMgr::registerBaseParam
 //------------------------------------------------------------------------
-IGUIParam GUIParamCxMgr::registerBaseParam(TagID iParamID, Parameters::IChangeListener *iChangeListener)
+IGUIParam GUIParamCxMgr::registerBaseParam(ParamID iParamID, Parameters::IChangeListener *iChangeListener)
 {
-  auto param = iParamID >= 0 ? fGUIState->findParam(static_cast<ParamID>(iParamID)) : nullptr;
+  auto param = iParamID != UNDEFINED_PARAM_ID ? fGUIState->findParam(static_cast<ParamID>(iParamID)) : nullptr;
 
   return __registerListener(IGUIParam(param), iChangeListener);
 }

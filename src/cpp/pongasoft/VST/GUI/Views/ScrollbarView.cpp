@@ -326,7 +326,7 @@ void ScrollbarView::registerParameters()
 //------------------------------------------------------------------------
 // ScrollbarView::setOffsetPercentTag
 //------------------------------------------------------------------------
-void ScrollbarView::setOffsetPercentTag(TagID offsetPercentTag)
+void ScrollbarView::setOffsetPercentTag(ParamID offsetPercentTag)
 {
   fOffsetPercentTag = offsetPercentTag;
 }
@@ -335,7 +335,7 @@ void ScrollbarView::setOffsetPercentTag(TagID offsetPercentTag)
 //------------------------------------------------------------------------
 // ScrollbarView::setZoomPercentTag
 //------------------------------------------------------------------------
-void ScrollbarView::setZoomPercentTag(TagID zoomPercentTag)
+void ScrollbarView::setZoomPercentTag(ParamID zoomPercentTag)
 {
   fZoomPercentTag = zoomPercentTag;
 }

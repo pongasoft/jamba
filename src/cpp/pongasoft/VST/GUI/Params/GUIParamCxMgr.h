@@ -43,19 +43,19 @@ public:
   // Base Param
   //------------------------------------------------------------------------
 
-  // registerBaseParam / TagID / IChangeListener
-  IGUIParam registerBaseParam(TagID iParamID, Parameters::IChangeListener *iChangeListener = nullptr);
+  // registerBaseParam / ParamID / IChangeListener
+  IGUIParam registerBaseParam(ParamID iParamID, Parameters::IChangeListener *iChangeListener = nullptr);
 
-  // registerBaseCallback / TagID / ChangeCallback
-  inline IGUIParam registerBaseCallback(TagID iParamID,
+  // registerBaseCallback / ParamID / ChangeCallback
+  inline IGUIParam registerBaseCallback(ParamID iParamID,
                                         Parameters::ChangeCallback iChangeCallback,
                                         bool iInvokeCallback)
   {
     return __registerCallback(registerBaseParam(iParamID), std::move(iChangeCallback), iInvokeCallback);
   }
 
-  // registerBaseCallback / TagID / ChangeCallback1<IGUIParam>
-  inline IGUIParam registerBaseCallback(TagID iParamID,
+  // registerBaseCallback / ParamID / ChangeCallback1<IGUIParam>
+  inline IGUIParam registerBaseCallback(ParamID iParamID,
                                         Parameters::ChangeCallback1<IGUIParam> iChangeCallback,
                                         bool iInvokeCallback)
   {
@@ -66,22 +66,22 @@ public:
   // Optional Param
   //------------------------------------------------------------------------
 
-  // registerOptionalParam / TagID / IChangeListener
+  // registerOptionalParam / ParamID / IChangeListener
   template<typename T>
-  GUIOptionalParam<T> registerOptionalParam(TagID iParamID,
+  GUIOptionalParam<T> registerOptionalParam(ParamID iParamID,
                                             Parameters::IChangeListener *iChangeListener = nullptr);
 
-  // registerOptionalCallback / TagID / ChangeCallback
+  // registerOptionalCallback / ParamID / ChangeCallback
   template<typename T>
-  inline GUIOptionalParam<T> registerOptionalCallback(TagID iParamID,
+  inline GUIOptionalParam<T> registerOptionalCallback(ParamID iParamID,
                                                       Parameters::ChangeCallback iChangeCallback,
                                                       bool iInvokeCallback) {
     return __registerCallback(registerOptionalParam<T>(iParamID), std::move(iChangeCallback), iInvokeCallback);
   }
 
-  // registerOptionalCallback / TagID / ChangeCallback1<GUIOptionalParam<T>>
+  // registerOptionalCallback / ParamID / ChangeCallback1<GUIOptionalParam<T>>
   template<typename T>
-  inline GUIOptionalParam<T> registerOptionalCallback(TagID iParamID,
+  inline GUIOptionalParam<T> registerOptionalCallback(ParamID iParamID,
                                                       Parameters::ChangeCallback1<GUIOptionalParam<T>> iChangeCallback,
                                                       bool iInvokeCallback) {
     return __registerCallback1(registerOptionalParam<T>(iParamID), std::move(iChangeCallback), iInvokeCallback);
@@ -91,21 +91,21 @@ public:
   // Optional Discrete Param
   //------------------------------------------------------------------------
 
-  // registerOptionalDiscreteParam / TagID / IChangeListener
-  GUIOptionalParam<int32> registerOptionalDiscreteParam(TagID iParamID,
+  // registerOptionalDiscreteParam / ParamID / IChangeListener
+  GUIOptionalParam<int32> registerOptionalDiscreteParam(ParamID iParamID,
                                                         int32 iStepCount,
                                                         Parameters::IChangeListener *iChangeListener = nullptr);
 
-  // registerOptionalDiscreteCallback / TagID / ChangeCallback
-  inline GUIOptionalParam<int32> registerOptionalDiscreteCallback(TagID iParamID,
+  // registerOptionalDiscreteCallback / ParamID / ChangeCallback
+  inline GUIOptionalParam<int32> registerOptionalDiscreteCallback(ParamID iParamID,
                                                                   int32 iStepCount,
                                                                   Parameters::ChangeCallback iChangeCallback,
                                                                   bool iInvokeCallback) {
     return __registerCallback(registerOptionalDiscreteParam(iParamID, iStepCount), std::move(iChangeCallback), iInvokeCallback);
   }
 
-  // registerOptionalDiscreteCallback / TagID / ChangeCallback1<GUIOptionalParam<int32>>
-  inline GUIOptionalParam<int32> registerOptionalDiscreteCallback(TagID iParamID,
+  // registerOptionalDiscreteCallback / ParamID / ChangeCallback1<GUIOptionalParam<int32>>
+  inline GUIOptionalParam<int32> registerOptionalDiscreteCallback(ParamID iParamID,
                                                                   int32 iStepCount,
                                                                   Parameters::ChangeCallback1<GUIOptionalParam<int32>> iChangeCallback,
                                                                   bool iInvokeCallback) {

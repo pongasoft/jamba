@@ -27,7 +27,7 @@ using namespace VSTGUI;
 //------------------------------------------------------------------------
 void TextEditView::registerParameters()
 {
-  fText = registerJmbCallback<UTF8String>(static_cast<TagID>(getTag()),
+  fText = registerJmbCallback<UTF8String>(static_cast<ParamID>(getTag()),
                                           [this](GUIJmbParam<UTF8String> &iParam) {
                                             setText(iParam);
                                           },

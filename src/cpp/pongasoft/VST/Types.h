@@ -19,9 +19,11 @@
 
 #include <string>
 #include <pluginterfaces/base/ftypes.h>
+#include <pluginterfaces/vst/vsttypes.h>
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
+
+using namespace Steinberg::Vst;
 
 /**
  * Strings made of char16 characters are represented by the native C++11 type
@@ -38,14 +40,15 @@ namespace VST {
 using VstString16 = std::basic_string<Steinberg::char16>;
 
 /**
- * ParamID is defined as a `uint32`. In some cases we need to represent the fact that there is no parameter assigned
- * in which case we use `-1` which cannot be represented as a ParamID. This type account for this use case.
+ * @deprecated Use `ParamID` instead as this is what the Vst layer uses and test for `UNDEFINED_PARAM_ID` if
+ *             you want to know if it represents a valid id or an undefined one
  */
-using TagID = Steinberg::int32;
+[[deprecated("Since 4.0.0 - Use ParamID instead")]] typedef Steinberg::int32 TagID;
 
-constexpr TagID UNDEFINED_TAG_ID = -1;
-constexpr TagID UNDEFINED_PARAM_ID = UNDEFINED_TAG_ID;
+/**
+ * Constant used throughout the code to test whether the `ParamID` represents a valid id or an undefined one */
+constexpr ParamID UNDEFINED_PARAM_ID = static_cast<ParamID>(-1);
 
+[[deprecated("Since 4.0.0 - Use UNDEFINED_PARAM_ID instead")]] constexpr ParamID UNDEFINED_TAG_ID = UNDEFINED_PARAM_ID;
 
-}
 }

@@ -47,12 +47,12 @@ public:
   void draw(CDrawContext *iContext) override;
 
   // tag to tie offsetPercent to a Vst parameter
-  TagID getOffsetPercentTag() const { return fOffsetPercentTag; }
-  void setOffsetPercentTag(TagID offsetPercentTag);
+  ParamID getOffsetPercentTag() const { return fOffsetPercentTag; }
+  void setOffsetPercentTag(ParamID offsetPercentTag);
 
   // tag to tie zoomPercent to a Vst parameter
-  TagID getZoomPercentTag() const { return fZoomPercentTag; }
-  void setZoomPercentTag(TagID zoomPercentTag);
+  ParamID getZoomPercentTag() const { return fZoomPercentTag; }
+  void setZoomPercentTag(ParamID zoomPercentTag);
 
   // margin : whitespace around the scrollbar
   Margin const &getMargin() const { return fMargin; }
@@ -256,12 +256,12 @@ protected:
   bool fEnableZoomDoubleClick{true};
 
   // offsetPercent tag/param/value + editor and editor value ("value" is used when no param)
-  TagID fOffsetPercentTag{UNDEFINED_PARAM_ID};
+  ParamID fOffsetPercentTag{UNDEFINED_PARAM_ID};
   GUIOptionalParam<ParamValue> fOffsetPercentParam{};
   GUIOptionalParamEditor<ParamValue> fOffsetPercentEditor{};
 
   // zoomPercent tag/param/value + editor and editor value ("value" is used when no param)
-  TagID fZoomPercentTag{UNDEFINED_PARAM_ID};
+  ParamID fZoomPercentTag{UNDEFINED_PARAM_ID};
   GUIOptionalParam<ParamValue> fZoomPercentParam{};
   GUIOptionalParamEditor<ParamValue> fZoomPercentEditor{};
 

@@ -27,7 +27,7 @@ namespace pongasoft::VST::GUI::Params {
 // ParamAware::registerOptionalParam
 //------------------------------------------------------------------------
 template<typename T>
-GUIOptionalParam<T> ParamAware::registerOptionalParam(TagID iParamID, bool iSubscribeToChanges)
+GUIOptionalParam<T> ParamAware::registerOptionalParam(ParamID iParamID, bool iSubscribeToChanges)
 {
   if(fParamCxMgr)
   {
@@ -41,7 +41,7 @@ GUIOptionalParam<T> ParamAware::registerOptionalParam(TagID iParamID, bool iSubs
 // ParamAware::registerOptionalCallback
 //------------------------------------------------------------------------
 template<typename T>
-GUIOptionalParam<T> ParamAware::registerOptionalCallback(TagID iParamID,
+GUIOptionalParam<T> ParamAware::registerOptionalCallback(ParamID iParamID,
                                                          Parameters::ChangeCallback iChangeCallback,
                                                          bool iInvokeCallback)
 {
@@ -57,7 +57,7 @@ GUIOptionalParam<T> ParamAware::registerOptionalCallback(TagID iParamID,
 // ParamAware::registerOptionalCallback
 //------------------------------------------------------------------------
 template<typename T>
-GUIOptionalParam<T> ParamAware::registerOptionalCallback(TagID iParamID,
+GUIOptionalParam<T> ParamAware::registerOptionalCallback(ParamID iParamID,
                                                          Parameters::ChangeCallback1<GUIOptionalParam<T>> iChangeCallback,
                                                          bool iInvokeCallback)
 {

@@ -25,7 +25,7 @@
 
 namespace pongasoft::VST::GUI::Params::TestParamAware {
 
-enum ParamIDs : TagID {
+enum ParamIDs : ParamID {
   kRawVst = 1000,
   kInt64Vst = 2000,
   kInt32Jmb = 3000,
@@ -107,16 +107,14 @@ public:
   GUIState *getGUIState() override { return &fState; }
 
   Parameters::ChangeCallback changeCallback(ParamID iParamID) {
-    fExpectedCallback = CallbackType::kChangeCallback;
-    return [this, iParamID] () {
-      CHECK_EQ_F(CallbackType::kChangeCallback, fExpectedCallback);
-      fCallbacks.emplace_back(iParamID);
-    };
-  }
-
-  Parameters::ChangeCallback changeCallback(TagID iParamID) {
-    if(iParamID >= 0)
-      return changeCallback(static_cast<ParamID>(iParamID));
+    if(iParamID != UNDEFINED_PARAM_ID)
+    {
+      fExpectedCallback = CallbackType::kChangeCallback;
+      return [this, iParamID] () {
+        CHECK_EQ_F(CallbackType::kChangeCallback, fExpectedCallback);
+        fCallbacks.emplace_back(iParamID);
+      };
+    }
     return []() {
       ABORT_F("should not be called!");
     };
@@ -124,18 +122,15 @@ public:
 
   template<typename Param>
   Parameters::ChangeCallback1<Param> changeCallback1(ParamID iParamID) {
-    fExpectedCallback = CallbackType::kChangeCallback1;
-    return [this, iParamID] (Param &iParam) {
-      CHECK_EQ_F(iParamID, iParam.getParamID());
-      CHECK_EQ_F(CallbackType::kChangeCallback1, fExpectedCallback);
-      fCallbacks.emplace_back(iParamID);
-    };
-  }
-
-  template<typename Param>
-  Parameters::ChangeCallback1<Param> changeCallback1(TagID iParamID) {
-    if(iParamID >= 0)
-      return changeCallback1<Param>(static_cast<ParamID>(iParamID));
+    if(iParamID != UNDEFINED_PARAM_ID)
+    {
+      fExpectedCallback = CallbackType::kChangeCallback1;
+      return [this, iParamID] (Param &iParam) {
+        CHECK_EQ_F(iParamID, iParam.getParamID());
+        CHECK_EQ_F(CallbackType::kChangeCallback1, fExpectedCallback);
+        fCallbacks.emplace_back(iParamID);
+      };
+    }
     return [](Param &iParam) {
       ABORT_F("should not be called!");
     };
@@ -824,7 +819,7 @@ TEST(ParamAware, testRawParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerRawVstParam(UNDEFINED_TAG_ID);
+  param = c.registerRawVstParam(UNDEFINED_PARAM_ID);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
@@ -886,8 +881,8 @@ TEST(ParamAware, testRawParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerRawVstCallback(UNDEFINED_TAG_ID,
-                                   c.changeCallback(UNDEFINED_TAG_ID),
+  param = c.registerRawVstCallback(UNDEFINED_PARAM_ID,
+                                   c.changeCallback(UNDEFINED_PARAM_ID),
                                    false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
@@ -950,8 +945,8 @@ TEST(ParamAware, testRawParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerRawVstCallback(UNDEFINED_TAG_ID,
-                                   c.changeCallback1<GUIRawVstParam>(UNDEFINED_TAG_ID),
+  param = c.registerRawVstCallback(UNDEFINED_PARAM_ID,
+                                   c.changeCallback1<GUIRawVstParam>(UNDEFINED_PARAM_ID),
                                    false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
@@ -1163,7 +1158,7 @@ TEST(ParamAware, testVstParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerVstParam<int64>(UNDEFINED_TAG_ID);
+  param = c.registerVstParam<int64>(UNDEFINED_PARAM_ID);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
@@ -1225,8 +1220,8 @@ TEST(ParamAware, testVstParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerVstCallback<int64>(UNDEFINED_TAG_ID,
-                                       c.changeCallback(UNDEFINED_TAG_ID),
+  param = c.registerVstCallback<int64>(UNDEFINED_PARAM_ID,
+                                       c.changeCallback(UNDEFINED_PARAM_ID),
                                        false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
@@ -1289,8 +1284,8 @@ TEST(ParamAware, testVstParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerVstCallback<int64>(UNDEFINED_TAG_ID,
-                                       c.changeCallback1<GUIVstParam<int64>>(UNDEFINED_TAG_ID),
+  param = c.registerVstCallback<int64>(UNDEFINED_PARAM_ID,
+                                       c.changeCallback1<GUIVstParam<int64>>(UNDEFINED_PARAM_ID),
                                        false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
@@ -1495,7 +1490,7 @@ TEST(ParamAware, testJmbParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerJmbParam<int32>(UNDEFINED_TAG_ID);
+  param = c.registerJmbParam<int32>(UNDEFINED_PARAM_ID);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
 
@@ -1556,8 +1551,8 @@ TEST(ParamAware, testJmbParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerJmbCallback<int32>(UNDEFINED_TAG_ID,
-                                       c.changeCallback(UNDEFINED_TAG_ID),
+  param = c.registerJmbCallback<int32>(UNDEFINED_PARAM_ID,
+                                       c.changeCallback(UNDEFINED_PARAM_ID),
                                        false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);
@@ -1619,8 +1614,8 @@ TEST(ParamAware, testJmbParam_ParamID)
   CHECK_EMPTY(c);
 
   // undefined param
-  param = c.registerJmbCallback<int32>(UNDEFINED_TAG_ID,
-                                       c.changeCallback1<GUIJmbParam<int32>>(UNDEFINED_TAG_ID),
+  param = c.registerJmbCallback<int32>(UNDEFINED_PARAM_ID,
+                                       c.changeCallback1<GUIJmbParam<int32>>(UNDEFINED_PARAM_ID),
                                        false);
   ASSERT_FALSE(param.exists());
   CHECK_EMPTY(c);

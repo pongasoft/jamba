@@ -41,16 +41,16 @@ public:
 
 public:
   // Constructor
-  explicit GUIValParameter(TagID iTagID, ParamType const &iDefaultValue) :
-    fTagID{iTagID},
+  explicit GUIValParameter(ParamID iParamID, ParamType const &iDefaultValue) :
+    fParamID{iParamID},
     fValue(iDefaultValue)
   {
 //    DLOG_F(INFO, "GUIValParameter(%p)", this);
   };
 
   // Constructor
-  explicit GUIValParameter(TagID iTagID, ParamType &&iDefaultValue) :
-    fTagID{iTagID},
+  explicit GUIValParameter(ParamID iParamID, ParamType &&iDefaultValue) :
+    fParamID{iParamID},
     fValue(std::move(iDefaultValue))
   {
 //    DLOG_F(INFO, "GUIValParameter(%p)", this);
@@ -62,20 +62,9 @@ public:
 //    DLOG_F(INFO, "~GUIValParameter(%p)", this);
   }
 
-  // getTagID
-  TagID getTagID() const { return fTagID; }
-  void setTagID(TagID iTagID) { fTagID = iTagID; }
-
-  /**
-   * In order to comply with the api, we return max value for ParamID when tag id is undefined... */
-  ParamID getParamID() const override
-  {
-    if(fTagID < 0)
-    {
-      return std::numeric_limits<ParamID>::max();
-    }
-    return static_cast<ParamID>(fTagID);
-  }
+  // getParamID
+  ParamID getParamID() const override { return fParamID; }
+  void setParamID(ParamID iParamID) { fParamID = iParamID; }
 
   inline int32 getStepCount() const override { return 0; }
 
@@ -190,7 +179,7 @@ public:
   std::shared_ptr<GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) override;
 
 protected:
-  TagID fTagID;
+  ParamID fParamID;
   T fValue;
 };
 
@@ -205,8 +194,8 @@ protected:
 class GUIDiscreteValParameter : public GUIValParameter<int32>
 {
 public:
-  GUIDiscreteValParameter(TagID iTagId, int32 iDefaultValue, int32 iStepCount) :
-    GUIValParameter(iTagId, iDefaultValue),
+  GUIDiscreteValParameter(ParamID iParamID, int32 iDefaultValue, int32 iStepCount) :
+    GUIValParameter(iParamID, iDefaultValue),
     fStepCount(iStepCount)
   {
     DCHECK_F(fStepCount > 0);
@@ -229,7 +218,7 @@ std::shared_ptr<GUIDiscreteParameter> GUIValParameter<T>::asDiscreteParameter(in
   {
     if constexpr(Utils::is_static_cast_defined<T, int32>)
     {
-      return VstUtils::make_sfo<GUIDiscreteValParameter>(fTagID, static_cast<int32>(fValue), iStepCount);
+      return VstUtils::make_sfo<GUIDiscreteValParameter>(fParamID, static_cast<int32>(fValue), iStepCount);
     }
   }
   return nullptr;
