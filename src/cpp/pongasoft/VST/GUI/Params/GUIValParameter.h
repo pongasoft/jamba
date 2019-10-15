@@ -29,6 +29,8 @@ using namespace Steinberg::Vst;
 /**
  * This parameter is not tied to any parameter definition/registration and is primarily used by the optional
  * parameter.
+ *
+ * @internal
  */
 template<typename T>
 class GUIValParameter: public ITGUIParameter<T>, public FObject
@@ -186,10 +188,12 @@ protected:
 /**
  * Simple extension class to treat a Val parameter as a discrete one.
  *
- * Implementation note: `GUIValParameter` is internal and not shared across views. As a result this implementation
- * does not wrap another `GUIValParameter` (like `GUIJmbParameter` implementation does) which suffices for the
- * current need. If `GUIValParameter` gets promoted to api level at a later date, then this implementation will
- * need to be changed.
+ * @note `GUIValParameter` is internal and not shared across views. As a result this implementation
+ *       does not wrap another `GUIValParameter` (like `GUIJmbParameter` implementation does) which suffices
+ *       for the current need. If `GUIValParameter` gets promoted to api level at a later date,
+ *       then this implementation will need to be changed.
+ *
+ * @internal
  */
 class GUIDiscreteValParameter : public GUIValParameter<int32>
 {

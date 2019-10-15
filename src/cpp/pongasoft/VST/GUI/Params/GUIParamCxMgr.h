@@ -22,6 +22,12 @@
 
 namespace pongasoft::VST::GUI::Params {
 
+/**
+ * Maintains the connections established between parameters and its listeners/callbacks. All the connections are
+ * properly closed when this class is destroyed.
+ *
+ * @internal
+ */
 class GUIParamCxMgr
 {
 public:

@@ -29,12 +29,19 @@ namespace pongasoft::VST::GUI::Params {
 using namespace Steinberg::Vst;
 
 /**
- * // TODO doc.
- * Because `GUIOptional` can represent a Vst parameter or a Jmb parameter, there are some restrictions on `T` itself
- * (which do not exist if you use `GUIJmbParam<T>`):
- * - `T` must have empty constructor: `T()`
- * - `T` have a copy constructor: `T(T const &)`
- * - `T` must be copy assignable: `T& operator=(T const &)`
+ * Represents an optional parameter (Jmb, Vst or no param at all). Like `GUIVstParam` and `GUIJmbParam`, this class
+ * is a wrapper arount the underlying parameter. This parameter is used in very generic views that need to handle
+ * a Vst or Jmb parameter, as well as no parameter at all (which is for example the case when adding a brand new view
+ * in the %VSTGUI editor) and still be functional.
+ *
+ * You can obtain an instance of an optional parameter by calling any `ParamAware::registerOptionalXXX`
+ * (resp. `ParamAware::registerOptionalDiscreteXX`) method.
+ *
+ * @note Because `GUIOptionalParam` can represent a Vst parameter or a Jmb parameter, there are some restrictions on `T` itself
+ *       (which do not exist if you use `GUIJmbParam`):
+ *       - `T` must have empty constructor: `T()`
+ *       - `T` have a copy constructor: `T(T const &)`
+ *       - `T` must be copy assignable: `T& operator=(T const &)`
  */
 template<typename T>
 class GUIOptionalParam
@@ -62,14 +69,16 @@ public:
     DCHECK_F(fParameter != nullptr);
   }
 
-  // exists (used by templated code... by definition an optional parameter ALWAYS exist)
+  /**
+   * Always return `true` because by definition an optional parameter **always** exist. */
   inline bool exists() const { return true; }
 
-  // getParamID
+  /**
+   * @copydoc IGUIParameter::getParamID() */
   inline ParamID getParamID() const { return fParameter->getParamID(); }
 
   /**
-   * @return the current value of the parameter as a T
+   * @return the current value of the parameter as a `T`
    */
   inline ParamType getValue() const
   {
@@ -79,64 +88,65 @@ public:
   }
 
   /**
-   * This method is typically called by a view to change the value of the parameter. Listeners will be notified
-   * of the changes if the value actually changes.
-   */
-  inline bool update(ParamType const &iNewValue)
+   * @copydoc ITGUIParameter::update(ParamType const &) */
+  inline bool update(ParamType const &iValue)
   {
-    return fParameter->update(iNewValue);
+    return fParameter->update(iValue);
   }
 
   /**
-   * This method is typically called by a view to change the value of the parameter. Listeners will be notified
-   * of the changes whether the value changes or not.
-   */
+   * @copydoc ITGUIParameter::setValue() */
   inline tresult setValue(ParamType const &iValue)
   {
     return fParameter->setValue(iValue);
   }
 
   /**
-   * Returns an editor to modify the parameter before commit or rollback
-   */
+   * @copydoc ITGUIParameter::edit() */
   inline std::unique_ptr<EditorType> edit()
   {
     return fParameter->edit();
   }
 
   /**
-   * Returns an editor to modify the parameter before commit or rollback
-   */
+   * @copydoc ITGUIParameter::edit(ParamType const &) */
   inline std::unique_ptr<EditorType> edit(ParamType const &iValue)
   {
     return fParameter->edit(iValue);
   }
 
   /**
-   * @return number of steps (for discrete param) or 0 for continuous
-   */
+   * @copydoc IGUIParameter::getStepCount() */
   inline int32 getStepCount() const { return fParameter->getStepCount(); }
 
-  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case T is bool))
+  /**
+   * Allow to use the param as the underlying `ParamType`.
+   *
+   * Example: `if(param)` in the case `T` is `bool`
+   */
   inline operator T() const { return getValue(); } // NOLINT
 
-  // allow to write param = 3 instead of param.update(3)
+  /**
+   * Allow to write `param = 3` instead of `param.update(3)` for example */
   inline void operator=(T const &iValue) { update(iValue); }
 
-  // allow to write param1 == param2
+  /**
+   * Allow to write `param1 == param2` to compare the underlying values */
   inline bool operator==(const class_type &rhs) const { return getValue() == rhs.getValue(); }
 
-  // allow to write param1 != param2
+  /**
+   * Allow to write `param1 != param2` to compare the underlying values */
   inline bool operator!=(const class_type &rhs) const { return getValue() != rhs.getValue(); }
 
   /**
-   * @return a connection that will listen to parameter changes (see GUIParamCx)
-   */
+   * @copydoc IGUIParameter::connect(Parameters::IChangeListener *) const */
   inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const
   {
     return fParameter->connect(iChangeListener);
   }
 
+  /**
+   * @copydoc IGUIParameter::connect(Parameters::ChangeCallback) const */
   inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const
   {
     return fParameter->connect(iChangeCallback);

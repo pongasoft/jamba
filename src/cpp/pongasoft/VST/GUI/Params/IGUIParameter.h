@@ -34,10 +34,14 @@ template<typename T> class ITGUIParameter;
 
 /**
  * A discrete parameter is defined by a parameter whose underlying backing type is an `int32` and whose number
- * of steps is `> 0`.
+ * of steps is `> 0`. The values that a discrete parameter manages are, by definition, in the range
+ * `[0, GUIDiscreteParameter::getStepCount()].
  */
 using GUIDiscreteParameter = ITGUIParameter<int32>;
 
+//------------------------------------------------------------------------
+// IGUIParameter
+//------------------------------------------------------------------------
 /**
  * This is the base class of all %GUI parameters. The API defined by this class is fairly limited since the
  * underlying type `T` is not known or exposed by this generic API.
@@ -76,6 +80,8 @@ public:
 public:
   /**
    * Each parameter has a unique ID returned by this method.
+   *
+   * \note Some parameters (in particular `GUIOptionalParam`) may return `pongasoft::VST::UNDEFINED_PARAM_ID`
    */
   virtual ParamID getParamID() const = 0;
 
@@ -91,7 +97,7 @@ public:
   virtual int32 getStepCount() const = 0;
 
   /**
-   * Return the current value of the parameter as a string (which is properly UTF-8 encoded).
+   * Returns the current value of the parameter as a string (which is properly UTF-8 encoded).
    *
    * @param iPrecision if `iPrecision < 0` the parameter is free to use whichever precision is tied to the parameter
    *                   otherwise it should use the one provided
@@ -127,7 +133,7 @@ public:
    * Downcasts this parameter into a typed version.
    *
    * @tparam T the underlying backing type of the parameter
-   * @return the downcasted parameter of `nullptr` if the cast is not possible
+   * @return the downcasted parameter or `nullptr` if the cast is not possible
    */
   template<typename T>
   std::shared_ptr<ITGUIParameter<T>> cast();
@@ -145,27 +151,111 @@ public:
   virtual std::shared_ptr<GUIDiscreteParameter> asDiscreteParameter(int32 iStepCount) = 0;
 };
 
+//------------------------------------------------------------------------
+// ITGUIParameter<T>
+//------------------------------------------------------------------------
+/**
+ * Represents a gui parameter with its underlying backing type `T` (aka `ParamType`).
+ *
+ * Since we know the `ParamType`, this subclass of `IGUIParameter` adds the basic manipulation methods to deal with
+ * the parameter.
+ *
+ * @tparam T the underlying backing type (aka `ParamType`).
+ */
 template<typename T>
 class ITGUIParameter : public IGUIParameter
 {
 public:
+  /**
+   * The type of the param (alias) */
   using ParamType = T;
+
+  /**
+   * API to access the value of the param
+   *
+   * @see `accessValue(ValueAccessor const &) const`
+   */
   using ValueAccessor = std::function<void(T const &)>;
 
 public:
-
-public:
+  /**
+   * Defines the API for the editor which can be obtained by calling `ITGUIParameter::edit()`.
+   *
+   * The editor is used in scenarios when you want to make multiple modifications to a parameter and then `commit()`
+   * or `rollback()` the set of changes. The typical use case is to create an editor on *mouse down event* in a view,
+   * modify the value on *mouse move event* and commit on *mouse up event*.
+   *
+   * ```
+   * // Example
+   * CMouseEventResult LCDDisplayView::onMouseDown(CPoint &where, const CButtonState &buttons)
+   * {
+   *   fLCDInputXEditor = fLCDInputXParameter.edit(computeLCDInputX(where));
+   *   return kMouseEventHandled;
+   * }
+   *
+   * CMouseEventResult LCDDisplayView::onMouseMoved(CPoint &where, const CButtonState &buttons)
+   * {
+   *   if(fLCDInputXEditor)
+   *   {
+   *     fLCDInputXEditor->setValue(computeLCDInputX(where));
+   *     return kMouseEventHandled;
+   *   }
+   *
+   *   return kMouseEventNotHandled;
+   * }
+   *
+   * CMouseEventResult LCDDisplayView::onMouseUp(CPoint &where, const CButtonState &buttons)
+   * {
+   *   if(fLCDInputXEditor)
+   *   {
+   *     fLCDInputXEditor->commit(computeLCDInputX(where));
+   *     fLCDInputXEditor = nullptr;
+   *     return kMouseEventHandled;
+   *   }
+   *
+   *   return kMouseEventNotHandled;
+   * }
+   *
+   * CMouseEventResult LCDDisplayView::onMouseCancel()
+   * {
+   *   if(fLCDInputXEditor)
+   *   {
+   *     fLCDInputXEditor->rollback();
+   *     fLCDInputXEditor = nullptr;
+   *     return kMouseEventHandled;
+   *   }
+   *
+   *   return kMouseEventNotHandled;
+   * }
+   * ```
+   */
   class ITEditor : public IGUIParameter::Editor
   {
   public:
+    /**
+     * Unconditionaly sets the value of the parameter to the value provided.
+     *
+     * @param iValue the value to set
+     * @return `kResultOk` if successful */
     virtual tresult setValue(ParamType const &iValue) = 0;
 
+    /**
+     * First check if the value provided (`iValue`) is different from the current value and if that is the case
+     * then updates it to the new value.
+     *
+     * \note If the type `T` does not provide a way to compare the value, then this call will delegate to
+     *       `setValue(ParamType const &)` and return `true`.
+     *
+     * @param iValue the value to update
+     * @return `true` if the value was updated */
     virtual bool updateValue(ParamType const &iValue) = 0;
 
     /**
      * Importing other commit method from superclass */
     using IGUIParameter::Editor::commit;
 
+    /**
+     * Shortcut method which calls `setValue(ParamType const &)` followed by `commit()`. */
     virtual tresult commit(ParamType const &iValue)
     {
       auto res = setValue(iValue);
@@ -178,8 +268,10 @@ public:
 
 public:
   /**
+   * API to access the underlying value.
+   *
    * `getValue()` has a different api depending on the type of param (Vst and Jmb). As a result this interface
-   * only provides a common way to access it in both case via an accessor which allows to:
+   * only provides a common way to access it in both cases via an accessor which allows to:
    *
    * - avoid copy in the case of Jmb
    * - avoid duplicating values in the case of Vst
@@ -188,12 +280,34 @@ public:
    */
   virtual tresult accessValue(ValueAccessor const &iGetter) const = 0;
 
+  /**
+   * First check if the value provided (`iValue`) is different from the current value and if that is the case
+   * then updates it to the new value.
+   *
+   * \note If the type `T` does not provide a way to compare the value, then this call will delegate to
+   *       `setValue(ParamType const &)` and return `true`.
+   *
+   * @param iValue the value to update
+   * @return `true` if the value was updated */
   virtual bool update(ParamType const &iValue) = 0;
 
+  /**
+   * Unconditionaly sets the value of the parameter to the value provided.
+   *
+   * @param iValue the value to set
+   * @return `kResultOk` if successful */
   virtual tresult setValue(ParamType const &iValue) = 0;
 
+  /**
+   * Creates an editor to modify the parameter in a transactional fashion.
+   *
+   * @see ITGUIParameter::ITEditor
+   */
   virtual std::unique_ptr<ITEditor> edit() = 0;
 
+  /**
+   * Shortcut api which creates an editor followed by `ITEditor::setValue(ParamType const &)` to set the parameter
+   * value to `iValue`. */
   virtual std::unique_ptr<ITEditor> edit(ParamType const &iValue)
   {
     auto editor = edit();
@@ -202,18 +316,30 @@ public:
   }
 };
 
+//------------------------------------------------------------------------
+// DefaultEditorImpl
+//------------------------------------------------------------------------
+/**
+ * Default implementation of the editor interface. Simply delegates the calls to the parameter while maintaining
+ * an initial value (for `rollback()`) and state (already completed).
+ *
+ * @internal
+ */
 template<typename T>
 class DefaultEditorImpl : public ITGUIParameter<T>::ITEditor
 {
 public:
+  // Constructor
   explicit DefaultEditorImpl(ITGUIParameter<T> *iGUIParameter, T const &iDefaultValue) :
     fGUIParameter{iGUIParameter},
     fInitialValue{iDefaultValue}
   {
   }
 
+  // Destructor
   ~DefaultEditorImpl() override { rollback(); }
 
+  // updateValue
   bool updateValue(T const &iValue) override
   {
     if(fDoneEditing)
@@ -221,6 +347,7 @@ public:
     return fGUIParameter->update(iValue);
   }
 
+  // setValue
   tresult setValue(T const &iValue) override
   {
     if(fDoneEditing)
@@ -233,6 +360,7 @@ public:
    * Importing other commit method from superclass */
   using ITGUIParameter<T>::ITEditor::commit;
 
+  // commit
   tresult commit() override
   {
     if(fDoneEditing)
@@ -241,6 +369,7 @@ public:
     return kResultOk;
   }
 
+  // rollback
   tresult rollback() override
   {
     auto res = setValue(fInitialValue);
@@ -255,45 +384,47 @@ private:
 };
 
 //------------------------------------------------------------------------
-// IGUIParam - wrapper to make writing the code much simpler and natural
+// IGUIParam
 //------------------------------------------------------------------------
 /**
- * This is the main class that the plugin should use as it exposes only the necessary methods of the param
- * as well as redefine a couple of operators which helps in writing simpler and natural code.
+ * Wrapper instance returned by `ParamAware::registerBaseParam()` methods. You can test for the actual existence of the
+ * parameter with the `IGUIParam::exists()` method.
+ *
+ * \note Although this wrapper does little more than the shared pointer, it is implemented for symmetry with other
+ *       parameters (`GUIVstParam` and `GUIJmbParam`) and hides some implementation details. As a result, it is
+ *       strongly recommended to use this wrapper instead of `IGUIParameter` directly.
  */
 class IGUIParam
 {
 public:
+  //! Constructor
   IGUIParam(std::shared_ptr<IGUIParameter> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
     fPtr{std::move(iPtr)}
   {}
 
-  // exists
+  /**
+   * Returns `true` if this wrapper actually refers to an actual parameter */
   inline bool exists() const { return (bool) fPtr; }
 
-  // getParamID
-  inline ParamID getParamID() const { return fPtr->getParamID(); }
-
-  // getStepCount
-  inline int32 getStepCount() const { return fPtr->getStepCount(); }
+  /**
+   * @copydoc IGUIParameter::getParamID() */
+  inline ParamID getParamID() const { DCHECK_F(exists()); return fPtr->getParamID(); }
 
   /**
-   * Return the current value of the parameter as a string (which is properly UTF-8 encoded).
-   *
-   * @param iPrecision if `iPrecision` < 0 the parameter is free to use whichever precision is tied to the parameter
-   *                   otherwise it should use the one provided
-   */
-  inline std::string toUTF8String(int32 iPrecision) const { return fPtr->toUTF8String(iPrecision); }
+   * @copydoc IGUIParameter::getStepCount() */
+  inline int32 getStepCount() const { DCHECK_F(exists()); return fPtr->getStepCount(); }
 
   /**
-   * @return an object maintaining the connection between the parameter and the listener
-   */
-  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { return fPtr->connect(iChangeListener); }
+   * @copydoc IGUIParameter::toUTF8String() */
+  inline std::string toUTF8String(int32 iPrecision) const { DCHECK_F(exists()); return fPtr->toUTF8String(iPrecision); }
 
   /**
-   * @return an object maintaining the connection between the parameter and the callback
-   */
-  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
+   * @copydoc IGUIParameter::connect(Parameters::IChangeListener *) const */
+  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { DCHECK_F(exists()); return fPtr->connect(iChangeListener); }
+
+  /**
+   * @copydoc IGUIParameter::connect(Parameters::ChangeCallback) const */
+  std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { DCHECK_F(exists()); return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
   std::shared_ptr<IGUIParameter> fPtr;

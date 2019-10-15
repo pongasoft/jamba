@@ -36,7 +36,29 @@ namespace Params {
 class GUIParamCxMgr;
 
 /**
- * Encapsulates classes that want to be aware of parameters and be notified when they change
+ * This class is inherited by classes who want to be aware of parameters and be notified when they change.
+ *
+ * The typical use case is to have a custom view (or a custom controller) inherits from this class and implements
+ * the `#registerParameters()` method which in turn calls the various `registerXXXParam` flavors and
+ * then implements `onParameterChange()` to handle the callback:
+ *
+ * ```
+ * // Example
+ * void MyView::registerParameters() {
+ *   fMyParam = registerVstParam(myParamID);
+ *   registerBaseCallback(getTitleTag(),
+ *                        [this](IGUIParam &iParam) {
+ *                          setTitle(iParam.toUTF8String(fPrecisionOverride));
+ *                        }, true);
+ * }
+ *
+ * void MyView::onParameterChange(ParamID iParamID) {
+ *  // called when fMyParam changes
+ * }
+ * ```
+ *
+ * @note For convenience, the classes `Views::CustomView`, `Views::CustomViewAdapter` and `Views::CustomController`
+ *       already inherit from this class.
  */
 class ParamAware : public Parameters::IChangeListener
 {
@@ -50,7 +72,7 @@ public:
   /**
    * Registers the "base" param for the most generic use case but as a result is fairly limited and mainly gives access
    * to the string representation of the param.
-   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   * `onParameterChange()` will be called on changes (if `iSubscribeToChanges` is set to `true`).
    *
    * @return empty param if not found
    */
@@ -84,9 +106,7 @@ public:
    * Registers an optional parameter which handles Vst, Jmb or no parameter at all. This parameter is particularly
    * useful to write very generic views that can accept "any" kind of parameter (Vst or Jmb) while still being
    * usable if no parameter is assigned at all.
-   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
-   * Note that this parameter has a very different signature since it is designed to be more dynamic (changed in the
-   * UI editor) and the previous value gets propagated if the
+   * `onParameterChange()` will be called on changes (if `iSubscribeToChanges` is set to `true`).
    *
    * @return param (never empty!)
    */
@@ -99,8 +119,6 @@ public:
    * useful to write very generic views that can accept "any" kind of parameter (Vst or Jmb) while still being
    * usable if no parameter is assigned at all.
    * The callback will be invoked when the parameter changes.
-   * Note that this parameter has a very different signature since it is designed to be more dynamic (changed in the
-   * UI editor) and the previous value gets propagated if the
    *
    * @return param (never empty!)
    */
@@ -114,8 +132,6 @@ public:
    * useful to write very generic views that can accept "any" kind of parameter (Vst or Jmb) while still being
    * usable if no parameter is assigned at all.
    * The callback will be invoked when the parameter changes.
-   * Note that this parameter has a very different signature since it is designed to be more dynamic (changed in the
-   * UI editor) and the previous value gets propagated if the
    *
    * @return param (never empty!)
    */
@@ -133,7 +149,7 @@ public:
    * will be converted to a discrete parameter if possible.
    * This parameter is particularly useful to write very generic views that can accept "any" kind of parameter
    * (Vst or Jmb) while still being usable if no parameter is assigned at all.
-   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   * `onParameterChange()` will be called on changes (if `iSubscribeToChanges` is set to `true`).
    *
    * @return param (never empty!)
    */
@@ -175,7 +191,7 @@ public:
 
   /**
    * Registers a raw parameter (no conversion)
-   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   * `onParameterChange()` will be called on changes (if `iSubscribeToChanges` is set to `true`).
    *
    * @return empty param if not found
    */
@@ -208,7 +224,7 @@ public:
 
   /**
    * Registers a raw parameter (no conversion). Convenient call using the param def
-   * (accessible in param-aware views via `fParams->fMyParam`).
+   * (accessible in state-aware views via `fParams->fMyParam`).
    */
   inline GUIRawVstParam registerParam(RawVstParam const &iParamDef, bool iSubscribeToChanges = true) {
     return registerRawVstParam(iParamDef->fParamID, iSubscribeToChanges);
@@ -216,7 +232,7 @@ public:
 
   /**
    * Registers a raw parameter (no conversion). Convenient call using the param def
-   * (accessible in param-aware views via `fParams->fMyParam`).
+   * (accessible in state-aware views via `fParams->fMyParam`).
    */
   inline GUIRawVstParam registerCallback(RawVstParam const &iParamDef,
                                          Parameters::ChangeCallback iChangeCallback,
@@ -226,7 +242,7 @@ public:
 
   /**
    * Registers a raw parameter (no conversion). Convenient call using the param def
-   * (accessible in param-aware views via `fParams->fMyParam`).
+   * (accessible in state-aware views via `fParams->fMyParam`).
    */
   inline GUIRawVstParam registerCallback(RawVstParam const &iParamDef,
                                          Parameters::ChangeCallback1<GUIRawVstParam> iChangeCallback,
@@ -252,7 +268,7 @@ public:
 
   /**
    * Register a Vst parameter simply given its id
-   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   * `onParameterChange()` will be called on changes (if `iSubscribeToChanges` is set to `true`).
    *
    * @return empty param  if not found or not proper type
    */
@@ -286,7 +302,7 @@ public:
   //------------------------------------------------------------------------
 
   /**
-   * Convenient call to register a Vst param simply by using its description (accessible in param-aware views
+   * Convenient call to register a Vst param simply by using its description (accessible in state-aware views
    * via `fParams->fMyParam`). Takes care of the type due to method API.
    *
    * @return empty param  if not found or not proper type
@@ -298,7 +314,7 @@ public:
 
   /**
    * Convenient call to register a callback for the Vst param simply by using its description (accessible in
-   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API
+   * state-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
    *
    * @return empty param  if not found or not proper type
    */
@@ -311,12 +327,13 @@ public:
 
   /**
    * Convenient call to register a callback for the Vst param simply by using its description (accessible in
-   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
+   * state-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
    *
    * Example:
    *
    * ```
-   * registerCallback<int>(fParams->fMyParam, [] (GUIVstParam<int> &iParam) { iParam.getValue()...; });
+   * registerCallback<int>(fParams->fMyParam,
+   *                       [] (GUIVstParam<int> &iParam) { iParam.getValue()...; });
    * ```
    *
    * @return empty param  if not found or not proper type
@@ -333,19 +350,19 @@ public:
   //------------------------------------------------------------------------
 
   /**
-   * Registers the Jmb param only given its id and return the wrapper to the param.
-   * `onParameterChanges` will be called on changes (if `iSubscribeToChanges` is set to `true`).
+   * Registers the Jmb param by its id and return the wrapper to the param.
+   * `onParameterChange()` will be called on changes (if `iSubscribeToChanges` is set to `true`).
    *
-   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists())
    */
   template<typename T>
   GUIJmbParam<T> registerJmbParam(ParamID iParamID, bool iSubscribeToChanges = true);
 
   /**
-   * Registers a callback for this Jmb param only given its id and return the wrapper to the param.
+   * Registers a callback for the Jmb param by its id and return the wrapper to the param.
    * The callback will be invoked when the parameter changes.
    *
-   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists())
    */
   template<typename T>
   GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
@@ -353,10 +370,10 @@ public:
                                      bool iInvokeCallback = false);
 
   /**
-   * Registers a callback for this Jmb param only given its id and return the wrapper to the param.
+   * Registers a callback for the Jmb param by its id and return the wrapper to the param.
    * The callback will be invoked when the parameter changes.
    *
-   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists)
+   * @return the wrapper which may be empty if the param does not exists or is of wrong type (use GUIJmbParam::exists())
    */
   template<typename T>
   GUIJmbParam<T> registerJmbCallback(ParamID iParamID,
@@ -368,7 +385,7 @@ public:
   //------------------------------------------------------------------------
 
   /**
-   * Convenient call to register a Jmb param simply by using its description (accessible in param-aware views
+   * Convenient call to register a Jmb param simply by using its description (accessible in state-aware views
    * via `fParams->fMyParam`). Takes care of the type due to method API.
    *
    * @return empty param  if not found or not proper type
@@ -380,7 +397,7 @@ public:
 
   /**
    * Convenient call to register a callback for the Jmb param simply by using its description (accessible in
-   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API
+   * state-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
    *
    * @return empty param  if not found or not proper type
    */
@@ -394,12 +411,13 @@ public:
 
   /**
    * Convenient call to register a callback for the Jmb param simply by using its description (accessible in
-   * param-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
+   * state-aware views via `fParams->fMyParam`). Takes care of the type due to method API.
    *
    * Example:
    *
    * ```
-   * registerCallback<int>(fParams->fMyParam, [] (GUIJmbParam<int> &iParam) { iParam.getValue()...; });
+   * registerCallback<int>(fParams->fMyParam,
+   *                       [] (GUIJmbParam<int> &iParam) { iParam.getValue()...; });
    * ```
    * @return empty param  if not found or not proper type
    */
@@ -445,7 +463,8 @@ public:
    * Example:
    *
    * ```
-   * registerCallback<int>(fParams->fMyParam, [] (GUIJmbParam<int> &iParam) { iParam.getValue()...; });
+   * registerCallback<int>(fParams->fMyParam,
+   *                       [] (GUIJmbParam<int> &iParam) { iParam.getValue()...; });
    * ```
    * @return empty param  if not found or not proper type
    */
@@ -457,12 +476,22 @@ public:
   }
 
   /**
-   * Called during initialization
+   * Called during initialization. Jamba takes care of properly initializing instances of this class with the
+   * gui state when they get instantiated.
+   *
+   * @internal
    */
   virtual void initState(GUIState *iGUIState);
 
   /**
-   * Subclasses should override this method to register each parameter
+   * Subclasses should override this method to register each parameter. Jamba automatically calls this method and you
+   * should not have to invoke it yourself.
+   *
+   * \note Jamba automatically calls `unregisterAll()` prior to calling this method so it is ok to assume that there
+   *       is no parameter registered prior to this call.
+   *
+   * \note This method may be called multiple times during the life of the class inheriting from `ParamAware`, which
+   *       is generally the case while using the %VSTGUI editor
    */
   virtual void registerParameters()
   {
@@ -508,12 +537,12 @@ public:
   GUIJmbParam<T> unregisterParam(GUIJmbParam<T> const &iParam) { return iParam; }
 
   /**
-   * Callback when a parameter changes. Empty default implementation
-   */
+   * This is the callback that should be implemented to handle parameter changes. This callback is only invoked
+   * if any `registerXXParam` method is called. */
   void onParameterChange(ParamID iParamID) override {}
 
   /**
-   * Invoke all registered callbacks and param listener */
+   * Invoke all (currently) registered callbacks and `onParameterChange()` (if registered). */
   void invokeAll();
 
 protected:
@@ -524,8 +553,8 @@ protected:
 /**
  * This subclass allows for registering callbacks to any kind of view without having to inherit from it.
  *
- * @tparam TView should be a subclass of VSTGUI::CView
- * @see GUIState::makeParamAware
+ * @tparam TView should be a subclass of `VSTGUI::CView`
+ * @see StateAwareCustomController::makeParamAware()
  */
 template<typename TView>
 class ParamAwareView : public ParamAware
@@ -544,8 +573,11 @@ public:
   explicit ParamAwareView(TView *iView) : fView(iView), fListener{} {}
 
   /**
-   * Since this class is intended to be used without inheriting from ParamAware, you can register
-   * a listener so that the onParameterChange method will be invoking this listener.
+   * Registers a listener invoked when a parameter changes.
+   *
+   * Since this class is intended to be used without inheriting from a view, you cannot implement the
+   * `onParameterChange()` method. As a result, you can use this method to set a listener that will be invoked
+   * instead.
    */
   void registerListener(ChangeListener iListener)
   {
@@ -553,14 +585,18 @@ public:
   }
 
   /**
-   * Register a callback for the Vst parameter. This version is specific to this class and allow for
+   * Register a callback for the Vst parameter. This version is specific to this class and allows for
    * the view to be passed back (since the view is not inheriting from this class).
    *
-   * Example:
+   * ```
+   * // Example
+   * registerCallback<bool>(fParams->fMyParam,
+   *                        [] (CTextLabel *iView, GUIVstParam<bool> &iParam) {
+   *                             iParam.getValue()...;
+   *                        });
+   * ```
    *
-   *     registerCallback<bool>(fParams->fMyParam, [] (CTextLabel *iView, GUIVstParam<bool> &iParam) { iParam.getValue()...; });
-   *
-   * @return `false` if not found or not proper type
+   * @return empty param if not found or not proper type
    */
   template<typename T>
   inline GUIVstParam<T> registerCallback(VstParam<T> const &iParamDef,
@@ -575,14 +611,18 @@ public:
   }
 
   /**
-   * Register a callback for the Jmb parameter. This version is specific to this class and allow for
+   * Register a callback for the Jmb parameter. This version is specific to this class and allows for
    * the view to be passed back (since the view is not inheriting from this class).
    *
-   * Example:
+   * ```
+   * // Example
+   * registerCallback<Range>(fState->fMyParam,
+   *                         [] (CTextLabel *iView, GUIJmbParam<Range> &iParam) {
+   *                               iParam.getValue()...;
+   *                          });
+   * ```
    *
-   *     registerCallback<Range>(fState->fMyParam, [] (CTextLabel *iView, GUIJmbParam<Range> &iParam) { iParam.getValue()...; });
-   *
-   * @return `false` if not found or not proper type
+   * @return empty param if not found or not proper type
    */
   template<typename T>
   inline GUIJmbParam<T> registerCallback(GUIJmbParam<T> &iParam,
@@ -596,7 +636,9 @@ public:
     return ParamAware::registerCallback<T>(iParam, std::move(callback), iInvokeCallback);
   }
 
-  // onParameterChange => delegate to listener
+  /**
+   * This implementation simply delegates to the listener registered by `registerListener()`.
+   */
   void onParameterChange(ParamID iParamID) override
   {
     if(fListener)

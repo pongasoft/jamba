@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = Jamba
+PROJECT_NAME           = "Jamba C++ API"
 PROJECT_NUMBER         = @JAMBA_MAJOR_VERSION@.@JAMBA_MINOR_VERSION@.@JAMBA_PATCH_VERSION@
 PROJECT_BRIEF          =
 PROJECT_LOGO           = jamba-logo.svg
@@ -38,7 +38,7 @@ MULTILINE_CPP_IS_BRIEF = NO
 INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
-ALIASES                =
+ALIASES                = internal="<dl class=\"section internal\"><dt>Private API</dt><dd>This is part of the internal/private API of Jamba and should not be used directly.</dd></dl>"
 TCL_SUBST              =
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
