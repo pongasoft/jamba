@@ -40,15 +40,20 @@ using namespace Steinberg::Vst;
 using VstString16 = std::basic_string<Steinberg::char16>;
 
 /**
- * @deprecated Use `ParamID` instead as this is what the Vst layer uses and test for `UNDEFINED_PARAM_ID` if
- *             you want to know if it represents a valid id or an undefined one
- */
-[[deprecated("Since 4.0.0 - Use ParamID instead")]] typedef Steinberg::int32 TagID;
-
-/**
  * Constant used throughout the code to test whether the `ParamID` represents a valid id or an undefined one */
 constexpr ParamID UNDEFINED_PARAM_ID = static_cast<ParamID>(-1);
 
-[[deprecated("Since 4.0.0 - Use UNDEFINED_PARAM_ID instead")]] constexpr ParamID UNDEFINED_TAG_ID = UNDEFINED_PARAM_ID;
+/**
+ * Defining a type for tags.
+ *
+ * @warning Since 4.0.0, this type has changed to be non negative. The issue stems from the fact that the VST SDK uses
+ *          `ParamID` throughout and is mapped to an `uint32` **but** the %VSTGUI layer uses `int32_t` for what they
+ *          call tags (ex: `CControl::getTag()`) but is in fact a parameter ID, hence a `uint32` (essentially this is
+ *          a mess...). So reverting to use what the VST SDK deals with: `uint32`
+ */
+using TagID = ParamID;
 
+/**
+ * Constant used to test whether the `TagID` represents a valid id or an undefined one */
+constexpr TagID UNDEFINED_TAG_ID = UNDEFINED_PARAM_ID;
 }

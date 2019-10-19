@@ -90,6 +90,7 @@ void GUIController::registerParameters(ParamAware *iParamAware)
   if(iParamAware)
   {
     iParamAware->initState(getGUIState());
+    iParamAware->unregisterAll();
     iParamAware->registerParameters();
   }
 }

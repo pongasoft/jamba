@@ -248,16 +248,16 @@ private:
   using ByRefAttribute = TAttribute<T, T const &(TView::*)() const, void (TView::*)(T const &)>;
 
   /**
-   * Specialization for a tag attribute (vst type ParamID). The view must have getter and setter as defined by the
+   * Specialization for a tag attribute (vst type TagID). The view must have getter and setter as defined by the
    * types below.
    */
-  class TagAttribute : public ByValAttribute<ParamID>
+  class TagAttribute : public ByValAttribute<TagID>
   {
   public:
     TagAttribute(std::string const &iName,
-                 typename ByValAttribute<ParamID>::Getter iGetter,
-                 typename ByValAttribute<ParamID>::Setter iSetter) :
-      ByValAttribute<ParamID>(iName, iGetter, iSetter) {}
+                 typename ByValAttribute<TagID>::Getter iGetter,
+                 typename ByValAttribute<TagID>::Setter iSetter) :
+      ByValAttribute<TagID>(iName, iGetter, iSetter) {}
 
     // getType
     IViewCreator::AttrType getType() override
@@ -266,15 +266,15 @@ private:
     }
 
     // fromString
-    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, ParamID &oValue) const override
+    bool fromString(IUIDescription const *iDescription, std::string const &iAttributeValue, TagID &oValue) const override
     {
       if(iAttributeValue.length() != 0)
       {
-        auto tag = static_cast<ParamID>(iDescription->getTagForName(iAttributeValue.c_str()));
-        if(tag == UNDEFINED_PARAM_ID)
+        auto tag = static_cast<TagID>(iDescription->getTagForName(iAttributeValue.c_str()));
+        if(tag == UNDEFINED_TAG_ID)
         {
           char *endPtr = nullptr;
-          tag = static_cast<ParamID>(strtol(iAttributeValue.c_str(), &endPtr, 10));
+          tag = static_cast<TagID>(strtol(iAttributeValue.c_str(), &endPtr, 10));
           if(endPtr == iAttributeValue.c_str())
           {
             return false;
@@ -291,9 +291,9 @@ private:
 
 #ifdef EDITOR_MODE
     // toString
-    bool toString(IUIDescription const *iDescription, const ParamID &iValue, std::string &oStringValue) const override
+    bool toString(IUIDescription const *iDescription, const TagID &iValue, std::string &oStringValue) const override
     {
-      if(iValue != UNDEFINED_PARAM_ID)
+      if(iValue != UNDEFINED_TAG_ID)
       {
         UTF8StringPtr controlTag = iDescription->lookupControlTagName(iValue);
         if(controlTag)

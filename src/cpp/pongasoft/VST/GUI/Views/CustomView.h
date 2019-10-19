@@ -32,12 +32,20 @@ using namespace VSTGUI;
 using namespace Params;
 
 /**
- * Base class that all custom views will inherit from. Defines a basic back color.
- * The custom view tag should be a tag associated to the view itself not a parameter (like it is the case for `CControl`).
- * The CustomView::registerParameters method is the method that you inherit from to register which Vst parameters your view will
- * use. By default each parameter will be also be registered to listen for changes which will trigger the view to be
- * redrawn: the CustomView::onParameterChange method can be overridden to react differently (or additionally) to handle parameter changes.
- * You use the convenient `registerParam` or `registerCallback` methods to register each parameter.
+ * Class you should inherit from if you want to write a custom view. It offers the following functionalities:
+ *
+ * - a back color that can be set (disabled by setting it to transparent)
+ * - a tag that can be associated with the view itself (can be used for example when writing custom controller)
+ * - an editor mode which can be used while developing the custom view (for example, draw debug info...)
+ * - gives access to parameter registration via `Params::ParamAware`
+ * - handle default parameter listener (mark the view dirty which triggers a redraw)
+ *
+ * In general, when inheriting from this class you will typically override:
+ *
+ * - `draw()` to handle the look and feel of the view
+ * - `registerParameters()` to register the parameters this view depends on
+ * - `onParameterChange()` to react to parameters that have changed (don't forget call `markDirty()` or delegate to
+ *   this class for the view to be redrawn).
  */
 class CustomView : public CView, public ParamAware, public ICustomViewLifecycle
 {
@@ -48,13 +56,26 @@ public:
   // Deleting for now... not sure there is an actual use for it
   CustomView(const CustomView &c) = delete;
 
-  // setBackColor / getBackColor
-  void setBackColor(CColor const &iColor);
+
+  /**
+   * Returns the back color (background) for the view. The `draw` method in this class simply delegates
+   * to `drawBackColor` which paints the background if thie view with this color (if not set to transparent).
+   */
   CColor const &getBackColor() const { return fBackColor; }
 
+  /**
+   * @see getBackColor() */
+  void setBackColor(CColor const &iColor);
+
   // setCustomViewTag / getCustomViewTag
-  void setCustomViewTag (ParamID iTag) { fTag = iTag; }
-  ParamID getCustomViewTag () const { return fTag; }
+  void setCustomViewTag (TagID iTag) { fTag = iTag; }
+
+  /**
+   * Returns the tag associated to this custom view. This tag (which is **not** related to a parameter), is optional
+   * and can be used
+   * @return
+   */
+  TagID getCustomViewTag () const { return fTag; }
 
   // setEditorMode / getEditorMode
   void setEditorMode(bool iEditorMode);
