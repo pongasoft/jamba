@@ -28,7 +28,9 @@ class ICustomViewLifecycle
 {
 public:
   /**
-   * The VST SDK always apply all attributes attached to the view as a block (loop). Whether it is at loading time
+   * Called after the attributes have been applied by the framework.
+   *
+   * The %VST SDK always apply all attributes attached to the view as a block (loop). Whether it is at loading time
    * (after loading the xml, and instantiating the view) or in the editor when modifying attributes.
    * This ends up calling "setters" on the view (via the `Creator`). This call is invoked after all attributes have
    * been set which allow to handle a consistent set of attributes. By default the jamba framework will call

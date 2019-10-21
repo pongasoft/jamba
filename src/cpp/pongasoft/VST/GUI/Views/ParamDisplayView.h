@@ -25,9 +25,13 @@
 namespace pongasoft::VST::GUI::Views {
 
 /**
- * This view extends `CParamDisplay` to work for both Vst and Jmb parameters. In addition, it provides a
- * `precision-override` attribute which, by default (-1), lets the parameter determine what the precision is (when
- * displaying numbers), but if set `>= 0` it will use the attribute value instead.
+ * This view extends `CParamDisplay` to work for both Vst and Jmb parameters.
+ *
+ * In addition to the attributes exposed by `CustomViewAdapter`, this class exposes the following attribute:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `precision-override` | if set to its default (-1), lets the parameter determine what the precision is (when displaying numbers), but if set `>= 0` it will use the attribute value instead | `getPrecisionOverride()`
  */
 class ParamDisplayView : public CustomViewAdapter<CParamDisplay>
 {

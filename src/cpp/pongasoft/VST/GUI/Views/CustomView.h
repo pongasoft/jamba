@@ -44,8 +44,18 @@ using namespace Params;
  *
  * - `draw()` to handle the look and feel of the view
  * - `registerParameters()` to register the parameters this view depends on
- * - `onParameterChange()` to react to parameters that have changed (don't forget call `markDirty()` or delegate to
+ * - `onParameterChange()` to react to parameters that have changed (don't forget to call `markDirty()` or delegate to
  *   this class for the view to be redrawn).
+ *
+ * This class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `custom-view-tag` | optional tag to differentiate between views when implementing a custom controller | `getCustomViewTag()`
+ * `editor-mode` | a flag whose purpose is to render/log information during development when the flag is set to `true` | `getEditorMode()`
+ * `back-color` | background color for the view (transparent for no background) | `getBackColor()`
+ *
+ * @see `CustomViewCreator` for details on how a custom view gets created
  */
 class CustomView : public CView, public ParamAware, public ICustomViewLifecycle
 {
@@ -56,10 +66,9 @@ public:
   // Deleting for now... not sure there is an actual use for it
   CustomView(const CustomView &c) = delete;
 
-
   /**
-   * Returns the back color (background) for the view. The `draw` method in this class simply delegates
-   * to `drawBackColor` which paints the background if thie view with this color (if not set to transparent).
+   * Returns the back color (background) for the view. The `draw()` method in this class simply delegates
+   * to `drawBackColor()` which paints the background of the view with this color (if not set to transparent).
    */
   CColor const &getBackColor() const { return fBackColor; }
 
@@ -67,24 +76,73 @@ public:
    * @see getBackColor() */
   void setBackColor(CColor const &iColor);
 
-  // setCustomViewTag / getCustomViewTag
+  /**
+   * @see getCustomViewTag() */
   void setCustomViewTag (TagID iTag) { fTag = iTag; }
 
   /**
    * Returns the tag associated to this custom view. This tag (which is **not** related to a parameter), is optional
-   * and can be used
-   * @return
+   * and can be used to differentiate between views when implementing a custom controller.
+   *
+   * ```
+   * // Example
+   * CView *SampleEditController::verifyView(CView *iView,
+   *                                         const UIAttributes &iAttributes,
+   *                                         const IUIDescription *iDescription)
+   * {
+   *   auto button = dynamic_cast<Views::TextButtonView *>(iView);
+   *
+   *   if(button) {
+   *     switch(button->getCustomViewTag()) {
+   *       case ESampleSplitterParamID::kNormalize0Action:
+   *         initButton(button, SampleDataAction::Type::kNormalize0, false);
+   *         break;
+   *
+   *         // ....
+   *      }
+   *   }
+   * }
+   * ```
    */
   TagID getCustomViewTag () const { return fTag; }
 
-  // setEditorMode / getEditorMode
+  /**
+   * @see getEditorMode() */
   void setEditorMode(bool iEditorMode);
-  bool getEditorMode() const;
 
   /**
-   * Implement this if you want to have a specific behavior when editor mode is changed.
+   * Editor mode is a flag whose purpose is to render/log information during development when the flag is set to
+   * `true`. It can be flipped directly in the %VSTGUI Editor without having to recompile the code.
+   *
+   * ```
+   * // Example
+   * void SampleEditView::draw(CDrawContext *iContext) {
+   * // ...
+   * #if EDITOR_MODE
+   *
+   *  if(getEditorMode())
+   *  {
+   *    auto rdc = pongasoft::VST::GUI::RelativeDrawContext{this, iContext};
+   *    rdc.debug("SampleRange: [%.3f,%.3f] | PixelRange: [%.3f,%.3f] | Visible: [%.3f,%.3f] | BPM: %f",
+   *              fState->fWESelectedSampleRange->fFrom, fState->fWESelectedSampleRange->fTo,
+   *              fSelectedPixelRange.fFrom, fSelectedPixelRange.fTo,
+   *              fVisibleSampleRange.fFrom, fVisibleSampleRange.fTo,
+   *              fHostInfo->fTempo);
+   *
+   *  }
+   *
+   * #endif
+   * }
+   * ```
+   *
+   * @note Since `getEditorMode()` always returns `false` in release build mode, it is recommended to enclose such
+   *       code in an <tt>\#if / \#endif</tt> block as shown in the example.
    */
+  bool getEditorMode() const;
+
 #if EDITOR_MODE
+  /**
+   * Overrides this method if you want to implement a specific behavior when editor mode is changed. */
   virtual void onEditorModeChanged() {}
 #endif
 
@@ -105,16 +163,26 @@ public:
   void drawStyleChanged();
 
   /**
-   * Callback when a parameter changes. By default simply marks the view as dirty.
+   * Callback when a parameter changes. By default simply marks the view as dirty. This method is intended to be
+   * overriden to implement specific behavior.
    */
   void onParameterChange(ParamID iParamID) override;
 
-  // markDirty
+  /**
+   * Marks this view dirty which will (at the appropriate time in the rendering lifecycle) trigger a call to `draw()`
+   *
+   * @warning You should not call `draw()` yourself but instead call this method which will invoke `draw()` at the
+   *          appropriate time (for example, calling `markDirty()` 3 times will not invoke `draw()` 3 times...).
+   */
   inline void markDirty() { setDirty(true); }
 
   /**
-   * Once all the attributes have been set, we call `registerParameters`. Subclasses can extend the behavior
-   * but should end up calling this method otherwise the view will most likely not behave as expected. */
+   * Handles the lifecycle behavior getting triggered once all the attributes have been set (which usually happens
+   * after the XML file (uidesc) has been read/processed, or when you modify attributes in the %VSTGUI Editor).
+   *
+   * @note Subclasses are allowed to extend this behavior (if you want to do some extra setup when the view
+   *       is initialized for example), but care should be taken in making sure that this method ends up being
+   *       called, otherwise the view will most likely not behave as expected. */
   void afterApplyAttributes() override
   {
     unregisterAll();
@@ -161,6 +229,12 @@ protected:
   CColor fBackColor;
 
 public:
+  /**
+   * Defines and registers the attributes exposed in the %VSTGUI Editor and XML file (`.uidesc`) for `CustomView`.
+   *
+   * @note Although not required, for clarity and consistency, each custom view defines the creator class with the same
+   *       `%Creator` name as an inner class of the view.
+   */
   class Creator : public TCustomViewCreator<CustomView>
   {
   public:
@@ -177,11 +251,34 @@ public:
 };
 
 /**
- * When implementing a View specific to a given plugin, you can use this class instead to get direct
- * access to the state and parameters registered with the plugin via the fState/fParams member.
+ * Override from this class if you need to implement a (custom) view specific to a given plugin.
  *
- * @tparam TView the parent view (should be a subclass of `CView`)
- * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
+ * When writing a "generic" view (for example, a `MomentaryButtonView`), you deal with parameters by their ids, since
+ * the view is meant to work with many parameters. But if you write a view that is very specific to a given plugin,
+ * it makes the code easier to write and more type safe if you *tie* the view to the state.
+ *
+ * By inheriting from this class you automatically get access to all the parameters of your plugin
+ * (via `StateAware::fParams`) as well as the %GUI state (via `StateAware::fState`).
+ *
+ * ```
+ * // Example
+ * class SliceSettingView : public StateAwareView<ToggleButtonView, SampleSplitterGUIState> {
+ *
+ * void registerParameters() {
+ *   ToggleButtonView::registerParameters();
+ *   fSelectedSlice = registerParam(fParams->fSelectedSlice);
+ *   fSlicesSettings = registerParam(fState->fSlicesSettings);
+ *   setToggleFromSetting();
+ * }
+ *
+ * protected:
+ *   GUIVstParam<int> fSelectedSlice{};
+ *   GUIJmbParam<SlicesSettings> fSlicesSettings{};
+ * };
+ * ```
+ *
+ * @tparam TView the parent view (must be a subclass of `CView`)
+ * @tparam TGUIState type of the gui state for the plugin (must be a subclass of `GUIState`)
  */
 template<typename TView, typename TGUIState>
 class StateAwareView : public TView, public StateAware<TGUIState>
@@ -194,10 +291,13 @@ class StateAwareView : public TView, public StateAware<TGUIState>
 
 public:
   // Constructor
-  explicit StateAwareView(const CRect &iSize) : TView(iSize) {}
+  template<typename... Args>
+  explicit StateAwareView(const CRect &iSize, Args&& ...args) : TView(iSize, std::forward<Args>(args)...) {}
 
 protected:
-  // initState - overridden to extract fParams
+  /**
+   * Overriden to call both `ParamAware::initState()` and `StateAware::initState()`
+   */
   void initState(GUIState *iGUIState) override
   {
     TView::initState(iGUIState);
@@ -206,19 +306,29 @@ protected:
 };
 
 /**
- * When implementing a CustomView specific to a given plugin, you can use this class instead to get direct
- * access to the state and parameters registered with the plugin via the fState/fParams member.
+ * Shortcut alias when implementing a `StateAwareView` where the view is a `CustomView`
  *
- * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
- */
+ * @see `StateAwareView` */
 template<typename TGUIState>
 using StateAwareCustomView = StateAwareView<CustomView, TGUIState>;
 
 /**
- * This class can be used to extend VST SDK classes directly while still benefiting from the extensions added by
- * this framework (multiple param access and state access)
+ * This class can be used to extend %VSTGUI classes directly while still benefiting from the extensions added by
+ * Jamba.
  *
- * @tparam TView the view class (for ex: CTextEdit)
+ * `CustomView` extends `CView` to create a completely custom class. If, on the other end, you simply want to extend
+ * another class from %VSTGUI (ex: `CTextEdit`), you can use this class which implements most of the behavior
+ * from `CustomView`.
+ *
+ * This class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `custom-view-tag` | optional tag to differentiate between views when implementing a custom controller | `getCustomViewTag()`
+ * `editor-mode` | a flag whose purpose is to render/log information during development when the flag is set to `true` | `getEditorMode()`
+ *
+ * @tparam TView the view class (for ex: `CTextEdit`)
+ * @see `CustomView`
  */
 template<typename TView>
 class CustomViewAdapter : public TView, public ParamAware, public ICustomViewLifecycle
@@ -231,14 +341,16 @@ public:
   template<typename... Args>
   explicit CustomViewAdapter(const CRect &iSize, Args&& ...args) : TView(iSize, std::forward<Args>(args)...), fTag{UNDEFINED_PARAM_ID} {}
 
-  // markDirty
+  //! @copydoc pongasoft::VST::GUI::Views::CustomView::markDirty()
   inline void markDirty() { TView::setDirty(true); }
 
-  // setCustomViewTag / getCustomViewTag
-  void setCustomViewTag (ParamID iTag) { fTag = iTag; }
-  ParamID getCustomViewTag () const { return fTag; }
+   //! @see getCustomViewTag()
+  void setCustomViewTag (TagID iTag) { fTag = iTag; }
 
-  // setEditorMode
+  //! @copydoc pongasoft::VST::GUI::Views::CustomView::getCustomViewTag()
+  TagID getCustomViewTag () const { return fTag; }
+
+  //! @see getEditorMode()
   void setEditorMode(bool iEditorMode)
   {
 #if EDITOR_MODE
@@ -252,7 +364,7 @@ public:
     // when not in editor mode, this does nothing...
   }
 
-  // getEditorMode
+  //! @copydoc pongasoft::VST::GUI::Views::CustomView::getEditorMode()
   bool getEditorMode() const
   {
 #if EDITOR_MODE
@@ -262,21 +374,15 @@ public:
 #endif
   }
 
-  /**
-   * Implement this if you want to have a specific behavior when editor mode is changed.
-   */
 #if EDITOR_MODE
+  //! @copydoc pongasoft::VST::GUI::Views::CustomView::onEditorModeChanged()
   virtual void onEditorModeChanged() {}
 #endif
 
-  /**
-   * Callback when a parameter changes. By default simply marks the view as dirty.
-   */
+  //! @copydoc pongasoft::VST::GUI::Views::CustomView::onParameterChange()
   void onParameterChange(ParamID iParamID) override { markDirty(); };
 
-  /**
-   * Once all the attributes have been set, we call `registerParameters`. Subclasses can extend the behavior
-   * but should end up calling this method otherwise the view will most likely not behave as expected. */
+  //! @copydoc pongasoft::VST::GUI::Views::CustomView::afterApplyAttributes()
   void afterApplyAttributes() override
   {
     unregisterAll();
@@ -285,7 +391,7 @@ public:
   }
 
 protected:
-  ParamID fTag;
+  TagID fTag;
 #if EDITOR_MODE
   bool fEditorMode{false};
 #endif
@@ -293,6 +399,9 @@ protected:
 public:
   using creator_super_type = TCustomViewCreator<CustomViewAdapter>;
 
+  /**
+   * Defines and registers the attributes exposed in the %VSTGUI Editor and XML file (`.uidesc`) for `CustomViewAdapter`.
+   */
   class Creator : public creator_super_type
   {
   public:

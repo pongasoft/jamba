@@ -26,6 +26,12 @@ namespace pongasoft::VST::GUI::Views {
  * This parameter simply extends `ParamDisplayView` to "highlight" the parameter for `highlight-duration-ms`
  * milliseconds (by default 1s) when its value changes. "Highlighting" is implemented by swapping the back color
  * and the font color.
+ *
+ * In addition to the attributes exposed by `ParamDisplayView`, this class exposes the following attribute:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `highlight-duration-ms` | duration (in ms) to highlight the parameter for when it changes | `getHighlightDurationMs()`
  */
 class DebugParamDisplayView : public ParamDisplayView, public ITimerCallback
 {

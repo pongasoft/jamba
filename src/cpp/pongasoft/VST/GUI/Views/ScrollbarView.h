@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2019 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,21 +21,33 @@
 #include <pongasoft/VST/GUI/DrawContext.h>
 #include <pongasoft/Utils/Lerp.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
 /**
  * Generic scrollbar which handles scrolling and (optional) zooming via handles. The scrollbar is driven by 2
- * parameters which can be tied to Vst parameters:
- * - offsetPercent which represents the position of the scrollbar as a percent (0 means completely left, 1 means
+ * parameters which can be tied to Vst or Jmb parameters:
+ * - `offsetPercent` which represents the position of the scrollbar as a percent (0 means completely left, 1 means
  *   completely right)
- * - zoomPercent which represents the size of the scrollbar as a percent (0 means completely zoomed out (hence the
+ * - `zoomPercent` which represents the size of the scrollbar as a percent (0 means completely zoomed out (hence the
  *   scrollbar is full), 1 means completely zoomed in (hence the scrollbar is at its minimum size)).
  * At the moment, it handles only horizontal scrollbar.
+ *
+ * In addition to the attributes exposed by `CustomView`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `offset-percent-tag` | id for the parameter tied to offset percent | `getOffsetPercentTag()`
+ * `zoom-percent-tag` | id of the parameter tied to zoom percent | `getZoomPercentTag()`
+ * `margin` | amount of space (in pixels) to draw around the full scrollbar (includes handles) | `getMargin()`
+ * `scrollbar-color` | the color of the scrollbar itself (the rectangle) | `getScrollbarColor()`
+ * `scrollbar-min-size` | minimum size that the scrollbar should have (in pixels) | `getScrollbarMinSize()`
+ * `scrollbar-gutter-spacing` | space between the body (rectangle) and the handles | `getScrollbarGutterSpacing()`
+ * `zoom-handles-color` | color of the handles | `getZoomHandlesColor()`
+ * `zoom-handles-size` | size (in pixels) of the handles | `getZoomHandlesSize()`
+ * `shift-drag-factor` | how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging | `getShiftDragFactor()`
+ * `enable-zoom-double-click` | `true` to allow zooming on double click on the scrollbar | `getEnableZoomDoubleClick()`
  */
 class ScrollbarView : public CustomView
 {
@@ -81,8 +93,18 @@ public:
   CCoord getZoomHandlesSize() const { return fZoomHandlesSize; }
   void setZoomHandlesSize(CCoord iSize) { fZoomHandlesSize = iSize; needsRecomputing(); }
 
-  // how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging
+  /**
+   * Attribute `shift-drag-factor`.
+   *
+   * Defines how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging.
+   *
+   * @note This attribute defines a range (which can be a degenerate range where both `from` and `to` are the same)
+   *       in the event you want the factor to vary depending on how zoomed the scrollbar is.
+   *       For example: `shift-drag-factor="0.01,0.5"`
+   */
   Range const &getShiftDragFactor() const { return fShiftDragFactor; }
+
+  //! Attribute `shift-drag-factor`.
   void setShiftDragFactor(Range const &iShiftDragFactor) { fShiftDragFactor = iShiftDragFactor; }
 
   // whether to allow double clicking for zoom
@@ -290,7 +312,4 @@ public:
   };
 };
 
-}
-}
-}
 }

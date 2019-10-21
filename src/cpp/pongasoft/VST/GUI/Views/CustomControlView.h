@@ -22,15 +22,39 @@
 namespace pongasoft::VST::GUI::Views {
 
 /**
- * Base class for custom views providing one parameter only (similar to CControl)
+ * Base class for custom views which are tied to one parameter only (similar to `CControl`).
+ *
+ * @note Unlike %VSTGUI, it is actually very easy to have a view managing more than 1 parameter, nonetheless this
+ *       class and subclasses have been created for convenience (and as an example) since 1 parameter per view
+ *       is a pretty typical use case.
+ *
+ * @note This base class does not handle registration of the parameter itself because it doesn't know anything
+ *       about the parameter (in particular its type).
+ *
+ * In addition to the attributes exposed by `CustomView`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `control-tag` | the tag (parameter id) of the parameter tied to this view | `getControlTag()`
+ *
  */
 class CustomControlView : public CustomView
 {
 public:
   explicit CustomControlView(const CRect &iSize) : CustomView(iSize) {}
 
-  // get/setControlTag
+  //! @see getControlTag()
   virtual void setControlTag (ParamID iTag) { fControlTag = iTag; };
+
+  /**
+   * Returns the id of the parameter that this view manages.
+   *
+   * @note For consistency with the %VSTGUI `CControl` class, this code uses the name *tag* (but it is properly
+   *       mapped to a `ParamID` since this is what is represented).
+   *
+   * @note In order to differentiate between the custom view tag and the control tag, the naming is made more explicit
+   *       (in `CControl` it is simple called `getTag`).
+   */
   ParamID getControlTag () const { return fControlTag; }
 
 public:
@@ -52,9 +76,13 @@ public:
 };
 
 /**
- * Base class for custom views providing one parameter only (similar to CControl).
- * This base class automatically registers the custom control and also keeps a control value for the case when
- * the control does not exist (for example in editor the control tag may not be defined).
+ * Base class which extends `CustomControlView` to provide the type (`T`) of the underlying parameter this
+ * view is managing.
+ *
+ * Because the type is known, this class takes care of registering the parameter (using its id given by
+ * `getControlTag()`) and automatically handles vst, jmb or no parameter at all (case when the id is undefined).
+ *
+ * @see `Params::GUIOptionalParam` for more details on optional parameters
  */
 template<typename T>
 class TCustomControlView : public CustomControlView
@@ -66,11 +94,16 @@ public:
 public:
   CLASS_METHODS_NOCOPY(TCustomControlView, CustomControlView)
 
-  // set/getControlValue
+  /**
+   * Returns the value of the managed parameter (properly typed) */
   T getControlValue() const;
+
+  /**
+   * Sets the value of the managed parameter to the provided value */
   virtual void setControlValue(T const &iControlValue);
 
-  // registerParameters
+  /**
+   * Registers the optional parameter using `getControlTag()` as its id */
   void registerParameters() override;
 
 protected:
@@ -83,28 +116,38 @@ public:
 
 /**
  * Specialization for raw parameter (`ParamValue` / no conversion).
+ *
+ * @note Roughly speaking, this view is essentially the Jamba equivalent of `CControl` with all the bells and whistles
+ *       added.
  */
 using RawCustomControlView = TCustomControlView<ParamValue>;
 
 /**
- * Base class for custom views providing a single discrete parameter only (similar to CControl).
- * This base class automatically registers the custom control and also keeps a control value for the case when
- * the control does not exist (for example in editor the control tag may not be defined). This type of view is
- * designed to work with any parameter (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter
- * which means:
+ * Specialization of `TCustomControlView` for discrete values.
+ *
+ * This type of view is designed to work with any parameter (both Vst and Jmb) that is (or can be interpreted as)
+ * a discrete parameter which means:
  *
  * - for Vst parameters
  *   - a discrete parameter (which is a parameter where `IGUIParameter::getStepCount()` > 0). Note that in this case
  *     the attribute `step-count` is ignored (and should be set to its default `-1`).
  *   - a non discrete parameter (which is a parameter where `IGUIParameter::getStepCount()` = 0) can be interpreted
  *     as a discrete parameter by defining the number of steps `step-count`. For example, setting `step-count` to `10`
- *     will "split" the continuous range into 11 values (0.0, 0.1, 0.2, 0.3, 0.4, ..., 1.0).
+ *     will "split" the continuous range into 11 values `(0.0, 0.1, 0.2, 0.3, 0.4, ..., 1.0)`.
  * - for Jmb parameters
  *   - a discrete parameter (which is a parameter where `IGUIParameter::getStepCount()` > 0, which is the case if
  *     a discrete converter is defined, like for `DiscreteTypeParamSerializer` that handle enums). Note that in this
  *     case the attribute `step-count` is  ignored (and should be set to its default `-1`).
  *   - a parameter whose underlying type (`T`) is convertible (both ways) to an `int32` can be interpreted as a
  *     discrete parameter by defining the number of steps `step-count`.
+ *
+ * In addition to the attributes exposed by `CustomControlView`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `step-count` | number of steps for the discrete values (`[0, 1, ..., getStepCount()]`) | `getStepCount()`
+ *
+ * @see IGUIParameter::asDiscreteParameter()
  */
 class CustomDiscreteControlView : public TCustomControlView<int32>
 {
@@ -112,13 +155,22 @@ public:
   // CustomDiscreteControlView
   explicit CustomDiscreteControlView(const CRect &iSize) : TCustomControlView<int32>(iSize) {}
 
+  /**
+   * The number of steps of the managed discrete parameter as specified by this view.
+   *
+   * @note This value is **ignored** if the managed parameter is already a discrete parameter, thus providing
+   *       its own step count. It will only be used in the event the managed parameter is not a discrete parameter
+   *       but can be *interpreted* as one (IGUIParameter::asDiscreteParameter())
+   */
   int32 getStepCount() const { return fStepCount; }
+
+  //! @see getStepCount()
   void setStepCount(int32 iStepCount) { fStepCount = iStepCount; }
 
 public:
   CLASS_METHODS_NOCOPY(CustomDiscreteControlView, TCustomControlView<int32>)
 
-  // registerParameters
+  //! @copydoc pongasoft::VST::GUI::Views::TCustomControlView::registerParameters()
   void registerParameters() override;
 
 protected:

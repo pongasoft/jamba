@@ -31,12 +31,17 @@ using namespace VSTGUI;
  *
  * This view works for any parameter (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter.
  *
- * - The `step-increment` attribute defines whether this button will increment (positive) or decrement (negative)
- *   the value and by which amount.
- * - The `shift-step-increment` attribute allows for a different value when the shift modifier is being held (for example
- *   having bigger steps or smaller steps).
- * - The `wrap` attribute defines what happens when the value reaches its end of range after being incremented (resp.
- *   decremented). When set to `true` it will wrap around, otherwise it will remain at its max (resp. min).
+ * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `step-increment` | value by which this button will increment (positive) or decrement (negative) the parameter | `getStepIncrement()`
+ * `shift-step-increment` | allows for a different value when the shift modifier is being held (for example having bigger steps or smaller steps) | `getShiftStepIncrement()`
+ * `wrap` | defines what happens when the value reaches its end of range after being incremented (resp. decremented). When set to `true` it will wrap around, otherwise it will remain at its max (resp. min) | `getWrap()`
+ * `held-color` | color to use when the button is held and no image is provided | `getHeldColor()`
+ * `released-color` | color to use when the button is not held and no image is provided | `getReleasedColor()`
+ * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
+ * `arrow-direction` | when no image is provided, the button is rendered as an arrow pointing in the direction defined by this attribute | `getArrowDirection()`
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -86,16 +91,21 @@ public:
   void setReleasedColor(CColor const &iColor) { fReleasedColor = iColor; markDirty(); }
 
   /**
-   * returns the image for the button which should have 2 frames
-   * The images should contain the following 2 frames (each is of size image height / 2):
-   *   - at y = 0, the button in its released state
-   *   - at y = image height / 2, the button in its held state
+   * Attribute `button-image`.
+   *
+   * The image should contain 2 frames (each is of size image height / 2) with the following convention:
+   *
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its released state
+   *   image height / 2 | the button in its held state
+   *
+   *   Example: ![2 frames example](https://raw.githubusercontent.com/pongasoft/vst-sam-spl-64/v1.0.0/resource/arrow_up.png)
+   *
    */
   BitmapPtr getImage() const { return fImage; }
 
-  /**
-   * @see getImage
-   */
+   //! Attribute `button-image`.
   void setImage(BitmapPtr iImage) { fImage = iImage; markDirty(); }
 
   /**
@@ -124,8 +134,15 @@ public:
   inline bool getWrap() const { return fWrap; }
   void setWrap(bool iFlag) { fWrap = iFlag; markDirty(); }
 
-  // get/setArrowDirection => used when there is no bitmap
+  /**
+   * Attribute `arrow-direction`.
+   *
+   * Used only when no bitmap provided to draw an arrow pointing in the direction defined by this attribute. A value
+   * of `auto` will trigger the rendering of an arrow up if `step-increment` is positive, and down if negative.
+   */
   EArrowDirection getArrowDirection() const { return fArrowDirection; }
+
+  //! Attribute `arrow-direction`.
   void setArrowDirection(EArrowDirection iArrowDirection) { fArrowDirection = iArrowDirection; fButtonPolygon = nullptr; markDirty(); }
 
 protected:

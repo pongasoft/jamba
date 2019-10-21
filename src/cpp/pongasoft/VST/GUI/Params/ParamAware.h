@@ -479,8 +479,9 @@ public:
    * Called during initialization. Jamba takes care of properly initializing instances of this class with the
    * gui state when they get instantiated.
    *
-   * @internal
-   */
+   * @note Subclasses are allowed to extend this behavior (if you want to do some extra setup when the view
+   *       is initialized for example), but care should be taken in making sure that this method ends up being
+   *       called, otherwise the view will most likely not behave as expected. */
   virtual void initState(GUIState *iGUIState);
 
   /**

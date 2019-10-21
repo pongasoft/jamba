@@ -32,17 +32,23 @@ using namespace VSTGUI;
  * This view is designed to handle parameters which are backed by a `bool` representation but it works for any parameter
  * (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter.
  *
- * - `on-step` maps to the "on" value unless it is set to its default (-1) value in which case it maps to "stepCount"
- *   (should be `-1` or [0, stepCount])
- * - `off-step` maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0`
- *   (should be `-1` or [0, stepCount])
- * - `inverse` inverses the meaning of "on" and "off" in regards to drawing the view/image
+ * @note This view defines the "on" state as being the opposite of the "off" state and so the "off" state is the one
+ *       being checked against the off value (otherwise we could end up in a situation where both `isOn` and `isOff` are
+ *       `true`...). The consequence is that the underlying parameter might have a value that is neither the "off" value
+ *       nor the "on" value, but for the sake of this view it will be treated as "on" (similarly to C/C++ where `0` is
+ *       `false` and any non-zero is `true`).
  *
- * Note that this view defines the "on" state as being the opposite of the "off" state and so the "off" state is the one
- * being checked against the off value (otherwise we could end up in a situation where both `isOn` and `isOff` are
- * `true`...). The consequence is that the underlying parameter might have a value that is neither the "off" value
- * nor the "on" value, but for the sake of this view it will be treated as "on" (similarly to C/C++ where `0` is
- * `false` and any non-zero is `true`).
+ * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `on-step` |  maps to the "on" value unless it is set to its default (-1) value in which case it maps to `getStepCount()` (should be `-1` or `[0, stepCount]`) | `getOnStep()`
+ * `off-step` | maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0` (should be `-1` or `[0, stepCount]`) | `getOffStep()`
+ * `on-color` | when no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state (draws a rectangle with this color) | `getOnColor()`
+ * `disabled-color` | when no image is provided and the control is disabled, this color is used instead | `getDisabledColor()`
+ * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
+ * `button-image-has-disabled-state` | used when drawing the image (see `getImage()` for details) | `getImageHasDisabledState()`
+ * `inverse` | inverses the meaning of "on" and "off" in regards to drawing the view/image | `getInverse()`
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -55,13 +61,13 @@ public:
     fBackColor = CColor{200,200,200};
   }
 
-  // draw => does the actual drawing job
+  //! Calls `drawOn()` or `drawOff()` depending on the state (takes into account the `inverse` attribute)
   void draw(CDrawContext *iContext) override;
 
-  // called to display the "on" state
+  //! called to display the "on" state (can be overriden)
   virtual void drawOn(CDrawContext *iContext);
 
-  // called to display the "off" state
+  //! called to display the "off" state (can be overriden)
   virtual void drawOff(CDrawContext *iContext);
 
   // input events (mouse/keyboard)
@@ -74,26 +80,32 @@ public:
   // sizeToFit
   bool sizeToFit() override;
 
-  /**
-   * Attribute `off-step`
-   */
+  //! Attribute `off-step`
   int32 getOffStep() const { return fOffStep; }
+
+  //! Attribute `off-step`
   void setOffStep(int32 iStep) { fOffStep = iStep; markDirty(); }
+
+  //! Computes "off" step based on value of `off-step` attribute
   int32 getComputedOffStep() const { return std::max(Utils::ZERO_INT32, getOffStep()); }
 
-  /**
-   * Attribute `on-step`
-   */
+  //! Attribute `on-step`
   int32 getOnStep() const { return fOnStep; }
+
+  //! Attribute `on-step`
   void setOnStep(int32 iStep) { fOnStep = iStep; markDirty(); }
+
+  //! Computes "on" step based on value of `on-step` attribute
   int32 getComputedOnStep() const;
 
   // is on or off
   bool isOff() const { return getControlValue() == getComputedOffStep(); }
   bool isOn() const { return !isOff(); }
 
-  // get/setOnColor (the off color is the back color...)
+  //! Attribute `on-color` (the "off" color is the back color...)
   CColor const &getOnColor() const { return fOnColor; }
+
+  //! Attribute `on-color` (the "off" color is the back color...)
   void setOnColor(CColor const &iColor) { fOnColor = iColor; }
 
   // get/setDisabledColor color for when disabled (mouse enabled set to false)
@@ -101,18 +113,30 @@ public:
   void setDisabledColor(CColor const &iColor) { fDisabledColor = iColor; }
 
   /**
-   * If 'button-image-has-disabled-state' is selected then the image should contain the following
-   * 3 frames (each is of size image height / 3):
-   *   - at y = 0, the button in its disabled state
-   *   - at y = 1 * image height / 3, the button in its off state
-   *   - at y = 2 * image height / 3, the button in its on state
+   * Attribute `button-image`.
    *
-   * If 'button-image-has-disabled-state' is NOT selected then the image should contain the following
+   * If `button-image-has-disabled-state` is `true` then the image should contain the following
+   * 3 frames (each is of size image height / 3):
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its disabled state
+   *   1 * image height / 3 | the button in its "off" state
+   *   2 * image height / 3 | the button in its "on" state
+   *
+   *   Example: ![3 frames example](https://raw.githubusercontent.com/pongasoft/vst-sam-spl-64/v1.0.0/resource/action_crop.png)
+   *
+   * If `button-image-has-disabled-state` is `false` then the image should contain the following
    * 2 frames (each is of size image height / 2):
-   *   - at y = 0, the button in its off state
-   *   - at y = image height / 2, the button in its on state
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its "off" state
+   *   image height / 2 | the button in its "on" state
+   *
+   *   Example: ![2 frames example](https://raw.githubusercontent.com/pongasoft/vst-sam-spl-64/v1.0.0/resource/bankC.png)
    */
   BitmapPtr getImage() const { return fImage; }
+
+  //! Attribute `button-image`.
   void setImage(BitmapPtr iImage) { fImage = iImage; }
 
   /**

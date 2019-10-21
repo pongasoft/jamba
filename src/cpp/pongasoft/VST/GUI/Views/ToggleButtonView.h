@@ -31,17 +31,22 @@ using namespace Params;
  * This view is designed to handle parameters which are backed by a `bool` representation but it works for any parameter
  * (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter.
  *
- * - `on-step` maps to the "on" value unless it is set to its default (-1) value in which case it maps to "stepCount"
- *   (should be `-1` or [0, stepCount])
- * - `off-step` maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0`
- *   (should be `-1` or [0, stepCount])
- * - `inverse` inverses the meaning of "on" and "off" in regards to drawing the view/image
+ * @note This view defines the "on" state as being the opposite of the "off" state and so the "off" state is the one
+ *       being checked against the off value (otherwise we could end up in a situation where both `isOn` and `isOff` are
+ *       `true`...). The consequence is that the underlying parameter might have a value that is neither the "off" value
+ *       nor the "on" value, but for the sake of this view it will be treated as "on" (similarly to C/C++ where `0` is
+ *       `false` and any non-zero is `true`).
  *
- * Note that this view defines the "on" state as being the opposite of the "off" state and so the "off" state is the one
- * being checked against the off value (otherwise we could end up in a situation where both `isOn` and `isOff` are
- * `true`...). The consequence is that the underlying parameter might have a value that is neither the "off" value
- * nor the "on" value, but for the sake of this view it will be treated as "on" (similarly to C/C++ where `0` is
- * `false` and any non-zero is `true`).
+ * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `on-step` |  maps to the "on" value unless it is set to its default (-1) value in which case it maps to `getStepCount()` (should be `-1` or `[0, stepCount]`) | `getOnStep()`
+ * `off-step` | maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0` (should be `-1` or `[0, stepCount]`) | `getOffStep()`
+ * `on-color` | when no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state (draws a rectangle with this color) | `getOnColor()`
+ * `frames` | the number of frames the image contains (see `getImage()` for details) | `getFrames()`
+ * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
+ * `inverse` | inverses the meaning of "on" and "off" in regards to drawing the view/image | `getInverse()`
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -112,18 +117,31 @@ public:
   void setInverse(bool iInverse) { fInverse = iInverse; }
 
   /**
-   * get/setImage for the button which should have 2 or 4 frames depending on the fFrames value
-   * The images should contain the following :
+   * Attribute `button-image`.
+   *
+   * The content of the image depends on the attribute `frames` (`getFrames()`) with the following convention:
+   *
    * - for 2 frames each is of size image height / 2:
-   *   - at y = 0, the button in its off state
-   *   - at y = image height / 2, the button in its on state
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its "off" state
+   *   image height / 2 | the button in its "on" state
+   *
+   *   Example: ![2 frames example](https://raw.githubusercontent.com/pongasoft/vst-sam-spl-64/v1.0.0/resource/bankC.png)
+   *
    * - for 4 frames each is of size image height / 4:
-   *   - at y = 0              0/4, the button in its off state
-   *   - at y = image height * 1/4, the button in its off state depressed
-   *   - at y = image height * 2/4, the button in its on state
-   *   - at y = image height * 3/4, the button in its on state depressed
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its "off" state
+   *   image height * 1/4 | the button in its "off" state depressed
+   *   image height * 2/4 | the button in its "on" state
+   *   image height * 3/4 | the button in its "on" state depressed
+   *
+   *   Example: ![4 frames example](https://raw.githubusercontent.com/pongasoft/vst-vac-6v/v1.2.0/resource/Button_Live_4frames.png)
    */
   BitmapPtr getImage() const { return fImage; }
+
+  //! Attribute `button-image`.
   void setImage(BitmapPtr iImage) { fImage = iImage; }
 
 protected:

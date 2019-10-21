@@ -22,7 +22,7 @@
 namespace pongasoft::VST::GUI::Views {
 
 /**
- * This class can be used to get access to the GUI state and parameters with their actual type
+ * This class is used to get access to the %GUI state and parameters of the plugin with their actual type.
  *
  * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
  */
@@ -32,7 +32,12 @@ class StateAware
   static_assert(std::is_convertible_v<TGUIState *, GUIState *>);
   
 public:
-  // initState
+  /**
+   * This method is called by Jamba automatically to initialize the state.
+   *
+   * @note Subclasses are allowed to extend this behavior (if you want to do some extra setup when the view
+   *       is initialized for example), but care should be taken in making sure that this method ends up being
+   *       called, otherwise the view will most likely not behave as expected. */
   virtual void initState(GUIState *iGUIState)
   {
     // because of the static assert, we know that this will not return nullptr
@@ -42,10 +47,12 @@ public:
   }
 
 public:
-  // direct access to state (ex: fState->fLabelA)
+  /**
+   * Gives access to the %GUI state (ex: `fState->fLabelA`) */
   TGUIState *fState{};
 
-  // direct access to parameters (ex: fParams->fBypassParam)
+  /**
+   * Gives direct access to parameters (ex: `fParams->fBypassParam`) */
   typename TGUIState::PluginParameters const *fParams{};
 };
 

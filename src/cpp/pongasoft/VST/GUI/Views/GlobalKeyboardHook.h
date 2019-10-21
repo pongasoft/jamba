@@ -21,10 +21,7 @@
 #include <pongasoft/VST/GUI/Types.h>
 #include "SelfContainedViewListener.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
@@ -35,30 +32,32 @@ using namespace VSTGUI;
  * the hook to the frame (when it becomes available) and unregistering it automatically as well. As an added bonus
  * it is possible to dynamically change the callbacks after registration.
  *
- * Typical usage would be to use Views::registerGlobalKeyboardHook this way:
+ * Typical usage would be to use `Views::registerGlobalKeyboardHook()` this way:
  *
- *     // assuming we are writing a custom view
- *     void initState(GUIState *iGUIState)
- *     {
- *       CustomView::initState(iGUIState);
- *       Views::registerGlobalKeyboardHook(this)
- *         ->onKeyDown([this](VstKeyCode const &iKeyCode) -> auto {
- *           if(iKeyCode.character == 'z')
- *           {
- *             // do something...
- *             return CKeyboardEventResult::kKeyboardEventHandled;
- *           }
- *           return CKeyboardEventResult::kKeyboardEventNotHandled;
- *         })
- *         ->onKeyUp([this](VstKeyCode const &iKeyCode) -> auto {
- *           if(iKeyCode.character == 'z')
- *           {
- *             // do something else...
- *             return CKeyboardEventResult::kKeyboardEventHandled;
- *           }
- *           return CKeyboardEventResult::kKeyboardEventNotHandled;
- *         });
- *      }
+ * ```
+ * // assuming we are writing a custom view
+ * void initState(GUIState *iGUIState)
+ * {
+ *   CustomView::initState(iGUIState);
+ *   Views::registerGlobalKeyboardHook(this)
+ *     ->onKeyDown([this](VstKeyCode const &iKeyCode) -> auto {
+ *       if(iKeyCode.character == 'z')
+ *       {
+ *         // do something...
+ *         return CKeyboardEventResult::kKeyboardEventHandled;
+ *       }
+ *       return CKeyboardEventResult::kKeyboardEventNotHandled;
+ *     })
+ *     ->onKeyUp([this](VstKeyCode const &iKeyCode) -> auto {
+ *       if(iKeyCode.character == 'z')
+ *       {
+ *         // do something else...
+ *         return CKeyboardEventResult::kKeyboardEventHandled;
+ *       }
+ *       return CKeyboardEventResult::kKeyboardEventNotHandled;
+ *    });
+ * }
+ * ```
  */
 class GlobalKeyboardHook : public SelfContainedViewListener, protected IKeyboardHook
 {
@@ -202,7 +201,4 @@ protected:
  */
 inline std::shared_ptr<GlobalKeyboardHook> registerGlobalKeyboardHook(CView *iView) { return GlobalKeyboardHook::create(iView); }
 
-}
-}
-}
 }

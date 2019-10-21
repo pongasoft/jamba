@@ -24,7 +24,10 @@
 namespace pongasoft::VST::GUI::Views {
 
 /**
- * Base class that a custom controller can inherit from, providing access to params
+ * Base class that a custom controller can inherit from.
+ *
+ * Like `CustomView`, this base class offers access to parameter registration and Jamba will automatically
+ * call the proper lifecycle methods when such a controller is created.
  */
 class CustomController : public VSTGUI::DelegationController, public ParamAware
 {
@@ -35,10 +38,13 @@ public:
 
 
 /**
- * When implementing a CustomController specific to a given plugin, you can use this class instead to get direct
- * access to the state and parameters registered with the plugin via the fState/fParams member.
+ * Override from this class if you need to implement a controller specific to a given plugin.
  *
- * @tparam TGUIState type of the gui state for the plugin (should be a subclass of `GUIState`)
+ * Like `StateAwareView`, by inheriting from this class you automatically get access to all the parameters
+ * of your plugin (via `StateAware::fParams`) as well as the %GUI state (via `StateAware::fState`).
+ *
+ * @tparam TGUIState type of the gui state for the plugin (must be a subclass of `GUIState`)
+ * @see `StateAwareView` for more information on parameter registration
  */
 template<typename TGUIState>
 class StateAwareCustomController : public CustomController, public StateAware<TGUIState>
@@ -64,11 +70,11 @@ public:
    *   iButton->setMouseEnabled(iParam > 3);
    * });
    * ```
+   * @note You should not keep the pointer returned by this method around as it will be automatically deleted when
+   *       the view goes away.
    *
    * @tparam TView must be a subclass of `VSTGUI::CView`
    * @return a pointer to an object for registering callbacks, listener and params.
-   *         Note: You should not keep this pointer around as it will be automatically deleted when the view
-   *         goes away.
    */
   template<typename TView>
   inline ParamAwareView<TView> *makeParamAware(TView *iView) {
@@ -76,7 +82,8 @@ public:
   }
 
 protected:
-  // initState - overridden to extract fParams
+  /**
+   * Overriden to call both `ParamAware::initState()` and `StateAware::initState()` */
   void initState(GUIState *iGUIState) override
   {
     CustomController::initState(iGUIState);

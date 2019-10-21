@@ -27,15 +27,21 @@ using namespace Params;
 
 /**
  * A discrete button behaves like a toggle button except that it is `on` only if the control value (tied to a parameter)
- * is equal to the `step` value (DiscreteButtonView::getStep() / `step` property in the xml).
+ * is equal to the `step` value (`DiscreteButtonView::getStep()` / `step` property in the xml).
  * Selecting the button will set the underlying parameter to `step`. This button can be used to implement a radio group
  * button behavior (only one selected at a time).
  *
  * This view works for any parameter (both Vst and Jmb) that is (or can be interpreted as) a discrete parameter.
  *
- * - `step` is the value used to check whether the button is on or off as well as the value to set the parameter to
- *   when the button is selected
- * - `inverse` inverses the meaning of "on" and "off" in regards to drawing the view/image
+ * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `frames` | the number of frames the image contains (see `getImage()` for details) | `getFrames()`
+ * `on-color` | when no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state (draws a rectangle with this color) | `getOnColor()`
+ * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
+ * `inverse` | inverses the meaning of "on" and "off" in regards to drawing the view/image | `getInverse()`
+ * `step` | the value used to check whether the button is "on" or "off" as well as the value to set the parameter to when the button is selected | `getStep()`
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -72,7 +78,7 @@ public:
 
   void setOn();
 
-  // get/set frames (should be either 2 or 4) 4 includes the pressed state
+  //! Attribute `frames`. Should be either 2 or 4 (4 includes the pressed state).
   int getFrames() const { return fFrames; }
 
   void setFrames(int iFrames);
@@ -91,16 +97,27 @@ public:
   void setStep(int32 step);
 
   /**
-   * get/setImage for the button which should have 2 or 4 frames depending on the fFrames value
-   * The images should contain the following :
+   * Attribute `button-image`.
+   *
+   * The content of the image depends on the attribute `frames` (`getFrames()`) with the following convention:
+   *
    * - for 2 frames each is of size image height / 2:
-   *   - at y = 0, the button in its off state
-   *   - at y = image height / 2, the button in its on state
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its "off" state
+   *   image height / 2 | the button in its "on" state
+   *
+   *   Example: ![2 frames example](https://raw.githubusercontent.com/pongasoft/vst-sam-spl-64/v1.0.0/resource/bankC.png)
+   *
    * - for 4 frames each is of size image height / 4:
-   *   - at y = 0              0/4, the button in its off state
-   *   - at y = image height * 1/4, the button in its off state depressed
-   *   - at y = image height * 2/4, the button in its on state
-   *   - at y = image height * 3/4, the button in its on state depressed
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its "off" state
+   *   image height * 1/4 | the button in its "off" state depressed
+   *   image height * 2/4 | the button in its "on" state
+   *   image height * 3/4 | the button in its "on" state depressed
+   *
+   *   Example: ![4 frames example](https://raw.githubusercontent.com/pongasoft/vst-vac-6v/v1.2.0/resource/Button_Live_4frames.png)
    */
   BitmapPtr getImage() const { return fImage; }
   void setImage(BitmapPtr iImage) { fImage = iImage; }

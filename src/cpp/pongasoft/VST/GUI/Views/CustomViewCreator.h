@@ -123,26 +123,32 @@ using AttrValInitList = std::initializer_list<typename AttrValMap<T>::value_type
  *
  * In case of inheritance, you do the following:
  *
- * class CustomView1 : public CControl { ... }
- * class CustomView2 : public CustomView1 { ... }
+ * ```
+ * class CustomView1 : public CControl { ... };
+ * class CustomView2 : public CustomView1 { ... };
  *
- * class CustomView1Creator : public CustomViewCreator<CustomView1> {
+ * class CustomView1Creator : public TCustomViewCreator<CustomView1> {
  *   public:
  *     explicit CustomView1Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
- *        CustomViewCreator(iViewName, iDisplayName)
+ *        TCustomViewCreator(iViewName, iDisplayName)
  *     {
  *       ... register CustomView1 attributes here ...
  *     }
- * }
- * class CustomView2Creator : public CustomViewCreator<CustomView2> {
+ * };
+ *
+ * class CustomView2Creator : public TCustomViewCreator<CustomView2> {
  *   public:
  *     explicit CustomView2Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
- *        CustomViewCreator(iViewName, iDisplayName)
+ *        TCustomViewCreator(iViewName, iDisplayName)
  *     {
  *       registerAttributes(CustomView1Creator());
  *       ... register CustomView2 attributes here ...
  *     }
- * }
+ * };
+ * ```
+ *
+ * @note It is recommended to follow the convention that the view has an inner class called `Creator` in which
+ *       case you should use the more convenient class `CustomViewCreator` instead.
  */
 template<typename TView>
 class TCustomViewCreator : public ViewCreatorAdapter
@@ -1197,7 +1203,7 @@ private:
   {
     // making sure there are no duplicates (cannot use loguru here!)
     assert(fAttributes.find(iAttribute->getName()) == fAttributes.cend());
-    fAttributes[iAttribute->getName()] = iAttribute;
+    fAttributes[iAttribute->getName()] = std::move(iAttribute);
   }
 
   /**
@@ -1223,10 +1229,83 @@ private:
   std::map<std::string, std::shared_ptr<ViewAttribute>> fAttributes;
 };
 
+namespace impl {
+  template<typename T>
+  using creator_ctor_t = decltype(typename T::Creator());
+
+  template<typename T>
+  constexpr auto is_creator_ctor_detected = Utils::cpp17::experimental::is_detected_v<creator_ctor_t, T>;
+}
+
 /**
- * Convenient definition which assumes that TBaseView has a Creator inner class. Use TCustomViewCreator otherwise.
+ * Inherit from this class to provide the factory for a custom view.
+ *
+ * When creating a custom view, you also need to provide a factory for this view: a way for the framework to
+ * instantiate and properly initialize the view.
+ *
+ * %VSTGUI uses the concept of "attributes" that are read (resp. written)
+ * to the xml file that is used to store the look and feel of the plugin. Those "attributes" are also exposed in the
+ * %VSTGUI editor as texfields, checkboxes and selection list to dynamically change them in a WYSIWYG fashion.
+ *
+ * In Jamba, by convention, writing this factory is as simple as writing an inner class of the view which must be
+ * called `Creator` which inherits from this class and with a constructor that simply registers the attribute
+ * that the view uses.
+ *
+ * ```
+ * // Example
+ * class MyCustomView : public CustomView {
+ *   // ....
+ *
+ *   CColor fMyColor;
+ *   CColor const &getMyColor() const { return fMyColor; }
+ *   void setMyColor(CColor const &iColor) { fMyColor = iColor; }
+ *
+ * public:
+ *   class Creator : public CustomViewCreator<MyCustomView, CustomView> {
+ *   public:
+ *     Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
+ *       CustomViewCreator(iViewName, iDisplayName) {
+ *         registerColorAttribute("my-color", // name of attribute
+ *                                &MyCustomView::getMyColor, // pointer to "getter"
+ *                                &MyCustomView::setMyColor); // pointer to "setter"
+ *     }
+ *   };
+ * };
+ *
+ * // in a .cpp somewhere
+ * // this automatically registers the factory with the framework
+ * MyCustomView::Creator __gMyCustomViewCreator("MyCustomView", "MyCustomView...");
+ * ```
+ *
+ * If your custom view inherits from another custom view, you should provide it as the second type parameter
+ * (`TBaseView`).
+ *
+ * If you custom view inherits from a %VSTGUI view (`CustomViewAdapter`), you should provide the proper `iBaseViewName`
+ * in the constructor so that your custom view can use the attributes defined by the %VSTGUI view.
+ *
+ * ```
+ * // Example
+ * class MyCustomView : public CustomViewAdapter<COnOffButton> {
+ *   // ...
+ * public:
+ *   class Creator : public CustomViewCreator<MyCustomView, CustomViewAdapter<COnOffButton>> {
+ *   public:
+ *     Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
+ *       CustomViewCreator(iViewName,
+ *                         iDisplayName,
+ *                         VSTGUI::UIViewCreator::kCOnOffButton) { // <--- iBaseViewName
+ *         // ...
+ *     }
+ *   };
+ * };
+ * }
+ *
+ * ```
+ *
+ * @tparam TView the type of the view that is being created by this creator (usually the name of the outer class)
+ * @tparam TBaseView optional parameter specifying the type of the base view
  */
-template<typename TView, typename TBaseView>
+template<typename TView, typename TBaseView = void>
 class CustomViewCreator : public TCustomViewCreator<TView>
 {
 public:
@@ -1235,8 +1314,10 @@ public:
                              char const *iBaseViewName = VSTGUI::UIViewCreator::kCView) :
     TCustomViewCreator<TView>(iViewName, iDisplayName, iBaseViewName)
   {
-    TCustomViewCreator<TView>::registerAttributes(typename TBaseView::Creator());
+    if constexpr(impl::is_creator_ctor_detected<TBaseView>)
+      TCustomViewCreator<TView>::registerAttributes(typename TBaseView::Creator());
   }
 };
 
 }
+

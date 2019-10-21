@@ -26,16 +26,19 @@ namespace pongasoft::VST {
 using namespace Steinberg::Vst;
 
 /**
- * Strings made of char16 characters are represented by the native C++11 type
- * `std::basic_string<Steinberg::char16>` and properly converted to what is required by the VST classes.
+ * Strings made of `char16` characters are represented by the native C++11 type
+ * `std::basic_string<Steinberg::char16>` and properly converted to what is required by the %VST classes.
  * The `Steinberg::String` class can be used to generate a formatted string like this:
  *
- *     int pad = 3;
- *     String title;
- *     title.printf(STR16("Pad [%d]", pad);
- *     // because std::basic_string<Steinberg::char16> can be created from a char16 const *, then you can simply
- *     // use title.text16() wherever a VstString16 is requested
- *     myParam = vst<BooleanParamConverter>(id, title.text16()).add();
+ * ```
+ * int pad = 3;
+ * String title;
+ * title.printf(STR16("Pad [%d]", pad);
+ *
+ * // because std::basic_string<Steinberg::char16> can be created from a char16 const *,
+ * // then you can simply use title.text16() wherever a VstString16 is requested
+ * myParam = vst<BooleanParamConverter>(id, title.text16()).add();
+ * ```
  */
 using VstString16 = std::basic_string<Steinberg::char16>;
 
@@ -46,10 +49,10 @@ constexpr ParamID UNDEFINED_PARAM_ID = static_cast<ParamID>(-1);
 /**
  * Defining a type for tags.
  *
- * @warning Since 4.0.0, this type has changed to be non negative. The issue stems from the fact that the VST SDK uses
+ * @warning Since 4.0.0, this type has changed to be non negative. The issue stems from the fact that the %VST SDK uses
  *          `ParamID` throughout and is mapped to an `uint32` **but** the %VSTGUI layer uses `int32_t` for what they
  *          call tags (ex: `CControl::getTag()`) but is in fact a parameter ID, hence a `uint32` (essentially this is
- *          a mess...). So reverting to use what the VST SDK deals with: `uint32`
+ *          a mess...). So reverting to use what the %VST SDK deals with: `uint32`
  */
 using TagID = ParamID;
 
