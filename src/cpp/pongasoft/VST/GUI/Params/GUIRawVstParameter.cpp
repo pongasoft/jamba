@@ -147,9 +147,9 @@ std::shared_ptr<GUIDiscreteParameter> GUIRawVstParameter::asDiscreteParameter(in
 
   if(stepCount > 0)
   {
-    if(iStepCount != -1)
+    if(iStepCount != -1 && iStepCount != stepCount)
     {
-      DLOG_F(WARNING, "Parameter step count %d, differs from requested %d. Using parameter step count.", getStepCount(), iStepCount);
+      DLOG_F(WARNING, "Parameter step count %d, differs from requested %d. Using parameter step count.", stepCount, iStepCount);
     }
   }
   else

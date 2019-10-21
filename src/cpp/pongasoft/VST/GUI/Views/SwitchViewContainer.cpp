@@ -18,10 +18,7 @@
 
 #include "SwitchViewContainer.h"
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 //------------------------------------------------------------------------
 // SwitchViewContainer::SwitchViewContainer
@@ -54,15 +51,11 @@ void SwitchViewContainer::afterCreate(IUIDescription const *iDescription, IContr
 //------------------------------------------------------------------------
 void SwitchViewContainer::registerParameters()
 {
-  fControlSwitch = registerRawVstParam(getSwitchControlTag());
+  fControlSwitch = registerOptionalDiscreteParam(getSwitchControlTag(), fTemplateNames.size() - 1);
 
 #ifndef NDEBUG
-  if(fControlSwitch.exists())
-  {
-    if(fControlSwitch.getStepCount() == 0)
-      DLOG_F(WARNING, "Param [%d] should be a discrete parameter (stepCount != 0) to be used as the switch control",
-             getSwitchControlTag());
-  }
+  if(fControlSwitch.getStepCount() == 0 && getSwitchControlTag() != UNDEFINED_PARAM_ID)
+    DLOG_F(WARNING, "%d parameter is not discrete (stepCount == 0)", fControlSwitch.getParamID());
 #endif
 
   switchCurrentView();
@@ -73,22 +66,16 @@ void SwitchViewContainer::registerParameters()
 //------------------------------------------------------------------------
 void SwitchViewContainer::switchCurrentView()
 {
-  if(fControlSwitch.exists())
-  {
-    auto index = convertNormalizedValueToDiscreteValue(fControlSwitch.getStepCount(), fControlSwitch);
-    auto templateName = UTF8String(computeTemplateName(index));
+  auto index = fControlSwitch.getValue();
+  auto templateName = UTF8String(computeTemplateName(index));
 
-    if(templateName != fCurrentTemplateName)
-    {
-      setCurrentView(fUIDescription->createView(templateName, fUIController));
-      fCurrentTemplateName = templateName;
-      invalid();
-    }
-  }
-  else
+  if(templateName != fCurrentTemplateName)
   {
-    setCurrentView(nullptr);
-    fCurrentTemplateName = "";
+    if(templateName != "")
+      setCurrentView(fUIDescription->createView(templateName, fUIController));
+    else
+      setCurrentView(nullptr);
+    fCurrentTemplateName = templateName;
     invalid();
   }
 }
@@ -160,7 +147,4 @@ SwitchViewContainer *createCustomView<SwitchViewContainer>(CRect const &iSize,
   return view;
 }
 
-}
-}
-}
 }

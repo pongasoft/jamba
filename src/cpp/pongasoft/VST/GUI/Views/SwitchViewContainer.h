@@ -19,24 +19,29 @@
 
 #include <pongasoft/VST/GUI/Views/CustomView.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 /**
- * This view offers dynamic switching between multiple views based on the value of a discrete vst parameter (the control
- * switch as defined by `switch-control-tag`). The multiple views come from the list of template names (comma
- * separated list of names `template-names`).
+ * This view offers dynamic switching between multiple views.
+ *
+ * Switching is based on the value of any parameter (both Vst and Jmb) that is (or can be interpreted as) a
+ * discrete parameter.
  *
  * The %VST SDK comes with a similar implementation which a) is buggy, b) requires an actual control tied to a vst
- * parameter (so for example does not work with StepButtonView or cannot be changed by the %RT). This implementation
- * uses a %VST parameter directly so has none of these restrictions.
+ * parameter (so for example does not work with `StepButtonView` or cannot be changed by the %RT). This implementation
+ * uses a parameter directly so has none of these restrictions.
  *
  * \note When editing the layout using the editor, and saving the xml file, unfortunately the editor will save the
  * children of this class (in this case, the one that was added dynamically). Although the code handles this case,
  * it is recommended (for production) to manually edit the xml file to remove any child of this entry (otherwise
  * objects will be created to be destroyed right away).
+ *
+ * In addition to the attributes exposed by `CViewContainer`, this class exposes the following attributes:
+ *
+ * Attribute | Description | More
+ * --------- | ----------- | ----
+ * `switch-control-tag` | id for the parameter tied to switching | `getSwitchControlTag()`
+ * `template-names` | a comma separated list of template names | `getTemplateNames()`
  */
 class SwitchViewContainer : public CustomViewAdapter<CViewContainer>, IViewContainerListenerAdapter
 {
@@ -90,7 +95,7 @@ protected:
   IController *fUIController{};
 
   ParamID fSwitchControlTag{UNDEFINED_PARAM_ID};
-  GUIRawVstParam fControlSwitch{};
+  GUIOptionalParam<int32> fControlSwitch{};
 
   std::vector<std::string> fTemplateNames;
 
@@ -119,7 +124,4 @@ SwitchViewContainer *createCustomView<SwitchViewContainer>(CRect const &iSize,
                                                            const UIAttributes &iAttributes,
                                                            const IUIDescription *iDescription);
 
-}
-}
-}
 }
