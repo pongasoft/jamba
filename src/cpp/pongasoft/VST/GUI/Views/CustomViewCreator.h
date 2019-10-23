@@ -31,6 +31,7 @@
 #include <pongasoft/VST/GUI/Types.h>
 #include <pongasoft/VST/GUI/LookAndFeel.h>
 #include <pongasoft/Utils/StringUtils.h>
+#include <pongasoft/Utils/Cpp17.h>
 #include <pongasoft/VST/Types.h>
 
 namespace pongasoft::VST::GUI::Views {

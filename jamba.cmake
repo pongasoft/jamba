@@ -4,9 +4,9 @@ set(JAMBA_ROOT ${CMAKE_CURRENT_LIST_DIR})
 #------------------------------------------------------------------------
 # Version
 #------------------------------------------------------------------------
-set(JAMBA_MAJOR_VERSION 3)
-set(JAMBA_MINOR_VERSION 2)
-set(JAMBA_PATCH_VERSION 4)
+set(JAMBA_MAJOR_VERSION 4)
+set(JAMBA_MINOR_VERSION 0)
+set(JAMBA_PATCH_VERSION 0)
 execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     RESULT_VARIABLE result
     OUTPUT_VARIABLE JAMBA_GIT_VERSION
