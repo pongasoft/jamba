@@ -26,10 +26,23 @@ using namespace VSTGUI;
 using namespace Params;
 
 /**
- * Extends the CTextButton view to:
- * - have a (potentially) dynamic title tied to a parameter (fTitle via fTitleTag)
- * - handle click conveniently (either inherit from this class and implement onClick, or provide an onClick listener)
+ * Extension of the `CTextButton` view to add more functionality.
+ *
+ * In addition to the behavior provided by `CTextButton`, this class adds the following functionality:
+ * - have a (potentially) dynamic title tied to a parameter (via `title-tag` / `TextButtonView::fTitleTag`)
+ * - handle click conveniently (either inherit from this class and implement `onClick()`, or provide an `onClick` listener)
  * - optionally handle image (3 states : disabled / off / on)
+ *
+ * In addition to the attributes exposed by `CTextButton`, this class exposes the following attributes:
+ *
+ * Attribute                         | Description
+ * ---------                         | -----------
+ * `title-tag`                       | @copydoc getTitleTag()
+ * `disabled-text-color`             | @copydoc getDisabledTextColor()
+ * `disabled-gradient`               | @copydoc getDisabledGradient()
+ * `button-image`                    | @copydoc getImage()
+ * `button-image-has-disabled-state` | @copydoc getImageHasDisabledState()
+ * `precision-override`              | @copydoc getPrecisionOverride()
  */
 class TextButtonView : public CustomViewAdapter<CTextButton>
 {
@@ -39,16 +52,24 @@ public:
   // Constructor
   explicit TextButtonView(const CRect &iSize) : CustomViewAdapter(iSize) {}
 
-  // get/set titleTag to (optionally) tie the title of this text button to a (Jmb) parameter
+  //! Attribute `title-tag`.
   virtual void setTitleTag(ParamID iValue);
+
+  /**
+   * Optional id of the parameter whose string representation (`IGUIParameter::toUTF8String()`) will be used
+   * as the title for this button. */
   ParamID getTitleTag() const { return fTitleTag; };
 
-  // get/set disabled text color (color to use when button is disabled)
+  //! Color used to draw the title when no image is provided and the button is disabled.
   CColor const &getDisabledTextColor() const { return fDisabledTextColor; }
+
+  //! Attribute `disabled-text-color`.
   virtual void setDisabledTextColor(CColor const &iColor) { fDisabledTextColor = iColor; };
 
-  // get/set disabled gradient (gradient to use when button is disabled)
+  //! Gradient used to draw the button when no image is provided and the button is disabled.
   GradientPtr getDisabledGradient() const { return fDisabledGradient; }
+
+  //! Attribute `disabled-gradient`.
   virtual void setDisabledGradient(GradientPtr iGradient) { fDisabledGradient = iGradient; };
 
   void setMouseEnabled(bool bEnable) override;
@@ -75,28 +96,45 @@ public:
   void setOnClickListener(OnClickListener iListener) { fOnClickListener = std::move(iListener); }
 
   /**
-   * If you want to replace the entire drawing with an image you can provide a 'button-image'.
+   * The image for the button.
    *
-   * If 'button-image-has-disabled-state' is selected then the image should contain the following
+   * If `button-image-has-disabled-state` is `true` then the image should contain the following
    * 3 frames (each is of size image height / 3):
-   *   - at y = 0, the button in its disabled state
-   *   - at y = 1 * image height / 3, the button in its off state
-   *   - at y = 2 * image height / 3, the button in its on state
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its disabled state
+   *   1 * image height / 3 | the button in its "off" state
+   *   2 * image height / 3 | the button in its "on" state
    *
-   * If 'button-image-has-disabled-state' is NOT selected then the image should contain the following
+   *   Example: ![3 frames example](https://raw.githubusercontent.com/pongasoft/vst-sam-spl-64/v1.0.0/resource/action_crop.png)
+   *
+   * If `button-image-has-disabled-state` is `false` then the image should contain the following
    * 2 frames (each is of size image height / 2):
-   *   - at y = 0, the button in its off state
-   *   - at y = image height / 2, the button in its on state
+   *   y | frame
+   *   - | -----
+   *   0 | the button in its "off" state
+   *   image height / 2 | the button in its "on" state
+   *
+   *   Example: ![2 frames example](https://raw.githubusercontent.com/pongasoft/vst-sam-spl-64/v1.0.0/resource/bankC.png)
    */
   BitmapPtr getImage() const { return fImage; }
   void setImage(BitmapPtr iImage) { fImage = iImage; }
 
   /**
-   * If the image contains a disabled state (3 frames) or not (2 frames) */
+   * Used when drawing the image. If `true`, the image contains a disabled state (3 frames) otherwise it doesn't (2 frames).
+   *
+   * @see getImage() for details on how the frames are laid out in the image */
   bool getImageHasDisabledState() const { return fImageHasDisabledState; }
   void setImageHasDisabledState(bool iValue) { fImageHasDisabledState = iValue; }
 
-  // get/set precision-override
+  /**
+   * Allow to override the precision of the parameter.
+   *
+   * If set to its default (-1), lets the parameter determine what the precision is (when displaying numbers),
+   * but if set `>= 0` it will use the attribute value instead.
+   *
+   * @see IGUIParameter::toUTF8String()
+   */
   int32 getPrecisionOverride() const { return fPrecisionOverride; }
   void setPrecisionOverride(int32 iPrecisionOverride) { fPrecisionOverride = iPrecisionOverride; markDirty(); }
 
@@ -107,7 +145,9 @@ protected:
   virtual void drawButtonText(CDrawContext *context);
 
   /**
-   * Called when the button is simply rendered as an image (\see TextButtonView::getImage)
+   * Called when the button is simply rendered as an image.
+   *
+   * @see getImage()
    */
   virtual void drawButtonImage(CDrawContext *context);
 

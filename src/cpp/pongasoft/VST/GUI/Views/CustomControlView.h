@@ -33,9 +33,9 @@ namespace pongasoft::VST::GUI::Views {
  *
  * In addition to the attributes exposed by `CustomView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `control-tag` | the tag (parameter id) of the parameter tied to this view | `getControlTag()`
+ * Attribute     | Description
+ * ---------     | -----------
+ * `control-tag` | @copydoc getControlTag()
  *
  */
 class CustomControlView : public CustomView
@@ -47,7 +47,7 @@ public:
   virtual void setControlTag (ParamID iTag) { fControlTag = iTag; };
 
   /**
-   * Returns the id of the parameter that this view manages.
+   * Id of the parameter that this view manages.
    *
    * @note For consistency with the %VSTGUI `CControl` class, this code uses the name *tag* (but it is properly
    *       mapped to a `ParamID` since this is what is represented).
@@ -143,9 +143,9 @@ using RawCustomControlView = TCustomControlView<ParamValue>;
  *
  * In addition to the attributes exposed by `CustomControlView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `step-count` | number of steps for the discrete values (`[0, 1, ..., getStepCount()]`) | `getStepCount()`
+ * Attribute    | Description
+ * ---------    | -----------
+ * `step-count` | @copydoc getStepCount()
  *
  * @see IGUIParameter::asDiscreteParameter()
  */

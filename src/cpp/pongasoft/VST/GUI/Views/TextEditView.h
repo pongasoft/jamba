@@ -34,8 +34,13 @@ public:
 };
 
 /**
- * Extends the CTextEdit view to tie it to a GUIJmbParam<UTF8String> => multiple views tied to the same paramID (aka Tag)
- * are all synchronized and the text edit value will be saved and restored with the state.
+ * Extends the `CTextEdit` view to tie it to a `GUIJmbParam<UTF8String>`.
+ *
+ * This allows to have multiple views tied to the same id which are all synchronized and the text edit
+ * value will be saved and restored with the state. In essence this class behaves like "regular" Vst parameters but
+ * for a `UTF8String` instead.
+ *
+ * This class does not have any specific attributes (besides the one exposed via `CTextEdit`).
  */
 class TextEditView : public CustomViewAdapter<TextEdit>
 {

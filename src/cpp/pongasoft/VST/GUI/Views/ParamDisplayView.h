@@ -29,9 +29,9 @@ namespace pongasoft::VST::GUI::Views {
  *
  * In addition to the attributes exposed by `CustomViewAdapter`, this class exposes the following attribute:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `precision-override` | if set to its default (-1), lets the parameter determine what the precision is (when displaying numbers), but if set `>= 0` it will use the attribute value instead | `getPrecisionOverride()`
+ * Attribute            | Description
+ * ---------            | -----------
+ * `precision-override` | @copydoc getPrecisionOverride()
  */
 class ParamDisplayView : public CustomViewAdapter<CParamDisplay>
 {
@@ -48,7 +48,13 @@ public:
   // draw - overridden to handle any parameter
   void draw(CDrawContext *iContext) override;
 
-  // get/set precision-override
+  /**
+   * Allow to override the precision of the parameter.
+   *
+   * If set to its default (-1), lets the parameter determine what the precision is (when displaying numbers),
+   * but if set `>= 0` it will use the attribute value instead.
+   *
+   * @see IGUIParameter::toUTF8String() */
   int32 getPrecisionOverride() const { return fPrecisionOverride; }
   void setPrecisionOverride(int32 iPrecisionOverride) { fPrecisionOverride = iPrecisionOverride; markDirty(); }
 

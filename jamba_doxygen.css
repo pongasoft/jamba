@@ -272,6 +272,11 @@ dl.note {
   padding: 3px;
 }
 
+dl.deprecated {
+  background: #d0d0d0;
+  padding: 3px;
+}
+
 dl.section.warning {
   background: #FAE2E2;
   padding: 3px;

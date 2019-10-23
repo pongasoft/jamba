@@ -36,18 +36,18 @@ using namespace VSTGUI;
  *
  * In addition to the attributes exposed by `CustomView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `offset-percent-tag` | id for the parameter tied to offset percent | `getOffsetPercentTag()`
- * `zoom-percent-tag` | id of the parameter tied to zoom percent | `getZoomPercentTag()`
- * `margin` | amount of space (in pixels) to draw around the full scrollbar (includes handles) | `getMargin()`
- * `scrollbar-color` | the color of the scrollbar itself (the rectangle) | `getScrollbarColor()`
- * `scrollbar-min-size` | minimum size that the scrollbar should have (in pixels) | `getScrollbarMinSize()`
- * `scrollbar-gutter-spacing` | space between the body (rectangle) and the handles | `getScrollbarGutterSpacing()`
- * `zoom-handles-color` | color of the handles | `getZoomHandlesColor()`
- * `zoom-handles-size` | size (in pixels) of the handles | `getZoomHandlesSize()`
- * `shift-drag-factor` | how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging | `getShiftDragFactor()`
- * `enable-zoom-double-click` | `true` to allow zooming on double click on the scrollbar | `getEnableZoomDoubleClick()`
+ * Attribute                  | Description
+ * ---------                  | -----------
+ * `offset-percent-tag`       | @copydoc getOffsetPercentTag()
+ * `zoom-percent-tag`         | @copydoc getZoomPercentTag()
+ * `margin`                   | @copydoc getMargin()
+ * `scrollbar-color`          | @copydoc getScrollbarColor()
+ * `scrollbar-min-size`       | @copydoc getScrollbarMinSize()
+ * `scrollbar-gutter-spacing` | @copydoc getScrollbarGutterSpacing()
+ * `zoom-handles-color`       | @copydoc getZoomHandlesColor()
+ * `zoom-handles-size`        | @copydoc getZoomHandlesSize()
+ * `shift-drag-factor`        | @copydoc getShiftDragFactor()
+ * `enable-zoom-double-click` | @copydoc getEnableZoomDoubleClick()
  */
 class ScrollbarView : public CustomView
 {
@@ -58,47 +58,45 @@ public:
   // draw
   void draw(CDrawContext *iContext) override;
 
-  // tag to tie offsetPercent to a Vst parameter
+  //! id for the parameter tied to offset percent
   ParamID getOffsetPercentTag() const { return fOffsetPercentTag; }
   void setOffsetPercentTag(ParamID offsetPercentTag);
 
-  // tag to tie zoomPercent to a Vst parameter
+  //! id for the parameter tied to zoom percent
   ParamID getZoomPercentTag() const { return fZoomPercentTag; }
   void setZoomPercentTag(ParamID zoomPercentTag);
 
-  // margin : whitespace around the scrollbar
+  //! Amount of space (in pixels) to draw around the full scrollbar (includes handles)
   Margin const &getMargin() const { return fMargin; }
   void setMargin(Margin  const &iMargin) { fMargin = iMargin; needsRecomputing();}
 
-  // scrollbar color
+  //! the color of the scrollbar itself (the rectangle)
   const CColor &getScrollbarColor() const { return fScrollbarColor; }
   void setScrollbarColor(const CColor &iColor) { fScrollbarColor = iColor; needsRecomputing(); }
 
-  // minimum size for the scrollbar. If -1 it will be auto-computed
+  //! Minimum size for the scrollbar (in pixels). If -1 it will be auto-computed.
   CCoord getScrollbarMinSize() const { return fScrollbarMinSize; }
   void setScrollbarMinSize(CCoord iScrollbarMinSize) { fScrollbarMinSize = iScrollbarMinSize; needsRecomputing();}
 
-  // spacing between the scrollbar and zoom handles (only drawn when zoom handles)
+  //! Spacing (in pixels) between the scrollbar and zoom handles (only drawn when zoom handles)
   CCoord getScrollbarGutterSpacing() const { return fScrollbarGutterSpacing; }
   void setScrollbarGutterSpacing(CCoord iScrollbarGutterSpacing) { fScrollbarGutterSpacing = iScrollbarGutterSpacing; needsRecomputing();}
 
   // showHandles
   bool showHandles() const { return fZoomHandlesSize != 0; }
 
-  // zoom handles color
+  //! Zoom handles color
   const CColor &getZoomHandlesColor() const { return fZoomHandlesColor; }
   void setZoomHandlesColor(const CColor &iColor) { fZoomHandlesColor = iColor; needsRecomputing(); }
 
-  // zoom handles size.  If -1 it will be auto-computed. Set to 0 to disable handles entirely
+  //! Zoom handles size.  If -1 it will be auto-computed. Set to 0 to disable handles entirely.
   CCoord getZoomHandlesSize() const { return fZoomHandlesSize; }
   void setZoomHandlesSize(CCoord iSize) { fZoomHandlesSize = iSize; needsRecomputing(); }
 
   /**
-   * Attribute `shift-drag-factor`.
-   *
    * Defines how much to slow down (if less than 1) or accelerate (if more than 1) when shift is held when dragging.
    *
-   * @note This attribute defines a range (which can be a degenerate range where both `from` and `to` are the same)
+   * @note This attribute defines a range (which can be a degenerate range when both `from` and `to` are the same)
    *       in the event you want the factor to vary depending on how zoomed the scrollbar is.
    *       For example: `shift-drag-factor="0.01,0.5"`
    */
@@ -107,7 +105,7 @@ public:
   //! Attribute `shift-drag-factor`.
   void setShiftDragFactor(Range const &iShiftDragFactor) { fShiftDragFactor = iShiftDragFactor; }
 
-  // whether to allow double clicking for zoom
+  //! `true` to allow zooming on double click on the scrollbar
   bool getEnableZoomDoubleClick() const { return fEnableZoomDoubleClick; }
   void setEnableZoomDoubleClick(bool iEnableZoomDoubleClick) { fEnableZoomDoubleClick = iEnableZoomDoubleClick; }
 

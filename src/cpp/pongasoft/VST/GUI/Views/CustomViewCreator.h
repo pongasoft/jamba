@@ -1299,8 +1299,9 @@ namespace impl {
  *   };
  * };
  * }
- *
  * ```
+ *
+ * @note You can check the `TextButtonView` class for a complete example of a custom view using a `CustomViewAdpater`.
  *
  * @tparam TView the type of the view that is being created by this creator (usually the name of the outer class)
  * @tparam TBaseView optional parameter specifying the type of the base view

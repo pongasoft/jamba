@@ -47,13 +47,13 @@ using namespace Params;
  * - `onParameterChange()` to react to parameters that have changed (don't forget to call `markDirty()` or delegate to
  *   this class for the view to be redrawn).
  *
- * This class exposes the following attributes:
+ * In addition to the attributes exposed by `CView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `custom-view-tag` | optional tag to differentiate between views when implementing a custom controller | `getCustomViewTag()`
- * `editor-mode` | a flag whose purpose is to render/log information during development when the flag is set to `true` | `getEditorMode()`
- * `back-color` | background color for the view (transparent for no background) | `getBackColor()`
+ * Attribute         | Description
+ * ---------         | -----------
+ * `custom-view-tag` | @copydoc getCustomViewTag()
+ * `editor-mode`     | @copydoc getEditorMode()
+ * `back-color`      | @copydoc getBackColor()
  *
  * @see `CustomViewCreator` for details on how a custom view gets created
  */
@@ -67,7 +67,7 @@ public:
   CustomView(const CustomView &c) = delete;
 
   /**
-   * Returns the back color (background) for the view. The `draw()` method in this class simply delegates
+   * The back color (background) for the view. The `draw()` method in this class simply delegates
    * to `drawBackColor()` which paints the background of the view with this color (if not set to transparent).
    */
   CColor const &getBackColor() const { return fBackColor; }
@@ -81,7 +81,7 @@ public:
   void setCustomViewTag (TagID iTag) { fTag = iTag; }
 
   /**
-   * Returns the tag associated to this custom view. This tag (which is **not** related to a parameter), is optional
+   * The tag associated to this custom view. This tag (which is **not** related to a parameter), is optional
    * and can be used to differentiate between views when implementing a custom controller.
    *
    * ```
@@ -111,7 +111,7 @@ public:
   void setEditorMode(bool iEditorMode);
 
   /**
-   * Editor mode is a flag whose purpose is to render/log information during development when the flag is set to
+   * A flag whose purpose is to render/log information during development when the flag is set to
    * `true`. It can be flipped directly in the %VSTGUI Editor without having to recompile the code.
    *
    * ```
@@ -320,15 +320,16 @@ using StateAwareCustomView = StateAwareView<CustomView, TGUIState>;
  * another class from %VSTGUI (ex: `CTextEdit`), you can use this class which implements most of the behavior
  * from `CustomView`.
  *
- * This class exposes the following attributes:
+ * In addition to the attributes exposed by `TView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `custom-view-tag` | optional tag to differentiate between views when implementing a custom controller | `getCustomViewTag()`
- * `editor-mode` | a flag whose purpose is to render/log information during development when the flag is set to `true` | `getEditorMode()`
+ * Attribute         | Description
+ * ---------         | -----------
+ * `custom-view-tag` | @copydoc getCustomViewTag()
+ * `editor-mode`     | @copydoc getEditorMode()
  *
  * @tparam TView the view class (for ex: `CTextEdit`)
- * @see `CustomView`
+ * @see `CustomView` for more details on the various methods to override
+ * @see `CustomViewCreator` for more details on how to make sure the attributes from `TView` are properly exposed
  */
 template<typename TView>
 class CustomViewAdapter : public TView, public ParamAware, public ICustomViewLifecycle
@@ -417,7 +418,7 @@ public:
 };
 
 /**
- * This class can be used to extend VST SDK classes directly while still benefiting from the extensions added by
+ * This class can be used to extend %VST SDK classes directly while still benefiting from the extensions added by
  * this framework (multiple param access and state access)
  *
  * @tparam TView the view class (for ex: CTextEdit)
@@ -448,7 +449,7 @@ protected:
 };
 
 /**
- * @deprecated Use StateAwareView instead
+ * @deprecated Use `StateAwareView` instead
  */
 template<typename TView, typename TGUIState>
 class [[deprecated("Since 4.0.0 - Use StateAwareView instead")]] PluginView : public StateAwareView<TView, TGUIState>
@@ -458,7 +459,7 @@ public:
 };
 
 /**
- * @deprecated Use StateAwareCustomView instead
+ * @deprecated Use `StateAwareCustomView` instead
  */
 template<typename TGUIState>
 class [[deprecated("Since 4.0.0 - Use StateAwareCustomView instead")]] PluginCustomView : public StateAwareCustomView<TGUIState>
@@ -468,7 +469,7 @@ public:
 };
 
 /**
- * @deprecated Use StateAwareCustomViewAdapter instead
+ * @deprecated Use `StateAwareCustomViewAdapter` instead
  */
 template<typename TView, typename TGUIState>
 class [[deprecated("Since 4.0.0 - Use StateAwareCustomViewAdapter instead")]] PluginCustomViewAdapter : public StateAwareCustomViewAdapter<TView, TGUIState>

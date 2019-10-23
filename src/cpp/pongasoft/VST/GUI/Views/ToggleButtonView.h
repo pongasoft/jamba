@@ -39,14 +39,14 @@ using namespace Params;
  *
  * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `on-step` |  maps to the "on" value unless it is set to its default (-1) value in which case it maps to `getStepCount()` (should be `-1` or `[0, stepCount]`) | `getOnStep()`
- * `off-step` | maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0` (should be `-1` or `[0, stepCount]`) | `getOffStep()`
- * `on-color` | when no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state (draws a rectangle with this color) | `getOnColor()`
- * `frames` | the number of frames the image contains (see `getImage()` for details) | `getFrames()`
- * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
- * `inverse` | inverses the meaning of "on" and "off" in regards to drawing the view/image | `getInverse()`
+ * Attribute      | Description
+ * ---------      | -----------
+ * `on-step`      | @copydoc getOnStep()
+ * `off-step`     | @copydoc getOffStep()
+ * `on-color`     | @copydoc getOnColor()
+ * `frames`       | @copydoc getFrames()
+ * `button-image` | @copydoc getImage()
+ * `inverse`      | @copydoc getInverse()
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -77,14 +77,16 @@ public:
   bool sizeToFit() override;
 
   /**
-   * Attribute `off-step`
+   * Maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0`
+   * (should be `-1` or a value in `[0, stepCount]`).
    */
   int32 getOffStep() const { return fOffStep; }
   void setOffStep(int32 iStep) { fOffStep = iStep; markDirty(); }
   int32 getComputedOffStep() const { return std::max(Utils::ZERO_INT32, getOffStep()); }
 
   /**
-   * Attribute `on-step`
+   * Maps to the "on" value unless it is set to its default (-1) value in which case it maps to `getStepCount()`
+   * (should be `-1` or a value in `[0, stepCount]`).
    */
   int32 getOnStep() const { return fOnStep; }
   void setOnStep(int32 iStep) { fOnStep = iStep; markDirty(); }
@@ -101,23 +103,30 @@ public:
    */
   int32 toggleControlValue();
 
-  // get/set frames (should be either 2 or 4) 4 includes the pressed state
+  /**
+   * The number of frames the image contains. Should be either 2 or 4 (4 includes the pressed state).
+   *
+   * @see `getImage()` for more details on the content of the image based on this value
+   */
   int getFrames() const { return fFrames; }
 
   void setFrames(int iFrames);
 
-  // get/setOnColor (the off color is the back color...)
+  /**
+   * When no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state
+   * (draws a rectangle with this color).
+   */
   CColor const &getOnColor() const { return fOnColor; }
 
   void setOnColor(CColor const &iColor) { fOnColor = iColor; }
 
-  // get/setInverse (toggles which image is on and which is off)
+  //! Inverses the meaning of "on" and "off" in regards to drawing the view/image.
   bool getInverse() const { return fInverse; }
 
   void setInverse(bool iInverse) { fInverse = iInverse; }
 
   /**
-   * Attribute `button-image`.
+   * The image to use to draw the button.
    *
    * The content of the image depends on the attribute `frames` (`getFrames()`) with the following convention:
    *

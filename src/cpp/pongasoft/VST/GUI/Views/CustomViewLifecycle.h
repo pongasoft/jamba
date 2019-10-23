@@ -30,12 +30,15 @@ public:
   /**
    * Called after the attributes have been applied by the framework.
    *
-   * The %VST SDK always apply all attributes attached to the view as a block (loop). Whether it is at loading time
-   * (after loading the xml, and instantiating the view) or in the editor when modifying attributes.
-   * This ends up calling "setters" on the view (via the `Creator`). This call is invoked after all attributes have
-   * been set which allow to handle a consistent set of attributes. By default the jamba framework will call
-   * `registerParameters` from this api because at this point in the lifecycle all attributes have been set (which
-   * include paramIDs/tagIDs and are required for registering parameters).
+   * The %VST SDK always apply all attributes attached to the view in a loop (and always all of them
+   * even if only one changes). Whether it is at loading time (after loading the xml, and instantiating the view) or
+   * in the editor when modifying attributes. This ends up calling "setters" on the view (via the `Creator`).
+   *
+   * This method is invoked after all attributes have been set which allow to handle a consistent set of attributes.
+   *
+   * @note The Jamba framework implements this method to call `registerParameters` because at this point in the
+   * lifecycle, all attributes have been set (which include paramIDs/tagIDs that are required for registering
+   * parameters).
    */
   virtual void afterApplyAttributes() {};
 };

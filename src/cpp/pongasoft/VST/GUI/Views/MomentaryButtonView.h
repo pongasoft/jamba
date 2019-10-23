@@ -40,15 +40,15 @@ using namespace VSTGUI;
  *
  * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `on-step` |  maps to the "on" value unless it is set to its default (-1) value in which case it maps to `getStepCount()` (should be `-1` or `[0, stepCount]`) | `getOnStep()`
- * `off-step` | maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0` (should be `-1` or `[0, stepCount]`) | `getOffStep()`
- * `on-color` | when no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state (draws a rectangle with this color) | `getOnColor()`
- * `disabled-color` | when no image is provided and the control is disabled, this color is used instead | `getDisabledColor()`
- * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
- * `button-image-has-disabled-state` | used when drawing the image (see `getImage()` for details) | `getImageHasDisabledState()`
- * `inverse` | inverses the meaning of "on" and "off" in regards to drawing the view/image | `getInverse()`
+ * Attribute                         | Description
+ * ---------                         | -----------
+ * `on-step`                         | @copydoc getOnStep()
+ * `off-step`                        | @copydoc getOffStep()
+ * `on-color`                        | @copydoc getOnColor()
+ * `disabled-color`                  | @copydoc getDisabledColor()
+ * `button-image`                    | @copydoc getImage()
+ * `button-image-has-disabled-state` | @copydoc getImageHasDisabledState()
+ * `inverse`                         | @copydoc getInverse()
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -80,7 +80,10 @@ public:
   // sizeToFit
   bool sizeToFit() override;
 
-  //! Attribute `off-step`
+  /**
+   * Maps to the "off" value unless it is set to its default (-1) value in which case it maps to `0`
+   * (should be `-1` or a value in `[0, stepCount]`).
+   */
   int32 getOffStep() const { return fOffStep; }
 
   //! Attribute `off-step`
@@ -89,7 +92,10 @@ public:
   //! Computes "off" step based on value of `off-step` attribute
   int32 getComputedOffStep() const { return std::max(Utils::ZERO_INT32, getOffStep()); }
 
-  //! Attribute `on-step`
+  /**
+   * Maps to the "on" value unless it is set to its default (-1) value in which case it maps to `getStepCount()`
+   * (should be `-1` or a value in `[0, stepCount]`).
+   */
   int32 getOnStep() const { return fOnStep; }
 
   //! Attribute `on-step`
@@ -102,18 +108,22 @@ public:
   bool isOff() const { return getControlValue() == getComputedOffStep(); }
   bool isOn() const { return !isOff(); }
 
-  //! Attribute `on-color` (the "off" color is the back color...)
+  /**
+   * When no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state
+   * (draws a rectangle with this color).
+   */
   CColor const &getOnColor() const { return fOnColor; }
 
   //! Attribute `on-color` (the "off" color is the back color...)
   void setOnColor(CColor const &iColor) { fOnColor = iColor; }
 
-  // get/setDisabledColor color for when disabled (mouse enabled set to false)
+  /**
+   * When no image is provided and the control is disabled, this color is used instead */
   CColor const &getDisabledColor() const { return fDisabledColor; }
   void setDisabledColor(CColor const &iColor) { fDisabledColor = iColor; }
 
   /**
-   * Attribute `button-image`.
+   * The image to use to draw the button.
    *
    * If `button-image-has-disabled-state` is `true` then the image should contain the following
    * 3 frames (each is of size image height / 3):
@@ -140,11 +150,13 @@ public:
   void setImage(BitmapPtr iImage) { fImage = iImage; }
 
   /**
-   * If the image contains a disabled state (3 frames) or not (2 frames) */
+   * Flag to determine whether the image contains a disabled state (3 frames) or not (2 frames)
+   *
+   * @see `getImage()` for details on the impact of this flag on the image */
   bool getImageHasDisabledState() const { return fImageHasDisabledState; }
   void setImageHasDisabledState(bool iValue) { fImageHasDisabledState = iValue; }
 
-  // get/setInverse (toggles which image is on and which is off)
+  //! Inverses the meaning of "on" and "off" in regards to drawing the view/image.
   bool getInverse() const { return fInverse; }
   void setInverse(bool iInverse) { fInverse = iInverse; }
 

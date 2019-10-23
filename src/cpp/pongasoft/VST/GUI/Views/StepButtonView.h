@@ -33,15 +33,15 @@ using namespace VSTGUI;
  *
  * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `step-increment` | value by which this button will increment (positive) or decrement (negative) the parameter | `getStepIncrement()`
- * `shift-step-increment` | allows for a different value when the shift modifier is being held (for example having bigger steps or smaller steps) | `getShiftStepIncrement()`
- * `wrap` | defines what happens when the value reaches its end of range after being incremented (resp. decremented). When set to `true` it will wrap around, otherwise it will remain at its max (resp. min) | `getWrap()`
- * `held-color` | color to use when the button is held and no image is provided | `getHeldColor()`
- * `released-color` | color to use when the button is not held and no image is provided | `getReleasedColor()`
- * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
- * `arrow-direction` | when no image is provided, the button is rendered as an arrow pointing in the direction defined by this attribute | `getArrowDirection()`
+ * Attribute              | Description
+ * ---------              | -----------
+ * `step-increment`       | @copydoc getStepIncrement()
+ * `shift-step-increment` | @copydoc getShiftStepIncrement()
+ * `wrap`                 | @copydoc getWrap()
+ * `held-color`           | @copydoc getHeldColor()
+ * `released-color`       | @copydoc getReleasedColor()
+ * `button-image`         | @copydoc getImage()
+ * `arrow-direction`      | @copydoc getArrowDirection()
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -82,16 +82,16 @@ public:
   // true if held
   bool isHeld() const { return fHeld; }
 
-  // get/setHeldColor
+  //! Color to use when the button is held and no image is provided
   inline CColor const &getHeldColor() const { return fHeldColor; }
   void setHeldColor(CColor const &iColor) { fHeldColor = iColor; markDirty(); }
 
-  // get/setReleasedColor
+  //! Color to use when the button is not held and no image is provided
   inline CColor const &getReleasedColor() const { return fReleasedColor; }
   void setReleasedColor(CColor const &iColor) { fReleasedColor = iColor; markDirty(); }
 
   /**
-   * Attribute `button-image`.
+   * The image for the button.
    *
    * The image should contain 2 frames (each is of size image height / 2) with the following convention:
    *
@@ -109,8 +109,7 @@ public:
   void setImage(BitmapPtr iImage) { fImage = iImage; markDirty(); }
 
   /**
-   * @return the increment value applied every time the step button is released, negative value will be decreasing
-   * and positive value will be increasing
+   * Value by which this button will increment (positive) or decrement (negative) the parameter.
    */
   int32 getStepIncrement() const { return fStepIncrement; }
 
@@ -120,8 +119,8 @@ public:
   void setStepIncrement(int32 iStepIncrement) { fStepIncrement = iStepIncrement; fButtonPolygon = nullptr; }
 
   /**
-   * @return the increment value applied every time the step button is released while shift is being selected.
-   * Negative value will be decreasing and positive value will be increasing
+   * Value by which this button will increment (positive) or decrement (negative) the parameter when the shift key
+   * modified is being held. This allows to have bigger steps (or smaller steps) when shift is used.
    */
   int32 getShiftStepIncrement() const { return fShiftStepIncrement; }
 
@@ -130,15 +129,15 @@ public:
    */
   void setShiftStepIncrement(int32 iStepIncrement) { fShiftStepIncrement = iStepIncrement; }
 
-  /// get/setWrap => whether the discrete value wraps around when it reaches max (or min)
+  /**
+   * Defines what happens when the value reaches its end of range after being incremented (resp. decremented).
+   * When set to `true` it will wrap around, otherwise it will remain at its max (resp. min) */
   inline bool getWrap() const { return fWrap; }
   void setWrap(bool iFlag) { fWrap = iFlag; markDirty(); }
 
   /**
-   * Attribute `arrow-direction`.
-   *
-   * Used only when no bitmap provided to draw an arrow pointing in the direction defined by this attribute. A value
-   * of `auto` will trigger the rendering of an arrow up if `step-increment` is positive, and down if negative.
+   * Used only when no bitmap provided in order to draw an arrow pointing in the direction defined by this attribute.
+   * A value of `auto` will trigger the rendering of an arrow up if `step-increment` is positive, and down if negative.
    */
   EArrowDirection getArrowDirection() const { return fArrowDirection; }
 

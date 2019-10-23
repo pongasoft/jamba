@@ -35,13 +35,13 @@ using namespace Params;
  *
  * In addition to the attributes exposed by `CustomDiscreteControlView`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `frames` | the number of frames the image contains (see `getImage()` for details) | `getFrames()`
- * `on-color` | when no image is provided, `back-color` is used for the "off" state and `on-color` for the "on" state (draws a rectangle with this color) | `getOnColor()`
- * `button-image` | the image to use to draw the button (see `getImage()` for details on the content of the image) | `getImage()`
- * `inverse` | inverses the meaning of "on" and "off" in regards to drawing the view/image | `getInverse()`
- * `step` | the value used to check whether the button is "on" or "off" as well as the value to set the parameter to when the button is selected | `getStep()`
+ * Attribute      | Description
+ * ---------      | -----------
+ * `frames`       | @copydoc getFrames()
+ * `on-color`     | @copydoc getOnColor()
+ * `button-image` | @copydoc getImage()
+ * `inverse`      | @copydoc getInverse()
+ * `step`         | @copydoc getStep()
  *
  * @see CustomDiscreteControlView for details on discrete parameters and the usage of `step-count`
  */
@@ -78,26 +78,37 @@ public:
 
   void setOn();
 
-  //! Attribute `frames`. Should be either 2 or 4 (4 includes the pressed state).
+  /**
+   * The number of frames the image contains. Should be either 2 or 4 (4 includes the pressed state).
+   *
+   * @see `getImage()` for details
+   */
   int getFrames() const { return fFrames; }
 
   void setFrames(int iFrames);
 
-  // get/setOnColor (the off color is the back color...)
+  /**
+   * When no image is provided, `back-color` is used for the "off" state and `on-color` for the "on"
+   * state (draws a rectangle with this color).
+   */
   CColor const &getOnColor() const { return fOnColor; }
 
   void setOnColor(CColor const &iColor) { fOnColor = iColor; }
 
-  // get/setInverse (toggles which image is on and which is off)
+  //! Inverses the meaning of "on" and "off" in regards to drawing the view/image.
   bool getInverse() const { return fInverse; }
 
   void setInverse(bool iInverse) { fInverse = iInverse; }
 
+  /**
+   * The value used to check whether the button is "on" or "off" as well as the value to set the
+   * parameter to when the button is selected.
+   */
   int32 getStep() const { return fStep; }
   void setStep(int32 step);
 
   /**
-   * Attribute `button-image`.
+   * The image for the button.
    *
    * The content of the image depends on the attribute `frames` (`getFrames()`) with the following convention:
    *

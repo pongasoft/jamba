@@ -29,9 +29,9 @@ namespace pongasoft::VST::GUI::Views {
  *
  * In addition to the attributes exposed by `ParamDisplayView`, this class exposes the following attribute:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `highlight-duration-ms` | duration (in ms) to highlight the parameter for when it changes | `getHighlightDurationMs()`
+ * Attribute               | Description
+ * ---------               | -----------
+ * `highlight-duration-ms` | @copydoc getHighlightDurationMs()
  */
 class DebugParamDisplayView : public ParamDisplayView, public ITimerCallback
 {
@@ -73,7 +73,7 @@ public:
     CustomViewAdapter::onParameterChange(iParamID);
   }
 
-  // get/set `highlight-duration-ms`
+  //! Duration (in ms) to highlight the parameter for when it changes
   uint32 getHighlightDurationMs() const { return fHighlightDurationMs; }
   void setHighlightDurationMs(uint32 iValue) { fHighlightDurationMs = iValue; }
 

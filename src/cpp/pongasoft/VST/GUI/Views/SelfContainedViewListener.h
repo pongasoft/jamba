@@ -21,10 +21,7 @@
 #include <vstgui4/vstgui/lib/cview.h>
 #include <pongasoft/logging/logging.h>
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
@@ -37,48 +34,53 @@ using namespace VSTGUI;
  *
  * The typical code usage would be
  *
- *     // Create your own listener
- *     class MyViewListener : public SelfContainedViewListener
- *     {
- *       public:
- *         // override whichever method from IViewListener that you are interested in
- *         // if you override viewWillDelete, make sure to call SelfContainedViewListener::viewWillDelete
- *     }
+ * ```
+ * // Create your own listener
+ * class MyViewListener : public SelfContainedViewListener
+ * {
+ *   public:
+ *     // override whichever method from IViewListener that you are interested in
+ *     // if you override viewWillDelete, make sure to call SelfContainedViewListener::viewWillDelete
+ * }
  *
- *     // Scenario 1: you only care about creating a listener for the duration of the view
- *     // we assume that it is being called from a custom controller
- *     // (but can be called directly from a view using "this")
- *     CView *verifyView(CView *iView, ...)
- *     {
- *       if(iView ....)
- *       {
- *         // create and "forget"... completely self contained, no need to keep a reference to it
- *         SelfContainedViewListener::create<MyViewListener>(iView);
- *       }
- *     }
+ * // Scenario 1: you only care about creating a listener for the duration of the view
+ * // we assume that it is being called from a custom controller
+ * // (but can be called directly from a view using "this")
+ * CView *verifyView(CView *iView, ...)
+ * {
+ *   if(iView ....)
+ *   {
+ *     // create and "forget"... completely self contained, no need to keep a reference to it
+ *     SelfContainedViewListener::create<MyViewListener>(iView);
+ *   }
+ * }
  *
- *     // Scenario 2: you want to be able to unregister at a later time
- *     std::shared_ptr<MyViewListener> fListener{};
+ * // Scenario 2: you want to be able to unregister at a later time
+ * std::shared_ptr<MyViewListener> fListener{};
  *
- *     CView *verifyView(CView *iView, ...)
- *     {
- *       if(iView ....)
- *       {
- *         // keep a reference to it which is guaranteed to remain valid
- *         fListener = SelfContainedViewListener::create<MyViewListener>(iView);
- *       }
- *     }
+ * CView *verifyView(CView *iView, ...)
+ * {
+ *   if(iView ....)
+ *   {
+ *     // keep a reference to it which is guaranteed to remain valid
+ *     fListener = SelfContainedViewListener::create<MyViewListener>(iView);
+ *   }
+ * }
  *
- *     void someCustomCode()
- *     {
- *      if(fListener)
- *        fListener->unregister();
- *     }
+ * void someCustomCode()
+ * {
+ *  if(fListener)
+ *    fListener->unregister();
+ * }
+ * ```
  *
  * Implementation note: internally this class keeps a `std::shared_ptr` to ifself for as long as `this` is registered
  * with the view itself, ensuring that this class is not going to be deleted until the view goes away (or it is
  * unregistered). If an outside piece of code also has a reference to this class which is scenario 2, then the class
  * itself won't be deleted until this other reference goes away.
+ *
+ * @note Although this class is not marked internal and you can use it in your own code, it is used by the framework
+ *       and you should rarely need to to use it.
  */
 class SelfContainedViewListener : protected IViewListenerAdapter, public std::enable_shared_from_this<SelfContainedViewListener>
 {
@@ -87,7 +89,7 @@ public:
    * This is the main method that should be used to create an instance of this class. It will automatically register
    * `this` class as a view listener to `iView`.
    *
-   * @tparam T the actual type (should be a subtype of SelfContainedViewListener)
+   * @tparam T the actual type (must be a subtype of `SelfContainedViewListener`)
    * @tparam Args optional arguments templates for the `T` constructor
    * @param iView the view on which this class will be registered as a listener (must not be `nullptr`)
    * @param iArgs optional arguments for the `T` constructor
@@ -96,6 +98,9 @@ public:
   template<typename T, typename ...Args>
   static std::shared_ptr<T> create(CView *iView, Args&& ...iArgs)
   {
+    // ensures that TView is a subclass of CView
+    static_assert(std::is_convertible<T *, SelfContainedViewListener*>::value, "T must be a subclass of SelfContainedViewListener");
+
     auto res = std::make_shared<T>(std::forward<Args>(iArgs)...);
     res->registerView(iView);
     return res;
@@ -103,7 +108,7 @@ public:
 
   /**
    * You can call this method at anytime to unregister `this` class as the listener to the view that was previously
-   * registered in SelfContainedViewListener::create. It is not necessary to call it explicitely as it will be
+   * registered in `SelfContainedViewListener::create()`. It is not necessary to call it explicitly as it will be
    * automatically unregistered when the view gets deleted.
    */
   virtual void unregister()
@@ -124,7 +129,7 @@ public:
 
   /**
    * Registers this class as a view listener. Note that this call requires to be called from a shared pointer. It is
-   * called by SelfContainedViewListener::create.
+   * called by `SelfContainedViewListener::create()`.
    */
   virtual std::shared_ptr<SelfContainedViewListener> registerView(CView *iView)
   {
@@ -158,7 +163,4 @@ protected:
   CView *fView{};
 };
 
-}
-}
-}
 }

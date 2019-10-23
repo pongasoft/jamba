@@ -14,6 +14,8 @@ This release contains a lot of big changes. Although I tried my best to be backw
   * Refactored most views to use the new optional and discrete parameter concepts, thus making them way more flexible
   * Changed `MomentaryButtonView` and `ToggleButtonView` to use discrete parameter concept (thus allowing other types than `bool`) and allowing
     to override the value of the steps representing *on* and *off*.
+  * Changed `SwitchViewContainer` to use discrete parameter concept, thus allowing to use any Vst or Jmb parameter that is 
+    (or can be interpreted as) a discrete parameter.
 * Major renaming: introduced `ParamAware` (formerly `GUIParamCxAware`) and `StateAware` (formerly `PluginAccessor`) (added deprecation warnings 
   for old names) and related.
 * Jmb GUI parameters no longer needed to be explicitly added to `GUIState` (similar to Vst parameters)

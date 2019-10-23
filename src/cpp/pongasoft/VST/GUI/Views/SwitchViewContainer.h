@@ -38,10 +38,10 @@ namespace pongasoft::VST::GUI::Views {
  *
  * In addition to the attributes exposed by `CViewContainer`, this class exposes the following attributes:
  *
- * Attribute | Description | More
- * --------- | ----------- | ----
- * `switch-control-tag` | id for the parameter tied to switching | `getSwitchControlTag()`
- * `template-names` | a comma separated list of template names | `getTemplateNames()`
+ * Attribute            | Description
+ * ---------            | -----------
+ * `switch-control-tag` | @copydoc getSwitchControlTag()
+ * `template-names`     | @copydoc getTemplateNames()
  */
 class SwitchViewContainer : public CustomViewAdapter<CViewContainer>, IViewContainerListenerAdapter
 {
@@ -50,11 +50,16 @@ public:
   explicit SwitchViewContainer(const CRect &iSize);
   ~SwitchViewContainer() override;
 
-  // get/setSwitchControlTag
+  //! Attribute `switch-control-tag`
   virtual void setSwitchControlTag (ParamID iTag) { fSwitchControlTag = iTag; };
+
+  /**
+   * id for the parameter tied to switching. It can be any parameter (both Vst and Jmb) that is
+   * (or can be interpreted as) a discrete parameter. */
   ParamID getSwitchControlTag () const { return fSwitchControlTag; }
 
-  // get/setTemplateNames
+  /**
+   * A comma separated list of template names. Should refer to valid templates (in the xml file) */
   const std::vector<std::string> &getTemplateNames() const { return fTemplateNames; }
   void setTemplateNames(const std::vector<std::string> &iNames) { fTemplateNames = iNames; switchCurrentView(); }
 
