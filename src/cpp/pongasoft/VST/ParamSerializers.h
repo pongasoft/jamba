@@ -435,10 +435,11 @@ public:
   // DiscreteTypeParamSerializer
   DiscreteTypeParamSerializer(ConstructorType iInitList)
   {
-    int32 stepCount = static_cast<int32>(iInitList.size() - 1);
-
+#ifndef NDEBUG
     // by definition, a discrete parameter has a step count > 0
+    auto stepCount = static_cast<int32>(iInitList.size() - 1);
     DCHECK_F(stepCount > 0);
+#endif
 
     int32 i = 0;
     for(auto &pair : iInitList)

@@ -82,6 +82,11 @@ public:
    */
   int32 getOffStep() const { return fOffStep; }
   void setOffStep(int32 iStep) { fOffStep = iStep; markDirty(); }
+
+  /**
+   * Actual value that the code should use for the underlying parameter. `getOffStep()` represents the raw attribute
+   * value which can be set to `-1`. This call returns the actual value representing the "off" step.
+   */
   int32 getComputedOffStep() const { return std::max(Utils::ZERO_INT32, getOffStep()); }
 
   /**
@@ -90,11 +95,34 @@ public:
    */
   int32 getOnStep() const { return fOnStep; }
   void setOnStep(int32 iStep) { fOnStep = iStep; markDirty(); }
+
+  /**
+   * Actual value that the code should use for the underlying parameter. `getOnStep()` represents the raw attribute
+   * value which can be set to `-1`. This call returns the actual value representing the "on" step.
+   */
   int32 getComputedOnStep() const;
 
-  // is on or off
+  //! Returns true if the toggle is in the "off" state (meaning the control value is equal to the off step)
   bool isOff() const { return getControlValue() == getComputedOffStep(); }
+
+  /**
+   * Returns true if the toggle is not in the "off" state
+   *
+   * @note This view defines the "on" state as being the opposite of the "off" state and so the "off" state is the one
+   *       being checked against the off value (otherwise we could end up in a situation where both `isOn` and `isOff` are
+   *       `true`...). The consequence is that the underlying parameter might have a value that is neither the "off" value
+   *       nor the "on" value, but for the sake of this view it will be treated as "on" (similarly to C/C++ where `0` is
+   *       `false` and any non-zero is `true`). */
   bool isOn() const { return !isOff(); }
+
+  //! Shortcut to set the toggle to its "off" state
+  inline void setOff() { setControlValue(getComputedOffStep()); }
+
+  //! Shortcut to set the toggle to its "on" state
+  inline void setOn() { setControlValue(getComputedOnStep()); }
+
+  //! Shortcut to set the toggle to the boolean state provided (`true` means "on", `false` means `off`)
+  inline void setOnOrOff(bool iOnOrOff) { iOnOrOff ? setOn() : setOff(); }
 
   /**
    * Toggles between on and off control value.
