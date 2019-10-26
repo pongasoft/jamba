@@ -51,7 +51,7 @@ void SwitchViewContainer::afterCreate(IUIDescription const *iDescription, IContr
 //------------------------------------------------------------------------
 void SwitchViewContainer::registerParameters()
 {
-  fControlSwitch = registerOptionalDiscreteParam(getSwitchControlTag(), fTemplateNames.size() - 1);
+  fControlSwitch = registerOptionalDiscreteParam(getSwitchControlTag(), static_cast<int32>(fTemplateNames.size() - 1));
 
 #ifndef NDEBUG
   if(fControlSwitch.getStepCount() == 0 && getSwitchControlTag() != UNDEFINED_PARAM_ID)

@@ -354,8 +354,10 @@ public:
   tresult getValue(int32 &oDiscreteValue) const
   {
     auto res = fConverter->convertToDiscreteValue(fJmbParameter->getValue(), oDiscreteValue);
+  #ifndef NDEBUG
     if(res == kResultFalse)
       DLOG_F(WARNING, "Cannot convert current value of Jmb param [%d] to a discrete value", getParamID());
+  #endif
     return res;
   }
 
