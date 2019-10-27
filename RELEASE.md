@@ -71,6 +71,7 @@ This release contains a lot of big changes. Although I tried my best to be backw
   on how to use it instead (ex: an increment of `0.1` can be converted to an increment of `1` 
   with a step count of `10`).
 * Changed `TagID` to be an unsigned int (`ParamID` aka `uint32`)
+* Changed default template type for `DiscreteValueParamConverter` to be an `int32`
 * Although care has been taken with renaming/adding deprecation warnings for old names, there is a chance (mostly 
   with templated parameters) that it may impact compilation.
 

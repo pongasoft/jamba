@@ -275,88 +275,91 @@ public:
     fPtr{std::move(iPtr)}
   {}
 
+  //! Assignment operator: `fMyParam = registerParam(...);`
+  GUIVstParam<T> &operator=(GUIVstParam<T> const &iOther) = default;
+
   // exists
   inline bool exists() const { return (bool) fPtr; }
 
   // getParamID
-  inline ParamID getParamID() const { return fPtr->getParamID(); }
+  inline ParamID getParamID() const { DCHECK_F(exists()); return fPtr->getParamID(); }
 
   /**
    * @return the current value of the parameter as a T (using the Denormalizer)
    */
-  inline T getValue() const { return fPtr->getValue(); }
+  inline T getValue() const { DCHECK_F(exists()); return fPtr->getValue(); }
 
   /**
    * @return the current value of the parameter as a normalized value
    */
-  inline ParamValue getNormalizedValue() const { return fPtr->getNormalizedValue(); }
+  inline ParamValue getNormalizedValue() const { DCHECK_F(exists()); return fPtr->getNormalizedValue(); }
 
   /**
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
-  tresult setValue(T const &iValue) { return fPtr->setValue(iValue); }
+  tresult setValue(T const &iValue) { DCHECK_F(exists()); return fPtr->setValue(iValue); }
 
   /**
    * Sets the value of this parameter as a normalized value. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
-  tresult setNormalizedValue(ParamValue const &iNormalizedValue) { return fPtr->setNormalizedValue(iNormalizedValue); }
+  tresult setNormalizedValue(ParamValue const &iNormalizedValue) { DCHECK_F(exists()); return fPtr->setNormalizedValue(iNormalizedValue); }
 
   /**
    * Shortcut to copy the value from another param to this one. Implementation note: uses normalized value as this
    * is faster and avoid math precision loss in normalize/denormalize
    */
-  tresult copyValueFrom(GUIVstParam<T> const &iParam) { return setNormalizedValue(iParam.getNormalizedValue()); }
+  tresult copyValueFrom(GUIVstParam<T> const &iParam) { DCHECK_F(exists()); return setNormalizedValue(iParam.getNormalizedValue()); }
 
   /**
    * @return number of steps (for discrete param) or 0 for continuous
    */
-  inline int32 getStepCount() const { return fPtr->getStepCount(); }
+  inline int32 getStepCount() const { DCHECK_F(exists()); return fPtr->getStepCount(); }
 
   /**
    * Populates the oString with a string representation of this parameter
    */
-  void toString(String128 oString) { fPtr->toString(oString); }
+  void toString(String128 oString) { DCHECK_F(exists()); fPtr->toString(oString); }
 
   /**
    * Returns a string representation of this parameter
    */
-  String toString() { return fPtr->toString(); }
+  String toString() { DCHECK_F(exists()); return fPtr->toString(); }
 
   /**
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit() { return fPtr->edit(); }
+  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit() { DCHECK_F(exists()); return fPtr->edit(); }
 
   /**
    * Shortcut to create an editor and set the value to it
    *
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit(T const &iValue) { return fPtr->edit(iValue); }
+  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit(T const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
-  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
-  inline operator T() const { return fPtr->getValue(); } // NOLINT
+  //! Allow to use the param as the underlying ParamType (ex: `if(param)` in the case `ParamType` is `bool`))
+  inline operator T() const { DCHECK_F(exists()); return fPtr->getValue(); } // NOLINT
 
-  // allow to write param = 3 instead of param.setValue(3)
-  inline void operator=(T const &iValue) { fPtr->setValue(iValue); }
+  //! Allow to write param = 3.0
+  inline GUIVstParam<T> &operator=(T const &iValue) { DCHECK_F(exists()); fPtr->setValue(iValue); return *this; }
 
-  // allow to write param1 == param2
-  inline bool operator==(const GUIVstParam<T> &rhs) const { return fPtr->getNormalizedValue() == rhs.fPtr->getNormalizedValue(); }
+  //! Allow to write param1 == param2
+  inline bool operator==(const GUIVstParam<T> &rhs) const { DCHECK_F(exists()); return fPtr->getNormalizedValue() == rhs.fPtr->getNormalizedValue(); }
 
-  // allow to write param1 != param2
-  inline bool operator!=(const GUIVstParam &rhs) const { return fPtr->getNormalizedValue() != rhs.fPtr->getNormalizedValue(); }
+  //! Allow to write param1 != param2
+  inline bool operator!=(const GUIVstParam &rhs) const { DCHECK_F(exists()); return fPtr->getNormalizedValue() != rhs.fPtr->getNormalizedValue(); }
 
   /**
    * @return an object maintaining the connection between the parameter and the listener
    */
-  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { return fPtr->connect(iChangeListener); }
+  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { DCHECK_F(exists()); return fPtr->connect(iChangeListener); }
 
   /**
    * @return an object maintaining the connection between the parameter and the callback
    */
-  inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
+  inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { DCHECK_F(exists()); return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
   std::shared_ptr<GUIVstParameter<T>> fPtr;

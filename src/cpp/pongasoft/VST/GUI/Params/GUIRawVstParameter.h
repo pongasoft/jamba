@@ -262,32 +262,35 @@ public:
     fPtr{std::move(iPtr)}
   {}
 
+  //! Assignment operator: `fMyParam = registerParam(...);`
+  GUIRawVstParam &operator=(GUIRawVstParam const &iOther) = default;
+
   // exists
   inline bool exists() const { return (bool) fPtr; }
 
   // getParamID
-  inline ParamID getParamID() const { return fPtr->getParamID(); }
+  inline ParamID getParamID() const { DCHECK_F(exists()); return fPtr->getParamID(); }
 
   /**
    * @return the current value of the parameter as a T (using the Denormalizer)
    */
-  inline ParamValue getValue() const { return fPtr->getValue(); }
+  inline ParamValue getValue() const { DCHECK_F(exists()); return fPtr->getValue(); }
 
   /**
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
-  tresult setValue(ParamValue const &iValue) { return fPtr->setValue(iValue); }
+  tresult setValue(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->setValue(iValue); }
 
   /**
    * Shortcut to copy the value from another param to this one.
    */
-  tresult copyValueFrom(GUIRawVstParam const &iParam) { return setValue(iParam.getValue()); }
+  tresult copyValueFrom(GUIRawVstParam const &iParam) { DCHECK_F(exists()); return setValue(iParam.getValue()); }
 
   /**
    * @return number of steps (for discrete param) or 0 for continuous
    */
-  inline int32 getStepCount() const { return fPtr->getStepCount(); }
+  inline int32 getStepCount() const { DCHECK_F(exists()); return fPtr->getStepCount(); }
 
   /**
    * Populates the oString with a string representation of this parameter
@@ -297,41 +300,41 @@ public:
   /**
    * Returns a string representation of this parameter
    */
-  String toString() { return fPtr->toString(); }
+  String toString() { DCHECK_F(exists()); return fPtr->toString(); }
 
   /**
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<GUIRawVstParameter::EditorType> edit() { return fPtr->edit(); }
+  std::unique_ptr<GUIRawVstParameter::EditorType> edit() { DCHECK_F(exists()); return fPtr->edit(); }
 
   /**
    * Shortcut to create an editor and set the value to it
    *
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<GUIRawVstParameter::EditorType> edit(ParamValue const &iValue) { return fPtr->edit(iValue); }
+  std::unique_ptr<GUIRawVstParameter::EditorType> edit(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
-  // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
-  inline operator ParamValue() const { return fPtr->getValue(); } // NOLINT
+  //! Allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
+  inline operator ParamValue() const { DCHECK_F(exists()); return fPtr->getValue(); } // NOLINT
 
-  // allow to write param = 3 instead of param.setValue(3)
-  inline void operator=(ParamValue const &iValue) { fPtr->setValue(iValue); }
+  //! Allow to write param = 0.5
+  inline GUIRawVstParam &operator=(ParamValue const &iValue) { DCHECK_F(exists()); fPtr->setValue(iValue); return *this; }
 
-  // allow to write param1 == param2
-  inline bool operator==(const GUIRawVstParam &rhs) const { return fPtr->getValue() == rhs.fPtr->getValue(); }
+  //! Allow to write param1 == param2
+  inline bool operator==(const GUIRawVstParam &rhs) const { DCHECK_F(exists()); return fPtr->getValue() == rhs.fPtr->getValue(); }
 
-  // allow to write param1 != param2
-  inline bool operator!=(const GUIRawVstParam &rhs) const { return fPtr->getValue() != rhs.fPtr->getValue(); }
+  //! Allow to write param1 != param2
+  inline bool operator!=(const GUIRawVstParam &rhs) const { DCHECK_F(exists()); return fPtr->getValue() != rhs.fPtr->getValue(); }
 
   /**
    * @return an object maintaining the connection between the parameter and the listener
    */
-  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { return fPtr->connect(iChangeListener); }
+  inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { DCHECK_F(exists()); return fPtr->connect(iChangeListener); }
 
   /**
    * @return an object maintaining the connection between the parameter and the callback
    */
-  inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { return fPtr->connect(std::move(iChangeCallback)); }
+  inline std::unique_ptr<FObjectCx> connect(Parameters::ChangeCallback iChangeCallback) const { DCHECK_F(exists()); return fPtr->connect(std::move(iChangeCallback)); }
 
 private:
   std::shared_ptr<GUIRawVstParameter> fPtr;

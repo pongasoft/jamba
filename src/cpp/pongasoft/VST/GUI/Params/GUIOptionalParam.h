@@ -160,7 +160,6 @@ private:
 template<typename T>
 using GUIOptionalParamEditor = std::unique_ptr<typename GUIOptionalParam<T>::EditorType>;
 
-// TODO remove???
 using GUIRawOptionalParam = GUIOptionalParam<ParamValue>;
 using GUIRawOptionalParamEditor = GUIOptionalParamEditor<ParamValue>;
 
