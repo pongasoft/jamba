@@ -128,7 +128,7 @@ public:
 
   /**
    * Allow to write `param = 3` instead of `param.update(3)` for example */
-  inline void operator=(T const &iValue) { update(iValue); }
+  inline GUIOptionalParam &operator=(T const &iValue) { update(iValue); return *this; }
 
   /**
    * Allow to write `param1 == param2` to compare the underlying values */
