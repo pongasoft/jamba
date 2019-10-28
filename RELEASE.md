@@ -1,7 +1,7 @@
 Release Notes {#release-notes}
 -------------
 
-## [2019-TBD - v4.0.0](https://github.com/pongasoft/jamba/tree/4.0.0)
+## [2019-10-28 - v4.0.0](https://github.com/pongasoft/jamba/tree/4.0.0)
 
 This release contains a lot of big changes. Although I tried my best to be backward compatible there may be a few changes that might be breaking.
 
