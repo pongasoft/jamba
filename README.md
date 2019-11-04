@@ -42,37 +42,13 @@ Getting Started
 
 Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started.
 
-Latest Release Notes
---------------------
-### 2019-08-03 - `v3.2.4`
-* fixed blank plugin `initialize` API to match superclass
+Latest Release
+--------------
+2019-10-28 - v4.0.0
 
-### 2019-08-01 - `v3.2.3`
-* Implemented [#6](https://github.com/pongasoft/jamba/issues/6): added cmake targets `build_vst3`, `test_vst3`, `install_vst3`, `install_vst2`, `build_au` and `install_au`
-* This change allows those targets to be used directly in an IDE and for example use them for debugging (ex: attach a DAW executable to `install_vst2` or `install_vst3`)
-* Modified `jamba.sh` and `jamba.bat` to use the new cmake targets (making the scripts more generic)
-* Added ability to customize (extend or completely override) the following targets:
-  * `build_vst3` by setting an optional `BUILD_VST3_TARGET` variable
-  * `test_vst3` by setting an optional `TEST_VST3_TARGET` variable
-  * `build_au` by setting an optional `BUILD_AU_TARGET` variable
+[Release notes (local)](RELEASE.md)
 
-### 2019-07-23 - `v3.2.2`
-* released [Jamba](https://jamba.dev/) website with [Quickstart](https://jamba.dev/quickstart/) section to make it very easy to generate a blank plugin (answer a few questions in the browser)
-* added (optional) VST3 SDK automatic download to the blank plugin (web and command line)
-* fixed blank plugin creation issue when no company was provided
-
-### 2019-05-19 - `v3.2.1`
-* fixed `jamba.sh` script to handle filename with white spaces and install audio unit before validation (validation tool unfortunately works from an installed component, not a file...)
-
-### 2019-05-19 - `v3.2.0`
-* added audio unit validation to `jamba.sh` script (`jamba.sh validate-au`) which runs the `auvaltool` utility on the audio unit plugin
-* added switch container view to handle tab like switching (check `Views::SwitchContainerView`)
-* added (optional) image for text buttons (`Views::TextButtonView`)
-* added (optional) disabled state for momentary buttons (`Views::MomentaryButtonView`)
-* added discrete button view (a button which is "on" only when the backing discrete parameter matches the `step` value). This button can be used for radio groups, tabs, etc... (check `Views::DiscreteButtonView`)
-* Note: There is a small potentially breaking API change with function `Views::createCustomView` (defined in `Views/CustomViewCreator.h`). Check [commit](https://github.com/pongasoft/jamba/commit/08d06ceda9b936b92c45b8bd9f22a93acfeb3995). The function takes an additional 2 parameters which can be safely ignored if you don't need them.
-
-[All release notes](https://jamba.dev/releases/)
+[Release notes (web)](https://jamba.dev/releases/)
 
 History
 -------

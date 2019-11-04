@@ -16,8 +16,7 @@ This release contains a lot of big changes. Although I tried my best to be backw
     to override the value of the steps representing *on* and *off*.
   * Changed `SwitchViewContainer` to use discrete parameter concept, thus allowing to use any Vst or Jmb parameter that is 
     (or can be interpreted as) a discrete parameter.
-* Major renaming: introduced `ParamAware` (formerly `GUIParamCxAware`) and `StateAware` (formerly `PluginAccessor`) (added deprecation warnings 
-  for old names) and related.
+* Major renaming: introduced `ParamAware` (formerly `GUIParamCxAware`) and `StateAware` (formerly `PluginAccessor`) (added deprecation warnings for old names) and related.
 * Jmb GUI parameters no longer needed to be explicitly added to `GUIState` (similar to Vst parameters)
 * Added `IDiscreteConverter<T>` concept for Jmb parameters to be able to convert a Jmb parameter to a discrete parameter
 * Added `ParamDisplayView` to display the value of any parameter (Vst or Jmb)
@@ -67,13 +66,10 @@ This release contains a lot of big changes. Although I tried my best to be backw
     it does not have to handle previously registered parameters (which was not trivial to keep an accurate track of)
   * Allow multiple registrations per paramID. Prior to this release, registering multiple callbacks per paramID 
     resulted in only the last one registered being called. Now all of them will be called. 
-* `StepButtonView` and `DiscreteButtonView` now use discrete values only (no longer `double`). Check the documentation
-  on how to use it instead (ex: an increment of `0.1` can be converted to an increment of `1` 
-  with a step count of `10`).
+* `StepButtonView` and `DiscreteButtonView` now use discrete values only (no longer `double`). Check the documentation on how to use it instead (ex: an increment of `0.1` can be converted to an increment of `1` with a step count of `10`).
 * Changed `TagID` to be an unsigned int (`ParamID` aka `uint32`)
 * Changed default template type for `DiscreteValueParamConverter` to be an `int32`
-* Although care has been taken with renaming/adding deprecation warnings for old names, there is a chance (mostly 
-  with templated parameters) that it may impact compilation.
+* Although care has been taken with renaming/adding deprecation warnings for old names, there is a chance (mostly with templated parameters) that it may impact compilation.
 
 ## [2019-08-03 - v3.2.4](https://github.com/pongasoft/jamba/tree/v3.2.4)
 
