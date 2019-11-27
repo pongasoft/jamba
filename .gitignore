@@ -1,5 +1,5 @@
 .DS_Store
 .idea
-.vscode
+/.vscode
 cmake-build-debug
 build
