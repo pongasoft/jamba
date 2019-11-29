@@ -44,7 +44,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 
 Latest Release
 --------------
-2019-10-28 - v4.0.0
+2019-11-29 - v4.0.1
 
 [Release notes (local)](RELEASE.md)
 
