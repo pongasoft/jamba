@@ -162,6 +162,8 @@ public:
    */
   bool update(ParamType const &iValue) override
   {
+    // TODO: use if constexpr to check whether ParamType defines operator!= and implement accordingly
+
     // Implementation note: because ParamType may not define `operator!=` we use the normalized value instead
     auto previousValue = getNormalizedValue();
     if(previousValue != fConverter->normalize(iValue))
@@ -257,6 +259,10 @@ private:
   std::shared_ptr<IParamConverter<T>> fConverter;
 };
 
+/**
+ * check https://github.com/TartanLlama/optional/blob/master/include/tl/optional.hpp#L1260
+ */
+
 //------------------------------------------------------------------------
 // GUIVstParam - wrapper to make writing the code much simpler and natural
 //------------------------------------------------------------------------
@@ -293,6 +299,13 @@ public:
    * @return the current value of the parameter as a normalized value
    */
   inline ParamValue getNormalizedValue() const { DCHECK_F(exists()); return fPtr->getNormalizedValue(); }
+
+  /**
+   * Update the parameter with a value.
+   *
+   * @return true if the value was actually updated, false if it is the same
+   */
+  bool update(T const &iValue) { DCHECK_F(exists()); return fPtr->update(iValue); }
 
   /**
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
