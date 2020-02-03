@@ -29,7 +29,7 @@ void TextEditView::registerParameters()
 {
   fText = registerJmbCallback<UTF8String>(static_cast<ParamID>(getTag()),
                                           [this](GUIJmbParam<UTF8String> &iParam) {
-                                            setText(iParam);
+                                            setText(*iParam);
                                           },
                                           true);
 }

@@ -19,6 +19,7 @@
 
 #include <pluginterfaces/vst/vsttypes.h>
 #include <pongasoft/logging/logging.h>
+#include <pongasoft/Utils/Operators.h>
 #include "IGUIParameter.h"
 #include "GUIVstParameter.h"
 #include "GUIJmbParameter.h"
@@ -44,7 +45,7 @@ using namespace Steinberg::Vst;
  *       - `T` must be copy assignable: `T& operator=(T const &)`
  */
 template<typename T>
-class GUIOptionalParam
+class GUIOptionalParam: public Utils::Operators::Dereferenceable<GUIOptionalParam<T>>
 {
   static_assert(std::is_default_constructible_v<T>, "T must have a default/empty constructor: T()");
   static_assert(std::is_copy_constructible_v<T>, "T must have a copy constructor: T(T const &)");
@@ -54,6 +55,20 @@ public:
   using class_type = GUIOptionalParam<T>;
   using ParamType = T;
   using EditorType = typename ITGUIParameter<T>::ITEditor;
+
+public:
+  /**
+   * The purpose of this class is to copy the value so that it can be accessed via `->` thus allowing to
+   * write `param->x` to access the underlying type (`T`) when it is a struct or a class
+   */
+  class Value {
+  public:
+    constexpr T const *operator ->() const { return &fValue; }
+    friend class GUIOptionalParam<T>;
+  private:
+    explicit Value(T const &iValue) : fValue{iValue} {}
+    T fValue;
+  };
 
 public:
   // Constructor
@@ -87,6 +102,9 @@ public:
     return res;
   }
 
+  //! Synonym to `getValue()`
+  inline ParamType value() const { return getValue(); }
+
   /**
    * @copydoc ITGUIParameter::update(ParamType const &) */
   inline bool update(ParamType const &iValue)
@@ -119,24 +137,23 @@ public:
    * @copydoc IGUIParameter::getStepCount() */
   inline int32 getStepCount() const { return fParameter->getStepCount(); }
 
+  //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
+  constexpr ParamType operator *() const { return getValue(); }
+
+  //! allow writing param->x to access the underlying value when T is a struct or class
+  constexpr Value operator ->() const { return Value{getValue()}; }
+
   /**
    * Allow to use the param as the underlying `ParamType`.
    *
    * Example: `if(param)` in the case `T` is `bool`
    */
-  inline operator T() const { return getValue(); } // NOLINT
+  [[deprecated("Since 4.1.0 -  use operator* or value() instead (ex: if(*param) {...} or if(param.value() {...})")]]
+  inline operator ParamType() const { return getValue(); } // NOLINT
 
   /**
    * Allow to write `param = 3` instead of `param.update(3)` for example */
   inline GUIOptionalParam &operator=(T const &iValue) { update(iValue); return *this; }
-
-  /**
-   * Allow to write `param1 == param2` to compare the underlying values */
-  inline bool operator==(const class_type &rhs) const { return getValue() == rhs.getValue(); }
-
-  /**
-   * Allow to write `param1 != param2` to compare the underlying values */
-  inline bool operator!=(const class_type &rhs) const { return getValue() != rhs.getValue(); }
 
   /**
    * @copydoc IGUIParameter::connect(Parameters::IChangeListener *) const */
@@ -153,7 +170,7 @@ public:
   }
 
 private:
-  std::shared_ptr<ITGUIParameter<T>> fParameter;
+  std::shared_ptr<ITGUIParameter<ParamType>> fParameter;
 };
 
 

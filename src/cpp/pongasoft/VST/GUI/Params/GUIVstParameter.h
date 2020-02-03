@@ -22,6 +22,7 @@
 #include "GUIRawVstParameter.h"
 #include <pongasoft/VST/ParamConverters.h>
 #include <pongasoft/VST/ParamDef.h>
+#include <pongasoft/Utils/Operators.h>
 
 namespace pongasoft::VST::GUI::Params {
 
@@ -162,14 +163,13 @@ public:
    */
   bool update(ParamType const &iValue) override
   {
-    // TODO: use if constexpr to check whether ParamType defines operator!= and implement accordingly
-
     // Implementation note: because ParamType may not define `operator!=` we use the normalized value instead
-    auto previousValue = getNormalizedValue();
-    if(previousValue != fConverter->normalize(iValue))
+    auto currentNormalizedValue = getNormalizedValue();
+    auto newNormalizedValued = fConverter->normalize(iValue);
+    if(currentNormalizedValue != newNormalizedValued)
     {
-      setValue(iValue);
-      return true;
+      if(setNormalizedValue(newNormalizedValued) == kResultOk)
+        return true;
     }
     return false;
   }
@@ -259,10 +259,6 @@ private:
   std::shared_ptr<IParamConverter<T>> fConverter;
 };
 
-/**
- * check https://github.com/TartanLlama/optional/blob/master/include/tl/optional.hpp#L1260
- */
-
 //------------------------------------------------------------------------
 // GUIVstParam - wrapper to make writing the code much simpler and natural
 //------------------------------------------------------------------------
@@ -273,8 +269,22 @@ private:
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class GUIVstParam
+class GUIVstParam: public Utils::Operators::Dereferenceable<GUIVstParam<T>>
 {
+public:
+  /**
+   * The purpose of this class is to copy the value so that it can be accessed via `->` thus allowing to
+   * write `param->x` to access the underlying type (`T`) when it is a struct or a class
+   */
+  class Value {
+  public:
+    constexpr T const *operator ->() const { return &fValue; }
+    friend class GUIVstParam<T>;
+  private:
+    explicit Value(T const &iValue) : fValue{iValue} {}
+    T fValue;
+  };
+
 public:
   // Constructor
   GUIVstParam(std::shared_ptr<GUIVstParameter<T>> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
@@ -294,6 +304,9 @@ public:
    * @return the current value of the parameter as a T (using the Denormalizer)
    */
   inline T getValue() const { DCHECK_F(exists()); return fPtr->getValue(); }
+
+  //! Synonym to `getValue()`
+  inline T value() const { DCHECK_F(exists()); return fPtr->getValue(); }
 
   /**
    * @return the current value of the parameter as a normalized value
@@ -323,7 +336,13 @@ public:
    * Shortcut to copy the value from another param to this one. Implementation note: uses normalized value as this
    * is faster and avoid math precision loss in normalize/denormalize
    */
-  tresult copyValueFrom(GUIVstParam<T> const &iParam) { DCHECK_F(exists()); return setNormalizedValue(iParam.getNormalizedValue()); }
+  template<typename V>
+  tresult copyValueFrom(GUIVstParam<V> const &iParam) { DCHECK_F(exists()); return setNormalizedValue(iParam.getNormalizedValue()); }
+
+  /**
+   * Shortcut to copy the value from another param to this one (raw value)
+   */
+  tresult copyValueFrom(GUIRawVstParam const &iParam) { DCHECK_F(exists()); return setNormalizedValue(iParam.getValue()); }
 
   /**
    * @return number of steps (for discrete param) or 0 for continuous
@@ -352,17 +371,21 @@ public:
    */
   std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit(T const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
+  //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
+  constexpr T operator *() const { DCHECK_F(exists()); return fPtr->getValue(); }
+
+  //! allow writing param->x to access the underlying value when T is a struct or class
+  constexpr Value operator ->() const { DCHECK_F(exists()); return Value{fPtr->getValue()}; }
+
   //! Allow to use the param as the underlying ParamType (ex: `if(param)` in the case `ParamType` is `bool`))
+  [[deprecated("Since 4.1.0 -  use operator* or .value() instead (ex: if(*param) {...} or if(param.value()) {...}")]]
   inline operator T() const { DCHECK_F(exists()); return fPtr->getValue(); } // NOLINT
 
   //! Allow to write param = 3.0
   inline GUIVstParam<T> &operator=(T const &iValue) { DCHECK_F(exists()); fPtr->setValue(iValue); return *this; }
 
   //! Allow to write param1 == param2
-  inline bool operator==(const GUIVstParam<T> &rhs) const { DCHECK_F(exists()); return fPtr->getNormalizedValue() == rhs.fPtr->getNormalizedValue(); }
-
-  //! Allow to write param1 != param2
-  inline bool operator!=(const GUIVstParam &rhs) const { DCHECK_F(exists()); return fPtr->getNormalizedValue() != rhs.fPtr->getNormalizedValue(); }
+//  friend constexpr bool operator==(GUIVstParam<T> const &lhs, GUIVstParam<T> const &rhs) { return lhs.fPtr->getNormalizedValue() == rhs.fPtr->getNormalizedValue(); }
 
   /**
    * @return an object maintaining the connection between the parameter and the listener
@@ -377,6 +400,7 @@ public:
 private:
   std::shared_ptr<GUIVstParameter<T>> fPtr;
 };
+
 
 //------------------------------------------------------------------------
 // GUIRawVstParameter::asVstParameter

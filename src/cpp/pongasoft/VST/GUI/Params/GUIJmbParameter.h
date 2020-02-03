@@ -25,6 +25,7 @@
 #include <pongasoft/VST/MessageHandler.h>
 #include <pongasoft/VST/MessageProducer.h>
 #include <pongasoft/Utils/Metaprogramming.h>
+#include <pongasoft/Utils/Operators.h>
 #include "IGUIParameter.h"
 #include "GUIParamCx.h"
 
@@ -485,7 +486,7 @@ std::shared_ptr<GUIDiscreteParameter> GUIJmbParameter<T>::asDiscreteParameter(in
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class GUIJmbParam
+class GUIJmbParam: public Utils::Operators::Dereferenceable<GUIJmbParam<T>>
 {
 public:
   GUIJmbParam(std::shared_ptr<GUIJmbParameter<T>> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
@@ -529,13 +530,23 @@ public:
   inline void resetToDefault() { DCHECK_F(exists()); fPtr->resetToDefault(); }
 
   // getValue
-  inline T const &getValue() const { DCHECK_F(exists()); return fPtr->getValue(); }
+  inline T const & getValue() const { DCHECK_F(exists()); return fPtr->getValue(); }
+
+  //! Synonym to `getValue()`
+  inline T const & value() const { DCHECK_F(exists()); return fPtr->getValue(); }
 
   // allow to use the param as the underlying `ParamType` (ex: `if(param)` in the case `ParamType` is `bool`))
+  [[deprecated("Since 4.1.0 -  use operator* or .value() instead (ex: if(*param) {...} or if(param.value()) {...}")]]
   inline operator T const &() const { DCHECK_F(exists()); return fPtr->getValue(); } // NOLINT
 
+  //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
+  constexpr T const & operator *() const { DCHECK_F(exists()); return fPtr->getValue(); }
+
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
-  inline T const *operator->() const { DCHECK_F(exists()); return &fPtr->getValue(); }
+  constexpr T const * operator->() const { DCHECK_F(exists()); return &fPtr->getValue(); }
+
+  //! Allow to write param = 3.0
+  inline GUIJmbParam<T> &operator=(T const &iValue) { DCHECK_F(exists()); fPtr->setValue(iValue); return *this; }
 
   // broadcast
   inline tresult broadcast() const { DCHECK_F(exists()); return fPtr->broadcast(); }

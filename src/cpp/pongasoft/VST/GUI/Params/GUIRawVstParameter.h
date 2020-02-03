@@ -19,6 +19,7 @@
 
 #include "IGUIParameter.h"
 #include <pongasoft/VST/Parameters.h>
+#include <pongasoft/Utils/Operators.h>
 #include "VstParameters.h"
 #include "GUIParamCx.h"
 
@@ -254,7 +255,7 @@ private:
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
  * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
  * behaves like T in many ways). */
-class GUIRawVstParam
+class GUIRawVstParam : public Utils::Operators::Dereferenceable<GUIRawVstParam>
 {
 public:
   // Constructor
@@ -275,6 +276,16 @@ public:
    * @return the current value of the parameter as a T (using the Denormalizer)
    */
   inline ParamValue getValue() const { DCHECK_F(exists()); return fPtr->getValue(); }
+
+  //! Synonym to `getValue()`
+  inline ParamValue value() const { DCHECK_F(exists()); return fPtr->getValue(); }
+
+  /**
+   * Update the parameter with a value.
+   *
+   * @return true if the value was actually updated, false if it is the same
+   */
+  bool update(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->update(iValue); }
 
   /**
    * Sets the value of this parameter. Note that this is "transactional" and if you want to make
@@ -314,17 +325,15 @@ public:
    */
   std::unique_ptr<GUIRawVstParameter::EditorType> edit(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
+  //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
+  constexpr ParamValue operator *() const { DCHECK_F(exists()); return fPtr->getValue(); }
+
   //! Allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
+  [[deprecated("Since 4.1.0 -  use operator* or .value() instead (ex: if(*param) {...} or if(param.value()) {...}")]]
   inline operator ParamValue() const { DCHECK_F(exists()); return fPtr->getValue(); } // NOLINT
 
   //! Allow to write param = 0.5
   inline GUIRawVstParam &operator=(ParamValue const &iValue) { DCHECK_F(exists()); fPtr->setValue(iValue); return *this; }
-
-  //! Allow to write param1 == param2
-  inline bool operator==(const GUIRawVstParam &rhs) const { DCHECK_F(exists()); return fPtr->getValue() == rhs.fPtr->getValue(); }
-
-  //! Allow to write param1 != param2
-  inline bool operator!=(const GUIRawVstParam &rhs) const { DCHECK_F(exists()); return fPtr->getValue() != rhs.fPtr->getValue(); }
 
   /**
    * @return an object maintaining the connection between the parameter and the listener

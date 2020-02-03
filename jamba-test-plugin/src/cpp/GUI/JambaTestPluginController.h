@@ -21,10 +21,7 @@
 #include <pongasoft/VST/GUI/GUIController.h>
 #include "../Plugin.h"
 
-namespace pongasoft {
-namespace test {
-namespace jamba {
-namespace GUI {
+namespace pongasoft::test::jamba::GUI {
 
 using namespace pongasoft::VST::GUI;
 
@@ -65,8 +62,5 @@ private:
   JambaTestPluginGUIState fState;
 };
 
-}
-}
-}
 }
 

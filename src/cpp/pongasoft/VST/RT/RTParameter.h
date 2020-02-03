@@ -22,10 +22,9 @@
 
 #include <pongasoft/VST/ParamDef.h>
 #include <pongasoft/logging/logging.h>
+#include <pongasoft/Utils/Operators.h>
 
-namespace pongasoft {
-namespace VST {
-namespace RT {
+namespace pongasoft::VST::RT {
 
 /**
  * Base class which deals with the "raw"/untyped parameter and keep the normalized value (ParamValue in the
@@ -37,7 +36,7 @@ class RTRawVstParameter
 public:
   // Constructor
   explicit RTRawVstParameter(std::shared_ptr<RawVstParamDef> iParamDef) :
-    fParamDef{iParamDef},
+    fParamDef{std::move(iParamDef)},
     fNormalizedValue{fParamDef->fDefaultValue},
     fPreviousNormalizedValue{fNormalizedValue}
   {}
@@ -188,12 +187,12 @@ void RTVstParameter<T>::update(const ParamType &iNewValue)
  *
  * @tparam T the underlying type of the param */
 template<typename T>
-class RTVstParam
+class RTVstParam : public Utils::Operators::Dereferenceable<RTVstParam<T>>
 {
   using ParamType = T;
 
 public:
-  RTVstParam(RTVstParameter<T> *iPtr) : fPtr{iPtr}
+  RTVstParam(RTVstParameter<T> *iPtr) : fPtr{iPtr} // NOLINT (not marked explicit on purpose)
   {}
 
   // getParamID
@@ -210,6 +209,9 @@ public:
 
   // value -- synonym
   inline T const &value() const { return fPtr->getValue(); }
+
+  //! Return the normalized value
+  inline ParamValue const &normalizedValue() const { return fPtr->getNormalizedValue(); }
 
   /**
    * This method is typically called during the processing method when the plugin needs to update the value. In general
@@ -239,10 +241,17 @@ public:
   inline tresult addToOutput(ProcessData &oData) { return fPtr->addToOutput(oData); }
 
   // allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
+  [[deprecated("Since 4.1.0 -  use operator* or value() instead (ex: *fState.fBypass or fState.fBypass.value())")]]
   inline operator ParamType const &() const { return fPtr->getValue(); }
 
+  //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
+  constexpr ParamType const &operator *() const { return fPtr->getValue(); }
+
   // allow writing param->xxx to access the underlying type directly (if not a primitive)
-  inline ParamType const *operator->() const { return &fPtr->getValue(); }
+  constexpr ParamType const *operator->() const { return &fPtr->getValue(); }
+
+  //! Allow to write param = 3.0
+  inline RTVstParam<T> &operator=(ParamType const &iValue) { update(iValue); return *this; }
 
   // previous
   inline ParamType const &previous() const { return fPtr->getPreviousValue(); }
@@ -258,7 +267,7 @@ private:
  * This is the main class that the plugin should use as it exposes only the necessary methods of the param
  * as well as redefine a couple of operators which helps in writing simpler and natural code (the param
  * behaves like T in many ways). */
-class RTRawVstParam
+class RTRawVstParam : public Utils::Operators::Dereferenceable<RTRawVstParam>
 {
 public:
   RTRawVstParam(RTRawVstParameter *iPtr) : fPtr{iPtr}
@@ -278,16 +287,21 @@ public:
    * the change needs to be propagated to the VST sdk (using addToOutput). Use this version of the call if you want to
    * control when the update actually happens.
    */
-  inline void update(ParamValue const &iNewValue) { fPtr->updateNormalizedValue(iNewValue); }
+  inline bool update(ParamValue const &iNewValue) { return fPtr->updateNormalizedValue(iNewValue); }
 
   /**
    * This method is typically called during the processing method when the plugin needs to update the value.
    * This version will automatically propagate the change to the the VST sdk.
    */
-  inline void update(ParamValue const &iNewValue, ProcessData &oData)
+  inline bool update(ParamValue const &iNewValue, ProcessData &oData)
   {
-    update(iNewValue);
-    addToOutput(oData);
+    if(update(iNewValue))
+    {
+      addToOutput(oData);
+      return true;
+    }
+    else
+      return false;
   }
 
   /**
@@ -301,7 +315,14 @@ public:
   inline tresult addToOutput(ProcessData &oData) { return fPtr->addToOutput(oData); }
 
   // allow to use the param as the ParamValue
+  [[deprecated("Since 4.1.0 -  use operator* instead")]]
   inline operator ParamValue const &() const { return fPtr->getNormalizedValue(); }
+
+  //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
+  inline ParamValue operator *() const { return fPtr->getNormalizedValue(); }
+
+  //! Allow to write param = 0.5
+  inline RTRawVstParam &operator=(ParamValue const &iValue) { update(iValue); return *this; }
 
   // previous
   inline ParamValue const &previous() const { return fPtr->getPreviousNormalizedValue(); }
@@ -310,8 +331,6 @@ private:
   RTRawVstParameter *fPtr;
 };
 
-}
-}
 }
 
 #endif // __PONGASOFT_VST_RT_PARAMETER_H__

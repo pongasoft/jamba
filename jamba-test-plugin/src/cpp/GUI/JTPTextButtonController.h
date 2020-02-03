@@ -87,7 +87,7 @@ private:
   {
     makeParamAware(iButton)->registerCallback<bool>(fState->fBoolJmb,
                                                     [](Views::TextButtonView *iButton, GUIJmbParam<bool> &iParam) {
-                                                      iButton->setMouseEnabled(iParam);
+                                                      iButton->setMouseEnabled(*iParam);
                                                     },
                                                     true);
   }
