@@ -1,6 +1,12 @@
 Release Notes {#release-notes}
 -------------
 
+## [TBD - v4.1.0](https://github.com/pongasoft/jamba/tree/v4.1.0)
+
+* Due to issues with implicit conversion triggering potential hard crash, deprecated implicit conversion to `T` for all params (`RTRawVstParam`, `RTParam`, `GUIRawVstParam`, `GUIVstParam`, `GUIJmbParam`, `GUIOptionalParam`).
+* Added convenient dereference operator (`operator *`) to all params as a shortcut to invoke `.value()` (which is the preferred way to fix the deprecated warnings)
+* Added convenient equality and relational operators to all params so that the params still continue to behave like the underlying type (`T`) in many instances
+
 ## [2019-11-29 - v4.0.1](https://github.com/pongasoft/jamba/tree/v4.0.1)
 
 * Added Visual Studio Code configuration files for Windows 10

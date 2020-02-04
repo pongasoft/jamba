@@ -22,7 +22,9 @@ namespace pongasoft::Utils::Operators {
 
 /**
  * Implements all the various equality and relational operators for the type `T` which is assumed to encapsulate some
- * value that can accessed by dereferencing `T` or in other words `T::operator*()` returns the underlying value.
+ * value that can be accessed by dereferencing `T` or in other words `T::operator*()` returns the underlying value.
+ *
+ * If `T::operator*()` returns a primitive, then it should just work and nothing else needs to be done.
  *
  * If `T::operator*()` returns another class or struct, then the following operators should be defined (you can define
  * only some of them depending on your use):

@@ -403,7 +403,6 @@ TEST(GUIParam, testOperators)
   ASSERT_EQ(0.6, int64VstParam.getNormalizedValue());
 
   // int32 x = int32VstParam; // deprecated
-  // int32VstParam = 4; // deprecated
 
   // TrivialStruct x = trivialStructVstParam; // deprecated
 
