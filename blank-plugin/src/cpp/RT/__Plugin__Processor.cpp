@@ -15,7 +15,7 @@ namespace [-namespace-]::RT {
 //------------------------------------------------------------------------
 [-name-]Processor::[-name-]Processor() : RTProcessor([-name-]ControllerUID), fParams{}, fState{fParams}
 {
-  DLOG_F(INFO, "[-name-]Processor() - jamba: %s - plugin: v%s", JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
+  DLOG_F(INFO, "[%s] [-name-]Processor() - jamba: %s - plugin: v%s", stringPluginName, JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
 
   // in Debug mode we display the parameters in a table
 #ifndef NDEBUG

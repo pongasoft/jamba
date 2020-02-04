@@ -33,12 +33,6 @@
 
 using namespace Steinberg::Vst;
 
-#ifndef NDEBUG
-#define stringPluginName "JambaTestPlugin_Debug"
-#else
-#define stringPluginName "JambaTestPlugin"
-#endif
-
 //------------------------------------------------------------------------
 //  Module init/exit
 //------------------------------------------------------------------------

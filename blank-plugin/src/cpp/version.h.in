@@ -23,3 +23,9 @@
 #endif
 #define stringCompanyName		"[-company-]\0"
 #define stringLegalCopyright	"© [-year-] [-company-]"
+
+#ifndef NDEBUG
+#define stringPluginName "[-name-]_Debug"
+#else
+#define stringPluginName "[-name-]"
+#endif

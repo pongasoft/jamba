@@ -39,4 +39,11 @@
 #define stringFileDescription	"JambaTestPlugin plugin by pongasoft"
 #endif
 #define stringCompanyName		"pongasoft\0"
-#define stringLegalCopyright	"© 2019 pongasoft"
+#define stringLegalCopyright	"© 2019-202 pongasoft"
+
+#ifndef NDEBUG
+#define stringPluginName "JambaTestPlugin_Debug"
+#else
+#define stringPluginName "JambaTestPlugin"
+#endif
+

@@ -26,17 +26,14 @@
 #include "version.h"
 #include "jamba_version.h"
 
-namespace pongasoft {
-namespace test {
-namespace jamba {
-namespace RT {
+namespace pongasoft::test::jamba::RT {
 
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
 JambaTestPluginProcessor::JambaTestPluginProcessor() : RTProcessor(JambaTestPluginControllerUID), fParams{}, fState{fParams}
 {
-  DLOG_F(INFO, "JambaTestPluginProcessor() - jamba: %s - plugin: v%s", JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
+  DLOG_F(INFO, "[%s] JambaTestPluginProcessor() - jamba: %s - plugin: v%s", stringPluginName, JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
 
   // in Debug mode we display the parameters in a table
 #ifndef NDEBUG
@@ -138,7 +135,4 @@ tresult JambaTestPluginProcessor::genericProcessInputs(ProcessData &data)
   return kResultOk;
 }
 
-}
-}
-}
 }
