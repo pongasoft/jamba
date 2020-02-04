@@ -217,6 +217,10 @@ public:
 
   using IParamConverter<IntType>::toString;
 
+  /**
+   * Defines the type for the constructor argument. Example: `{ STR16("abc"), ... }` */
+  using ConstructorType = std::array<VstString16, StepCount + 1> const &;
+
   // Constructor - you can provide an offset for the toString conversion (ex: counting from 1 instead of 0)
   explicit DiscreteValueParamConverter(IntType iToStringOffset = 0) : fToStringOffset{iToStringOffset} {}
 
@@ -225,7 +229,7 @@ public:
     fToStringOffset{iToStringOffset}, fFormat{std::move(iFormat)} {}
 
   // Constructor with all values defined
-  explicit DiscreteValueParamConverter(std::array<VstString16, StepCount + 1> const &iToStringValues) :
+  explicit DiscreteValueParamConverter(ConstructorType iToStringValues) :
     fToStringValues(iToStringValues.cbegin(), iToStringValues.cend()) {}
 
   inline int32 getStepCount() const override { return StepCount; }
