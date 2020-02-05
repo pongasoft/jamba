@@ -59,7 +59,10 @@ public:
   ParamID getSwitchControlTag () const { return fSwitchControlTag; }
 
   /**
-   * A comma separated list of template names. Should refer to valid templates (in the xml file) */
+   * A comma separated list of template names. Should refer to valid templates (in the xml file)
+   *
+   * @note You can use `_` for a template name which means displays nothing (make sure you set the container to
+   *       transparent in this case). Can be used for overlay for example. */
   const std::vector<std::string> &getTemplateNames() const { return fTemplateNames; }
   void setTemplateNames(const std::vector<std::string> &iNames) { fTemplateNames = iNames; switchCurrentView(); }
 

@@ -71,10 +71,9 @@ void SwitchViewContainer::switchCurrentView()
 
   if(templateName != fCurrentTemplateName)
   {
-    if(templateName != "")
-      setCurrentView(fUIDescription->createView(templateName, fUIController));
-    else
-      setCurrentView(nullptr);
+    setCurrentView(templateName == "" || templateName == "_" ?
+                   nullptr :
+                   fUIDescription->createView(templateName, fUIController));
     fCurrentTemplateName = templateName;
     invalid();
   }
