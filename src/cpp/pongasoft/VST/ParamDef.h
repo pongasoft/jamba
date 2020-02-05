@@ -317,7 +317,20 @@ public:
     if(fSerializer)
       return fSerializer->toString(iValue, iPrecision);
     else
-      return "";
+    {
+      if constexpr(Utils::is_operator_write_to_ostream_defined<ParamType>)
+      {
+        std::ostringstream s;
+        if(iPrecision >= 0)
+        {
+          s.precision(iPrecision);
+          s.setf(std::ios::fixed);
+        }
+        s << iValue;
+        return s.str();
+      }
+    }
+    return "";
   }
 
   /**
