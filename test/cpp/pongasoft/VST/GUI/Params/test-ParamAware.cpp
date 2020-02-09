@@ -782,7 +782,7 @@ TEST(ParamAware, testRawParam_ParamID)
   // changing vst value => listener called
   c.vst(3);
   CHECK(c, ParamIDs::kInt64Vst);
-  ASSERT_EQ(0.6, param.getValue());
+  ASSERT_DOUBLE_EQ(0.6, param.getValue());
 
   ASSERT_EQ(kResultOk, param.setValue(0.4));
   CHECK(c, ParamIDs::kInt64Vst);
@@ -803,7 +803,7 @@ TEST(ParamAware, testRawParam_ParamID)
   // changing vst value => listener NOT called
   c.vst(3);
   CHECK_EMPTY(c);
-  ASSERT_EQ(0.6, param.getValue());
+  ASSERT_DOUBLE_EQ(0.6, param.getValue());
 
   ASSERT_EQ(kResultOk, param.setValue(0.4));
   CHECK_EMPTY(c);
@@ -840,7 +840,7 @@ TEST(ParamAware, testRawParam_ParamID)
   // changing vst value => callback called
   c.vst(3);
   CHECK(c, ParamIDs::kInt64Vst);
-  ASSERT_EQ(0.6, param.getValue());
+  ASSERT_DOUBLE_EQ(0.6, param.getValue());
 
   ASSERT_EQ(kResultOk, param.setValue(0.4));
   CHECK(c, ParamIDs::kInt64Vst);
@@ -863,7 +863,7 @@ TEST(ParamAware, testRawParam_ParamID)
   // changing vst value => callback called
   c.vst(3);
   CHECK(c, ParamIDs::kInt64Vst);
-  ASSERT_EQ(0.6, param.getValue());
+  ASSERT_DOUBLE_EQ(0.6, param.getValue());
 
   ASSERT_EQ(kResultOk, param.setValue(0.4));
   CHECK(c, ParamIDs::kInt64Vst);
@@ -904,7 +904,7 @@ TEST(ParamAware, testRawParam_ParamID)
   // changing vst value => callback called
   c.vst(3);
   CHECK(c, ParamIDs::kInt64Vst);
-  ASSERT_EQ(0.6, param.getValue());
+  ASSERT_DOUBLE_EQ(0.6, param.getValue());
 
   ASSERT_EQ(kResultOk, param.setValue(0.4));
   CHECK(c, ParamIDs::kInt64Vst);
@@ -927,7 +927,7 @@ TEST(ParamAware, testRawParam_ParamID)
   // changing vst value => callback called
   c.vst(3);
   CHECK(c, ParamIDs::kInt64Vst);
-  ASSERT_EQ(0.6, param.getValue());
+  ASSERT_DOUBLE_EQ(0.6, param.getValue());
 
   ASSERT_EQ(kResultOk, param.setValue(0.4));
   CHECK(c, ParamIDs::kInt64Vst);

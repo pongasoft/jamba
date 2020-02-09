@@ -111,7 +111,6 @@ TEST(SelfContainedViewListener, testScenario1) {
 // SelfContainedViewListener - testScenario2
 TEST(SelfContainedViewListener, testScenario2) {
   MyView view{};
-  MyViewListener *listener{nullptr};
 
   // making sure there is no instances
   ASSERT_EQ(0, MyViewListener::instanceCounter.load());

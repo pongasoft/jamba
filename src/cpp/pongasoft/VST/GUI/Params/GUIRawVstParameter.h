@@ -326,7 +326,7 @@ public:
   std::unique_ptr<GUIRawVstParameter::EditorType> edit(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
   //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
-  constexpr ParamValue operator *() const { DCHECK_F(exists()); return fPtr->getValue(); }
+  inline ParamValue operator *() const { DCHECK_F(exists()); return fPtr->getValue(); }
 
   //! Allow to use the param as the underlying ParamType (ex: "if(param)" in the case ParamType is bool))
   [[deprecated("Since 4.1.0 -  use operator* or .value() instead (ex: if(*param) {...} or if(param.value()) {...}")]]
