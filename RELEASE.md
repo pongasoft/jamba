@@ -1,11 +1,14 @@
 Release Notes {#release-notes}
 -------------
 
-## [TBD - v4.1.0](https://github.com/pongasoft/jamba/tree/v4.1.0)
+## [2020-02-09 - v4.1.0](https://github.com/pongasoft/jamba/tree/v4.1.0)
 
 * Due to issues with implicit conversion triggering potential hard crash, deprecated implicit conversion to `T` for all params (`RTRawVstParam`, `RTParam`, `GUIRawVstParam`, `GUIVstParam`, `GUIJmbParam`, `GUIOptionalParam`).
 * Added convenient dereference operator (`operator *`) to all params as a shortcut to invoke `.value()` (which is the preferred way to fix the deprecated warnings)
 * Added convenient equality and relational operators to all params so that the params still continue to behave like the underlying type (`T`) in many instances
+
+* Handle `toUTF8String()` for Jmb parameter when no serializer is provided by checking the availability of `ostream<<` for `T`
+* Allow the use of the template name `_` for the switch container view (for example to use as an overlay that is shown/hidden)
 
 ## [2019-11-29 - v4.0.1](https://github.com/pongasoft/jamba/tree/v4.0.1)
 
