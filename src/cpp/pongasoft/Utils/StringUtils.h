@@ -22,8 +22,10 @@
 #include <vector>
 #include <iterator>
 
-namespace pongasoft {
-namespace Utils {
+namespace pongasoft::Utils {
+
+//! Convenient call to convert a boolean into a string
+constexpr char const *to_string(bool iValue) { return iValue ? "true" : "false"; }
 
 /**
  * Split a string according to a delimiter and writes the result into Out (can be a vector, array, etc...)
@@ -113,5 +115,4 @@ std::vector<TFloat> splitFloats(const std::string &iString, char iDelimiter, boo
   return res;
 }
 
-}
 }

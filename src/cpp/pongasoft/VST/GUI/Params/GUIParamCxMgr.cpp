@@ -68,7 +68,7 @@ GUIOptionalParam<int32> GUIParamCxMgr::registerOptionalDiscreteParam(ParamID iPa
     auto pint32 = VstUtils::make_sfo<GUIValParameter<int32>>(iParamID, 0);
 
     if(iStepCount > 0)
-      optionalParam = std::move(pint32->asDiscreteParameter(iStepCount));
+      optionalParam = pint32->asDiscreteParameter(iStepCount);
     else
       optionalParam = std::move(pint32);
 

@@ -27,6 +27,7 @@
 #include <vstgui4/vstgui/lib/cbitmap.h>
 #include <map>
 #include <memory>
+#include <functional>
 #include <pongasoft/logging/logging.h>
 #include <pongasoft/VST/GUI/Types.h>
 #include <pongasoft/VST/GUI/LookAndFeel.h>
@@ -191,7 +192,7 @@ private:
       return false;
     }
 
-    // apply => set a color to the view
+    //! apply => calls the setter on the view to set the attribute (use `fromString`)
     bool apply(CView *iView, const UIAttributes &iAttributes, const IUIDescription *iDescription) override
     {
       auto *tv = dynamic_cast<TView *>(iView);
@@ -203,7 +204,7 @@ private:
           T value;
           if(fromString(iDescription, *attributeValue, value))
           {
-            (tv->*fSetter)(value);
+            std::invoke(fSetter, tv, value);
             return true;
           }
         }
@@ -222,13 +223,13 @@ private:
     }
 
 
-    // getAttributeValue => get a color from the view
+    //! getAttributeValue => calls the getter on the view to retrieve the value of the attribute (use `toString`)
     bool getAttributeValue(CView *iView, const IUIDescription *iDescription, std::string &oStringValue) const override
     {
       auto *tv = dynamic_cast<TView *>(iView);
       if(tv != nullptr)
       {
-        auto value = (tv->*fGetter)();
+        auto value = std::invoke(fGetter, tv);
         return toString(iDescription, value, oStringValue);
       }
       return false;

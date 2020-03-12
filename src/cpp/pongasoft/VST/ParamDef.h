@@ -410,10 +410,17 @@ tresult JmbParamDef<T>::writeToStream(const T &iValue, IBStreamer &oStreamer) co
 // JmbParamDef::writeToStream
 //------------------------------------------------------------------------
 template<typename T>
-void JmbParamDef<T>::writeToStream(const ParamType &iValue, std::ostream &oStreamer) const
+void JmbParamDef<T>::writeToStream(const ParamType &iValue, std::ostream &oStream) const
 {
   if(fSerializer)
-    fSerializer->writeToStream(iValue, oStreamer);
+    fSerializer->writeToStream(iValue, oStream);
+  else
+  {
+    if constexpr(Utils::is_operator_write_to_ostream_defined<ParamType>)
+    {
+      oStream << iValue;
+    }
+  }
 }
 
 //------------------------------------------------------------------------

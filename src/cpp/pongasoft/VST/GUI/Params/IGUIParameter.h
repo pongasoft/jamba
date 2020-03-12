@@ -233,7 +233,7 @@ public:
   {
   public:
     /**
-     * Unconditionaly sets the value of the parameter to the value provided.
+     * Unconditionally sets the value of the parameter to the value provided.
      *
      * @param iValue the value to set
      * @return `kResultOk` if successful */
@@ -292,7 +292,7 @@ public:
   virtual bool update(ParamType const &iValue) = 0;
 
   /**
-   * Unconditionaly sets the value of the parameter to the value provided.
+   * Unconditionally sets the value of the parameter to the value provided.
    *
    * @param iValue the value to set
    * @return `kResultOk` if successful */
