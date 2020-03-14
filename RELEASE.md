@@ -1,6 +1,10 @@
 Release Notes {#release-notes}
 -------------
 
+## [TBD]
+
+* Added `ParamImageView` to render a parameter value as an image (very useful for status LEDs, etc...)
+
 ## [2020-02-09 - v4.1.0](https://github.com/pongasoft/jamba/tree/v4.1.0)
 
 * Due to issues with implicit conversion triggering potential hard crash, deprecated implicit conversion to `T` for all params (`RTRawVstParam`, `RTParam`, `GUIRawVstParam`, `GUIVstParam`, `GUIJmbParam`, `GUIOptionalParam`).

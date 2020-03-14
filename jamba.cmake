@@ -5,7 +5,7 @@ set(JAMBA_ROOT ${CMAKE_CURRENT_LIST_DIR})
 # Version
 #------------------------------------------------------------------------
 set(JAMBA_MAJOR_VERSION 4)
-set(JAMBA_MINOR_VERSION 1)
+set(JAMBA_MINOR_VERSION 2)
 set(JAMBA_PATCH_VERSION 0)
 execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     RESULT_VARIABLE result
@@ -124,6 +124,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamDisplayView.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamImageView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/StateAware.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextEditView.h
@@ -171,6 +172,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/DiscreteButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamDisplayView.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamImageView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/StepButtonView.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/SwitchViewContainer.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/TextButtonView.cpp

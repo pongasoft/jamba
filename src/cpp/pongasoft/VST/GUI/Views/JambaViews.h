@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@
 #include "DiscreteButtonView.h"
 #include "SwitchViewContainer.h"
 #include "ParamDisplayView.h"
+#include "ParamImageView.h"
 #include "DebugParamDisplayView.h"
 
 
@@ -40,6 +41,7 @@ struct JambaViews : public FObject
   SINGLETON(JambaViews);
 
   const ParamDisplayView::Creator fParamDisplayView{"jamba::ParamDisplay", "Jamba - Param Display (Vst & Jmb)"};
+  const ParamImageView::Creator fParamImageView{"jamba::ParamImage", "Jamba - Param Image - Value rendered as image (ex: LEDs, status, etc...) "};
   const DebugParamDisplayView::Creator fDebugParamDisplayView{"jamba::DebugParamDisplay", "Jamba - Param Display + highlight (for debug)"};
   const ToggleButtonView::Creator fToggleButtonCreator{"jamba::ToggleButton", "Jamba - Toggle Button (on/off)"};
   const MomentaryButtonView::Creator fMomentaryButtonCreator{"jamba::MomentaryButton", "Jamba - Momentary Button (on when pressed)"};

@@ -98,6 +98,7 @@ public:
   //! Inverses the meaning of "on" and "off" in regards to drawing the view/image.
   bool getInverse() const { return fInverse; }
 
+  //! Attribute `inverse`
   void setInverse(bool iInverse) { fInverse = iInverse; }
 
   /**
