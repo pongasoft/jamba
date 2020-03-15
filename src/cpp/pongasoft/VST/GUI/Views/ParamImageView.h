@@ -43,7 +43,7 @@ namespace pongasoft::VST::GUI::Views {
 class ParamImageView : public CustomDiscreteControlView
 {
 public:
-  explicit ParamImageView(const CRect &iSize) : CustomDiscreteControlView(iSize) {}
+  explicit ParamImageView(const CRect &iSize) : CustomDiscreteControlView(iSize) { CView::setMouseEnabled(false); }
 
   // draw => does the actual drawing job
   void draw(CDrawContext *iContext) override;

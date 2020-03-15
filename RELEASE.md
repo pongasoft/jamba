@@ -4,6 +4,7 @@ Release Notes {#release-notes}
 ## [TBD]
 
 * Added `ParamImageView` to render a parameter value as an image (very useful for status LEDs, etc...)
+* Added `ImageView` to render an image (useful for static images, logos, decals, stickers, etc...)
 
 ## [2020-02-09 - v4.1.0](https://github.com/pongasoft/jamba/tree/v4.1.0)
 

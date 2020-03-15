@@ -28,6 +28,7 @@
 #include "ParamDisplayView.h"
 #include "ParamImageView.h"
 #include "DebugParamDisplayView.h"
+#include "ImageView.h"
 
 
 namespace pongasoft::VST::GUI::Views {
@@ -41,7 +42,8 @@ struct JambaViews : public FObject
   SINGLETON(JambaViews);
 
   const ParamDisplayView::Creator fParamDisplayView{"jamba::ParamDisplay", "Jamba - Param Display (Vst & Jmb)"};
-  const ParamImageView::Creator fParamImageView{"jamba::ParamImage", "Jamba - Param Image - Value rendered as image (ex: LEDs, status, etc...) "};
+  const ParamImageView::Creator fParamImageView{"jamba::ParamImage", "Jamba - Param Image | Value rendered as image (ex: LEDs, status, etc...) "};
+  const ImageView::Creator fImageView{"jamba::Image", "Jamba - Image | Simply renders an image (decal, sticker, logo...) "};
   const DebugParamDisplayView::Creator fDebugParamDisplayView{"jamba::DebugParamDisplay", "Jamba - Param Display + highlight (for debug)"};
   const ToggleButtonView::Creator fToggleButtonCreator{"jamba::ToggleButton", "Jamba - Toggle Button (on/off)"};
   const MomentaryButtonView::Creator fMomentaryButtonCreator{"jamba::MomentaryButton", "Jamba - Momentary Button (on when pressed)"};
