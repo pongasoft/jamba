@@ -1,10 +1,11 @@
 Release Notes {#release-notes}
 -------------
 
-## [TBD]
+## [2020-03-16 - v4.2.0](https://github.com/pongasoft/jamba/tree/v4.2.0)
 
 * Added `ParamImageView` to render a parameter value as an image (very useful for status LEDs, etc...)
 * Added `ImageView` to render an image (useful for static images, logos, decals, stickers, etc...)
+* Upgraded `googletest` to `1.10.0` (due to CMake caching, this requires deleting the CMake build folder to take effect on existing projects)
 
 ## [2020-02-09 - v4.1.0](https://github.com/pongasoft/jamba/tree/v4.1.0)
 

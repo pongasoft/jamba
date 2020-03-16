@@ -10,7 +10,7 @@ else()
 endif()
 
 set(googletest_GIT_REPO "https://github.com/google/googletest" CACHE STRING "googletest git repository URL")
-set(googletest_GIT_TAG "release-1.8.1" CACHE STRING "googletest git tag")
+set(googletest_GIT_TAG "release-1.10.0" CACHE STRING "googletest git tag")
 
 FetchContent_Declare(googletest
     GIT_REPOSITORY    ${googletest_GIT_REPO}
