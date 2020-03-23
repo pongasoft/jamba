@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -193,7 +193,9 @@ class RTVstParam : public Utils::Operators::Dereferenceable<RTVstParam<T>>
 
 public:
   RTVstParam(RTVstParameter<T> *iPtr) : fPtr{iPtr} // NOLINT (not marked explicit on purpose)
-  {}
+  {
+    DCHECK_F(fPtr != nullptr);
+  }
 
   // getParamID
   inline ParamID getParamID() const { return fPtr->getParamID(); }
@@ -270,8 +272,10 @@ private:
 class RTRawVstParam : public Utils::Operators::Dereferenceable<RTRawVstParam>
 {
 public:
-  RTRawVstParam(RTRawVstParameter *iPtr) : fPtr{iPtr}
-  {}
+  RTRawVstParam(RTRawVstParameter *iPtr) : fPtr{iPtr} // NOLINT (not marked explicit on purpose)
+  {
+    DCHECK_F(fPtr != nullptr);
+  }
 
   // getParamID
   inline ParamID getParamID() const { return fPtr->getParamID(); }

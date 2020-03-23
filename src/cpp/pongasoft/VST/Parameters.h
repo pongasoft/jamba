@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -72,16 +72,17 @@ public:
   struct RawVstParamDefBuilder
   {
     // builder methods
-    RawVstParamDefBuilder &units(VstString16 iUnits) { fUnits = iUnits; return *this; }
+    RawVstParamDefBuilder &units(VstString16 iUnits) { fUnits = std::move(iUnits); return *this; }
     RawVstParamDefBuilder &defaultValue(ParamValue iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     RawVstParamDefBuilder &stepCount(int32 iStepCount) { fStepCount = iStepCount; return *this;}
     RawVstParamDefBuilder &flags(int32 iFlags) { fFlags = iFlags; return *this; }
     RawVstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
-    RawVstParamDefBuilder &shortTitle(VstString16 iShortTitle) { fShortTitle = iShortTitle; return *this; }
+    RawVstParamDefBuilder &shortTitle(VstString16 iShortTitle) { fShortTitle = std::move(iShortTitle); return *this; }
     RawVstParamDefBuilder &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
     RawVstParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
     RawVstParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
     RawVstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+    RawVstParamDefBuilder &deprecatedSince(int16 iVersion) { fDeprecatedSince = iVersion; return *this; }
 
     // parameter factory method
     RawVstParam add() const;
@@ -92,12 +93,13 @@ public:
     VstString16 fUnits{};
     ParamValue fDefaultValue{};
     int32 fStepCount{0};
-    int32 fFlags = ParameterInfo::kCanAutomate;
-    UnitID fUnitID = kRootUnitId;
+    int32 fFlags{ParameterInfo::kCanAutomate};
+    UnitID fUnitID{kRootUnitId};
     VstString16 fShortTitle{};
-    int32 fPrecision = 4;
-    IParamDef::Owner fOwner = IParamDef::Owner::kRT;
-    bool fTransient = false;
+    int32 fPrecision{4};
+    IParamDef::Owner fOwner{IParamDef::Owner::kRT};
+    bool fTransient{false};
+    int16 fDeprecatedSince{IParamDef::kVersionNotDeprecated};
 
     friend class Parameters;
 
@@ -116,15 +118,16 @@ public:
   struct VstParamDefBuilder
   {
     // builder methods
-    VstParamDefBuilder &units(VstString16 iUnits) { fUnits = iUnits; return *this; }
+    VstParamDefBuilder &units(VstString16 iUnits) { fUnits = std::move(iUnits); return *this; }
     VstParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     VstParamDefBuilder &flags(int32 iFlags) { fFlags = iFlags; return *this; }
     VstParamDefBuilder &unitID(int32 iUnitID) { fUnitID = iUnitID; return *this; }
-    VstParamDefBuilder &shortTitle(VstString16 iShortTitle) { fShortTitle = iShortTitle; return *this; }
+    VstParamDefBuilder &shortTitle(VstString16 iShortTitle) { fShortTitle = std::move(iShortTitle); return *this; }
     VstParamDefBuilder &precision(int32 iPrecision) { fPrecision = iPrecision; return *this; }
     VstParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
     VstParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
     VstParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+    VstParamDefBuilder &deprecatedSince(int16 iVersion) { fDeprecatedSince = iVersion; return *this; }
     VstParamDefBuilder &converter(std::shared_ptr<IParamConverter<T>> iConverter) { fConverter = std::move(iConverter); return *this; }
     template<typename ParamConverter, typename... Args>
     VstParamDefBuilder &converter(Args&& ...iArgs) { fConverter = std::make_shared<ParamConverter>(std::forward<Args>(iArgs)...); return *this; }
@@ -137,12 +140,13 @@ public:
     VstString16 fTitle;
     VstString16 fUnits{};
     T fDefaultValue{};
-    int32 fFlags = ParameterInfo::kCanAutomate;
-    UnitID fUnitID = kRootUnitId;
+    int32 fFlags{ParameterInfo::kCanAutomate};
+    UnitID fUnitID{kRootUnitId};
     VstString16 fShortTitle{};
-    int32 fPrecision = 4;
-    IParamDef::Owner fOwner = IParamDef::Owner::kRT;
-    bool fTransient = false;
+    int32 fPrecision{4};
+    IParamDef::Owner fOwner{IParamDef::Owner::kRT};
+    bool fTransient{false};
+    int16 fDeprecatedSince{IParamDef::kVersionNotDeprecated};
     std::shared_ptr<IParamConverter<T>> fConverter{};
 
     friend class Parameters;
@@ -164,6 +168,7 @@ public:
     // builder methods
     JmbParamDefBuilder &defaultValue(T const &iDefaultValue) { fDefaultValue = iDefaultValue; return *this;}
     JmbParamDefBuilder &transient(bool iTransient = true) { fTransient = iTransient; return *this; }
+    JmbParamDefBuilder &deprecatedSince(int16 iVersion) { fDeprecatedSince = iVersion; return *this; }
     JmbParamDefBuilder &rtOwned() { fOwner = IParamDef::Owner::kRT; return *this; }
     JmbParamDefBuilder &guiOwned() { fOwner = IParamDef::Owner::kGUI; return *this; }
     JmbParamDefBuilder &shared(bool iShared = true) { fShared = iShared; return *this; }
@@ -178,9 +183,10 @@ public:
     ParamID fParamID;
     VstString16 fTitle;
     T fDefaultValue{};
-    IParamDef::Owner fOwner = IParamDef::Owner::kGUI;
-    bool fTransient = false;
-    bool fShared = false;
+    IParamDef::Owner fOwner{IParamDef::Owner::kGUI};
+    bool fTransient{false};
+    int16 fDeprecatedSince{IParamDef::kVersionNotDeprecated};
+    bool fShared{false};
     std::shared_ptr<IParamSerializer<T>> fSerializer{};
 
     friend class Parameters;
@@ -253,7 +259,7 @@ public:
    * processor, setComponentState in the controller)
    *
    * @param iVersion should be a >= 0 number. If negative it will be ignored
-   * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef, JmbParamDef
+   * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef
    */
   template<typename... Args>
   tresult setRTSaveStateOrder(int16 iVersion, Args&& ...args);
@@ -263,6 +269,22 @@ public:
    * processor, setComponentState in the controller)
    */
   tresult setRTSaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder);
+
+  /**
+   * This method should be called to save the order of a deprecated version so that it can be handled during upgrade. A
+   * deprecated version should be used when the state changes in a non compatible fashion.
+   *
+   * For example, adding new parameters at the end of the state is **not** an incompatible change and does not require
+   * to deprecate the version.
+   *
+   * On the other end, adding new parameters in the middle and removing parameters are incompatible changes and
+   * require to deprecate the version.
+   *
+   * @param iVersion should be a >= 0 number. If negative it will be ignored
+   * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef
+   */
+  template<typename... Args>
+  tresult setRTDeprecatedSaveStateOrder(int16 iVersion, Args&& ...args);
 
   /**
    * @return the order used when saving the GUI state (getState/setState in the controller)
@@ -327,6 +349,48 @@ public:
   // getAllRegistrationOrder
   std::vector<ParamID> const &getAllRegistrationOrder() const { return fAllRegistrationOrder; }
 
+  /**
+   * When Jamba detects that a previously saved RT state matches a deprecated version (as registered with
+   * `setRTDeprecatedSaveStateOrder`), it will call this method to let the plugin handle the upgrade if necessary.
+   *
+   * Here is an example of a typical implementation of this method:
+   *
+   * ```
+   * switch(iDeprecatedState.getVersion())
+   * {
+   *    case kRT_V1: // assuming this is the previous version
+   *    {
+   *      // __deprecated_fNumSlices is a deprecated param (removed from deprecated state) so we read
+   *      // its value using a helper in the deprecated state
+   *      auto oldNumSlices = __deprecated_fNumSlices->readFromState(iDeprecatedState);
+   *
+   *      // fNumSlices is a new parameter (added to the new state) which handles number of slices completely
+   *      // differently so we save the new value in the new state using a helper
+   *      fNumSlices->writeToState(NumSlice{oldNumSlices}, oNewState);
+   *
+   *      return kResultTrue;
+   *    }
+   *
+   *    default:
+   *      DLOG_F(ERROR, "Unexpected deprecated version %d", iDeprecatedState.fSaveOrder->fVersion);
+   *      return kResultFalse;
+   * }
+   * ```
+   *
+   * \note Since `oNewState` has already been populated with the values from `iDeprecatedState` that had the same
+   *       parameter ID, this method should be overridden only when further tweaks need to happen (like in the
+   *       above example when a parameter value which was an enumeration, need to be converted to a float)
+   *
+   * @param iDeprecatedState the populated deprecated state from which to read the deprecated values
+   * @param oNewState the new state already populated with the common values from `iDeprecatedState` for
+   *                  further tweaks
+   * @return `kResultTrue` if handled, `kResultFalse` if unhandled
+   */
+  virtual tresult handleRTStateUpgrade(NormalizedState const &iDeprecatedState, NormalizedState &oNewState) const
+  {
+    return kResultTrue;
+  }
+
   // gives access for debug
   friend class Debug::ParamDisplay;
 
@@ -348,6 +412,10 @@ protected:
   // addJmbParamDef
   tresult addJmbParamDef(std::shared_ptr<IJmbParamDef> iParamDef);
 
+  /**
+   * This method is called to read a deprecated (prior version) RTState from the stream */
+  virtual tresult readDeprecatedRTState(uint16 iVersion, IBStreamer &iStreamer, NormalizedState *oNormalizedState) const;
+
 private:
   // contains all the registered (raw type) parameters (unique ID, will be checked on add)
   std::map<ParamID, std::shared_ptr<RawVstParamDef>> fVstParams{};
@@ -361,9 +429,12 @@ private:
   // order in which the parameters were registered
   std::vector<ParamID> fAllRegistrationOrder{};
 
-  /// @todo Handle multiple versions with upgrade
+  // The "latest" order for both RT and GUI
   NormalizedState::SaveOrder fRTSaveStateOrder{};
   NormalizedState::SaveOrder fGUISaveStateOrder{};
+
+  // Keep track of deprecated state orders used for upgrade
+  std::map<int16, NormalizedState::SaveOrder> fRTDeprecatedSaveStateOrders{};
 
 private:
   // leaf of templated calls to build a list of ParamIDs from ParamID or ParamDefs
@@ -401,6 +472,10 @@ private:
     return buildParamIDs(iParamIDs, iParamDef->fParamID, std::forward<Args>(args)...);
   }
 
+  /**
+   * Called internally with the order for a deprecated version */
+  tresult setRTDeprecatedSaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder);
+
 };
 
 //------------------------------------------------------------------------
@@ -437,6 +512,7 @@ VstParam<T> Parameters::add(VstParamDefBuilder<T> const &iBuilder)
                                                 iBuilder.fPrecision,
                                                 iBuilder.fOwner,
                                                 iBuilder.fTransient,
+                                                iBuilder.fDeprecatedSince,
                                                 iBuilder.fConverter);
 
   if(!iBuilder.fTransient && !iBuilder.fConverter)
@@ -460,6 +536,7 @@ JmbParam<T> Parameters::add(Parameters::JmbParamDefBuilder<T> const &iBuilder)
                                                 iBuilder.fTitle,
                                                 iBuilder.fOwner,
                                                 iBuilder.fTransient,
+                                                iBuilder.fDeprecatedSince,
                                                 iBuilder.fShared,
                                                 iBuilder.fDefaultValue,
                                                 iBuilder.fSerializer);
@@ -580,6 +657,17 @@ tresult Parameters::setRTSaveStateOrder(int16 iVersion, Args&& ...args)
   std::vector<ParamID> ids{};
   buildParamIDs(ids, std::forward<Args>(args)...);
   return setRTSaveStateOrder({iVersion, ids});
+}
+
+//------------------------------------------------------------------------
+// Parameters::setRTDeprecatedSaveStateOrder
+//------------------------------------------------------------------------
+template<typename... Args>
+tresult Parameters::setRTDeprecatedSaveStateOrder(int16 iVersion, Args&& ...args)
+{
+  std::vector<ParamID> ids{};
+  buildParamIDs(ids, std::forward<Args>(args)...);
+  return setRTDeprecatedSaveStateOrder({iVersion, ids});
 }
 
 //------------------------------------------------------------------------

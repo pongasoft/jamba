@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,8 +20,7 @@
 
 #include <sstream>
 
-namespace pongasoft {
-namespace VST {
+namespace pongasoft::VST {
 
 //------------------------------------------------------------------------
 // NormalizedState::NormalizedState
@@ -78,6 +77,22 @@ NormalizedState &NormalizedState::operator=(const NormalizedState &other)
 }
 
 //------------------------------------------------------------------------
+// NormalizedState::copyValuesTo
+//------------------------------------------------------------------------
+int NormalizedState::copyValuesTo(NormalizedState &oDestination) const
+{
+  int count = 0;
+  for(int i = 0; i < getCount(); i++)
+  {
+    if(oDestination.setNormalizedValue(fSaveOrder->fOrder[i], fValues[i]) == kResultOk)
+      count++;
+  }
+  return count;
+}
+
+
+
+//------------------------------------------------------------------------
 // NormalizedState::readFromStream
 //------------------------------------------------------------------------
 tresult NormalizedState::readFromStream(const Parameters *iParameters, IBStreamer &iStreamer)
@@ -111,6 +126,46 @@ tresult NormalizedState::writeToStream(Parameters const * /* iParameters */, IBS
 }
 
 //------------------------------------------------------------------------
+// NormalizedState::getNormalizedValue
+//------------------------------------------------------------------------
+tresult NormalizedState::getNormalizedValue(ParamID iParamID, ParamValue &oValue) const
+{
+  auto paramIdx = findParamIndex(iParamID);
+  if(paramIdx >= 0)
+  {
+    oValue = get(paramIdx);
+    return kResultTrue;
+  }
+  else
+    return kResultFalse;
+}
+
+//------------------------------------------------------------------------
+// NormalizedState::setNormalizedValue
+//------------------------------------------------------------------------
+tresult NormalizedState::setNormalizedValue(ParamID iParamID, ParamValue iValue)
+{
+  auto paramIdx = findParamIndex(iParamID);
+  if(paramIdx >= 0)
+  {
+    set(paramIdx, iValue);
+    return kResultTrue;
+  }
+  else
+    return kResultFalse;
+}
+
+//------------------------------------------------------------------------
+// NormalizedState::findParamIndex
+//------------------------------------------------------------------------
+int NormalizedState::findParamIndex(ParamID iParamID) const
+{
+  auto pos = std::find(std::begin(fSaveOrder->fOrder), std::end(fSaveOrder->fOrder), iParamID);
+  auto distance = static_cast<int>(std::distance(std::begin(fSaveOrder->fOrder), pos));
+  return distance == getCount() ? -1 : distance;
+}
+
+//------------------------------------------------------------------------
 // NormalizedState::toString -- only for debug
 //------------------------------------------------------------------------
 std::string NormalizedState::toString() const
@@ -125,5 +180,4 @@ std::string NormalizedState::toString() const
   return s.str();
 }
 
-}
 }

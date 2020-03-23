@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -253,6 +253,9 @@ protected:
 template<typename TPluginParameters>
 class GUIPluginState : public GUIState
 {
+  // ensures that TPluginParameters is a subclass of Parameters
+  static_assert(std::is_convertible<TPluginParameters*, Parameters*>::value, "TPluginParameters must be a subclass of Parameters");
+
 public:
   using PluginParameters = TPluginParameters;
 

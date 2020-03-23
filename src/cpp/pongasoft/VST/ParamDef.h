@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@
 #include "ParamConverters.h"
 #include "ParamSerializers.h"
 #include "Messaging.h"
+#include "NormalizedState.h"
 
 #include <base/source/fstreamer.h>
 #include <pluginterfaces/vst/vsttypes.h>
@@ -45,29 +46,41 @@ class IGUIJmbParameter;
 class IParamDef : public std::enable_shared_from_this<IParamDef>
 {
 public:
+  /**
+   * Who owns the parameter (mostly for state saving purposes) */
   enum class Owner
   {
     kRT,
     kGUI
   };
+
+  //! Special version indicating the parameter is not deprecated
+  static constexpr int16 kVersionNotDeprecated = -1;
+
 public:
   IParamDef(ParamID const iParamID,
             VstString16 iTitle,
             Owner const iOwner,
-            bool const iTransient) :
+            bool const iTransient,
+            int16 const iDeprecatedSince) :
     fParamID{iParamID},
     fTitle{std::move(iTitle)},
     fOwner{iOwner},
-    fTransient{iTransient}
+    fTransient{iTransient},
+    fDeprecatedSince{iDeprecatedSince}
   {}
 
   virtual ~IParamDef() = default;
+
+  //! Returns true if the parameter is deprecated (meaning it can only be used to upgrade to latest version)
+  bool isDeprecated() const { return fDeprecatedSince > kVersionNotDeprecated; }
 
 public:
   const ParamID fParamID;
   const VstString16 fTitle;
   const Owner fOwner; // who owns the parameter (and which stream will it be saved if non transient)
   const bool fTransient; // not saved in the stream
+  const int16 fDeprecatedSince; // at which version the parameter got deprecated
 };
 
 
@@ -87,8 +100,9 @@ public:
                  VstString16 iShortTitle,
                  int32 const iPrecision,
                  Owner const iOwner,
-                 bool const iTransient) :
-    IParamDef(iParamID, std::move(iTitle), iOwner, iTransient),
+                 bool const iTransient,
+                 int16 const iDeprecatedSince) :
+    IParamDef(iParamID, std::move(iTitle), iOwner, iTransient, iDeprecatedSince),
     fUnits{std::move(iUnits)},
     fDefaultValue{Utils::clampE(iDefaultNormalizedValue, 0.0, 1.0)},
     fStepCount{iStepCount},
@@ -109,6 +123,20 @@ public:
       res = value;
 
     return res;
+  }
+
+  //! Read the value from the (normalized) state
+  ParamValue readFromState(NormalizedState const &iState) const
+  {
+    ParamValue res = fDefaultValue;
+    iState.getNormalizedValue(fParamID, res);
+    return res;
+  }
+
+  //! Writes the provided value to the (normalized) state
+  tresult writeToState(ParamValue iValue, NormalizedState &oState) const
+  {
+    return oState.setNormalizedValue(fParamID, iValue);
   }
 
   // toString
@@ -160,6 +188,7 @@ public:
               int32 const iPrecision,
               Owner const iOwner,
               bool const iTransient,
+              int16 const iDeprecatedSince,
               std::shared_ptr<IParamConverter<ParamType>> iConverter) :
     RawVstParamDef(iParamID,
                    std::move(iTitle),
@@ -171,10 +200,23 @@ public:
                    std::move(iShortTitle),
                    iPrecision,
                    iOwner,
-                   iTransient),
+                   iTransient,
+                   iDeprecatedSince),
     fDefaultValue{iDefaultValue},
     fConverter{std::move(iConverter)}
   {
+  }
+
+  //! Read the value from the (normalized) state
+  ParamType readFromState(NormalizedState const &iState) const
+  {
+    return denormalize(RawVstParamDef::readFromState(iState));
+  }
+
+  //! Writes the provided value to the (normalized) state
+  tresult writeToState(ParamType const &iValue, NormalizedState &oState) const
+  {
+    return RawVstParamDef::writeToState(normalize(iValue), oState);
   }
 
   // getDefaultValue
@@ -241,8 +283,9 @@ public:
                VstString16 iTitle,
                Owner const iOwner,
                bool const iTransient,
+               int16 const iDeprecatedSince,
                bool const iShared)
-    : IParamDef(iParamID, std::move(iTitle), iOwner, iTransient),
+    : IParamDef(iParamID, std::move(iTitle), iOwner, iTransient, iDeprecatedSince),
       fShared{iShared}
   {}
 
@@ -279,10 +322,11 @@ public:
               VstString16 iTitle,
               Owner const iOwner,
               bool const iTransient,
+              int16 const iDeprecatedSince,
               bool const iShared,
               ParamType const &iDefaultValue,
               std::shared_ptr<IParamSerializer<ParamType>> iSerializer) :
-    IJmbParamDef(iParamID, std::move(iTitle), iOwner, iTransient, iShared),
+    IJmbParamDef(iParamID, std::move(iTitle), iOwner, iTransient, iDeprecatedSince, iShared),
     fDefaultValue{iDefaultValue},
     fSerializer{std::move(iSerializer)}
   {}
