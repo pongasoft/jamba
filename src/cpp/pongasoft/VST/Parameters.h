@@ -302,6 +302,28 @@ public:
   tresult setGUISaveStateOrder(int16 iVersion, Args&& ...args);
 
   /**
+   * @return the order used when saving the GUI state (getState/setState in the controller) for the given (deprecated)
+   *         version or `nullptr` if there is no such version
+   */
+  NormalizedState::SaveOrder const *getGUIDeprecatedSaveStateOrder(int16 iVersion) const;
+
+  /**
+   * This method should be called to save the order of a deprecated version so that it can be handled during upgrade. A
+   * deprecated version should be used when the state changes in a non compatible fashion.
+   *
+   * For example, adding new parameters at the end of the state is **not** an incompatible change and does not require
+   * to deprecate the version.
+   *
+   * On the other end, adding new parameters in the middle and removing parameters are incompatible changes and
+   * require to deprecate the version.
+   *
+   * @param iVersion should be a >= 0 number. If negative it will be ignored
+   * @param args can be any combination of `ParamID`, RawVstParamDef, VstParamDef, JmbParamDef
+   */
+  template<typename... Args>
+  tresult setGUIDeprecatedSaveStateOrder(int16 iVersion, Args&& ...args);
+
+  /**
    * Used to change the default order (registration order) used when saving the GUI state (getState/setState in
    * the controller)
    */
@@ -331,6 +353,11 @@ public:
    * @return a new normalized state for RT (can be overridden to return a subclass!)
    */
   virtual std::unique_ptr<NormalizedState> newRTState() const;
+
+  /**
+   * @return a new normalized state for RT (can be overridden to return a subclass!)
+   */
+  virtual std::unique_ptr<NormalizedState> newRTState(NormalizedState::SaveOrder const *iSaveOrder) const;
 
   /**
    * @return normalized value read from the stream for the given parameter
@@ -435,6 +462,7 @@ private:
 
   // Keep track of deprecated state orders used for upgrade
   std::map<int16, NormalizedState::SaveOrder> fRTDeprecatedSaveStateOrders{};
+  std::map<int16, NormalizedState::SaveOrder> fGUIDeprecatedSaveStateOrders{};
 
 private:
   // leaf of templated calls to build a list of ParamIDs from ParamID or ParamDefs
@@ -476,6 +504,9 @@ private:
    * Called internally with the order for a deprecated version */
   tresult setRTDeprecatedSaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder);
 
+  /**
+   * Called internally with the order for a deprecated version */
+  tresult setGUIDeprecatedSaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder);
 };
 
 //------------------------------------------------------------------------
@@ -679,6 +710,17 @@ tresult Parameters::setGUISaveStateOrder(int16 iVersion, Args&& ...args)
   std::vector<ParamID> ids{};
   buildParamIDs(ids, std::forward<Args>(args)...);
   return setGUISaveStateOrder({iVersion, ids});
+}
+
+//------------------------------------------------------------------------
+// Parameters::setGUIDeprecatedSaveStateOrder
+//------------------------------------------------------------------------
+template<typename... Args>
+tresult Parameters::setGUIDeprecatedSaveStateOrder(int16 iVersion, Args&& ...args)
+{
+  std::vector<ParamID> ids{};
+  buildParamIDs(ids, std::forward<Args>(args)...);
+  return setGUIDeprecatedSaveStateOrder({iVersion, ids});
 }
 
 }

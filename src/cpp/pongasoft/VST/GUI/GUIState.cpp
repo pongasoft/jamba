@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -129,26 +129,65 @@ tresult GUIState::readGUIState(IBStreamer &iStreamer)
     if(!iStreamer.readInt16u(stateVersion))
       stateVersion = 0;
 
-    /// @todo handle multiple versions
     if(stateVersion != saveOrder.fVersion)
-    {
-      DLOG_F(WARNING, "unexpected GUI state version %d", stateVersion);
-    }
+      return readDeprecatedGUIState(stateVersion, iStreamer, saveOrder);
   }
+
+  return readGUIState(saveOrder, iStreamer);
+}
+
+//------------------------------------------------------------------------
+// GUIState::readDeprecatedGUIState
+//------------------------------------------------------------------------
+tresult GUIState::readDeprecatedGUIState(uint16 iDeprecatedVersion,
+                                         IBStreamer &iStreamer,
+                                         NormalizedState::SaveOrder const &iLatestSaveOrder)
+{
+  auto deprecatedSaveOrder = fPluginParameters.getGUIDeprecatedSaveStateOrder(iDeprecatedVersion);
+  if(deprecatedSaveOrder)
+  {
+    auto res = readGUIState(*deprecatedSaveOrder, iStreamer);
+
+    if(res == kResultOk)
+      res = handleGUIStateUpgrade(iDeprecatedVersion, iLatestSaveOrder.fVersion);
+    return res;
+  }
+  else
+  {
+    DLOG_F(WARNING, "unexpected GUI state version %d", iDeprecatedVersion);
+    return readGUIState(iLatestSaveOrder, iStreamer);
+  }
+}
+
+//------------------------------------------------------------------------
+// GUIState::readGUIState
+//------------------------------------------------------------------------
+tresult GUIState::readGUIState(NormalizedState::SaveOrder const &iSaveOrder, IBStreamer &iStreamer)
+{
+  // nothing to read ?
+  if(iSaveOrder.getCount() == 0)
+    return kResultOk;
 
   tresult res = kResultOk;
 
-  for(int i = 0; i < saveOrder.getCount(); i++)
+  for(int i = 0; i < iSaveOrder.getCount(); i++)
   {
-    auto paramID = saveOrder.fOrder[i];
+    auto paramID = iSaveOrder.fOrder[i];
     auto iter = fJmbParams.find(paramID);
     if(iter == fJmbParams.cend())
     {
-      DCHECK_F(existsVst(paramID)); // sanity check
-
-      // not found => regular parameter
-      ParamValue value = fPluginParameters.readNormalizedValue(paramID, iStreamer);
-      fVstParameters->setParamNormalized(paramID, value);
+      // not jmb => vst
+      if(fPluginParameters.getRawVstParamDef(paramID))
+      {
+        ParamValue value = fPluginParameters.readNormalizedValue(paramID, iStreamer);
+        fVstParameters->setParamNormalized(paramID, value);
+      }
+      else
+      {
+        DLOG_F(ERROR, "Param [%d] expected in GUI save state order version [%d] not registered",
+               paramID,
+               iSaveOrder.fVersion);
+      }
     }
     else
     {

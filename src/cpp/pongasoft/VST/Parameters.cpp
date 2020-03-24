@@ -70,6 +70,14 @@ std::unique_ptr<NormalizedState> Parameters::newRTState() const
 }
 
 //------------------------------------------------------------------------
+// Parameters::newRTState
+//------------------------------------------------------------------------
+std::unique_ptr<NormalizedState> Parameters::newRTState(NormalizedState::SaveOrder const *iSaveOrder) const
+{
+  return std::make_unique<NormalizedState>(iSaveOrder);
+}
+
+//------------------------------------------------------------------------
 // __readStateVersion
 //------------------------------------------------------------------------
 uint16 __readStateVersion(IBStreamer &iStreamer)
@@ -93,8 +101,6 @@ tresult Parameters::readRTState(IBStreamer &iStreamer, NormalizedState *oNormali
     // handling deprecated versions
     if(stateVersion != fRTSaveStateOrder.fVersion)
       return readDeprecatedRTState(stateVersion, iStreamer, oNormalizedState);
-    else
-      return oNormalizedState->readFromStream(this, iStreamer);
   }
 
   return oNormalizedState->readFromStream(this, iStreamer);
@@ -111,21 +117,21 @@ tresult Parameters::readDeprecatedRTState(uint16 iVersion, IBStreamer &iStreamer
   {
     auto const &deprecatedSaveOrder = iter->second;
 
-    // Implementation note: this code dynamically allocate memory but it is ok because
+    // Implementation note: this code dynamically allocates memory but it is ok because
     // 1) it happens only on load of the plugin
     // 2) it happens in the UI thread
-    NormalizedState deprecatedNormalizedState{&deprecatedSaveOrder};
+    auto deprecatedNormalizedState = newRTState(&deprecatedSaveOrder);
 
     // now we can read the deprecated state from the deprecated stream
-    auto res = deprecatedNormalizedState.readFromStream(this, iStreamer);
+    auto res = deprecatedNormalizedState->readFromStream(this, iStreamer);
 
     if(res == kResultOk)
     {
       // we copy all values that we can from deprecated state to new state
-      deprecatedNormalizedState.copyValuesTo(*oNormalizedState);
+      deprecatedNormalizedState->copyValuesTo(*oNormalizedState);
 
       // we let the plugin potentially handle further changes necessary
-      res = handleRTStateUpgrade(deprecatedNormalizedState, *oNormalizedState);
+      res = handleRTStateUpgrade(*deprecatedNormalizedState, *oNormalizedState);
     }
 
     return res;
@@ -478,6 +484,99 @@ tresult Parameters::setGUISaveStateOrder(NormalizedState::SaveOrder const &iSave
   fGUISaveStateOrder = {iSaveOrder.fVersion, newIds};
 
   return res;
+}
+
+//------------------------------------------------------------------------
+// Parameters::setGUIDeprecatedSaveStateOrder
+//------------------------------------------------------------------------
+tresult Parameters::setGUIDeprecatedSaveStateOrder(NormalizedState::SaveOrder const &iSaveOrder)
+{
+  tresult res = kResultOk;
+
+  auto ids = iSaveOrder.fOrder;
+  std::vector<ParamID> newIds{};
+
+  bool deprecatedParam = false;
+
+  std::map<ParamID, std::shared_ptr<IParamDef>> allParams{};
+  for(auto &&p : fVstParams)
+  {
+    allParams[p.first] = p.second;
+  }
+
+  for(auto &&p : fJmbParams)
+  {
+    allParams[p.first] = p.second;
+  }
+
+  for(auto id : ids)
+  {
+    tresult paramOk = kResultOk;
+
+    auto iter = allParams.find(id);
+    if(iter == allParams.cend())
+    {
+      paramOk = kResultFalse;
+      DLOG_F(ERROR,
+             "Param [%d] was not registered as a vst or jmb parameter",
+             id);
+    }
+    else
+    {
+      auto param = iter->second;
+
+      if(param->fOwner == IParamDef::Owner::kRT)
+      {
+        paramOk = kResultFalse;
+        DLOG_F(ERROR,
+               "Param [%d] cannot be used for GUISaveStateOrder as it is owned by RT",
+               id);
+
+      }
+
+      if(param->isDeprecated())
+      {
+        deprecatedParam = true;
+        if(param->fDeprecatedSince != iSaveOrder.fVersion)
+        {
+          paramOk = kResultFalse;
+          DLOG_F(ERROR,
+                 "Param [%d] deprecated version mismatch (marked deprecated since [%d] but used in [%d] GUIDeprecatedSaveStateOrder)",
+                 id, param->fDeprecatedSince, iSaveOrder.fVersion);
+        }
+      }
+    }
+
+    if(paramOk == kResultOk)
+    {
+      newIds.emplace_back(id);
+    }
+
+    res |= paramOk;
+
+  }
+
+  if(!deprecatedParam)
+  {
+    DLOG_F(WARNING, "RTDeprecatedSaveStateOrder for version %d does not contain any deprecated parameter.",  iSaveOrder.fVersion);
+  }
+
+  fGUIDeprecatedSaveStateOrders[iSaveOrder.fVersion] = {iSaveOrder.fVersion, newIds};
+
+  return res;
+}
+
+//------------------------------------------------------------------------
+// Parameters::getGUISaveStateOrder
+//------------------------------------------------------------------------
+NormalizedState::SaveOrder const *Parameters::getGUIDeprecatedSaveStateOrder(int16 iVersion) const
+{
+  auto iter = fGUIDeprecatedSaveStateOrders.find(iVersion);
+
+  if(iter != fGUIDeprecatedSaveStateOrders.end())
+    return &iter->second;
+  else
+    return nullptr;
 }
 
 //------------------------------------------------------------------------

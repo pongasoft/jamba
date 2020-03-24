@@ -206,6 +206,19 @@ public:
   // getAllRegistrationOrder
   std::vector<ParamID> const &getAllRegistrationOrder() const { return fAllRegistrationOrder; }
 
+  /**
+   * When Jamba detects that a previously saved GUI state matches a deprecated version (as registered with
+   * `setGUIDeprecatedSaveStateOrder`), it will call this method to let the plugin handle the upgrade if necessary.
+   *
+   * \note When this method is called, the parameters from the deprecated stream have been read and properly
+   *       set so this method is only used for handling conversion cases.
+   *
+   * @param iDeprecatedVersion the deprecated version
+   * @param iVersion the current version
+   * @return `kResultTrue` if handled, `kResultFalse` if unhandled
+   */
+  virtual tresult handleGUIStateUpgrade(int16 iDeprecatedVersion, int16 iVersion) const { return kResultTrue; }
+
   // gives access for debug
   friend class Debug::ParamDisplay;
 
@@ -243,6 +256,13 @@ protected:
 
   // sendMessage
   tresult sendMessage(IPtr<IMessage> iMessage) override;
+
+  virtual tresult readDeprecatedGUIState(uint16 iDeprecatedVersion,
+                                         IBStreamer &iStreamer,
+                                         NormalizedState::SaveOrder const &iLatestSaveOrder);
+
+  //! Reads the gui state from the stream using the provided order
+  virtual tresult readGUIState(NormalizedState::SaveOrder const &iSaveOrder, IBStreamer &iStreamer);
 };
 
 /**
