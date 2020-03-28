@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -169,8 +169,8 @@ protected:
    */
   bool fHeld{false};
 
-  double fStepIncrement{1.0};
-  double fShiftStepIncrement{0.0};
+  int32 fStepIncrement{1};
+  int32 fShiftStepIncrement{1};
   bool fWrap{false};
   CColor fHeldColor{kRedCColor};
   CColor fReleasedColor{kGreyCColor};

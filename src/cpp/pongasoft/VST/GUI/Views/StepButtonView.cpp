@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,10 +19,7 @@
 #include <pongasoft/Utils/Constants.h>
 
 
-namespace pongasoft {
-namespace VST {
-namespace GUI {
-namespace Views {
+namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
@@ -225,42 +222,7 @@ void StepButtonView::registerParameters()
 //------------------------------------------------------------------------
 int32 StepButtonView::computeNextValue(int32 iIncrement) const
 {
-  // no increment, noop
-  if(iIncrement == 0)
-    return getControlValue();
-
-  auto stepCount = fControlParameter.getStepCount();
-
-  if(stepCount > 0)
-  {
-    auto discreteValue = getControlValue() + iIncrement;
-
-    // handles wrapping
-    if(getWrap())
-    {
-      if(iIncrement > 0)
-      {
-        while(discreteValue > stepCount)
-          discreteValue -= stepCount + 1;
-      }
-      else
-      {
-        while(discreteValue < 0)
-          discreteValue += stepCount + 1;
-      }
-    }
-    else
-    {
-      // no wrapping => simply clamp the value to the range
-      discreteValue = Utils::clamp(discreteValue, Utils::ZERO_INT32, stepCount);
-    }
-
-    return discreteValue;
-  }
-  else
-  {
-    return getControlValue();
-  }
+  return computeNextDiscreteValue(getControlValue(), fControlParameter.getStepCount(), iIncrement, getWrap());
 }
 
 //------------------------------------------------------------------------
@@ -277,7 +239,4 @@ void StepButtonView::setViewSize(const CRect &rect, bool invalid)
   CView::setViewSize(rect, invalid);
 }
 
-}
-}
-}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,18 @@
  *
  * @author Yan Pujante
  */
-#include "MomentaryButtonView.h"
+#include "StepPadView.h"
+#include <pongasoft/Utils/Constants.h>
 
-#include <vstgui4/vstgui/lib/cdrawcontext.h>
 
 namespace pongasoft::VST::GUI::Views {
 
 using namespace VSTGUI;
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::draw
+// StepPadView::draw
 //------------------------------------------------------------------------
-void MomentaryButtonView::draw(CDrawContext *iContext)
+void StepPadView::draw(CDrawContext *iContext)
 {
   CustomView::draw(iContext);
 
@@ -35,17 +35,17 @@ void MomentaryButtonView::draw(CDrawContext *iContext)
     held = !held;
 
   if(held)
-    drawOn(iContext);
+    drawHeldPad(iContext);
   else
-    drawOff(iContext);
+    drawReleasedPad(iContext);
 
   setDirty(false);
 }
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::drawOn
+// StepPadView::drawHeldPad
 //------------------------------------------------------------------------
-void MomentaryButtonView::drawOn(CDrawContext *iContext)
+void StepPadView::drawHeldPad(CDrawContext *iContext)
 {
   if(fImage)
   {
@@ -67,17 +67,17 @@ void MomentaryButtonView::drawOn(CDrawContext *iContext)
   }
   else
   {
-    // no image => simply fill the surface with appropriate color (background and "on" color)
+    // no image => simply fill the surface with appropriate color (background and "held" color)
     // so that the button is fully functioning right away
-    iContext->setFillColor(getMouseEnabled() ? getOnColor() : getDisabledColor());
+    iContext->setFillColor(getMouseEnabled() ? getHeldColor() : getDisabledColor());
     iContext->drawRect(getViewSize(), kDrawFilled);
   }
 }
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::drawOff
+// StepPadView::drawReleasedPad
 //------------------------------------------------------------------------
-void MomentaryButtonView::drawOff(CDrawContext *iContext)
+void StepPadView::drawReleasedPad(CDrawContext *iContext)
 {
   if(fImage)
   {
@@ -108,100 +108,139 @@ void MomentaryButtonView::drawOff(CDrawContext *iContext)
   }
 }
 
+
 //------------------------------------------------------------------------
-// MomentaryButtonView::onMouseDown
+// StepPadView::onMouseDown
 //------------------------------------------------------------------------
-CMouseEventResult MomentaryButtonView::onMouseDown(CPoint &where, const CButtonState &buttons)
+CMouseEventResult StepPadView::onMouseDown(CPoint &where, const CButtonState &buttons)
 {
   if(!(buttons & kLButton))
     return kMouseEventNotHandled;
 
   fHeld = true;
-  setControlValue(getComputedOnStep());
+  fEditor = fControlParameter.edit();
+  fMousePosition = where;
   markDirty();
+
   return kMouseEventHandled;
 }
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::onMouseUp
+// StepPadView::onMouseMoved
 //------------------------------------------------------------------------
-CMouseEventResult MomentaryButtonView::onMouseUp(CPoint &where, const CButtonState &buttons)
+CMouseEventResult StepPadView::onMouseMoved(CPoint &where, const CButtonState &buttons)
 {
-  if(!(buttons & kLButton))
-    return kMouseEventNotHandled;
+  auto res = setNextValue(where, buttons);
+  markDirty();
+  return res;
+}
+
+//------------------------------------------------------------------------
+// StepPadView::onMouseUp
+//------------------------------------------------------------------------
+CMouseEventResult StepPadView::onMouseUp(CPoint &where, const CButtonState &buttons)
+{
+  auto res = setNextValue(where, buttons);
+
+  if(fEditor)
+    fEditor->commit();
+  fEditor = nullptr;
 
   fHeld = false;
-  setControlValue(getComputedOffStep());
+
   markDirty();
-  return kMouseEventHandled;
+
+  return res;
 }
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::onMouseCancel
+// StepPadView::onMouseCancel
 //------------------------------------------------------------------------
-CMouseEventResult MomentaryButtonView::onMouseCancel()
+CMouseEventResult StepPadView::onMouseCancel()
 {
+  if(fEditor)
+    fEditor->rollback();
+  fEditor = nullptr;
+
   fHeld = false;
-  setControlValue(getComputedOffStep());
+
   markDirty();
+
   return kMouseEventHandled;
 }
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::onKeyDown
+// StepPadView::registerParameters
 //------------------------------------------------------------------------
-int32_t MomentaryButtonView::onKeyDown(VstKeyCode &keyCode)
+void StepPadView::registerParameters()
 {
-  if(keyCode.virt == VKEY_RETURN && keyCode.modifier == 0)
+  CustomDiscreteControlView::registerParameters();
+
+  // this section is only used during dev to display a warning...
+#ifndef NDEBUG
+  if(fControlParameter.getStepCount() == 0)
   {
-    fHeld = true;
-    setControlValue(getComputedOnStep());
-    markDirty();
-    return 1;
+    DLOG_F(WARNING, "step count is 0 so this control will have no effect");
   }
-  return -1;
+#endif
+
 }
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::onKeyUp
+// StepPadView::sizeToFit
 //------------------------------------------------------------------------
-int32_t MomentaryButtonView::onKeyUp(VstKeyCode &keyCode)
+bool StepPadView::sizeToFit()
 {
-  if(keyCode.virt == VKEY_RETURN && keyCode.modifier == 0)
-  {
-    fHeld = false;
-    setControlValue(getComputedOffStep());
-    markDirty();
-    return 1;
-  }
-  return -1;
-}
-
-//------------------------------------------------------------------------
-// MomentaryButtonView::sizeToFit
-//------------------------------------------------------------------------
-bool MomentaryButtonView::sizeToFit()
-{
-  DLOG_F(INFO, "MomentaryButtonView::sizeToFit");
+  DLOG_F(INFO, "StepPadView::sizeToFit");
   return CustomView::sizeToFit(getImage(), fImageHasDisabledState ? 3 : 2);
 }
 
 //------------------------------------------------------------------------
-// MomentaryButtonView::getComputedOnStep
+// StepPadView::setNextValue
 //------------------------------------------------------------------------
-int32 MomentaryButtonView::getComputedOnStep() const
+CMouseEventResult StepPadView::setNextValue(CPoint &iWhere, const CButtonState &iButtons)
 {
-  auto onStep = getOnStep();
+  if(fControlParameter.getStepCount() == 0)
+    return kMouseEventNotHandled;
 
-  if(onStep > -1)
-    return onStep;
+  if(!(iButtons & kLButton))
+    return kMouseEventNotHandled;
 
-  onStep = fControlParameter.getStepCount();
+  if(fEditor)
+  {
+    // how much did we move (in pixels)
+    auto delta = (fDirection == EPositiveDirection::kUp  || fDirection == EPositiveDirection::kDown) ?
+                 fMousePosition.y - iWhere.y : // vertical   / y axis
+                 fMousePosition.x - iWhere.x;  // horizontal / x axis
 
-  if(onStep > 0)
-    return onStep;
+    // reverses the direction if necessary
+    if(fDirection == EPositiveDirection::kDown || fDirection == EPositiveDirection::kRight)
+      delta = -delta;
+
+    // apply the drag factor (or shift drag factor if shift is held)
+    delta *= iButtons.getModifierState() == CButton::kShift ? fShiftDragFactor : fDragFactor;
+
+    // account for number of steps (intuitively, the more steps the fastest we need to move)
+    delta *= fControlParameter.getStepCount();
+
+    // finally apply some empirically determined factor to make it "right"
+    // note that the sdk CKnob class also uses some empiric factor
+    delta *= kDeltaFactor;
+
+    auto increment = static_cast<int32>(delta * getStepIncrement());
+
+    if(increment != 0)
+    {
+      auto nextValue = computeNextDiscreteValue(getControlValue(), fControlParameter.getStepCount(), increment, getWrap());
+      fEditor->setValue(nextValue);
+      fMousePosition = iWhere;
+    }
+
+    return kMouseEventHandled;
+  }
   else
-    return 1;
+    return kMouseEventNotHandled;
 }
+
 
 }

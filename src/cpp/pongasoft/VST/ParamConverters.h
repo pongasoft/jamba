@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -202,6 +202,54 @@ static inline int32 convertNormalizedValueToDiscreteValue(int32 iStepCount, Para
   auto value = Utils::clamp(iNormalizedValue, 0.0, 1.0);
   auto discreteValue = std::floor(std::min(static_cast<ParamValue>(iStepCount), value * (iStepCount + 1)));
   return static_cast<int32>(discreteValue);
+}
+
+/**
+ * Implements a standard behavior for what it means to increment (resp. decrement if `iIncrement` is negative) a
+ * discrete value.
+ *
+ * @param iValue the current value from which we want to compute the "next" one
+ * @param iStepCount the number of steps for the discrete property (no action if `<= 0`)
+ * @param iIncrement how much to increment (if positive) or decrement (if negative) the current value
+ * @param iWrap if `true` wraps the property around if it goes beyond the limit after increment (resp. decrement)
+ *              or stay at the limit if `false`
+ * @return the computed "next" discrete value */
+static inline int32 computeNextDiscreteValue(int32 iValue, int32 iStepCount, int32 iIncrement, bool iWrap)
+{
+  // no increment, noop
+  if(iIncrement == 0)
+    return iValue;
+
+  if(iStepCount > 0)
+  {
+    auto discreteValue = iValue + iIncrement;
+
+    // handles wrapping
+    if(iWrap)
+    {
+      if(iIncrement > 0)
+      {
+        while(discreteValue > iStepCount)
+          discreteValue -= iStepCount + 1;
+      }
+      else
+      {
+        while(discreteValue < 0)
+          discreteValue += iStepCount + 1;
+      }
+    }
+    else
+    {
+      // no wrapping => simply clamp the value to the range
+      discreteValue = Utils::clamp(discreteValue, Utils::ZERO_INT32, iStepCount);
+    }
+
+    return discreteValue;
+  }
+  else
+  {
+    return iValue;
+  }
 }
 
 /**

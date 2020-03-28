@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -220,7 +220,7 @@ std::shared_ptr<GUIDiscreteParameter> GUIValParameter<T>::asDiscreteParameter(in
 {
   if(iStepCount > 0)
   {
-    if constexpr(Utils::is_static_cast_defined<T, int32>)
+    if constexpr(Utils::is_static_cast_defined<int32, T> && Utils::is_static_cast_defined<T, int32>)
     {
       return VstUtils::make_sfo<GUIDiscreteValParameter>(fParamID, static_cast<int32>(fValue), iStepCount);
     }

@@ -4,6 +4,8 @@ Release Notes {#release-notes}
 ## [TBD - 4.3.0](https://github.com/pongasoft/jamba/tree/v4.3.0)
 
 * Handle state deprecation which allows a plugin to change the state saved by a previous version in a non backward compatible way (for example removing parameters)
+* Added `StepPadView` to allow a parameter value to be changed by dragging the mouse (useful for lcd displays, etc...)
+* Fixed `MomentaryButtonView` to decouple the state of the button with the value of the parameter (which caused several rendering issues)
 
 ## [2020-03-16 - v4.2.0](https://github.com/pongasoft/jamba/tree/v4.2.0)
 

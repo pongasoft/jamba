@@ -20,6 +20,7 @@
 #include "ToggleButtonView.h"
 #include "MomentaryButtonView.h"
 #include "StepButtonView.h"
+#include "StepPadView.h"
 #include "TextEditView.h"
 #include "TextButtonView.h"
 #include "ScrollbarView.h"
@@ -49,6 +50,7 @@ struct JambaViews : public FObject
   const MomentaryButtonView::Creator fMomentaryButtonCreator{"jamba::MomentaryButton", "Jamba - Momentary Button (on when pressed)"};
   const DiscreteButtonView::Creator fDiscreteButtonCreator{"jamba::DiscreteButton", "Jamba - Discrete Button (for discrete/step properties)"};
   const StepButtonView::Creator fStepButtonView{"jamba::StepButton", "Jamba - Step Button (+ or - discrete property)"};
+  const StepPadView::Creator fStepPadView{"jamba::StepPad", "Jamba - Step Pad (drag to change discrete property)"};
   const TextEditView::Creator fTextEditCreator{"jamba::TextEdit", "Jamba - Text Edit (user input string)"};
   const TextButtonView::Creator fTextButtonCreator{"jamba::TextButton", "Jamba - Text Button"};
   const ScrollbarView::Creator fScrollbarViewCreator{"jamba::Scrollbar", "Jamba - Scrollbar"};

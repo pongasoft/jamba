@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -160,9 +160,16 @@ public:
   bool getInverse() const { return fInverse; }
   void setInverse(bool iInverse) { fInverse = iInverse; }
 
+  // true if held
+  bool isHeld() const { return fHeld; }
+
 protected:
   int32 fOffStep{-1};
   int32 fOnStep{-1};
+
+  /**
+   * State of the button (`true` for held, `false` for released) */
+  bool fHeld{false};
 
   CColor fOnColor{kRedCColor};
   CColor fDisabledColor{kBlackCColor};
