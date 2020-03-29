@@ -1,19 +1,19 @@
 Release Notes {#release-notes}
 -------------
 
-## [TBD - 4.3.0](https://github.com/pongasoft/jamba/tree/v4.3.0)
+## [4.3.0 | 2020-03-29](https://github.com/pongasoft/jamba/tree/v4.3.0)
 
 * Handle state deprecation which allows a plugin to change the state saved by a previous version in a non backward compatible way (for example removing parameters)
 * Added `StepPadView` to allow a parameter value to be changed by dragging the mouse (useful for lcd displays, etc...)
 * Fixed `MomentaryButtonView` to decouple the state of the button with the value of the parameter (which caused several rendering issues)
 
-## [2020-03-16 - v4.2.0](https://github.com/pongasoft/jamba/tree/v4.2.0)
+## [4.2.0 | 2020-03-16](https://github.com/pongasoft/jamba/tree/v4.2.0)
 
 * Added `ParamImageView` to render a parameter value as an image (very useful for status LEDs, etc...)
 * Added `ImageView` to render an image (useful for static images, logos, decals, stickers, etc...)
 * Upgraded `googletest` to `1.10.0` (due to CMake caching, this requires deleting the CMake build folder to take effect on existing projects)
 
-## [2020-02-09 - v4.1.0](https://github.com/pongasoft/jamba/tree/v4.1.0)
+## [4.1.0 | 2020-02-09](https://github.com/pongasoft/jamba/tree/v4.1.0)
 
 * Due to issues with implicit conversion triggering potential hard crash, deprecated implicit conversion to `T` for all params (`RTRawVstParam`, `RTParam`, `GUIRawVstParam`, `GUIVstParam`, `GUIJmbParam`, `GUIOptionalParam`).
 * Added convenient dereference operator (`operator *`) to all params as a shortcut to invoke `.value()` (which is the preferred way to fix the deprecated warnings)
@@ -22,11 +22,11 @@ Release Notes {#release-notes}
 * Handle `toUTF8String()` for Jmb parameter when no serializer is provided by checking the availability of `ostream<<` for `T`
 * Allow the use of the template name `_` for the switch container view (for example to use as an overlay that is shown/hidden)
 
-## [2019-11-29 - v4.0.1](https://github.com/pongasoft/jamba/tree/v4.0.1)
+## [4.0.1 | 2019-11-29](https://github.com/pongasoft/jamba/tree/v4.0.1)
 
 * Added Visual Studio Code configuration files for Windows 10
 
-## [2019-10-28 - v4.0.0](https://github.com/pongasoft/jamba/tree/v4.0.0)
+## [4.0.0 | 2019-10-28](https://github.com/pongasoft/jamba/tree/v4.0.0)
 
 This release contains a lot of big changes. Although I tried my best to be backward compatible there may be a few changes that might be breaking.
 
@@ -96,13 +96,13 @@ This release contains a lot of big changes. Although I tried my best to be backw
 * Changed default template type for `DiscreteValueParamConverter` to be an `int32`
 * Although care has been taken with renaming/adding deprecation warnings for old names, there is a chance (mostly with templated parameters) that it may impact compilation.
 
-## [2019-08-03 - v3.2.4](https://github.com/pongasoft/jamba/tree/v3.2.4)
+## [3.2.4 | 2019-08-03](https://github.com/pongasoft/jamba/tree/v3.2.4)
 
 * fixed blank plugin `initialize` API to match superclass
 
 
 
-## [2019-08-01 - v3.2.3](https://github.com/pongasoft/jamba/tree/v3.2.3)
+## [3.2.3 | 2019-08-01](https://github.com/pongasoft/jamba/tree/v3.2.3)
 
 * Implemented [#6](https://github.com/pongasoft/jamba/issues/6): added cmake targets `build_vst3`, `test_vst3`, `install_vst3`, `install_vst2`, `build_au` and `install_au`
 * This change allows those targets to be used directly in an IDE and for example use them for debugging (ex: attach a DAW executable to `install_vst2` or `install_vst3`)
@@ -114,7 +114,7 @@ This release contains a lot of big changes. Although I tried my best to be backw
 
 
 
-## [2019-07-23 - v3.2.2](https://github.com/pongasoft/jamba/tree/v3.2.2)
+## [3.2.2 | 2019-07-23](https://github.com/pongasoft/jamba/tree/v3.2.2)
 
 * released [Jamba](https://jamba.dev/) website with [Quickstart](https://jamba.dev/quickstart/) section to make it very easy to generate a blank plugin (answer a few questions in the browser)
 * added (optional) VST3 SDK automatic download to the blank plugin (web and command line)
@@ -122,13 +122,13 @@ This release contains a lot of big changes. Although I tried my best to be backw
 
 
 
-## [2019-05-19 - v3.2.1](https://github.com/pongasoft/jamba/tree/v3.2.1)
+## [3.2.1 | 2019-05-19](https://github.com/pongasoft/jamba/tree/v3.2.1)
 
 * fixed `jamba.sh` script to handle filename with white spaces and install audio unit before validation (validation tool unfortunately works from an installed component, not a file...)
 
 
 
-## [2019-05-19 - v3.2.0](https://github.com/pongasoft/jamba/tree/v3.2.0)
+## [3.2.0 | 2019-05-19](https://github.com/pongasoft/jamba/tree/v3.2.0)
 
 * added audio unit validation to `jamba.sh` script (`jamba.sh validate-au`) which runs the `auvaltool` utility on the audio unit plugin
 * added switch container view to handle tab like switching (check `Views::SwitchContainerView`)
@@ -142,7 +142,7 @@ This release contains a lot of big changes. Although I tried my best to be backw
 
 * There is a small potentially breaking API change with function `Views::createCustomView` (defined in `Views/CustomViewCreator.h`). Check [commit](https://github.com/pongasoft/jamba/commit/08d06ceda9b936b92c45b8bd9f22a93acfeb3995). The function takes an additional 2 parameters which can be safely ignored if you don't need them.
 
-## [2019-02-10 - v3.1.0](https://github.com/pongasoft/jamba/tree/v3.1.0)
+## [3.1.0 | 2019-02-10](https://github.com/pongasoft/jamba/tree/v3.1.0)
 
 * added ability to conveniently register a global key hook (check `Views::registerGlobalKeyboardHook`)
 * parameters now copy the provided strings (title, short tile and units) so that they no longer have to be static and for example can be computed
@@ -151,19 +151,19 @@ This release contains a lot of big changes. Although I tried my best to be backw
 
 
 
-## [2019-01-06 - v3.0.2](https://github.com/pongasoft/jamba/tree/v3.0.2)
+## [3.0.2 | 2019-01-06](https://github.com/pongasoft/jamba/tree/v3.0.2)
 
 * fixed minor bugs
 
 
 
-## [2019-01-04 - v3.0.1](https://github.com/pongasoft/jamba/tree/v3.0.1)
+## [3.0.1 | 2019-01-04](https://github.com/pongasoft/jamba/tree/v3.0.1)
 
 * Use shallow cloning to avoid downloading the (unused) project history
 
 
 
-## [2019-01-03 - v3.0.0](https://github.com/pongasoft/jamba/tree/v3.0.0)
+## [3.0.0 | 2019-01-03](https://github.com/pongasoft/jamba/tree/v3.0.0)
 
 * This is a major release with many changes (a few breaking APIs)
 * Added `TextViewButton` on which you can register a `onClickListener` or implement `onClick`. Also handles disabled state.
@@ -222,20 +222,20 @@ This release contains a lot of big changes. Although I tried my best to be backw
 * Removed `CustomViewInitializer`
 
 
-## [2018-10-11 - v2.1.2](https://github.com/pongasoft/jamba/tree/v2.1.2)
+## [2.1.2 | 2018-10-11](https://github.com/pongasoft/jamba/tree/v2.1.2)
 
 * `AudioBuffers` now properly handles null buffers
 * Fixed issue with non Xcode build (Xcode generator is only required for audio unit building) and allow building with CLion
 
 
 
-## [2018-10-06 - v2.1.1](https://github.com/pongasoft/jamba/tree/v2.1.1)
+## [2.1.1 | 2018-10-06](https://github.com/pongasoft/jamba/tree/v2.1.1)
 
 * Fixed #4: Generate AU Plugin Manufacturer code from name instead of company
 
 
 
-## [2018-10-06 - v2.1.0](https://github.com/pongasoft/jamba/tree/v2.1.0)
+## [2.1.0 | 2018-10-06](https://github.com/pongasoft/jamba/tree/v2.1.0)
 
 * Implemented #1: _Eliminate resource declaration duplication_
 * Implemented #2: _Optionally generate audio unit wrapper_
@@ -246,19 +246,19 @@ This release contains a lot of big changes. Although I tried my best to be backw
 
 
 
-## [2018-09-02 - v2.0.2](https://github.com/pongasoft/jamba/tree/v2.0.2)
+## [2.0.2 | 2018-09-02](https://github.com/pongasoft/jamba/tree/v2.0.2)
 
 * Updated license terms
 
 
 
-## [2018-08-28 - v2.0.1](https://github.com/pongasoft/jamba/tree/v2.0.1)
+## [2.0.1 | 2018-08-28](https://github.com/pongasoft/jamba/tree/v2.0.1)
 
 * Added ability to create a jamba enabled blank plugin: the plugin simply copies the input to the output and offers all the capabilities of jamba (build, test, edit, validate, install, etc...).
 
 
 
-## [2018-08-25 - v2.0.0](https://github.com/pongasoft/jamba/tree/v2.0.0)
+## [2.0.0 | 2018-08-25](https://github.com/pongasoft/jamba/tree/v2.0.0)
 
 * Introduced Jamba parameters to handle non VST parameters and messaging RT <-> GUI
 * Added `Debug::ParamTable` and `Debug::ParamLine` to display parameters => example
@@ -292,6 +292,6 @@ This release contains a lot of big changes. Although I tried my best to be backw
 
 
 
-## [2018-08-05 - v1.0.0](https://github.com/pongasoft/jamba/tree/v1.0.0)
+## [1.0.0 | 2018-08-05](https://github.com/pongasoft/jamba/tree/v1.0.0)
 
 * first public release / free / open source

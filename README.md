@@ -34,7 +34,7 @@ Features
 - use Jamba parameters to easily exchange messages between RT and GUI (both directions) in a thread safe fashion
 - easily create custom views with their creators (so that they appear in the GUI editor)
 - easily use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
-- store/read state in a thread safe fashion (includes version)
+- store/read state in a thread safe fashion (includes version to allow easy state upgrade)
 - [Jamba Views](https://jamba.dev/views/)
 
 Getting Started
@@ -44,7 +44,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 
 Latest Release
 --------------
-2020-03-16 - v4.2.0
+4.3.0 | 2020-03-29
 
 [Release notes (local)](RELEASE.md)
 
