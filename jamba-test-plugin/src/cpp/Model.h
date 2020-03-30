@@ -34,7 +34,7 @@ enum class ETabs {
   kTabToggleButtonView,
   kTabMomentaryButtonView,
   kTabStepButtonView,
-  kTabPadButtonView,
+  kTabStepPadView,
   kTabDiscreteButtonView,
   kTabParamImageView,
   kTabTextButtonView,

@@ -38,6 +38,7 @@ using namespace VSTGUI;
  * Attribute                      | Description
  * ---------                      | -----------
  * `step-increment`               | @copydoc getStepIncrement()
+ * `shift-step-increment`         | @copydoc getShiftStepIncrement()
  * `drag-factor`                  | @copydoc getDragFactor()
  * `shift-drag-factor`            | @copydoc getShiftDragFactor()
  * `held-color`                   | @copydoc getHeldColor()
@@ -149,19 +150,30 @@ public:
   void setStepIncrement(int32 iStepIncrement) { fStepIncrement = iStepIncrement; }
 
   /**
-   * Defines how slow (if less than 1.0) or fast (if more than 1.0) the value changes when dragging. This directly
-   * translates into how much the mouse needs to be moved to change the value of the parameter.
-   * - "Slow" means the mouse needs to be moved more (value changes slower as the mouse move).
-   * - "Fast" means the mouse needs to be moved less (values changes faster as the mouse move) */
+   * Value by which this pad will increment (positive) or decrement (negative) the parameter when the shift key
+   * modified is being held. This allows to have bigger steps (or smaller steps) when shift is used.
+   */
+  int32 getShiftStepIncrement() const { return fShiftStepIncrement; }
+
+  //! Attribute `shift-step-increment`.
+  void setShiftStepIncrement(int32 iStepIncrement) { fShiftStepIncrement = iStepIncrement; }
+
+  /**
+   * Defines how many pixels the mouse needs to move to go through the range of values. The bigger this number
+   * the "slower" the value will change.
+   *
+   * \note Due to `step-increment`, the size of the range is actually (number of steps / increment). For example
+   *       with 50 steps and an increment of 5, this represent 10 values, so if `drag-factor` is set to its
+   *       default (100 pixels), the mouse will have to move 10 pixels to result in a value change. */
   double getDragFactor() const { return fDragFactor; }
   //! Attribute `drag-factor`.
   void setDragFactor(double iDragFactor) { fDragFactor = iDragFactor; }
 
   /**
-   * Defines how slow (if less than 1.0) or fast (if more than 1.0) the value changes when dragging while the shift
-   * key is being held.
+   * Defines how many pixels the mouse needs to move to go through the range of values when shift is being held.
+   * The bigger this number the "slower" the value will change.
    *
-   * @see `getDragFactor` for details on slow vs fast */
+   * @see `getDragFactor` for an example of the meaning of this value */
   double getShiftDragFactor() const { return fShiftDragFactor; }
   //! Attribute `shift-drag-factor`.
   void setShiftDragFactor(double iShiftDragFactor) { fShiftDragFactor = iShiftDragFactor; }
@@ -213,17 +225,13 @@ protected:
 
 protected:
   /**
-   * This factor has been empirically determined to provide somewhat "good" results by default. `drag-factor` and
-   * `shift-drag-factor` can be adjusted to further tweak the responsiveness of the control depending on needs.  */
-  constexpr static CCoord kDeltaFactor = 1.0 / 50.0;
-
-  /**
    * State of the pad (`true` for held, `false` for released) */
   bool fHeld{false};
 
   int32 fStepIncrement{1};
-  double fDragFactor{1.0};
-  double fShiftDragFactor{1.0};
+  int32 fShiftStepIncrement{1};
+  double fDragFactor{100.0};
+  double fShiftDragFactor{100.0};
   bool fWrap{false};
 
   CColor fHeldColor{kRedCColor};
@@ -247,6 +255,7 @@ public:
       CustomViewCreator(iViewName, iDisplayName)
     {
       registerIntegerAttribute<int32>("step-increment", &StepPadView::getStepIncrement, &StepPadView::setStepIncrement);
+      registerIntegerAttribute<int32>("shift-step-increment", &StepPadView::getShiftStepIncrement, &StepPadView::setShiftStepIncrement);
       registerDoubleAttribute("drag-factor", &StepPadView::getDragFactor, &StepPadView::setDragFactor);
       registerDoubleAttribute("shift-drag-factor", &StepPadView::getShiftDragFactor, &StepPadView::setShiftDragFactor);
       registerBooleanAttribute("wrap", &StepPadView::getWrap, &StepPadView::setWrap);

@@ -1,7 +1,7 @@
 Release Notes {#release-notes}
 -------------
 
-## [4.3.0 | 2020-03-29](https://github.com/pongasoft/jamba/tree/v4.3.0)
+## [4.3.0 | 2020-03-30](https://github.com/pongasoft/jamba/tree/v4.3.0)
 
 * Handle state deprecation which allows a plugin to change the state saved by a previous version in a non backward compatible way (for example removing parameters)
 * Added `StepPadView` to allow a parameter value to be changed by dragging the mouse (useful for lcd displays, etc...)

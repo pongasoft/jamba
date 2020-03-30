@@ -45,7 +45,7 @@ JambaTestPluginParameters::JambaTestPluginParameters()
                                              {ETabs::kTabToggleButtonView,    STR16("ToggleButton")},
                                              {ETabs::kTabMomentaryButtonView, STR16("MomentaryButton")},
                                              {ETabs::kTabStepButtonView,      STR16("StepButton")},
-                                             {ETabs::kTabPadButtonView,       STR16("PadButton")},
+                                             {ETabs::kTabStepPadView,         STR16("StepPad")},
                                              {ETabs::kTabDiscreteButtonView,  STR16("DiscreteButton")},
                                              {ETabs::kTabParamImageView,      STR16("ParamImage")},
                                              {ETabs::kTabTextButtonView,      STR16("TextButton")},

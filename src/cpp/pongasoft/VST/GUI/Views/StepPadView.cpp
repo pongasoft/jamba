@@ -179,11 +179,14 @@ void StepPadView::registerParameters()
   // this section is only used during dev to display a warning...
 #ifndef NDEBUG
   if(fControlParameter.getStepCount() == 0)
-  {
     DLOG_F(WARNING, "step count is 0 so this control will have no effect");
-  }
-#endif
 
+  if(fDragFactor <= 0)
+    DLOG_F(WARNING, "Drag factor [%f] is <= 0 resulting in no effect", fDragFactor);
+
+  if(fShiftDragFactor <= 0)
+    DLOG_F(WARNING, "Shift Drag factor [%f] is <= 0 resulting in no effect", fShiftDragFactor);
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -208,6 +211,23 @@ CMouseEventResult StepPadView::setNextValue(CPoint &iWhere, const CButtonState &
 
   if(fEditor)
   {
+    // is the shift key being held?
+    bool isShiftKeyHeld = iButtons.getModifierState() == CButton::kShift;
+
+    // which increment to use?
+    auto increment = isShiftKeyHeld ? getShiftStepIncrement() : getStepIncrement();
+
+    // no increment => nothing to change
+    if(increment == 0)
+      return kMouseEventHandled;
+
+    // determine appropriate drag factor (number of pixels to go through the range)
+    auto dragFactor = isShiftKeyHeld ? fShiftDragFactor : fDragFactor;
+
+    // sanity check...
+    if(dragFactor <= 0)
+      return kMouseEventHandled;
+
     // how much did we move (in pixels)
     auto delta = (fDirection == EPositiveDirection::kUp  || fDirection == EPositiveDirection::kDown) ?
                  fMousePosition.y - iWhere.y : // vertical   / y axis
@@ -217,17 +237,15 @@ CMouseEventResult StepPadView::setNextValue(CPoint &iWhere, const CButtonState &
     if(fDirection == EPositiveDirection::kDown || fDirection == EPositiveDirection::kRight)
       delta = -delta;
 
-    // apply the drag factor (or shift drag factor if shift is held)
-    delta *= iButtons.getModifierState() == CButton::kShift ? fShiftDragFactor : fDragFactor;
+    // the size of the range of values is determined by (stepCount / increment) (for example if there are
+    // 50 steps and an increment of 5 then there are 10 values in the range)
+    // the dragFactor represents how many pixels are required to go through the range => each value in the range
+    // represents dragFactor / (size of range) = dragFactor * (increment / stepCount) = (dragFactor * increment) / stepCount
+    // we can then multiply delta by the inverse to get the multiple of increments
+    delta *= fControlParameter.getStepCount() / (increment * dragFactor);
 
-    // account for number of steps (intuitively, the more steps the fastest we need to move)
-    delta *= fControlParameter.getStepCount();
-
-    // finally apply some empirically determined factor to make it "right"
-    // note that the sdk CKnob class also uses some empiric factor
-    delta *= kDeltaFactor;
-
-    auto increment = static_cast<int32>(delta * getStepIncrement());
+    // the delta is used as a multiple of increment (takes care of increase/decrease with sign of delta)
+    increment *= static_cast<int32>(delta);
 
     if(increment != 0)
     {
