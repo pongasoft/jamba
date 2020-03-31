@@ -49,7 +49,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/VST3_SDK.cmake)
 #------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(JAMBA_CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/cpp)
-set(LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.cpp)
+set(LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/loguru.cpp)
 include_directories(${JAMBA_CPP_SOURCES})
 
 set(JAMBA_sources_h

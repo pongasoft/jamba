@@ -151,7 +151,7 @@ public:
 
   /**
    * Value by which this pad will increment (positive) or decrement (negative) the parameter when the shift key
-   * modified is being held. This allows to have bigger steps (or smaller steps) when shift is used.
+   * modifier is being held. This allows to have bigger steps (or smaller steps) when shift is used.
    */
   int32 getShiftStepIncrement() const { return fShiftStepIncrement; }
 
