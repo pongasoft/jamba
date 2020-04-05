@@ -55,6 +55,7 @@ public:
   using class_type = GUIOptionalParam<T>;
   using ParamType = T;
   using EditorType = typename ITGUIParameter<T>::ITEditor;
+  using Editor = std::unique_ptr<EditorType>;
 
 public:
   /**

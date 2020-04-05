@@ -272,6 +272,11 @@ template<typename T>
 class GUIVstParam: public Utils::Operators::Dereferenceable<GUIVstParam<T>>
 {
 public:
+  using ParamType = T;
+  using EditorType = typename GUIVstParameter<T>::ITEditor;
+  using Editor = std::unique_ptr<EditorType>;
+
+public:
   /**
    * The purpose of this class is to copy the value so that it can be accessed via `->` thus allowing to
    * write `param->x` to access the underlying type (`T`) when it is a struct or a class
@@ -362,14 +367,14 @@ public:
   /**
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit() { DCHECK_F(exists()); return fPtr->edit(); }
+  Editor edit() { DCHECK_F(exists()); return fPtr->edit(); }
 
   /**
    * Shortcut to create an editor and set the value to it
    *
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<typename GUIVstParameter<T>::EditorType> edit(T const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
+  Editor edit(T const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
   //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
   constexpr T operator *() const { DCHECK_F(exists()); return fPtr->getValue(); }

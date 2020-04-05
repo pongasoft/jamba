@@ -467,8 +467,7 @@ public:
    */
   bool isEmpty() const
   {
-    auto &spinLock = const_cast<SpinLock &>(fSpinLock);
-    auto lock = spinLock.acquire();
+    auto lock = fSpinLock.acquire();
     return fIsEmpty;
   }
 
@@ -536,7 +535,7 @@ public:
 private:
   std::unique_ptr<T> fSingleElement;
   bool fIsEmpty;
-  SpinLock fSpinLock;
+  mutable SpinLock fSpinLock;
 };
 
 /**

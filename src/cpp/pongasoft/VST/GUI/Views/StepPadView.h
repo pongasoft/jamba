@@ -244,7 +244,7 @@ protected:
   bool fImageHasDisabledState{false};
 
   // the editor for handling parameter change
-  std::unique_ptr<GUIOptionalParam<int32>::EditorType> fEditor{};
+  GUIOptionalParam<int32>::Editor fEditor{};
   CPoint fMousePosition{};
 
 public:

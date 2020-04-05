@@ -489,6 +489,11 @@ template<typename T>
 class GUIJmbParam: public Utils::Operators::Dereferenceable<GUIJmbParam<T>>
 {
 public:
+  using ParamType = T;
+  using EditorType = typename GUIJmbParameter<T>::EditorType;
+  using Editor = std::unique_ptr<EditorType>;
+
+public:
   GUIJmbParam(std::shared_ptr<GUIJmbParameter<T>> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
     fPtr{std::move(iPtr)}
   {}
@@ -524,6 +529,15 @@ public:
    * The difference with update is that it does not check for equality (case when T is not comparable)
    */
   inline void setValue(T &&iNewValue) { DCHECK_F(exists()); fPtr->setValue(std::move(iNewValue)); }
+
+  /**
+   * @return the editor to change the parameter (commit/rollback) */
+  inline Editor edit() { DCHECK_F(exists()); return fPtr->edit(); }
+
+  /**
+   * @param iValue first value to set
+   * @return the editor to change the parameter (commit/rollback) */
+  inline Editor edit(T const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
   /**
    * Resets the param to its default value */

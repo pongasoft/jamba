@@ -258,6 +258,11 @@ private:
 class GUIRawVstParam : public Utils::Operators::Dereferenceable<GUIRawVstParam>
 {
 public:
+  using ParamType = ParamValue;
+  using EditorType = GUIRawVstParameter::EditorType;
+  using Editor = std::unique_ptr<EditorType>;
+
+public:
   // Constructor
   GUIRawVstParam(std::shared_ptr<GUIRawVstParameter> iPtr = nullptr) : // NOLINT (not marked explicit on purpose)
     fPtr{std::move(iPtr)}
@@ -316,14 +321,14 @@ public:
   /**
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<GUIRawVstParameter::EditorType> edit() { DCHECK_F(exists()); return fPtr->edit(); }
+  Editor edit() { DCHECK_F(exists()); return fPtr->edit(); }
 
   /**
    * Shortcut to create an editor and set the value to it
    *
    * @return an editor to modify the parameter (see Editor)
    */
-  std::unique_ptr<GUIRawVstParameter::EditorType> edit(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
+  Editor edit(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->edit(iValue); }
 
   //! allow writing *param to access the underlying value (or in other words, `*param` is the same `param.value()`)
   inline ParamValue operator *() const { DCHECK_F(exists()); return fPtr->getValue(); }
