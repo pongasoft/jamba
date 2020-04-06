@@ -579,6 +579,10 @@ public:
     broadcast();
   }
 
+  /**
+   * @copydoc IGUIParameter::toUTF8String() */
+  inline std::string toUTF8String(int32 iPrecision) const { DCHECK_F(exists()); return fPtr->toUTF8String(iPrecision); }
+
   // connect
   inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) { DCHECK_F(exists()); return fPtr->connect(iChangeListener); }
 

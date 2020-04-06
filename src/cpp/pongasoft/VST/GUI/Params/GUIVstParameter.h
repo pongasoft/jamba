@@ -365,6 +365,10 @@ public:
   String toString() { DCHECK_F(exists()); return fPtr->toString(); }
 
   /**
+   * @copydoc IGUIParameter::toUTF8String() */
+  inline std::string toUTF8String(int32 iPrecision) const { DCHECK_F(exists()); return fPtr->toUTF8String(iPrecision); }
+
+  /**
    * @return an editor to modify the parameter (see Editor)
    */
   Editor edit() { DCHECK_F(exists()); return fPtr->edit(); }

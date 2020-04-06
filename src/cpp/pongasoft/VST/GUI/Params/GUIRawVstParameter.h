@@ -341,6 +341,10 @@ public:
   inline GUIRawVstParam &operator=(ParamValue const &iValue) { DCHECK_F(exists()); fPtr->setValue(iValue); return *this; }
 
   /**
+   * @copydoc IGUIParameter::toUTF8String() */
+  inline std::string toUTF8String(int32 iPrecision) const { DCHECK_F(exists()); return fPtr->toUTF8String(iPrecision); }
+
+  /**
    * @return an object maintaining the connection between the parameter and the listener
    */
   inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const { DCHECK_F(exists()); return fPtr->connect(iChangeListener); }

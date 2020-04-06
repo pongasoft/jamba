@@ -157,6 +157,10 @@ public:
   inline GUIOptionalParam &operator=(T const &iValue) { update(iValue); return *this; }
 
   /**
+   * @copydoc IGUIParameter::toUTF8String() */
+  inline std::string toUTF8String(int32 iPrecision) const { return fParameter->toUTF8String(iPrecision); }
+
+  /**
    * @copydoc IGUIParameter::connect(Parameters::IChangeListener *) const */
   inline std::unique_ptr<FObjectCx> connect(Parameters::IChangeListener *iChangeListener) const
   {
