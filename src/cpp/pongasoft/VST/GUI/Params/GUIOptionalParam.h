@@ -31,7 +31,7 @@ using namespace Steinberg::Vst;
 
 /**
  * Represents an optional parameter (Jmb, Vst or no param at all). Like `GUIVstParam` and `GUIJmbParam`, this class
- * is a wrapper arount the underlying parameter. This parameter is used in very generic views that need to handle
+ * is a wrapper around the underlying parameter. This parameter is used in very generic views that need to handle
  * a Vst or Jmb parameter, as well as no parameter at all (which is for example the case when adding a brand new view
  * in the %VSTGUI editor) and still be functional.
  *
@@ -119,6 +119,10 @@ public:
   {
     return fParameter->setValue(iValue);
   }
+
+  /**
+   * Resets the param to its default value */
+   inline tresult resetToDefault() { fParameter->resetToDefault(); }
 
   /**
    * @copydoc ITGUIParameter::edit() */

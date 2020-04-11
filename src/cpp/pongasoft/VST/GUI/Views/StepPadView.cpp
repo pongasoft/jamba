@@ -131,7 +131,10 @@ CMouseEventResult StepPadView::onMouseDown(CPoint &where, const CButtonState &bu
 CMouseEventResult StepPadView::onMouseMoved(CPoint &where, const CButtonState &buttons)
 {
   auto res = setNextValue(where, buttons);
-  markDirty();
+
+  if(res == kMouseEventHandled)
+    markDirty();
+
   return res;
 }
 

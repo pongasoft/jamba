@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -103,6 +103,10 @@ public:
    *                   otherwise it should use the one provided
    */
   virtual std::string toUTF8String(int32 iPrecision) const = 0;
+
+  /**
+   * Resets the parameter to its default value */
+  virtual tresult resetToDefault() = 0;
 
   /**
    * Creates a connection between this parameter and the change listener: whenever the parameter changes, the
@@ -417,6 +421,10 @@ public:
   /**
    * @copydoc IGUIParameter::toUTF8String() */
   inline std::string toUTF8String(int32 iPrecision) const { DCHECK_F(exists()); return fPtr->toUTF8String(iPrecision); }
+
+  /**
+   * @copydoc IGUIParameter::resetToDefault() */
+  inline void resetToDefault() { DCHECK_F(exists()); fPtr->resetToDefault(); }
 
   /**
    * @copydoc IGUIParameter::connect(Parameters::IChangeListener *) const */

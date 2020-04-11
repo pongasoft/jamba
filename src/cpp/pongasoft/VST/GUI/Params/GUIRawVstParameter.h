@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -198,6 +198,13 @@ public:
   }
 
   /**
+   * @copydoc IGUIParameter::resetToDefault() */
+  tresult resetToDefault() override
+  {
+    return setValue(fParamDef->fDefaultValue);
+  }
+
+  /**
    * @return an editor to modify the parameter (see Editor)
    */
   std::unique_ptr<EditorType> edit() override
@@ -297,6 +304,10 @@ public:
    * further changes that spans multiple calls (ex: onMouseDown / onMouseMoved / onMouseUp) you should use an editor
    */
   tresult setValue(ParamValue const &iValue) { DCHECK_F(exists()); return fPtr->setValue(iValue); }
+
+  /**
+   * Resets the param to its default value */
+  inline tresult resetToDefault() { DCHECK_F(exists()); return fPtr->resetToDefault(); }
 
   /**
    * Shortcut to copy the value from another param to this one.

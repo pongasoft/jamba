@@ -35,6 +35,11 @@ using namespace Steinberg::Vst;
 template<typename T>
 class GUIValParameter: public ITGUIParameter<T>, public FObject
 {
+  // Since this parameter is used by GUIOptionalParam parameter it should satisfy the same rules
+  static_assert(std::is_default_constructible_v<T>, "T must have a default/empty constructor: T()");
+  static_assert(std::is_copy_constructible_v<T>, "T must have a copy constructor: T(T const &)");
+  static_assert(std::is_copy_assignable_v<T>, "T must be copy assignable: T& operator=(T const &)");
+
 public:
   using ParamType = T;
   using EditorType = typename ITGUIParameter<T>::ITEditor;
@@ -45,15 +50,8 @@ public:
   // Constructor
   explicit GUIValParameter(ParamID iParamID, ParamType const &iDefaultValue) :
     fParamID{iParamID},
+    fDefaultValue{iDefaultValue},
     fValue(iDefaultValue)
-  {
-//    DLOG_F(INFO, "GUIValParameter(%p)", this);
-  };
-
-  // Constructor
-  explicit GUIValParameter(ParamID iParamID, ParamType &&iDefaultValue) :
-    fParamID{iParamID},
-    fValue(std::move(iDefaultValue))
   {
 //    DLOG_F(INFO, "GUIValParameter(%p)", this);
   };
@@ -132,14 +130,10 @@ public:
   }
 
   /**
-   * Sets the value. The difference with update is that it does not check for equality (case when ParamType is
-   * not comparable)
-   */
-  tresult setValue(ParamType &&iValue)
+   * Resets the param to its default value */
+  tresult resetToDefault() override
   {
-    fValue = std::move(iValue);
-    changed();
-    return kResultOk;
+    return update(fDefaultValue);
   }
 
   // accessValue
@@ -182,6 +176,7 @@ public:
 
 protected:
   ParamID fParamID;
+  T fDefaultValue;
   T fValue;
 };
 

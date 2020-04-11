@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -194,9 +194,9 @@ public:
 
   /**
    * Resets the param to its default value */
-  void resetToDefault()
+  tresult resetToDefault() override
   {
-    setValue(getParamDefT()->fDefaultValue);
+    return setValue(getParamDefT()->fDefaultValue);
   }
 
   // readFromStream
@@ -419,6 +419,12 @@ public:
     return res;
   }
 
+  // resetToDefault
+  tresult resetToDefault() override
+  {
+    return fJmbParameter->resetToDefault();
+  }
+
   // edit
   std::unique_ptr<EditorType> edit() override
   {
@@ -541,7 +547,7 @@ public:
 
   /**
    * Resets the param to its default value */
-  inline void resetToDefault() { DCHECK_F(exists()); fPtr->resetToDefault(); }
+  inline tresult resetToDefault() { DCHECK_F(exists()); return fPtr->resetToDefault(); }
 
   // getValue
   inline T const & getValue() const { DCHECK_F(exists()); return fPtr->getValue(); }

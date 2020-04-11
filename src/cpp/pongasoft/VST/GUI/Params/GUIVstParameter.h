@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,7 @@
  *
  * @author Yan Pujante
  */
-#ifndef __PONGASOFT_VST_GUI_PARAMETER_H__
-#define __PONGASOFT_VST_GUI_PARAMETER_H__
+#pragma once
 
 #include "IGUIParameter.h"
 #include "GUIRawVstParameter.h"
@@ -193,6 +192,13 @@ public:
   }
 
   /**
+   * @copydoc IGUIParameter::resetToDefault() */
+  tresult resetToDefault() override
+  {
+    return fRawParameter->resetToDefault();
+  }
+
+  /**
    * @return number of steps (for discrete param) or 0 for continuous
    */
   inline int32 getStepCount() const override { return fConverter->getStepCount(); }
@@ -338,6 +344,10 @@ public:
   tresult setNormalizedValue(ParamValue const &iNormalizedValue) { DCHECK_F(exists()); return fPtr->setNormalizedValue(iNormalizedValue); }
 
   /**
+   * Resets the param to its default value */
+  inline tresult resetToDefault() { DCHECK_F(exists()); return fPtr->resetToDefault(); }
+
+  /**
    * Shortcut to copy the value from another param to this one. Implementation note: uses normalized value as this
    * is faster and avoid math precision loss in normalize/denormalize
    */
@@ -435,5 +445,3 @@ using GUIVstBooleanParam = GUIVstParam<bool>;
 using GUIVstPercentParam = GUIVstParam<Percent>;
 
 }
-
-#endif // __PONGASOFT_VST_GUI_PARAMETER_H__
