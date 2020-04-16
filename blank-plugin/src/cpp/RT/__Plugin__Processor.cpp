@@ -13,7 +13,7 @@ namespace [-namespace-]::RT {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-[-name-]Processor::[-name-]Processor() : RTProcessor([-name-]ControllerUID), fParams{}, fState{fParams}
+[-name-]Processor::[-name-]Processor([-name-]Parameters const &iParams) : RTProcessor([-name-]ControllerUID), fParams{iParams}, fState{fParams}
 {
   DLOG_F(INFO, "[%s] [-name-]Processor() - jamba: %s - plugin: v%s", stringPluginName, JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
 

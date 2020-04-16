@@ -5,7 +5,7 @@ namespace [-namespace-]::GUI {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-[-name-]Controller::[-name-]Controller() : GUIController("[-name-].uidesc"), fParams{}, fState{fParams}
+[-name-]Controller::[-name-]Controller([-name-]Parameters const &iParams) : GUIController("[-name-].uidesc"), fParams{iParams}, fState{fParams}
 {
   DLOG_F(INFO, "[-name-]Controller()");
 }

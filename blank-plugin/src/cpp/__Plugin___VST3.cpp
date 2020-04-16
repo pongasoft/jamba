@@ -4,16 +4,13 @@
 //------------------------------------------------------------------------------------------------------------
 #include "[-name-]CIDs.h"
 
-#include <pluginterfaces/vst/ivstcomponent.h>
-#include <pluginterfaces/vst/ivstaudioprocessor.h>
-#include <public.sdk/source/main/pluginfactoryvst3.h>
-#include <pluginterfaces/vst/ivsteditcontroller.h>
-
 #include "version.h"
 #include "RT/[-name-]Processor.h"
 #include "GUI/[-name-]Controller.h"
 
-using namespace Steinberg::Vst;
+#include <pongasoft/VST/PluginFactory.h>
+
+using namespace pongasoft::VST;
 
 //------------------------------------------------------------------------
 //  Module init/exit
@@ -34,33 +31,18 @@ bool DeinitModule()
 }
 
 //------------------------------------------------------------------------
-//  VST Plug-in Entry
+//  VST3 Plugin Main entry point
 //------------------------------------------------------------------------
-BEGIN_FACTORY_DEF ("[-company-]",
-                   "[-company_url-]",
-                   "[-company_email-]")
-
-    // [-name-]Processor processor
-    DEF_CLASS2 (INLINE_UID_FROM_FUID([-namespace-]::[-name-]ProcessorUID),
-                PClassInfo::kManyInstances,  // cardinality
-                kVstAudioEffectClass,        // the component category (do not changed this)
-                stringPluginName,            // here the Plug-in name (to be changed)
-                Vst::kDistributable,         // means that component and controller could be distributed on different computers
-                Vst::PlugType::kFx,          // Subcategory for this Plug-in (to be changed)
-                FULL_VERSION_STR,            // Plug-in version (to be changed)
-                kVstVersionString,           // the VST 3 SDK version (do not changed this, use always this define)
-                [-namespace-]::RT::[-name-]Processor::createInstance)  // function pointer called when this component should be instantiated
-
-    // [-name-]Controller controller
-    DEF_CLASS2 (INLINE_UID_FROM_FUID([-namespace-]::[-name-]ControllerUID),
-                PClassInfo::kManyInstances,  // cardinality
-                kVstComponentControllerClass,// the Controller category (do not changed this)
-                stringPluginName
-                "Controller",  // controller name (could be the same than component name)
-                0,            // not used here
-                "",            // not used here
-                FULL_VERSION_STR,    // Plug-in version (to be changed)
-                kVstVersionString,    // the VST 3 SDK version (do not changed this, use always this define)
-                [-namespace-]::GUI::[-name-]Controller::createInstance)// function pointer called when this component should be instantiated
-
-END_FACTORY
+EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
+{
+  return JambaPluginFactory<[-namespace-]::[-name-]Parameters>::GetVST3PluginFactory<
+    [-namespace-]::RT::[-name-]Processor, // processor class (Real Time)
+    [-namespace-]::GUI::[-name-]Controller // controller class (GUI)
+  >("[-company-]", // company/vendor
+    "[-company_url-]", // url
+    "[-company_email-]", // email
+    stringPluginName, // plugin name
+    FULL_VERSION_STR, // plugin version
+    Vst::PlugType::kFx // plugin category (can be changed to other like kInstrument, etc...)
+   );
+}

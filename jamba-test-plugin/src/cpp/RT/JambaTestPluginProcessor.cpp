@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,7 @@ namespace pongasoft::test::jamba::RT {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-JambaTestPluginProcessor::JambaTestPluginProcessor() : RTProcessor(JambaTestPluginControllerUID), fParams{}, fState{fParams}
+JambaTestPluginProcessor::JambaTestPluginProcessor(JambaTestPluginParameters const &iParams) : RTProcessor(JambaTestPluginControllerUID), fParams{iParams}, fState{fParams}
 {
   DLOG_F(INFO, "[%s] JambaTestPluginProcessor() - jamba: %s - plugin: v%s", stringPluginName, JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
 

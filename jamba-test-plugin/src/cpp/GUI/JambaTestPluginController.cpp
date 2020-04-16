@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,7 +24,7 @@ namespace pongasoft::test::jamba::GUI {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-JambaTestPluginController::JambaTestPluginController() : GUIController("JambaTestPlugin.uidesc"), fParams{}, fState{fParams}
+JambaTestPluginController::JambaTestPluginController(JambaTestPluginParameters const &iParams) : GUIController("JambaTestPlugin.uidesc"), fParams{iParams}, fState{fParams}
 {
   DLOG_F(INFO, "JambaTestPluginController()");
 }

@@ -14,13 +14,20 @@ class [-name-]Controller : public GUIController
 {
 public:
   //------------------------------------------------------------------------
-  // Factory method used in [-name-]_VST3.cpp to create the controller
+  // UUID() method used to create the controller
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void * /*context*/) { return (IEditController *) new [-name-]Controller(); }
+  static inline ::Steinberg::FUID UUID() { return [-name-]ControllerUID; };
+
+  //------------------------------------------------------------------------
+  // Factory method used to create the controller
+  //------------------------------------------------------------------------
+  static FUnknown *createInstance(void *iContext) {
+    return (IEditController *) new [-name-]Controller(*reinterpret_cast<[-name-]Parameters *>(iContext));
+  }
 
 public:
   // Constructor
-  [-name-]Controller();
+  explicit [-name-]Controller([-name-]Parameters const &iParams);
 
   // Destructor -- overridden for debugging purposes only
   ~[-name-]Controller() override;
@@ -34,7 +41,7 @@ protected:
 
 private:
   // The controller gets its own copy of the parameters (defined in Plugin.h)
-  [-name-]Parameters fParams;
+  [-name-]Parameters const &fParams;
 
   // The state accessible in the controller and views
   [-name-]GUIState fState;

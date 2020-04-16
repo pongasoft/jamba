@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,10 +21,7 @@
 #include <pongasoft/VST/RT/RTProcessor.h>
 #include "../Plugin.h"
 
-namespace pongasoft {
-namespace test {
-namespace jamba {
-namespace RT {
+namespace pongasoft::test::jamba::RT {
 
 using namespace pongasoft::VST::RT;
 
@@ -34,14 +31,19 @@ using namespace pongasoft::VST::RT;
 class JambaTestPluginProcessor : public RTProcessor
 {
 public:
+  static inline ::Steinberg::FUID UUID() { return JambaTestPluginProcessorUID; };
+
+public:
   //------------------------------------------------------------------------
   // Factory method used in JambaTestPlugin_VST3.cpp to create the processor
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void * /*context*/) { return (IAudioProcessor *) new JambaTestPluginProcessor(); }
+  static FUnknown *createInstance(void *iContext) {
+    return (IAudioProcessor *) new JambaTestPluginProcessor(*reinterpret_cast<JambaTestPluginParameters *>(iContext));
+  }
 
 public:
   // Constructor
-  JambaTestPluginProcessor();
+  explicit JambaTestPluginProcessor(JambaTestPluginParameters const &iParams);
 
   // Destructor
   ~JambaTestPluginProcessor() override;
@@ -72,14 +74,11 @@ protected:
 
 private:
   // The processor gets its own copy of the parameters (defined in Plugin.h)
-  JambaTestPluginParameters fParams;
+  JambaTestPluginParameters const &fParams;
 
   // The state
   JambaTestPluginRTState fState;
 };
 
-}
-}
-}
 }
 

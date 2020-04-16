@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,14 +31,19 @@ using namespace pongasoft::VST::GUI;
 class JambaTestPluginController : public GUIController
 {
 public:
+  static inline ::Steinberg::FUID UUID() { return JambaTestPluginControllerUID; };
+
+public:
   //------------------------------------------------------------------------
   // Factory method used in JambaTestPlugin_VST3.cpp to create the controller
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void * /*context*/) { return (IEditController *) new JambaTestPluginController(); }
+  static FUnknown *createInstance(void *iContext) {
+    return (IEditController *) new JambaTestPluginController(*reinterpret_cast<JambaTestPluginParameters *>(iContext));
+  }
 
 public:
   // Constructor
-  JambaTestPluginController();
+  explicit JambaTestPluginController(JambaTestPluginParameters const &iParams);
 
   // Destructor -- overridden for debugging purposes only
   ~JambaTestPluginController() override;
@@ -56,7 +61,7 @@ protected:
 
 private:
   // The controller gets its own copy of the parameters (defined in Plugin.h)
-  JambaTestPluginParameters fParams;
+  JambaTestPluginParameters const &fParams;
 
   // The state accessible in the controller and views
   JambaTestPluginGUIState fState;

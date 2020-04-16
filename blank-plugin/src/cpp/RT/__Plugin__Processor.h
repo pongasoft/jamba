@@ -14,13 +14,20 @@ class [-name-]Processor : public RTProcessor
 {
 public:
   //------------------------------------------------------------------------
-  // Factory method used in [-name-]_VST3.cpp to create the processor
+  // UUID() method used to create the processor
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void * /*context*/) { return (IAudioProcessor *) new [-name-]Processor(); }
+  static inline ::Steinberg::FUID UUID() { return [-name-]ProcessorUID; };
+
+  //------------------------------------------------------------------------
+  // Factory method used to create the processor
+  //------------------------------------------------------------------------
+  static FUnknown *createInstance(void *iContext) {
+    return (IAudioProcessor *) new [-name-]Processor(*reinterpret_cast<[-name-]Parameters *>(iContext));
+  }
 
 public:
   // Constructor
-  [-name-]Processor();
+  explicit [-name-]Processor([-name-]Parameters const &iParams);
 
   // Destructor
   ~[-name-]Processor() override;
@@ -51,7 +58,7 @@ protected:
 
 private:
   // The processor gets its own copy of the parameters (defined in [-name-].h)
-  [-name-]Parameters fParams;
+  [-name-]Parameters const &fParams;
 
   // The state
   [-name-]RTState fState;

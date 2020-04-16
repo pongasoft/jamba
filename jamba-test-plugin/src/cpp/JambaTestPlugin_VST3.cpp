@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2020 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,16 +22,13 @@
 //------------------------------------------------------------------------------------------------------------
 #include "JambaTestPluginCIDs.h"
 
-#include <pluginterfaces/vst/ivstcomponent.h>
-#include <pluginterfaces/vst/ivstaudioprocessor.h>
-#include <public.sdk/source/main/pluginfactoryvst3.h>
-#include <pluginterfaces/vst/ivsteditcontroller.h>
-
 #include "version.h"
 #include "RT/JambaTestPluginProcessor.h"
 #include "GUI/JambaTestPluginController.h"
 
-using namespace Steinberg::Vst;
+#include <pongasoft/VST/PluginFactory.h>
+
+using namespace pongasoft::VST;
 
 //------------------------------------------------------------------------
 //  Module init/exit
@@ -52,33 +49,18 @@ bool DeinitModule()
 }
 
 //------------------------------------------------------------------------
-//  VST Plug-in Entry
+//  VST3 Plugin Main entry point
 //------------------------------------------------------------------------
-BEGIN_FACTORY_DEF ("pongasoft",
-                   "https://www.pongasoft.com",
-                   "support@pongasoft.com")
-
-    // JambaTestPluginProcessor processor
-    DEF_CLASS2 (INLINE_UID_FROM_FUID(pongasoft::test::jamba::JambaTestPluginProcessorUID),
-                PClassInfo::kManyInstances,  // cardinality
-                kVstAudioEffectClass,        // the component category (do not changed this)
-                stringPluginName,            // here the Plug-in name (to be changed)
-                Vst::kDistributable,         // means that component and controller could be distributed on different computers
-                Vst::PlugType::kFx,          // Subcategory for this Plug-in (to be changed)
-                FULL_VERSION_STR,            // Plug-in version (to be changed)
-                kVstVersionString,           // the VST 3 SDK version (do not changed this, use always this define)
-                pongasoft::test::jamba::RT::JambaTestPluginProcessor::createInstance)  // function pointer called when this component should be instantiated
-
-    // JambaTestPluginController controller
-    DEF_CLASS2 (INLINE_UID_FROM_FUID(pongasoft::test::jamba::JambaTestPluginControllerUID),
-                PClassInfo::kManyInstances,  // cardinality
-                kVstComponentControllerClass,// the Controller category (do not changed this)
-                stringPluginName
-                "Controller",  // controller name (could be the same than component name)
-                0,            // not used here
-                "",            // not used here
-                FULL_VERSION_STR,    // Plug-in version (to be changed)
-                kVstVersionString,    // the VST 3 SDK version (do not changed this, use always this define)
-                pongasoft::test::jamba::GUI::JambaTestPluginController::createInstance)// function pointer called when this component should be instantiated
-
-END_FACTORY
+EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
+{
+  return JambaPluginFactory<pongasoft::test::jamba::JambaTestPluginParameters>::GetVST3PluginFactory<
+    pongasoft::test::jamba::RT::JambaTestPluginProcessor, // processor class (Real Time)
+    pongasoft::test::jamba::GUI::JambaTestPluginController // controller class (GUI)
+  >("pongasoft", // vendor
+    "https://www.pongasoft.com", // url
+    "support@pongasoft.com", // email
+    stringPluginName, // plugin name
+    FULL_VERSION_STR, // plugin version
+    Vst::PlugType::kFx // plugin category (can be changed to other like kInstrument, etc...)
+   );
+}
