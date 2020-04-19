@@ -90,6 +90,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Timer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Types.h
 
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/ExpiringDataCache.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/Utils.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTParameter.h
