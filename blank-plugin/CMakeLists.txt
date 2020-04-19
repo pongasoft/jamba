@@ -46,7 +46,7 @@ endif ()
 set(vst_sources
     ${CPP_SOURCES}/[-name-]_VST3.cpp
 
-    ${CPP_SOURCES}/[-name-].h
+    ${CPP_SOURCES}/Plugin.h
     ${CPP_SOURCES}/[-name-]CIDs.h
 
     ${CPP_SOURCES}/RT/[-name-]Processor.h

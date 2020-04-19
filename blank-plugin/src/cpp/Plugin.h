@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VST3_JAMBA_[-name-]_PLUGIN_H
+#define VST3_JAMBA_[-name-]_PLUGIN_H
 
 #include "[-name-]CIDs.h"
 
@@ -144,3 +145,5 @@ protected:
 };
 
 }
+
+#endif // VST3_JAMBA_[-name-]_PLUGIN_H

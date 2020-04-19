@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VST3_JAMBA_[-name-]_CIDS_H
+#define VST3_JAMBA_[-name-]_CIDS_H
 
 #include <pluginterfaces/base/funknown.h>
 #include <pluginterfaces/vst/vsttypes.h>
@@ -32,3 +33,5 @@ enum E[-name-]ParamID : Steinberg::Vst::ParamID
 };
 
 }
+
+#endif // VST3_JAMBA_[-name-]_CIDS_H

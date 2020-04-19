@@ -60,7 +60,7 @@ protected:
   tresult PLUGIN_API initialize(FUnknown *context) override;
 
 private:
-  // The controller gets its own copy of the parameters (defined in Plugin.h)
+  // The controller gets access to the parameters (defined in Plugin.h)
   JambaTestPluginParameters const &fParams;
 
   // The state accessible in the controller and views

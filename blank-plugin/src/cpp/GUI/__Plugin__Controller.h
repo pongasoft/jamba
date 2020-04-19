@@ -1,7 +1,8 @@
-#pragma once
+#ifndef VST3_JAMBA_[-name-]_GUI_CONTROLLER_H
+#define VST3_JAMBA_[-name-]_GUI_CONTROLLER_H
 
 #include <pongasoft/VST/GUI/GUIController.h>
-#include "../[-name-].h"
+#include "../Plugin.h"
 
 namespace [-namespace-]::GUI {
 
@@ -40,7 +41,7 @@ protected:
   tresult PLUGIN_API initialize(FUnknown *context) override;
 
 private:
-  // The controller gets its own copy of the parameters (defined in Plugin.h)
+  // The controller gets access to the parameters (defined in Plugin.h)
   [-name-]Parameters const &fParams;
 
   // The state accessible in the controller and views
@@ -48,4 +49,6 @@ private:
 };
 
 }
+
+#endif // VST3_JAMBA_[-name-]_GUI_CONTROLLER_H
 

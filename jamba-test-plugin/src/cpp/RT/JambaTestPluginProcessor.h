@@ -73,7 +73,7 @@ protected:
   tresult processInputs64Bits(ProcessData &data) override { return genericProcessInputs<Sample64>(data); }
 
 private:
-  // The processor gets its own copy of the parameters (defined in Plugin.h)
+  // The processor gets access to the parameters (defined in Plugin.h)
   JambaTestPluginParameters const &fParams;
 
   // The state

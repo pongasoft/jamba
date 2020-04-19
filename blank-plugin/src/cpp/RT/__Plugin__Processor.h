@@ -1,7 +1,8 @@
-#pragma once
+#ifndef VST3_JAMBA_[-name-]_RT_PROCESSOR_H
+#define VST3_JAMBA_[-name-]_RT_PROCESSOR_H
 
 #include <pongasoft/VST/RT/RTProcessor.h>
-#include "../[-name-].h"
+#include "../Plugin.h"
 
 namespace [-namespace-]::RT {
 
@@ -57,7 +58,7 @@ protected:
   tresult processInputs64Bits(ProcessData &data) override { return genericProcessInputs<Sample64>(data); }
 
 private:
-  // The processor gets its own copy of the parameters (defined in [-name-].h)
+  // The processor gets access to the parameters (defined in Plugin.h)
   [-name-]Parameters const &fParams;
 
   // The state
@@ -65,4 +66,6 @@ private:
 };
 
 }
+
+#endif // VST3_JAMBA_[-name-]_RT_PROCESSOR_H
 

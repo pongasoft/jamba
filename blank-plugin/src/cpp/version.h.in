@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VST3_JAMBA_[-name-]_VERSION_H
+#define VST3_JAMBA_[-name-]_VERSION_H
 
 #define MAJOR_VERSION_STR "@PLUGIN_MAJOR_VERSION@"
 #define MAJOR_VERSION_INT @PLUGIN_MAJOR_VERSION@
@@ -29,3 +30,5 @@
 #else
 #define stringPluginName "[-name-]"
 #endif
+
+#endif // VST3_JAMBA_[-name-]_VERSION_H
