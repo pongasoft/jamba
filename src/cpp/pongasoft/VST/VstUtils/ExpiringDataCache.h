@@ -113,6 +113,9 @@ public:
     return *this;
   }
 
+  //! Allow to write `if(cache)` to check if the cache is properly initialized
+  explicit operator bool() const noexcept { return fDataLoader ? true : false; }
+
   /**
    * Main api to retrieve the data. If the data is in the cache, it simply returns it (and extends the duration to
    * remain in the cache by TTL). If it is not in the cache, it delegates to the loader to get it. Note that it is ok
