@@ -43,7 +43,7 @@ namespace pongasoft::VST {
  * // this is the main entry point that every plugin must define
  * EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
  * {
- *   return JambaPluginFactory<pongasoft::test::jamba::JambaTestPluginParameters>::GetVST3PluginFactory<
+ *   return JambaPluginFactory::GetVST3PluginFactory<
  *     pongasoft::test::jamba::RT::JambaTestPluginProcessor,  // processor class (Real Time)
  *     pongasoft::test::jamba::GUI::JambaTestPluginController // controller class (GUI)
  *   >("pongasoft",                     // vendor
@@ -56,76 +56,47 @@ namespace pongasoft::VST {
  * }
  * ```
  *
- * \note 1. The factory creates and maintain an instance of the `Parameters` class and is provided as the context to both
- *       the processor and controller. Because the factory is the last thing being destroyed, it is guaranteed that
- *       the parameters will outlive the processor and controller.
+ * \note 1. The `GetPluginFactory()` method takes an additional (optional) parameter not shown in this example
+ *          which is provided to the factory method of the controller and processor (`iContext`) and can be used
+ *          to provide additional information like a constructor argument for the parameters class or the parameters
+ *          themselves or whatever else you want.
  *
  * \note 2. If you do not want to use this class, you can continue to use the macros provided with the SDK.
- *
- * @tparam ParametersClass the class of the parameters (if the contructor takes arguments, you provide them
- *                         as extra parameters at the end of `GetVST3PluginFactory`)
  */
-template<typename ParametersClass>
-class JambaPluginFactory : Steinberg::CPluginFactory
+class JambaPluginFactory
 {
 public:
   /**
-   * Main method to create the factory for the plugin. See usage in the class comment. The optional `iParametersArgs`
-   * are arguments that are provided to the `ParametersClass` in the event the constructor requires arguments.
+   * Main method to create the factory for the plugin. See example in the class comment. The optional `iContext`
+   * last arguments will be provided to the controller and processor factory methods (the macros provided
+   * with the SDK do not let you set this parameter).
    *
    * @tparam RTProcessorClass the class for the processor (assumes existence of `UUID()` and
    *                          `createInstance(void *)` static methods)
    * @tparam GUIControllerClass the class for the controller (assumes existence of `UUID()` and
    *                            `createInstance(void *)` static methods)
-   * @tparam Args the types for the parameters class constructor (usually none, but otherwise deduced by call...)
    */
-  template<typename RTProcessorClass, typename GUIControllerClass, typename... Args>
+  template<typename RTProcessorClass, typename GUIControllerClass>
   static Steinberg::IPluginFactory* GetVST3PluginFactory(const std::string& iVendor,
                                                          const std::string& iURL,
                                                          const std::string& iEmail,
                                                          const std::string& iPluginName,
                                                          const std::string& iPluginVersion,
                                                          const std::string& iSubCategories,
-                                                         Args&& ...iParametersArgs);
-
-  /**
-   * Implementation note: because the implementation of this method uses `delete this` it must be overridden to
-   * implement the proper behavior and delete the subclass instead!
-   */
-  virtual Steinberg::uint32 PLUGIN_API release() SMTG_OVERRIDE
-  {
-    if(::Steinberg::FUnknownPrivate::atomicAdd(__funknownRefCount, -1) == 0)
-    {
-      delete this;
-      return 0;
-    }
-    return __funknownRefCount;
-  }
-
-protected:
-  //! Constructor: called by `GetVST3PluginFactory`
-  template<typename... Args>
-  explicit JambaPluginFactory(Steinberg::PFactoryInfo const &iFactoryInfo, Args&& ...iParametersArgs) :
-    CPluginFactory(iFactoryInfo),
-    fParameters{std::forward<Args>(iParametersArgs)...}
-  {}
-
-protected:
-  ParametersClass fParameters;
+                                                         void *iContext = nullptr);
 };
 
 //------------------------------------------------------------------------
 // JambaPluginFactory::GetVST3PluginFactory
 //------------------------------------------------------------------------
-template<typename PClass>
-template<typename RTClass, typename GUIClass, typename... Args>
-Steinberg::IPluginFactory *JambaPluginFactory<PClass>::GetVST3PluginFactory(std::string const &iVendor,
-                                                                            std::string const &iURL,
-                                                                            std::string const &iEmail,
-                                                                            std::string const &iPluginName,
-                                                                            std::string const &iPluginVersion,
-                                                                            std::string const &iSubCategories,
-                                                                            Args &&... iParametersArgs)
+template<typename RTClass, typename GUIClass>
+Steinberg::IPluginFactory *JambaPluginFactory::GetVST3PluginFactory(std::string const &iVendor,
+                                                                    std::string const &iURL,
+                                                                    std::string const &iEmail,
+                                                                    std::string const &iPluginName,
+                                                                    std::string const &iPluginVersion,
+                                                                    std::string const &iSubCategories,
+                                                                    void *iContext)
 {
   // implementation note: this code was essentially copied from the macros coming from the SDKs and adapted this way:
   // 1) do not use Steinberg::gPluginFactory global variable
@@ -136,9 +107,7 @@ Steinberg::IPluginFactory *JambaPluginFactory<PClass>::GetVST3PluginFactory(std:
                                       Steinberg::Vst::kDefaultFactoryFlags);
 
   // wrapping in a unique_ptr to make sure it gets destroyed if the method does not end properly
-  // note: std::make_unique does not work due to protected constructor...
-  std::unique_ptr<JambaPluginFactory<PClass>> factory{new JambaPluginFactory<PClass>(factoryInfo,
-                                                                                     std::forward<Args>(iParametersArgs)...)};
+  auto factory = std::make_unique<Steinberg::CPluginFactory>(factoryInfo);
 
   // processor
   {
@@ -153,7 +122,7 @@ Steinberg::IPluginFactory *JambaPluginFactory<PClass>::GetVST3PluginFactory(std:
                                      iPluginVersion.c_str(),
                                      kVstVersionString};
 
-    factory->registerClass(&component, RTClass::createInstance, &factory->fParameters);
+    factory->registerClass(&component, RTClass::createInstance, iContext);
   }
 
   // controller
@@ -169,7 +138,7 @@ Steinberg::IPluginFactory *JambaPluginFactory<PClass>::GetVST3PluginFactory(std:
                                      iPluginVersion.c_str(),
                                      kVstVersionString};
 
-    factory->registerClass(&component, GUIClass::createInstance, &factory->fParameters);
+    factory->registerClass(&component, GUIClass::createInstance, iContext);
   }
 
   // here we can release the pointer as it becomes the responsibility of the caller to manage its

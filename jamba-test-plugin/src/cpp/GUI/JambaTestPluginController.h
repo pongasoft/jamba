@@ -37,13 +37,11 @@ public:
   //------------------------------------------------------------------------
   // Factory method used in JambaTestPlugin_VST3.cpp to create the controller
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void *iContext) {
-    return (IEditController *) new JambaTestPluginController(*reinterpret_cast<JambaTestPluginParameters *>(iContext));
-  }
+  static FUnknown *createInstance(void * /*iContext*/) { return (IEditController *) new JambaTestPluginController(); }
 
 public:
   // Constructor
-  explicit JambaTestPluginController(JambaTestPluginParameters const &iParams);
+  explicit JambaTestPluginController();
 
   // Destructor -- overridden for debugging purposes only
   ~JambaTestPluginController() override;
@@ -60,8 +58,8 @@ protected:
   tresult PLUGIN_API initialize(FUnknown *context) override;
 
 private:
-  // The controller gets access to the parameters (defined in Plugin.h)
-  JambaTestPluginParameters const &fParams;
+  // The controller gets a copy of the parameters (defined in Plugin.h)
+  JambaTestPluginParameters fParams;
 
   // The state accessible in the controller and views
   JambaTestPluginGUIState fState;

@@ -22,13 +22,11 @@ public:
   //------------------------------------------------------------------------
   // Factory method used to create the controller
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void *iContext) {
-    return (IEditController *) new [-name-]Controller(*reinterpret_cast<[-name-]Parameters *>(iContext));
-  }
+  static FUnknown *createInstance(void * /*iContext */) { return (IEditController *) new [-name-]Controller(); }
 
 public:
   // Constructor
-  explicit [-name-]Controller([-name-]Parameters const &iParams);
+  explicit [-name-]Controller();
 
   // Destructor -- overridden for debugging purposes only
   ~[-name-]Controller() override;
@@ -41,8 +39,8 @@ protected:
   tresult PLUGIN_API initialize(FUnknown *context) override;
 
 private:
-  // The controller gets access to the parameters (defined in Plugin.h)
-  [-name-]Parameters const &fParams;
+  // The controller gets a copy of the parameters (defined in Plugin.h)
+  [-name-]Parameters fParams;
 
   // The state accessible in the controller and views
   [-name-]GUIState fState;

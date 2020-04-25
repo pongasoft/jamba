@@ -53,7 +53,7 @@ bool DeinitModule()
 //------------------------------------------------------------------------
 EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
 {
-  return JambaPluginFactory<pongasoft::test::jamba::JambaTestPluginParameters>::GetVST3PluginFactory<
+  return JambaPluginFactory::GetVST3PluginFactory<
     pongasoft::test::jamba::RT::JambaTestPluginProcessor, // processor class (Real Time)
     pongasoft::test::jamba::GUI::JambaTestPluginController // controller class (GUI)
   >("pongasoft", // vendor

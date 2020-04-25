@@ -37,13 +37,11 @@ public:
   //------------------------------------------------------------------------
   // Factory method used in JambaTestPlugin_VST3.cpp to create the processor
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void *iContext) {
-    return (IAudioProcessor *) new JambaTestPluginProcessor(*reinterpret_cast<JambaTestPluginParameters *>(iContext));
-  }
+  static FUnknown *createInstance(void * /*iContext*/) { return (IAudioProcessor *) new JambaTestPluginProcessor(); }
 
 public:
   // Constructor
-  explicit JambaTestPluginProcessor(JambaTestPluginParameters const &iParams);
+  explicit JambaTestPluginProcessor();
 
   // Destructor
   ~JambaTestPluginProcessor() override;
@@ -73,8 +71,8 @@ protected:
   tresult processInputs64Bits(ProcessData &data) override { return genericProcessInputs<Sample64>(data); }
 
 private:
-  // The processor gets access to the parameters (defined in Plugin.h)
-  JambaTestPluginParameters const &fParams;
+  // The processor gets a copy of the parameters (defined in Plugin.h)
+  JambaTestPluginParameters fParams;
 
   // The state
   JambaTestPluginRTState fState;

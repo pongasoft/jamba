@@ -22,13 +22,11 @@ public:
   //------------------------------------------------------------------------
   // Factory method used to create the processor
   //------------------------------------------------------------------------
-  static FUnknown *createInstance(void *iContext) {
-    return (IAudioProcessor *) new [-name-]Processor(*reinterpret_cast<[-name-]Parameters *>(iContext));
-  }
+  static FUnknown *createInstance(void * /*iContext*/) { return (IAudioProcessor *) new [-name-]Processor(); }
 
 public:
   // Constructor
-  explicit [-name-]Processor([-name-]Parameters const &iParams);
+  explicit [-name-]Processor();
 
   // Destructor
   ~[-name-]Processor() override;
@@ -58,8 +56,8 @@ protected:
   tresult processInputs64Bits(ProcessData &data) override { return genericProcessInputs<Sample64>(data); }
 
 private:
-  // The processor gets access to the parameters (defined in Plugin.h)
-  [-name-]Parameters const &fParams;
+  // The processor gets a copy of the parameters (defined in Plugin.h)
+  [-name-]Parameters fParams;
 
   // The state
   [-name-]RTState fState;

@@ -24,7 +24,7 @@ namespace pongasoft::test::jamba::GUI {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-JambaTestPluginController::JambaTestPluginController(JambaTestPluginParameters const &iParams) : GUIController("JambaTestPlugin.uidesc"), fParams{iParams}, fState{fParams}
+JambaTestPluginController::JambaTestPluginController() : GUIController("JambaTestPlugin.uidesc"), fParams{}, fState{fParams}
 {
   DLOG_F(INFO, "JambaTestPluginController()");
 }

@@ -31,7 +31,7 @@ namespace pongasoft::test::jamba::RT {
 //------------------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------------------
-JambaTestPluginProcessor::JambaTestPluginProcessor(JambaTestPluginParameters const &iParams) : RTProcessor(JambaTestPluginControllerUID), fParams{iParams}, fState{fParams}
+JambaTestPluginProcessor::JambaTestPluginProcessor() : RTProcessor(JambaTestPluginControllerUID), fParams{}, fState{fParams}
 {
   DLOG_F(INFO, "[%s] JambaTestPluginProcessor() - jamba: %s - plugin: v%s", stringPluginName, JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
 

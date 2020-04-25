@@ -35,7 +35,7 @@ bool DeinitModule()
 //------------------------------------------------------------------------
 EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
 {
-  return JambaPluginFactory<[-namespace-]::[-name-]Parameters>::GetVST3PluginFactory<
+  return JambaPluginFactory::GetVST3PluginFactory<
     [-namespace-]::RT::[-name-]Processor, // processor class (Real Time)
     [-namespace-]::GUI::[-name-]Controller // controller class (GUI)
   >("[-company-]", // company/vendor
