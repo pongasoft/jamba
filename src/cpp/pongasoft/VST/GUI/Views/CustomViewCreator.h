@@ -1204,7 +1204,9 @@ private:
   void registerAttribute(std::shared_ptr<ViewAttribute> iAttribute)
   {
     // making sure there are no duplicates (cannot use loguru here!)
+#ifndef NDEBUG
     assert(fAttributes.find(iAttribute->getName()) == fAttributes.cend());
+#endif
     fAttributes[iAttribute->getName()] = std::move(iAttribute);
   }
 
