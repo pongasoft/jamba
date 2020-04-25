@@ -44,11 +44,25 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 
 Latest Release
 --------------
-4.3.0 | 2020-03-30
+4.4.0 | 2020-04-26
 
 [Release notes (local)](RELEASE.md)
 
 [Release notes (web)](https://jamba.dev/releases/)
+
+Development
+-----------
+
+In order to work on this project itself (not a plugin), you need to clone this repository and install the VST3 SDK as described in the [requirements](https://jamba.dev/requirements/) section. In addition to the unit tests (under `src/test`), the embedded `jamba-test-plugin` plugin constitutes the main source of testing.
+
+Although this project does not contain a great deal of tests, it is being heavily used (and as a result tested) by the plugins it has been designed to build.
+
+Plugin | Description
+------ | -----------
+[vst-ab-switch](https://github.com/pongasoft/vst-ab-switch) | A/B Audio Switch VST plugin
+[vst-vac-6](https://github.com/pongasoft/vst-vac-6v) | VST (2 & 3) plugin to analyze and control the peak volume of a signal
+[vst-sam-spl-64](https://github.com/pongasoft/vst-sam-spl-64) | A free/open source VST2, VST3 and AudioUnit plugin to easily split a sample in up to 64 slices
+[jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) | Documentation plugin for Jamba framework: a simple gain plugin for VST2/3
 
 History
 -------

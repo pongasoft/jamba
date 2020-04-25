@@ -1,6 +1,31 @@
 Release Notes {#release-notes}
 -------------
 
+## [4.4.0 | 2020-04-26](https://github.com/pongasoft/jamba/tree/v4.4.0)
+
+* Updated loguru to latest (as of master on 2020-03-31)
+* Added missing `using` types and `toUTF8String()` methods to `XXXParam` classes
+* Added `resetToDefault()` method to all parameters (since a default value is provided when the parameter is created, it is a very convenient way to get back to it without having to know about it and using some global constant)
+* Added `ExpiringDataCache` concept (using `Timer` from the VST3 SDK)
+* Renamed the plugin file from the blank plugin to `Plugin.h` (instead of the name of the plugin)
+* Changed the way the plugin gets registered to the VST3 world (implements the _main_ `GetPluginFactory()` function) with an easier and less error prone syntax: 
+
+      EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
+      {
+        return JambaPluginFactory::GetVST3PluginFactory<
+          pongasoft::test::jamba::RT::JambaTestPluginProcessor, // processor class (Real Time)
+          pongasoft::test::jamba::GUI::JambaTestPluginController // controller class (GUI)
+        >("pongasoft",                 // vendor
+          "https://www.pongasoft.com", // url
+          "support@pongasoft.com",     // email
+          stringPluginName,            // plugin name
+          FULL_VERSION_STR,            // plugin version
+          Vst::PlugType::kFx           // plugin category (can be changed to other like kInstrument, etc...)
+         );
+      }
+          
+* This new syntax is optional and the old/macro based syntax is still valid and acceptable (new blank plugins will be created using this new methodology). If you want to migrate your codebase to the new factory you can check this [commit](https://github.com/pongasoft/jamba-sample-gain/commit/36818aaf77ce543cf133ac1e7d1e85aeb71f6b4e) for the `JambaSampleGain` project as an example.
+
 ## [4.3.0 | 2020-03-30](https://github.com/pongasoft/jamba/tree/v4.3.0)
 
 * Handle state deprecation which allows a plugin to change the state saved by a previous version in a non backward compatible way (for example removing parameters)
