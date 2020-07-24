@@ -42,7 +42,7 @@ using namespace VSTGUI;
 //------------------------------------------------------------------------
 // Implementation Note: Half of the API (the "getter"/"read" part of it)  is not used in Release mode because the
 // editor code is built only during Debug mode (EDITOR_MODE is defined) and only the editor code is using it.
-// As a result, it is conditionnally compiled so that it doesn't use  unecessary space in Release mode.
+// As a result, it is conditionally compiled so that it doesn't use unnecessary space in Release mode.
 //------------------------------------------------------------------------
 
 /**

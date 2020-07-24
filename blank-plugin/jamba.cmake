@@ -32,7 +32,7 @@ if(NOT jamba_POPULATED)
   if(FETCHCONTENT_SOURCE_DIR_JAMBA)
     message(STATUS "Using jamba from local ${FETCHCONTENT_SOURCE_DIR_JAMBA}")
   else()
-    message(STATUS "Fetching jamba ${JAMBA_GIT_REPO}@${JAMBA_GIT_TAG}")
+    message(STATUS "Fetching jamba ${JAMBA_GIT_REPO}/tree/${JAMBA_GIT_TAG}")
   endif()
 
   FetchContent_Populate(jamba)

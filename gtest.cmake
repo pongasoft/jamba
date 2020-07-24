@@ -32,7 +32,7 @@ if(NOT googletest_POPULATED)
   if(FETCHCONTENT_SOURCE_DIR_GOOGLETEST)
     message(STATUS "Using googletest from local ${FETCHCONTENT_SOURCE_DIR_GOOGLETEST}")
   else()
-    message(STATUS "Fetching googletest ${googletest_GIT_REPO}@${googletest_GIT_TAG}")
+    message(STATUS "Fetching googletest ${googletest_GIT_REPO}/tree/${googletest_GIT_TAG}")
   endif()
 
   FetchContent_Populate(googletest)

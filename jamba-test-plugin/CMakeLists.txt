@@ -93,6 +93,7 @@ set(JAMBA_TEST_SRC_FILES
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-CustomViewCreator.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
+    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioUtils.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-SampleRateBasedClock.cpp
     ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-Utils.cpp
