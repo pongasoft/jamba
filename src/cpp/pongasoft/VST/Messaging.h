@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <memory>
 #include <public.sdk/source/vst/vstpresetfile.h>
+#include <public.sdk/source/common/memorystream.h>
 #include <string>
 #include <sstream>
 
@@ -189,10 +190,8 @@ tresult Message::getSerializableValue(IAttributeList::AttrID id, const IParamSer
   if(res != kResultOk)
     return res;
 
-  /// @todo this line unnecessarily copies the data but there is no other API
-  Buffer buffer(data, size);
-
-  BufferStream stream{std::move(buffer)};
+  // YP implementation note: removing const due to API... only used for reading anyway
+  MemoryStream stream(const_cast<void*>(data), size);
   stream.seek(IBStream::kIBSeekSet, 0, nullptr); // make sure it is at the beginning of the stream
 
   IBStreamer streamer{&stream};
