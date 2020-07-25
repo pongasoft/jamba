@@ -44,6 +44,13 @@ option(SMTG_CREATE_VST3_LINK "" OFF) # disable link (explicit install step)
 
 include(${CMAKE_CURRENT_LIST_DIR}/VST3_SDK.cmake)
 
+# enforcing c++17 after calling sdk (which enforces c++14)
+if(XCODE)
+  set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17")
+elseif(APPLE)
+  set(CMAKE_CXX_FLAGS "-std=c++1z -stdlib=libc++")
+endif()
+
 #------------------------------------------------------------------------
 # Defining files to include to generate the library
 #------------------------------------------------------------------------
