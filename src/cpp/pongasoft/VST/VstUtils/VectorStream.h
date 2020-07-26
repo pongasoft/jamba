@@ -37,8 +37,7 @@ public:
 
   tresult seek(int64 pos, int32 mode, int64 *result) override;
 
-  inline tresult reset() { return seek(0, IBStream::kIBSeekSet, nullptr); }
-  inline void clear() { fPos = 0; }
+  inline tresult reset() { fPos = 0; return kResultOk; }
 
   tresult tell(int64 *pos) override;
 

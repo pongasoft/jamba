@@ -1165,28 +1165,28 @@ VstInt32 Vst2Wrapper::getChunk(void **data, bool isPreset)
   // array)
   if(mComponent)
   {
-    mRTChunk.clear();
+    mRTChunk.reset();
     if(mComponent->getState(&mRTChunk) != kResultTrue)
     {
       DLOG_F(WARNING, "Vst2Wrapper::getChunk - Error while reading RT state");
-      mRTChunk.clear();
+      mRTChunk.reset();
     }
   }
 
   if(mController)
   {
-    mGUIChunk.clear();
+    mGUIChunk.reset();
     if(mController->getState(&mGUIChunk) != kResultTrue)
     {
       DLOG_F(WARNING, "Vst2Wrapper::getChunk - Error while reading GUI state");
-      mGUIChunk.clear();
+      mGUIChunk.reset();
     }
   }
 
   if(mRTChunk.size() + mGUIChunk.size() == 0)
     return 0;
 
-  mChunk.clear();
+  mChunk.reset();
   IBStreamer acc(&mChunk, kLittleEndian);
 
   acc.writeInt64(mRTChunk.size());
