@@ -208,10 +208,8 @@ if (JAMBA_ENABLE_VST2)
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/hostclasses.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
-      ${JAMBA_CPP_SOURCES}/pongasoft/VST/VST2/vst2wrapper_jamba.cpp
-      ${JAMBA_CPP_SOURCES}/pongasoft/VST/VST2/vst2wrapper_jamba.h
-      ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
-      ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
       ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffect.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffectx.cpp
       )

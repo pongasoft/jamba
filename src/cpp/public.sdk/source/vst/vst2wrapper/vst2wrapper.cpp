@@ -54,7 +54,7 @@
  * @author Yan Pujante
  */
 
-#include "vst2wrapper_jamba.h"
+#include "vst2wrapper.h"
 
 #include "public.sdk/source/vst/hosting/hostclasses.h"
 #include "public.sdk/source/vst2.x/aeffeditor.h"
@@ -87,7 +87,7 @@ namespace Steinberg {
 namespace Vst {
 
 //! The parameter's name contains the unit path (e.g. "Modulators.LFO 1.frequency")
-extern bool vst2WrapperFullParameterPath;
+bool vst2WrapperFullParameterPath = true;
 
 //------------------------------------------------------------------------
 // some Globals
@@ -102,13 +102,11 @@ enum
 
 // default: kDontKnow which uses createView to find out
 typedef int32 EditorAvailability;
-extern EditorAvailability gPluginHasEditor;
+EditorAvailability gPluginHasEditor = kDontKnow;
 
 // Set to 'true' in EditController::initialize
 // default: VST 3 kIsProgramChange parameter will not be exported in VST 2
-extern bool gExportProgramChangeParameters;
-
-namespace Jamba {
+bool gExportProgramChangeParameters = false;
 
 using VectorStream = pongasoft::VST::VstUtils::VectorStream;
 
@@ -3177,6 +3175,61 @@ tresult PLUGIN_API Vst2Wrapper::notifyProgramListChange(ProgramListID listId, in
 }
 
 //-----------------------------------------------------------------------------
-} // namespace Jamba
 } // namespace Vst
 } // namespace Steinberg
+
+extern bool InitModule ();
+
+//-----------------------------------------------------------------------------
+extern "C" {
+
+#if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
+#define VST_EXPORT __attribute__ ((visibility ("default")))
+#elif SMTG_OS_WINDOWS
+#define VST_EXPORT __declspec( dllexport )
+#else
+#define VST_EXPORT
+#endif
+
+//-----------------------------------------------------------------------------
+/** Prototype of the export function main */
+//-----------------------------------------------------------------------------
+VST_EXPORT AEffect* VSTPluginMain (audioMasterCallback audioMaster)
+{
+  // Get VST Version of the Host
+  if (!audioMaster (0, audioMasterVersion, 0, 0, 0, 0))
+    return 0; // old version
+
+  if (InitModule () == false)
+    return 0;
+
+  // Create the AudioEffect
+  AudioEffect* effect = createEffectInstance (audioMaster);
+  if (!effect)
+    return 0;
+
+  // Return the VST AEffect structure
+  return effect->getAeffect ();
+}
+
+//-----------------------------------------------------------------------------
+// support for old hosts not looking for VSTPluginMain
+#if (TARGET_API_MAC_CARBON && __ppc__)
+VST_EXPORT AEffect* main_macho (audioMasterCallback audioMaster)
+{
+	return VSTPluginMain (audioMaster);
+}
+#elif WIN32
+VST_EXPORT AEffect* MAIN (audioMasterCallback audioMaster)
+{
+	return VSTPluginMain (audioMaster);
+}
+#elif BEOS
+VST_EXPORT AEffect* main_plugin (audioMasterCallback audioMaster)
+{
+	return VSTPluginMain (audioMaster);
+}
+#endif
+
+} // extern "C"
+//-----------------------------------------------------------------------------

@@ -80,7 +80,6 @@
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
-namespace Jamba {
 
 class Vst2MidiEventQueue;
 
@@ -393,6 +392,8 @@ protected:
 };
 
 //------------------------------------------------------------------------
-} // namespace Jamba
 } // namespace Vst
 } // namespace Steinberg
+
+/** Must be implemented externally. */
+extern ::AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
