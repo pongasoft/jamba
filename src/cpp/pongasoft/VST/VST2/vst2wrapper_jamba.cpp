@@ -85,12 +85,9 @@ extern bool DeinitModule (); //! Called in Vst2Wrapper destructor
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
-namespace Jamba {
-
-using VectorStream = pongasoft::VST::VstUtils::VectorStream;
 
 //! The parameter's name contains the unit path (e.g. "Modulators.LFO 1.frequency")
-bool vst2WrapperFullParameterPath = true;
+extern bool vst2WrapperFullParameterPath;
 
 //------------------------------------------------------------------------
 // some Globals
@@ -105,11 +102,15 @@ enum
 
 // default: kDontKnow which uses createView to find out
 typedef int32 EditorAvailability;
-EditorAvailability gPluginHasEditor = kDontKnow;
+extern EditorAvailability gPluginHasEditor;
 
 // Set to 'true' in EditController::initialize
 // default: VST 3 kIsProgramChange parameter will not be exported in VST 2
-bool gExportProgramChangeParameters = false;
+extern bool gExportProgramChangeParameters;
+
+namespace Jamba {
+
+using VectorStream = pongasoft::VST::VstUtils::VectorStream;
 
 //------------------------------------------------------------------------
 // Vst2EditorWrapper Declaration
