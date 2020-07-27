@@ -1159,7 +1159,7 @@ bool Vst2Wrapper::getParameterProperties(VstInt32 index, VstParameterProperties 
 //------------------------------------------------------------------------
 VstInt32 Vst2Wrapper::getChunk(void **data, bool isPreset)
 {
-  DLOG_F(INFO, "Vst2Wrapper::getChunk");
+  LOG_SCOPE_FUNCTION(INFO);
 
   // Host stores Plug-in state. Returns the size in bytes of the chunk (Plug-in allocates the data
   // array)
@@ -1196,6 +1196,7 @@ VstInt32 Vst2Wrapper::getChunk(void **data, bool isPreset)
   acc.writeRaw(mGUIChunk.data(), (int32) mGUIChunk.size());
 
   *data = const_cast<int8*>(mChunk.data());
+  DLOG_F(INFO, "Vst2Wrapper::getChunk -> %lld", mChunk.size());
   return static_cast<int32>(mChunk.size());
 }
 
