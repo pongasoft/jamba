@@ -171,7 +171,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTProcessor.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTState.cpp
 
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/VectorStream.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/FastWriteMemoryStream.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIJmbParameter.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCx.cpp

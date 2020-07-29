@@ -72,7 +72,7 @@
 #include "base/source/fstring.h"
 #include "base/source/timer.h"
 
-#include <pongasoft/VST/VstUtils/VectorStream.h>
+#include <pongasoft/VST/VstUtils/FastWriteMemoryStream.h>
 
 #include <map>
 #include <vector>
@@ -377,9 +377,7 @@ protected:
   ParameterChangeTransfer mOutputTransfer;
   ParameterChangeTransfer mGuiTransfer;
 
-  pongasoft::VST::VstUtils::VectorStream mChunk;
-  pongasoft::VST::VstUtils::VectorStream mRTChunk;
-  pongasoft::VST::VstUtils::VectorStream mGUIChunk;
+  pongasoft::VST::VstUtils::FastWriteMemoryStream mChunk;
 
   Timer *mTimer = nullptr;
   IPluginFactory *mFactory = nullptr;

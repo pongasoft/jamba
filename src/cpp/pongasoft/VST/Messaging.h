@@ -23,6 +23,7 @@
 #include <memory>
 #include <public.sdk/source/vst/vstpresetfile.h>
 #include <public.sdk/source/common/memorystream.h>
+#include <pongasoft/VST/VstUtils/FastWriteMemoryStream.h>
 #include <string>
 #include <sstream>
 
@@ -143,35 +144,20 @@ int32 Message::getBinary(IAttributeList::AttrID id, T *iData, uint32 iSize) cons
   return oSize;
 }
 
-/**
- * Internal class to override the BufferStream class and give access to the buffer
- */
-class BufferStream : public Steinberg::Vst::BufferStream
-{
-public:
-  BufferStream() : Steinberg::Vst::BufferStream() {}
-  explicit BufferStream(Buffer &&iFrom) : Steinberg::Vst::BufferStream()
-  {
-    mBuffer.take(iFrom);
-  }
-  Buffer const &getBuffer() const { return mBuffer; }
-};
-
 //------------------------------------------------------------------------
 // Message::setSerializableValue
 //------------------------------------------------------------------------
 template<typename T>
 tresult Message::setSerializableValue(IAttributeList::AttrID id, const IParamSerializer<T> &iSerializer, const T &iValue)
 {
-  BufferStream stream{};
+  VstUtils::FastWriteMemoryStream stream{};
 
   IBStreamer streamer{&stream};
 
   tresult res = iSerializer.writeToStream(iValue, streamer);
   if(res == kResultOk)
   {
-    auto const &buffer = stream.getBuffer();
-    return setBinary(id, buffer.int8Ptr(), buffer.getFillSize());
+    return setBinary(id, stream.getData(), stream.getSize());
   }
   return res;
 }

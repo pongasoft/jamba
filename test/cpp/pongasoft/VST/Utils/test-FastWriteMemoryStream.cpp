@@ -17,18 +17,18 @@
  */
 
 #include <gtest/gtest.h>
-#include <pongasoft/VST/VstUtils/VectorStream.h>
+#include <pongasoft/VST/VstUtils/FastWriteMemoryStream.h>
 #include <base/source/fstreamer.h>
 #include <array>
 
-namespace pongasoft::VST::VstUtils::TestVectorStream {
+namespace pongasoft::VST::VstUtils::TestFastWriteMemoryStream {
 
-// TestVectorStream - test_write
-TEST(TestVectorStream, test_write)
+// TestFastWriteMemoryStream - test_write
+TEST(TestFastWriteMemoryStream, test_write)
 {
-  VectorStream vs{};
+  FastWriteMemoryStream vs{};
 
-  ASSERT_EQ(0, vs.size());
+  ASSERT_EQ(0, vs.getSize());
   ASSERT_EQ(0, vs.pos());
 
   auto seek = [&vs](int64 iPos, int32 iMode, int64 iExpectedResult) {
@@ -37,9 +37,9 @@ TEST(TestVectorStream, test_write)
     ASSERT_EQ(iExpectedResult, res);
   };
 
-  seek(3, VectorStream::kIBSeekSet, 0);
-  seek(3, VectorStream::kIBSeekCur, 0);
-  seek(-3, VectorStream::kIBSeekEnd, 0);
+  seek(3, FastWriteMemoryStream::kIBSeekSet, 0);
+  seek(3, FastWriteMemoryStream::kIBSeekCur, 0);
+  seek(-3, FastWriteMemoryStream::kIBSeekEnd, 0);
 
   std::array<int8, 5> str = {'a', 'b', 'c', 'd', 'e'};
 
@@ -47,8 +47,8 @@ TEST(TestVectorStream, test_write)
     int32 numWritten = 0;
     ASSERT_EQ(kResultOk, vs.write(str.data() + start, end - start, &numWritten));
     ASSERT_EQ(end - start, numWritten);
-    ASSERT_EQ(iExpected.size(), vs.size());
-    ASSERT_EQ(iExpected, std::vector<int8>(vs.data(), vs.data() + vs.size()));
+    ASSERT_EQ(iExpected.size(), vs.getSize());
+    ASSERT_EQ(iExpected, std::vector<int8>(vs.getData(), vs.getData() + vs.getSize()));
   };
 
   write(0, 3, {'a', 'b', 'c'});
@@ -57,7 +57,7 @@ TEST(TestVectorStream, test_write)
   write(3, 5, {'a', 'b', 'c', 'd', 'e'});
   ASSERT_EQ(5, vs.pos());
 
-  seek(2, VectorStream::kIBSeekSet, 2);
+  seek(2, FastWriteMemoryStream::kIBSeekSet, 2);
   write(0, 1, {'a', 'b', 'a', 'd', 'e'});
   ASSERT_EQ(3, vs.pos());
 
@@ -66,12 +66,12 @@ TEST(TestVectorStream, test_write)
 
 }
 
-// TestVectorStream - test_read
-TEST(TestVectorStream, test_read)
+// TestFastWriteMemoryStream - test_read
+TEST(TestFastWriteMemoryStream, test_read)
 {
-  VectorStream vs{};
+  FastWriteMemoryStream vs{};
 
-  ASSERT_EQ(0, vs.size());
+  ASSERT_EQ(0, vs.getSize());
   ASSERT_EQ(0, vs.pos());
 
   auto seek = [&vs](int64 iPos, int32 iMode, int64 iExpectedResult) {
@@ -86,8 +86,8 @@ TEST(TestVectorStream, test_read)
     int32 numWritten = 0;
     ASSERT_EQ(kResultOk, vs.write(str.data() + start, end - start, &numWritten));
     ASSERT_EQ(end - start, numWritten);
-    ASSERT_EQ(iExpected.size(), vs.size());
-    ASSERT_EQ(iExpected, std::vector<int8>(vs.data(), vs.data() + vs.size()));
+    ASSERT_EQ(iExpected.size(), vs.getSize());
+    ASSERT_EQ(iExpected, std::vector<int8>(vs.getData(), vs.getData() + vs.getSize()));
   };
 
 
@@ -106,20 +106,20 @@ TEST(TestVectorStream, test_read)
   ASSERT_EQ(5, vs.pos());
   read(3, {});
 
-  seek(2, VectorStream::kIBSeekSet, 2);
+  seek(2, FastWriteMemoryStream::kIBSeekSet, 2);
   ASSERT_EQ(2, vs.pos());
   read(0, {});
   ASSERT_EQ(2, vs.pos());
   read(1, {'c'});
   ASSERT_EQ(3, vs.pos());
-  seek(-3, VectorStream::kIBSeekCur, 0);
+  seek(-3, FastWriteMemoryStream::kIBSeekCur, 0);
   read(2, {'a', 'b'});
   ASSERT_EQ(2, vs.pos());
   read(10, {'c', 'd', 'e'});
   ASSERT_EQ(5, vs.pos());
   read(10, {});
   ASSERT_EQ(5, vs.pos());
-  seek(-3, VectorStream::kIBSeekEnd, 2);
+  seek(-3, FastWriteMemoryStream::kIBSeekEnd, 2);
   ASSERT_EQ(2, vs.pos());
   read(1, {'c'});
 }

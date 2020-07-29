@@ -108,7 +108,7 @@ EditorAvailability gPluginHasEditor = kDontKnow;
 // default: VST 3 kIsProgramChange parameter will not be exported in VST 2
 bool gExportProgramChangeParameters = false;
 
-using VectorStream = pongasoft::VST::VstUtils::VectorStream;
+using FastWriteMemoryStream = pongasoft::VST::VstUtils::FastWriteMemoryStream;
 
 //------------------------------------------------------------------------
 // Vst2EditorWrapper Declaration
@@ -1162,41 +1162,29 @@ VstInt32 Vst2Wrapper::getChunk(void **data, bool isPreset)
 
   // Host stores Plug-in state. Returns the size in bytes of the chunk (Plug-in allocates the data
   // array)
-  if(mComponent)
-  {
-    mRTChunk.reset();
-    if(mComponent->getState(&mRTChunk) != kResultTrue)
-    {
-      DLOG_F(WARNING, "Vst2Wrapper::getChunk - Error while reading RT state");
-      mRTChunk.reset();
-    }
-  }
+  FastWriteMemoryStream componentStream;
+  if(mComponent && mComponent->getState(&componentStream) != kResultTrue)
+    componentStream.setSize(0);
 
-  if(mController)
-  {
-    mGUIChunk.reset();
-    if(mController->getState(&mGUIChunk) != kResultTrue)
-    {
-      DLOG_F(WARNING, "Vst2Wrapper::getChunk - Error while reading GUI state");
-      mGUIChunk.reset();
-    }
-  }
+  FastWriteMemoryStream controllerStream;
+  if(mController && mController->getState(&controllerStream) != kResultTrue)
+    controllerStream.setSize(0);
 
-  if(mRTChunk.size() + mGUIChunk.size() == 0)
+  if(componentStream.getSize() + controllerStream.getSize() == 0)
     return 0;
 
-  mChunk.reset();
+  mChunk.setSize(0);
   IBStreamer acc(&mChunk, kLittleEndian);
 
-  acc.writeInt64(mRTChunk.size());
-  acc.writeInt64(mGUIChunk.size());
+  acc.writeInt64(componentStream.getSize());
+  acc.writeInt64(controllerStream.getSize());
 
-  acc.writeRaw(mRTChunk.data(), (int32) mRTChunk.size());
-  acc.writeRaw(mGUIChunk.data(), (int32) mGUIChunk.size());
+  acc.writeRaw(componentStream.getData(), (int32) componentStream.getSize());
+  acc.writeRaw(controllerStream.getData(), (int32) controllerStream.getSize());
 
-  *data = const_cast<int8*>(mChunk.data());
-  DLOG_F(INFO, "Vst2Wrapper::getChunk -> %lld", mChunk.size());
-  return static_cast<int32>(mChunk.size());
+  int32 chunkSize = (int32) mChunk.getSize();
+  *data = const_cast<char *>(mChunk.getData());
+  return chunkSize;
 }
 
 //------------------------------------------------------------------------
