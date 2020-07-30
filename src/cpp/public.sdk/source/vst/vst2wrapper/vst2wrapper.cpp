@@ -1217,23 +1217,24 @@ VstInt32 Vst2Wrapper::setChunk(void *data, VstInt32 byteSize, bool isPreset)
     return 0;
   }
 
-  VstPresetStream rtStream(((char *) data) + acc.tell(), rtDataSize);
-  VstPresetStream guiStream(((char *) data) + acc.tell() + rtDataSize, guiDataSize);
+  VstPresetStream componentStream(((char *) data) + acc.tell(), rtDataSize);
+  VstPresetStream controllerStream(((char *) data) + acc.tell() + rtDataSize, guiDataSize);
 
-  mComponent->setState(&rtStream);
-  rtStream.seek(0, IBStream::kIBSeekSet, 0);
+  if(!isPreset)
+  {
+    if(Vst::IAttributeList *attr = componentStream.getAttributes())
+      attr->setString(Vst::PresetAttributes::kStateType, String(Vst::StateType::kProject));
+    if(Vst::IAttributeList *attr = controllerStream.getAttributes())
+      attr->setString(Vst::PresetAttributes::kStateType, String(Vst::StateType::kProject));
+  }
+
+  mComponent->setState(&componentStream);
+  componentStream.seek(0, IBStream::kIBSeekSet, nullptr);
 
   if(mController)
   {
-    if(!isPreset)
-    {
-      if(Vst::IAttributeList *attr = rtStream.getAttributes())
-        attr->setString(Vst::PresetAttributes::kStateType, String(Vst::StateType::kProject));
-      if(Vst::IAttributeList *attr = guiStream.getAttributes())
-        attr->setString(Vst::PresetAttributes::kStateType, String(Vst::StateType::kProject));
-    }
-    mController->setComponentState(&rtStream);
-    mController->setState(&guiStream);
+    mController->setComponentState(&componentStream);
+    mController->setState(&controllerStream);
   }
 
   return 0;
