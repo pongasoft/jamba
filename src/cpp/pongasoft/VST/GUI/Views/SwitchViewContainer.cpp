@@ -44,6 +44,8 @@ void SwitchViewContainer::afterCreate(IUIDescription const *iDescription, IContr
 {
   fUIDescription = iDescription;
   fUIController = iController;
+  // will be adjusted appropriately in setCurrentView
+  setVisible(false);
 }
 
 //------------------------------------------------------------------------
@@ -88,22 +90,25 @@ void SwitchViewContainer::onParameterChange(ParamID iParamID)
   CustomViewAdapter::onParameterChange(iParamID);
 }
 
-
 //------------------------------------------------------------------------
 // SwitchViewContainer::setCurrentView
 //------------------------------------------------------------------------
 void SwitchViewContainer::setCurrentView(CView *iCurrentView)
 {
-  if(fCurrentView == iCurrentView)
-    return;
+  if(fCurrentView != iCurrentView)
+  {
+    if(fCurrentView)
+      removeView(fCurrentView);
 
-  if(fCurrentView)
-    removeView(fCurrentView);
+    fCurrentView = iCurrentView;
 
-  fCurrentView = iCurrentView;
+    if(fCurrentView)
+      addView(fCurrentView);
+  }
 
-  if(fCurrentView)
-    addView(fCurrentView);
+  // when there is no current view, we make this view invisible to make sure that whatever is below
+  // is handled properly (like drag'n'drop)
+  setVisible(fCurrentView != nullptr);
 }
 
 //------------------------------------------------------------------------

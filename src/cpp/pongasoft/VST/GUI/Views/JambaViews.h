@@ -30,6 +30,7 @@
 #include "ParamImageView.h"
 #include "DebugParamDisplayView.h"
 #include "ImageView.h"
+#include "ModalViewContainer.h"
 
 
 namespace pongasoft::VST::GUI::Views {
@@ -55,6 +56,7 @@ struct JambaViews : public FObject
   const TextButtonView::Creator fTextButtonCreator{"jamba::TextButton", "Jamba - Text Button"};
   const ScrollbarView::Creator fScrollbarViewCreator{"jamba::Scrollbar", "Jamba - Scrollbar"};
   const SwitchViewContainer::Creator fSwitchViewContainerCreator{"jamba::SwitchViewContainer", "Jamba - Switch View Container (dynamic template selection)"};
+  const ModalViewContainer::Creator fModalViewContainerCreator{"jamba::ModalViewContainer", "Jamba - Modal View Container (handle all mouse/key events)"};
 };
 
 }

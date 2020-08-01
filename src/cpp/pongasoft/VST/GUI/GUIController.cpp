@@ -235,7 +235,7 @@ bool GUIController::switchToView(char const *iViewName)
   if(newViewName != fCurrentViewName && fVST3Editor)
   {
 
-    #ifdef JAMBA_DEBUG_LOGGING
+#ifdef JAMBA_DEBUG_LOGGING
     DLOG_F(INFO, "GUIController::switchToView -> %s", iViewName);
 #endif
 

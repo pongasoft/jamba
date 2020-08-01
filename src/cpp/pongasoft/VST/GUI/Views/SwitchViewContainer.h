@@ -115,7 +115,7 @@ public:
   {
   public:
     explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) :
-      CustomViewCreator(iViewName, iDisplayName)
+      CustomViewCreator(iViewName, iDisplayName, VSTGUI::UIViewCreator::kCViewContainer)
     {
       registerTagAttribute("switch-control-tag", &SwitchViewContainer::getSwitchControlTag, &SwitchViewContainer::setSwitchControlTag);
       registerVectorStringAttribute("template-names", &SwitchViewContainer::getTemplateNames, &SwitchViewContainer::setTemplateNames);

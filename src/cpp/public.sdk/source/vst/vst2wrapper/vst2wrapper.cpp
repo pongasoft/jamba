@@ -1158,8 +1158,6 @@ bool Vst2Wrapper::getParameterProperties(VstInt32 index, VstParameterProperties 
 //------------------------------------------------------------------------
 VstInt32 Vst2Wrapper::getChunk(void **data, bool isPreset)
 {
-  LOG_SCOPE_FUNCTION(INFO);
-
   // Host stores Plug-in state. Returns the size in bytes of the chunk (Plug-in allocates the data
   // array)
   FastWriteMemoryStream componentStream;
