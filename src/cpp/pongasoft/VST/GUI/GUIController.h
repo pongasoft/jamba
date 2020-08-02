@@ -27,6 +27,7 @@
 #include <pongasoft/VST/GUI/Params/ParamAware.h>
 #include <pongasoft/VST/MessageHandler.h>
 #include <vstgui4/vstgui/plugin-bindings/vst3editor.h>
+#include "IDialogHandler.h"
 
 namespace pongasoft::VST::GUI {
 
@@ -37,7 +38,7 @@ using namespace Params;
  * (state loading/saving in a thread safe manner, registering VST parameters...) so
  * that the actual controller code deals mostly with business logic.
  */
-class GUIController : public EditController, public VSTGUI::VST3EditorDelegate, public IMessageProducer
+class GUIController : public EditController, public VSTGUI::VST3EditorDelegate, public IMessageProducer, public IDialogHandler
 {
 public:
   // Constructor
@@ -75,7 +76,6 @@ protected:
   // willClose -> track lifecycle of editor (close)
   void willClose(VST3Editor *editor) override;
 
-protected:
   /** Sets the component state (after setting the processor) or after restore */
   tresult PLUGIN_API setComponentState(IBStream *state) override;
 
@@ -119,12 +119,23 @@ protected:
    */
   virtual bool switchToMainView() { return switchToView(fMainViewName.c_str()) ; }
 
+  //! Shows the dialog if necessary
+  bool maybeShowDialog();
+
 public:
   // allocateMessage - API adapter
   IPtr<IMessage> allocateMessage() override;
 
   // sendMessage - API adapter
   tresult sendMessage(IPtr<IMessage> iMessage) override;
+
+  /**
+   * @copydoc IDialogHandler::showDialog() */
+  bool showDialog(std::string iTemplateName) override;
+
+  /**
+   * @copydoc IDialogHandler::dismissDialog() */
+  bool dismissDialog() override;
 
 protected:
   // the name of the xml file (relative) which contains the ui description
@@ -142,6 +153,15 @@ private:
 
   // The name of the current view
   std::string fCurrentViewName;
+
+  // Maintains a reference to the ui description
+  SharedPointer<UIDescription> fUIDescription{};
+
+  // The name of the template for the dialog window => empty means no dialog
+  std::string fDialogTemplateName{};
+
+  // The dialog view
+  SharedPointer<CView> fDialogView{};
 
   // we keep a reference to the editor to be able to switch views
   VSTGUI::VST3Editor *fVST3Editor{};

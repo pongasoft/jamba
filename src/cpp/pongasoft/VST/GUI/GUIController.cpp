@@ -67,7 +67,7 @@ tresult GUIController::initialize(FUnknown *context)
   // initializing the state
   auto guiState = getGUIState();
 
-  guiState->init(vstParameters, this);
+  guiState->init(vstParameters, this, this);
 
   // making sure that the knob mode is set to the default specified
   CFrame::kDefaultKnobMode = fDefaultKnobMode;
@@ -116,6 +116,7 @@ tresult GUIController::terminate()
   return res;
 }
 
+
 //------------------------------------------------------------------------
 // GUIController::createView
 //------------------------------------------------------------------------
@@ -123,8 +124,9 @@ IPlugView *GUIController::createView(const char *name)
 {
   if(name && strcmp(name, ViewType::kEditor) == 0)
   {
-    UIDescription *uiDescription = new UIDescription(fXmlFileName, fViewFactory);
-    return new VSTGUI::VST3Editor(uiDescription, this, fCurrentViewName.c_str(), fXmlFileName);
+    // we keep a reference to the UIDescription as it is needed to build the dialog view
+    fUIDescription = VSTGUI::makeOwned<UIDescription>(fXmlFileName, fViewFactory);
+    return new VSTGUI::VST3Editor(fUIDescription, this, fCurrentViewName.c_str(), fXmlFileName);
   }
   return nullptr;
 }
@@ -135,6 +137,8 @@ IPlugView *GUIController::createView(const char *name)
 void GUIController::didOpen(VST3Editor *editor)
 {
   fVST3Editor = editor;
+  // when we open (or reopen) the UI, we must redisplay the dialog if there is one
+  maybeShowDialog();
 }
 
 //------------------------------------------------------------------------
@@ -142,7 +146,9 @@ void GUIController::didOpen(VST3Editor *editor)
 //------------------------------------------------------------------------
 void GUIController::willClose(VST3Editor * /* ignored */)
 {
+  fUIDescription = nullptr;
   fVST3Editor = nullptr;
+  fDialogView = nullptr;
 }
 
 //------------------------------------------------------------------------
@@ -243,6 +249,61 @@ bool GUIController::switchToView(char const *iViewName)
     return fVST3Editor->exchangeView(iViewName);
   }
   return false;
+}
+
+//------------------------------------------------------------------------
+// GUIController::showDialog
+//------------------------------------------------------------------------
+bool GUIController::showDialog(std::string iTemplateName)
+{
+  if(iTemplateName.empty() ||
+    (!fDialogTemplateName.empty() && iTemplateName != fDialogTemplateName))
+  {
+    // if we are changing the dialog (or removing it) call dismiss
+    dismissDialog();
+  }
+
+  fDialogTemplateName = iTemplateName;
+
+  return maybeShowDialog();
+}
+
+//------------------------------------------------------------------------
+// GUIController::dismissDialog
+//------------------------------------------------------------------------
+bool GUIController::dismissDialog()
+{
+  if(fDialogTemplateName.empty() || !fVST3Editor)
+    return false;
+
+  if(fVST3Editor->getFrame()->getModalView())
+    fVST3Editor->getFrame()->setModalView(nullptr);
+
+  fDialogTemplateName = "";
+  fDialogView = nullptr;
+
+  return true;
+}
+
+//------------------------------------------------------------------------
+// GUIController::maybeShowDialog
+//------------------------------------------------------------------------
+bool GUIController::maybeShowDialog()
+{
+  if(fDialogTemplateName.empty() || fUIDescription.get() == nullptr || fVST3Editor == nullptr)
+    return false;
+
+  auto dialogView = VSTGUI::owned<CView>(fUIDescription->createView(fDialogTemplateName.c_str(), fVST3Editor));
+
+  if(!dialogView)
+  {
+    DLOG_F(ERROR, "Could not open dialog view from template <%s>", fDialogTemplateName.c_str());
+    return false;
+  }
+
+  fDialogView = std::move(dialogView);
+
+  return fVST3Editor->getFrame()->setModalView(fDialogView);
 }
 
 }

@@ -132,7 +132,6 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/GlobalKeyboardHook.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ImageView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/JambaViews.h
-    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ModalViewContainer.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/MomentaryButtonView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamDisplayView.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Views/ParamImageView.h
@@ -151,6 +150,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIController.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIUtils.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/IDialogHandler.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/LookAndFeel.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Types.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/ParamAwareViews.h

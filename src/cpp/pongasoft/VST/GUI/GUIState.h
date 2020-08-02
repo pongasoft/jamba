@@ -25,6 +25,7 @@
 #include <pongasoft/VST/GUI/Params/GUIJmbParameter.h>
 #include <pongasoft/VST/MessageProducer.h>
 #include "ParamAwareViews.h"
+#include "IDialogHandler.h"
 
 namespace pongasoft::VST {
 
@@ -37,7 +38,7 @@ namespace Params {
 class GUIParamCxMgr;
 }
 
-class GUIState : public IMessageProducer
+class GUIState : public IMessageProducer, public IDialogHandler
 {
 public:
   // Constructor
@@ -45,7 +46,9 @@ public:
 
   /**
    * Called by the GUIController. */
-  virtual tresult init(VstParametersSPtr iVstParameters, IMessageProducer *iMessageProducer);
+  virtual tresult init(VstParametersSPtr iVstParameters,
+                       IMessageProducer *iMessageProducer,
+                       IDialogHandler *iDialogHandler);
 
   // getPluginParameters
   Parameters const &getPluginParameters() const { return fPluginParameters; }
@@ -219,6 +222,14 @@ public:
    */
   virtual tresult handleGUIStateUpgrade(int16 iDeprecatedVersion, int16 iVersion) const { return kResultTrue; }
 
+  /**
+   * @copydoc IDialogHandler::showDialog() */
+  bool showDialog(std::string iTemplateName) override;
+
+  /**
+   * @copydoc IDialogHandler::dismissDialog() */
+  bool dismissDialog() override;
+
   // gives access for debug
   friend class Debug::ParamDisplay;
 
@@ -237,6 +248,9 @@ protected:
 
   // handles messages (receive messages)
   MessageHandler fMessageHandler{};
+
+  // handles show/dismiss dialog window
+  IDialogHandler *fDialogHandler{};
 
   // contains all the (serializable) registered parameters (unique ID, will be checked on add)
   std::map<ParamID, std::shared_ptr<IGUIJmbParameter>> fJmbParams{};

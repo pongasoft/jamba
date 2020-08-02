@@ -80,6 +80,8 @@ enum EJambaTestPluginParamID : Steinberg::Vst::ParamID
   kButton3Action = 5002,
   kButton4Action = 5003,
   kButton5Action = 5004,
+  kButtonOpenDialogAction = 5100,
+  kButtonDismissDialogAction = 5101,
 
 };
 

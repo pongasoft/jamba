@@ -237,10 +237,12 @@ tresult GUIState::writeGUIState(IBStreamer &oStreamer) const
 //------------------------------------------------------------------------
 // GUIState::init
 //------------------------------------------------------------------------
-tresult GUIState::init(VstParametersSPtr iVstParameters, IMessageProducer *iMessageProducer)
+tresult GUIState::init(VstParametersSPtr iVstParameters, IMessageProducer *iMessageProducer, IDialogHandler *iDialogHandler)
 {
   fVstParameters = std::move(iVstParameters);
   fMessageProducer = iMessageProducer;
+  fDialogHandler = iDialogHandler;
+
   auto const &saveOrder = fPluginParameters.getGUISaveStateOrder();
   if(saveOrder.getCount() > 0 && saveOrder.fVersion == 0)
   {
@@ -321,6 +323,28 @@ tresult GUIState::sendMessage(IPtr<IMessage> iMessage)
     return fMessageProducer->sendMessage(iMessage);
   else
     return kResultFalse;
+}
+
+//------------------------------------------------------------------------
+// GUIState::showDialog
+//------------------------------------------------------------------------
+bool GUIState::showDialog(std::string iTemplateName)
+{
+  if(fDialogHandler)
+    return fDialogHandler->showDialog(iTemplateName);
+
+  return false;
+}
+
+//------------------------------------------------------------------------
+// GUIState::dismissDialog
+//------------------------------------------------------------------------
+bool GUIState::dismissDialog()
+{
+  if(fDialogHandler)
+    return fDialogHandler->dismissDialog();
+
+  return false;
 }
 
 }

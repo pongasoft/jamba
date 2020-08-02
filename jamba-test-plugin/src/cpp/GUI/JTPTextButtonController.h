@@ -64,6 +64,19 @@ public:
           addListener(button, "Button5");
           break;
 
+        case EJambaTestPluginParamID::kButtonOpenDialogAction:
+          button->setOnClickListener([this] {
+            fState->showDialog("view_dialog");
+          });
+          break;
+
+        // reusing the same controller for the dialog window...
+        case EJambaTestPluginParamID::kButtonDismissDialogAction:
+          button->setOnClickListener([this] {
+            fState->dismissDialog();
+          });
+          break;
+
         default:
           // do nothing
           break;
