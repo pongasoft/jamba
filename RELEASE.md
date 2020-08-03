@@ -1,6 +1,22 @@
 Release Notes {#release-notes}
 -------------
 
+## [4.5.0 | 2020-08-03](https://github.com/pongasoft/jamba/tree/v4.5.0)
+
+* Improved messaging (GUI <-> RT) and VST2 performance by using `FastWriteMemoryStream` (a faster implementation of `MemoryStream`)
+* Added the ability to show and dismiss a dialog view (for example, an About view or an alert):
+
+      // Example from some controller (aboutButton is a TextButtonView)
+      aboutButton->setOnClickListener([this] {
+        fState->showDialog("about_dialog");
+      });
+     
+      // From another controller tied to the about_dialog view (set via the sub-controller attribute)
+      dismissButton->setOnClickListener([this] {
+        fState->dismissDialog();
+      });
+
+
 ## [4.4.0 | 2020-04-26](https://github.com/pongasoft/jamba/tree/v4.4.0)
 
 * Updated loguru to latest (as of master on 2020-03-31)
