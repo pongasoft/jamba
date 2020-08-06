@@ -4,8 +4,8 @@ set(JAMBA_ROOT ${CMAKE_CURRENT_LIST_DIR})
 #------------------------------------------------------------------------
 # Version
 #------------------------------------------------------------------------
-set(JAMBA_MAJOR_VERSION 4)
-set(JAMBA_MINOR_VERSION 5)
+set(JAMBA_MAJOR_VERSION 5)
+set(JAMBA_MINOR_VERSION 0)
 set(JAMBA_PATCH_VERSION 0)
 execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     RESULT_VARIABLE result
@@ -20,15 +20,27 @@ execute_process(COMMAND git describe --tags
 set(JAMBA_VERSION "${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_VERSION}")
 message(STATUS "jamba git version - ${JAMBA_GIT_VERSION} | jamba git tag - ${JAMBA_GIT_TAG}")
 
+get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
 #------------------------------------------------------------------------
 # Options
 #------------------------------------------------------------------------
 option(JAMBA_DEBUG_LOGGING "Enable debug logging for jamba framework" OFF)
 
+#-------------------------------------------------------------------------------
+# Platform Detection
+#-------------------------------------------------------------------------------
+
+if(APPLE)
+  set(MAC TRUE)
+elseif(WIN32)
+  set(WIN TRUE)
+endif()
+
 #------------------------------------------------------------------------
 # Compiler options
 #------------------------------------------------------------------------
-if (WIN32)
+if(WIN)
   message(STATUS "Adding compiler options")
   add_compile_options("/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING" "/EHsc" "/D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING" "/D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING")
 endif ()
@@ -36,25 +48,53 @@ endif ()
 #------------------------------------------------------------------------
 # Including VST3 SDK
 #------------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 17)
 
 # options set before including the SDK
 option(SMTG_CREATE_VST2_VERSION "" ${JAMBA_ENABLE_VST2})
+option(SMTG_ENABLE_TARGET_VARS_LOG "" OFF) # disable dump variables
 option(SMTG_RUN_VST_VALIDATOR "" OFF) # disable validator (explicit validate step)
-option(SMTG_CREATE_VST3_LINK "" OFF) # disable link (explicit install step)
+option(SMTG_CREATE_PLUGIN_LINK "" OFF) # disable link (explicit install step)
+option(SMTG_ADD_VST3_PLUGINS_SAMPLES "" OFF) # disable plugin samples
 
-include(${CMAKE_CURRENT_LIST_DIR}/VST3_SDK.cmake)
+#------------------------------------------------------------------------
+# Audio Unit
+#------------------------------------------------------------------------
+if(MAC AND JAMBA_ENABLE_AUDIO_UNIT)
+  if(NOT SMTG_COREAUDIO_SDK_PATH)
+    set(SMTG_COREAUDIO_SDK_PATH "${JAMBA_ROOT}/audio-unit/CoreAudioSDK/CoreAudio")
+  endif()
+  # Computes the Audio Unit version (AU_PLUGIN_VERSION_HEX)
+  execute_process(COMMAND bash -c "echo 'obase=16;${PLUGIN_MAJOR_VERSION}*65536+${PLUGIN_MINOR_VERSION}*256+${PLUGIN_PATCH_VERSION}' | bc"
+      OUTPUT_VARIABLE AU_PLUGIN_VERSION_HEX
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+endif ()
 
-# enforcing c++17 after calling sdk (which enforces c++14)
-if(XCODE)
-  set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17")
-elseif(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++1z -stdlib=libc++")
-endif()
+# Adding cmake/modules to cmake path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
+
+# Including VST3 SDK
+include(VST3_SDK)
+
+# optionally including VST2 SDK
+if(JAMBA_ENABLE_VST2)
+  include(VST2_SDK)
+endif ()
+
+# Defining VST3_OUTPUT_DIR which is the location where the VST3 artifact is hosted
+set(VST3_OUTPUT_DIR ${CMAKE_BINARY_DIR}/VST3)
+
+## enforcing c++17 after calling sdk (which enforces c++14)
+#if(XCODE)
+#  set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17")
+#elseif(MAC)
+#  set(CMAKE_CXX_FLAGS "-std=c++1z -stdlib=libc++")
+#endif()
 
 #------------------------------------------------------------------------
 # Defining files to include to generate the library
 #------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
 set(JAMBA_CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/cpp)
 set(LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/loguru.cpp)
 include_directories(${JAMBA_CPP_SOURCES})
@@ -200,22 +240,28 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/ParamAwareViews.cpp
 
+    ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
     )
 
 if (JAMBA_ENABLE_VST2)
   set(JAMBA_vst2_sources
-      ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
+      # VST3 hosting sources
+      ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/connectionproxy.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/eventlist.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/hostclasses.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.cpp
+      ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/pluginterfacesupport.cpp
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
+
+      # JAMBA overrides
       ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
       ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
-      ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffect.cpp
-      ${VST3_SDK_ROOT}/public.sdk/source/vst2.x/audioeffectx.cpp
-      )
-endif ()
 
+      # VST2 sources
+      ${VST2_SDK_ROOT}/public.sdk/source/vst2.x/audioeffect.cpp
+      ${VST2_SDK_ROOT}/public.sdk/source/vst2.x/audioeffectx.cpp
+    )
+endif ()
 
 configure_file(${JAMBA_CPP_SOURCES}/pongasoft/logging/jamba_version.h.in ${CMAKE_BINARY_DIR}/generated/jamba_version.h)
 include_directories(${CMAKE_BINARY_DIR}/generated/)
@@ -228,18 +274,6 @@ endif ()
 add_library(jamba STATIC ${JAMBA_sources_cpp} ${JAMBA_vst2_sources} ${JAMBA_sources_h})
 target_include_directories(jamba PUBLIC ${VSTGUI_ROOT}/vstgui4)
 target_compile_definitions(jamba PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
-
-#------------------------------------------------------------------------
-# Audio Unit
-#------------------------------------------------------------------------
-set(AU_PLUGIN_VERSION_HEX "0")
-
-if (MAC AND JAMBA_ENABLE_AUDIO_UNIT)
-  if (NOT SMTG_COREAUDIO_SDK_PATH)
-    set(SMTG_COREAUDIO_SDK_PATH "${JAMBA_ROOT}/audio-unit/CoreAudioSDK/CoreAudio")
-  endif ()
-  execute_process(COMMAND bash -c "echo 'obase=16;${PLUGIN_MAJOR_VERSION}*65536+${PLUGIN_MINOR_VERSION}*256+${PLUGIN_PATCH_VERSION}' | bc" OUTPUT_VARIABLE AU_PLUGIN_VERSION_HEX OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif ()
 
 #------------------------------------------------------------------------
 # jamba_create_archive - Create archive (.tgz)
@@ -316,7 +350,7 @@ if (NOT JAMBA_RESOURCE_DIR)
   set(JAMBA_RESOURCE_DIR "${PROJECT_SOURCE_DIR}/resource")
 endif ()
 function(jamba_add_vst3_resource target type filename)
-  smtg_add_vst3_resource(${target} "${JAMBA_RESOURCE_DIR}/${filename}")
+  smtg_add_vst3_resource(${target} "${JAMBA_RESOURCE_DIR}/${filename}" "")
   file(TO_NATIVE_PATH "${JAMBA_RESOURCE_DIR}/${filename}" JAMBA_VST3_RESOURCE_PATH)
   string(REPLACE "\\" "\\\\" JAMBA_VST3_RESOURCE_PATH "${JAMBA_VST3_RESOURCE_PATH}")
   set(JAMBA_VST3_RESOURCES_RC "${JAMBA_VST3_RESOURCES_RC}\n${filename}\t${type}\t\"${JAMBA_VST3_RESOURCE_PATH}\"" PARENT_SCOPE)
@@ -349,9 +383,16 @@ endfunction()
 # jamba_add_vst3plugin
 #------------------------------------------------------------------------
 function(jamba_add_vst3plugin target vst_sources)
+
+  # 1. Adds the VST3 plugin
   smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
+
+  # 2. Implement a fix for VST2
   jamba_fix_vst2(${target})
-  if (JAMBA_ENABLE_AUDIO_UNIT)
+
+  # 3. If Audio Unit enabled => add audio unit
+  if (MAC AND JAMBA_ENABLE_AUDIO_UNIT)
+
     set(JAMBA_VST3_PLUGIN_TARGET "${target}")
     # add the wrapper
     add_subdirectory(${JAMBA_ROOT}/audio-unit/auwrapper auwrapper)
@@ -361,6 +402,7 @@ function(jamba_add_vst3plugin target vst_sources)
     endif ()
     add_subdirectory(${JAMBA_ROOT}/audio-unit/plugin auplugin)
   endif ()
+
 endfunction()
 
 #------------------------------------------------------------------------
@@ -388,7 +430,7 @@ function(jamba_dev_scripts target)
     set(JAMBA_RELEASE_FILENAME "${target}")
   endif ()
   if (MAC)
-    if (XCODE)
+    if (GENERATOR_IS_MULTI_CONFIG)
       configure_file(${JAMBA_ROOT}/scripts/jamba_multi.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
     else ()
       configure_file(${JAMBA_ROOT}/scripts/jamba_single.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
@@ -416,10 +458,10 @@ function(jamba_dev_scripts target)
   if (MAC)
     ### VST3
     set(VST3_PLUGIN_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
-    if (XCODE)
-      set(VST3_PLUGIN_SRC "${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION}")
+    if (GENERATOR_IS_MULTI_CONFIG)
+      set(VST3_PLUGIN_SRC "${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.vst3")
     else ()
-      set(VST3_PLUGIN_SRC "${VST3_OUTPUT_DIR}/${target}.${VST3_EXTENSION}")
+      set(VST3_PLUGIN_SRC "${VST3_OUTPUT_DIR}/${CMAKE_BUILD_TYPE}/${target}.vst3")
     endif ()
     set(VST3_PLUGIN_DST "${VST3_PLUGIN_DIR}/${PLUGIN_FILENAME}.vst3")
 
@@ -434,11 +476,7 @@ function(jamba_dev_scripts target)
     ### VST2 ??
     if (JAMBA_ENABLE_VST2)
       set(VST2_PLUGIN_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
-      if (XCODE)
-        set(VST2_PLUGIN_SRC "${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION}")
-      else ()
-        set(VST2_PLUGIN_SRC "${VST3_OUTPUT_DIR}/${target}.${VST3_EXTENSION}")
-      endif ()
+      set(VST2_PLUGIN_SRC "${VST3_PLUGIN_SRC}")
       set(VST2_PLUGIN_DST "${VST2_PLUGIN_DIR}/${PLUGIN_FILENAME}.vst")
 
       ### install_vst2 target

@@ -157,11 +157,11 @@ public:
   /**
    * Returns a string representation of this parameter
    */
-  String toString()
+  Steinberg::String toString()
   {
     String128 s;
     toString(s);
-    return String(s);
+    return Steinberg::String(s);
   }
 
   // toUTF8String
@@ -327,7 +327,7 @@ public:
   /**
    * Returns a string representation of this parameter
    */
-  String toString() { DCHECK_F(exists()); return fPtr->toString(); }
+  Steinberg::String toString() { DCHECK_F(exists()); return fPtr->toString(); }
 
   /**
    * @return an editor to modify the parameter (see Editor)

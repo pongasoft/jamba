@@ -26,7 +26,7 @@
 #include <pluginterfaces/base/ipluginbase.h>
 #include <pluginterfaces/vst/ivstaudioprocessor.h>
 #include <pluginterfaces/vst/ivstcomponent.h>
-#include <public.sdk/source/main/pluginfactoryvst3.h>
+#include <public.sdk/source/main/pluginfactory.h>
 
 namespace pongasoft::VST {
 

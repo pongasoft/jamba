@@ -6,6 +6,7 @@ if (MAC AND XCODE)
       )
   include_directories(${CMAKE_BINARY_DIR}/generated/)
   add_library(${target} MODULE ${${target}_sources})
+  smtg_setup_universal_binary(${target})
   set_target_properties(${target} PROPERTIES BUNDLE TRUE)
   set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_GENERATE_MASTER_OBJECT_FILE "YES")
   set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_OTHER_LDFLAGS "-all_load")
@@ -31,6 +32,7 @@ if (MAC AND XCODE)
       "-is" "${CMAKE_OSX_SYSROOT}"
       "-I" "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
       "-I" "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
+      "-I" "/System/Library/Frameworks/AudioUnit.framework/Versions/A/Headers/"
       "-I" "${SMTG_COREAUDIO_SDK_PATH}/AudioUnits/AUPublic/AUBase"
       "-I" "${AU_PLUGIN_ROOT}"
       "-I" "${CMAKE_BINARY_DIR}/generated"

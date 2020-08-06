@@ -82,7 +82,7 @@ using namespace VSTGUI;
  * @note Although this class is not marked internal and you can use it in your own code, it is used by the framework
  *       and you should rarely need to to use it.
  */
-class SelfContainedViewListener : protected IViewListenerAdapter, public std::enable_shared_from_this<SelfContainedViewListener>
+class SelfContainedViewListener : protected ViewListenerAdapter, public std::enable_shared_from_this<SelfContainedViewListener>
 {
 public:
   /**

@@ -83,7 +83,7 @@ using namespace Params;
  *         }
  *     };
  */
-class ParamAwareViews : private IViewListenerAdapter
+class ParamAwareViews : private ViewListenerAdapter
 {
 public:
   /**

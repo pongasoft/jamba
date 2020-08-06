@@ -43,7 +43,7 @@ namespace pongasoft::VST::GUI::Views {
  * `switch-control-tag` | @copydoc getSwitchControlTag()
  * `template-names`     | @copydoc getTemplateNames()
  */
-class SwitchViewContainer : public CustomViewAdapter<CViewContainer>, IViewContainerListenerAdapter
+class SwitchViewContainer : public CustomViewAdapter<CViewContainer>, ViewContainerListenerAdapter
 {
 public:
   // Lifecycle

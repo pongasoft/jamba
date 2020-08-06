@@ -76,7 +76,7 @@ edit()
   fi
   build
   ${DRY_RUN} cmake --build . --target editorhost ${BUILD_OPTIONS}
-  ${DRY_RUN} ./bin/editorhost.app/Contents/MacOS/editorhost VST3/${BUILD_TARGET}.vst3
+  ${DRY_RUN} ./bin/${BUILD_CONFIG}/editorhost.app/Contents/MacOS/editorhost VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3
 }
 
 ###############################################################################
@@ -95,7 +95,7 @@ validate()
 {
   build
   ${DRY_RUN} cmake --build . --target validator ${BUILD_OPTIONS}
-  ${DRY_RUN} ./bin/validator VST3/${BUILD_TARGET}.vst3
+  ${DRY_RUN} ./bin/${BUILD_CONFIG}/validator VST3/${BUILD_CONFIG}/${BUILD_TARGET}.vst3
 }
 
 ###############################################################################

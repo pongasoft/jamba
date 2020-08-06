@@ -214,7 +214,7 @@ public:
   /**
    * Returns a string representation of this parameter
    */
-  String toString()
+  Steinberg::String toString()
   {
     return fRawParameter->toString();
   }
@@ -372,7 +372,7 @@ public:
   /**
    * Returns a string representation of this parameter
    */
-  String toString() { DCHECK_F(exists()); return fPtr->toString(); }
+  Steinberg::String toString() { DCHECK_F(exists()); return fPtr->toString(); }
 
   /**
    * @copydoc IGUIParameter::toUTF8String() */

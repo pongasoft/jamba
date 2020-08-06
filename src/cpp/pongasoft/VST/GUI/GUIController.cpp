@@ -274,7 +274,7 @@ bool GUIController::showDialog(std::string iTemplateName)
 bool GUIController::dismissDialog()
 {
   if(fDialogTemplateName.empty() || !fVST3Editor)
-    return false;
+  return false;
 
   if(fVST3Editor->getFrame()->getModalView())
     fVST3Editor->getFrame()->setModalView(nullptr);
@@ -291,7 +291,7 @@ bool GUIController::dismissDialog()
 bool GUIController::maybeShowDialog()
 {
   if(fDialogTemplateName.empty() || fUIDescription.get() == nullptr || fVST3Editor == nullptr)
-    return false;
+  return false;
 
   auto dialogView = VSTGUI::owned<CView>(fUIDescription->createView(fDialogTemplateName.c_str(), fVST3Editor));
 

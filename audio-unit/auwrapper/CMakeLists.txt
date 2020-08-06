@@ -23,10 +23,14 @@ if (MAC)
         ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/hostclasses.h
         ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.cpp
         ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.h
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/pluginterfacesupport.cpp
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/pluginterfacesupport.h
         ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
         ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.h
+        ${VST3_SDK_ROOT}/public.sdk/source/vst/vstinitiids.cpp
         )
     add_library(${target} STATIC ${auwrapper_sources})
+    smtg_setup_universal_binary(${target})
     set_target_properties(${target} PROPERTIES ${SDK_IDE_LIBS_FOLDER})
     target_link_libraries(${target} PRIVATE base "-framework AudioUnit" "-framework CoreMIDI" "-framework AudioToolbox" "-framework CoreFoundation" "-framework Carbon" "-framework Cocoa" "-framework CoreAudio")
     target_include_directories(${target} PRIVATE "${SMTG_COREAUDIO_SDK_PATH}/**")

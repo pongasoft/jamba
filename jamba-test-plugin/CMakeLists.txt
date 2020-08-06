@@ -25,6 +25,13 @@ set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PAT
 
 set(CPP_SOURCES src/cpp)
 
+# We need to recompute the Audio Unit version (AU_PLUGIN_VERSION_HEX) because PLUGIN_MAJOR_VERSION (...) are set
+# AFTER including jamba for this plugin only
+execute_process(COMMAND bash -c "echo 'obase=16;${PLUGIN_MAJOR_VERSION}*65536+${PLUGIN_MINOR_VERSION}*256+${PLUGIN_PATCH_VERSION}' | bc"
+    OUTPUT_VARIABLE AU_PLUGIN_VERSION_HEX
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
 configure_file(${CPP_SOURCES}/version.h.in ${CMAKE_BINARY_DIR}/generated/version.h)
 include_directories(${CMAKE_BINARY_DIR}/generated/)
 
