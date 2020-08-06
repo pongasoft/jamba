@@ -55,6 +55,9 @@ public:
   // valueChanged
   void valueChanged() override;
 
+  // setListener
+  void setListener(IControlListener *l) override;
+
 protected:
   // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fText{};

@@ -17,6 +17,7 @@
  */
 
 #include "TextEditView.h"
+#include <vstgui4/vstgui/plugin-bindings/vst3editor.h>
 
 namespace pongasoft::VST::GUI::Views {
 
@@ -44,6 +45,18 @@ void TextEditView::valueChanged()
   {
     fText.update(getText());
   }
+}
+
+//------------------------------------------------------------------------
+// TextEditView::setListener
+//------------------------------------------------------------------------
+void TextEditView::setListener(IControlListener *l)
+{
+  // For some reason in VST3.7.0, this methoed is called with VSTGUI::VST3Editor and it breaks the control entirely due to
+  // what appear to be some hack ("fix textual representation") in the endEdit method
+  // (see https://github.com/steinbergmedia/vstgui/blob/a9b1f800f1442846bf38280aaf62bc161e2137ca/vstgui/plugin-bindings/vst3editor.cpp#L200)
+  if(dynamic_cast<VSTGUI::VST3Editor *>(l) == nullptr)
+    CControl::setListener(l);
 }
 
 }
