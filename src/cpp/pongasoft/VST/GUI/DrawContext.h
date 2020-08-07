@@ -30,9 +30,32 @@ namespace GUI {
 
 using namespace VSTGUI;
 
+/**
+ * Implementation note: The `CControlEnum` enumeration has been removed from VSTGUI. Since some of the values
+ * were being used by Jamba, this (deprecated) enumeration serves 2 purposes:
+ * - keep the same values that were present in the old enum
+ * - trigger deprecation warning when compiling
+ *
+ * @deprecated Since 5.0.0 - Use `StringDrawContext::Style` enum instead
+ */
+enum [[deprecated("Since 5.0.0 - Use StringDrawContext::Style enum instead")]] DeprecatedCControlEnum
+{
+  kShadowText			= 1 << 2,
+  kNoTextStyle		= 1 << 11,
+};
+
+/**
+ * The context which contains the details on how the string should be drawn. */
 struct StringDrawContext
 {
+  enum class Style : int32_t
+  {
+    kShadowText			= 1 << 2,
+    kNoTextStyle		= 1 << 11
+  };
+
   CHoriTxtAlign fHorizTxtAlign{kCenterText};
+  //! Should be a value provided by `StringDrawContext::Style`
   int32_t fStyle{0};
   FontPtr fFont{nullptr};
   CColor fFontColor{kWhiteCColor};
@@ -40,6 +63,10 @@ struct StringDrawContext
   CPoint fTextInset{0, 0};
   CPoint fShadowTextOffset{1., 1.};
   bool fAntialias{true};
+
+  constexpr bool hasStyle(Style iStyle) const { return fStyle & static_cast<int32_t>(iStyle); }
+  inline void setStyle(Style iStyle) { fStyle = static_cast<int32_t>(iStyle); }
+  inline void addStyle(Style iStyle) { fStyle |= static_cast<int32_t>(iStyle); }
 };
 
 using RelativeCoord = CCoord;

@@ -17,7 +17,6 @@
  */
 #include "DrawContext.h"
 #include <vstgui4/vstgui/lib/controls/ccontrol.h>
-#include <vstgui4/vstgui/lib/controls/cparamdisplay.h>
 #include <vstgui4/vstgui/lib/platform/iplatformfont.h>
 
 namespace pongasoft {
@@ -26,14 +25,12 @@ namespace GUI {
 
 using namespace VSTGUI;
 
-// TODO SDK.370 need to define enum to replace the one that is gone => temporarily using CParamDisplay::Style
-
 //------------------------------------------------------------------------
 // RelativeDrawContext::drawString
 //------------------------------------------------------------------------
 void RelativeDrawContext::drawString(UTF8String const &fText, RelativeRect const &fSize, StringDrawContext &sdc)
 {
-  if(!(sdc.fStyle & CParamDisplay::Style::kNoTextStyle))
+  if(!(sdc.hasStyle(StringDrawContext::Style::kNoTextStyle)))
   {
     fDrawContext->saveGlobalState();
     CRect textRect = toAbsoluteRect(fSize);
@@ -50,7 +47,7 @@ void RelativeDrawContext::drawString(UTF8String const &fText, RelativeRect const
     fDrawContext->setFont(sdc.fFont);
 
     // draw darker text (as shadow)
-    if(sdc.fStyle & CParamDisplay::Style::kShadowText)
+    if(sdc.hasStyle((StringDrawContext::Style::kShadowText)))
     {
       CRect newSize(textRect);
       newSize.offset(sdc.fShadowTextOffset);
@@ -72,7 +69,7 @@ void RelativeDrawContext::drawString(UTF8String const &fText, RelativeRect const
 void RelativeDrawContext::debugText(RelativeCoord x, RelativeCoord y, char const *iText)
 {
   StringDrawContext sdc{};
-  sdc.fStyle |= CParamDisplay::Style::kShadowText;
+  sdc.addStyle(StringDrawContext::Style::kShadowText);
   sdc.fHorizTxtAlign = kLeftText;
   sdc.fFont = fDebugStringFont;
   sdc.fFontColor = fDebugStringColor;
