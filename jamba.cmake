@@ -139,6 +139,8 @@ set(JAMBA_sources_h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/ExpiringDataCache.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/Utils.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/FastWriteMemoryStream.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/ReadOnlyMemoryStream.h
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTParameter.h
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTProcessor.h
@@ -213,6 +215,7 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/RT/RTState.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/FastWriteMemoryStream.cpp
+    ${JAMBA_CPP_SOURCES}/pongasoft/VST/VstUtils/ReadOnlyMemoryStream.cpp
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIJmbParameter.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/Params/GUIParamCx.cpp
@@ -240,7 +243,6 @@ set(JAMBA_sources_cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/GUIState.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/GUI/ParamAwareViews.cpp
 
-    ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
     )
 
 if (JAMBA_ENABLE_VST2)
@@ -254,6 +256,8 @@ if (JAMBA_ENABLE_VST2)
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
 
       # JAMBA overrides
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/basewrapper/basewrapper.cpp
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/basewrapper/basewrapper.h
       ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
       ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
 

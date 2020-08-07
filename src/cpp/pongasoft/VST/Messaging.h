@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <memory>
 #include <public.sdk/source/vst/vstpresetfile.h>
-#include <public.sdk/source/common/memorystream.h>
+#include <pongasoft/VST/VstUtils/ReadOnlyMemoryStream.h>
 #include <pongasoft/VST/VstUtils/FastWriteMemoryStream.h>
 #include <string>
 #include <sstream>
@@ -176,8 +176,7 @@ tresult Message::getSerializableValue(IAttributeList::AttrID id, const IParamSer
   if(res != kResultOk)
     return res;
 
-  // YP implementation note: removing const due to API... only used for reading anyway
-  MemoryStream stream(const_cast<void*>(data), size);
+  VstUtils::ReadOnlyMemoryStream stream(static_cast<char const *>(data), size);
   stream.seek(IBStream::kIBSeekSet, 0, nullptr); // make sure it is at the beginning of the stream
 
   IBStreamer streamer{&stream};
