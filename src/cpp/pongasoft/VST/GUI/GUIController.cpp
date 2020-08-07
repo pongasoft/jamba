@@ -148,7 +148,6 @@ void GUIController::willClose(VST3Editor * /* ignored */)
 {
   fUIDescription = nullptr;
   fVST3Editor = nullptr;
-  fDialogView = nullptr;
 }
 
 //------------------------------------------------------------------------
@@ -276,11 +275,11 @@ bool GUIController::dismissDialog()
   if(fDialogTemplateName.empty() || !fVST3Editor)
   return false;
 
-  if(fVST3Editor->getFrame()->getModalView())
-    fVST3Editor->getFrame()->setModalView(nullptr);
+  if(fModalViewSession)
+    fVST3Editor->getFrame()->endModalViewSession(*fModalViewSession);
 
   fDialogTemplateName = "";
-  fDialogView = nullptr;
+  fModalViewSession.reset();
 
   return true;
 }
@@ -293,7 +292,7 @@ bool GUIController::maybeShowDialog()
   if(fDialogTemplateName.empty() || fUIDescription.get() == nullptr || fVST3Editor == nullptr)
   return false;
 
-  auto dialogView = VSTGUI::owned<CView>(fUIDescription->createView(fDialogTemplateName.c_str(), fVST3Editor));
+  auto dialogView = fUIDescription->createView(fDialogTemplateName.c_str(), fVST3Editor);
 
   if(!dialogView)
   {
@@ -301,9 +300,12 @@ bool GUIController::maybeShowDialog()
     return false;
   }
 
-  fDialogView = std::move(dialogView);
+  // Implementation note: The API for this call states that it shares the ownership with the caller
+  // but as demonstrated in this thread (https://sdk.steinberg.net/viewtopic.php?f=5&t=838) it is not the
+  // case => passing the pointer created
+  fModalViewSession = fVST3Editor->getFrame()->beginModalViewSession(dialogView);
 
-  return fVST3Editor->getFrame()->setModalView(fDialogView);
+  return static_cast<bool>(fModalViewSession);
 }
 
 }

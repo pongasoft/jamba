@@ -160,8 +160,8 @@ private:
   // The name of the template for the dialog window => empty means no dialog
   std::string fDialogTemplateName{};
 
-  // The dialog view
-  SharedPointer<CView> fDialogView{};
+  // The modal view session (managed by SDK)
+  Optional<ModalViewSessionID> fModalViewSession{};
 
   // we keep a reference to the editor to be able to switch views
   VSTGUI::VST3Editor *fVST3Editor{};
