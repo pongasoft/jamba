@@ -16,10 +16,16 @@ endif()
 # Includes
 #-------------------------------------------------------------------------------
 
-if(VST2_SDK_ROOT)
-  MESSAGE(STATUS "VST2_SDK_ROOT=${VST2_SDK_ROOT}")
-else()
-  MESSAGE(FATAL_ERROR "You have enabled VST2 support but VST2_SDK_ROOT is not defined. Please use -DVST2_SDK_ROOT=<path to VST2 sdk>.")
+# This is the main compiled file so should exist
+set(VSTSDK2_KNOWN_FILE "public.sdk/source/vst2.x/audioeffect.cpp")
+
+if(NOT EXISTS "${VST2_SDK_ROOT}/${VSTSDK2_KNOWN_FILE}")
+  if(EXISTS "${VST2_SDK_ROOT}/VST2_SDK/${VSTSDK2_KNOWN_FILE}")
+    set(VST2_SDK_ROOT "${VST2_SDK_ROOT}/VST2_SDK" CACHE PATH "Location of VST2 SDK" FORCE)
+    message(WARNING "VST2_SDK_ROOT should point to the SDK directly and has been adjusted to ${VST2_SDK_ROOT}")
+  else()
+    message(FATAL_ERROR "VST2_SDK_ROOT=${VST2_SDK_ROOT} does not seem to point to a valid VST2 SDK (VST2 is enabled)")
+  endif()
 endif()
 
-include_directories(${VST2_SDK_ROOT})
+message(STATUS "VST2_SDK_ROOT=${VST2_SDK_ROOT}")
