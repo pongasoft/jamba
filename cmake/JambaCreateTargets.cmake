@@ -81,7 +81,19 @@ function(internal_jamba_create_targets)
     endif()
   endif()
 
-  ## set(VST3_PLUGIN_EXE $<TARGET_FILE:${ARG_TARGET}>)
+  #------------------------------------------------------------------------
+  # run_validator target
+  #------------------------------------------------------------------------
+  add_custom_target("${ARG_TARGETS_PREFIX}run_validator"
+      COMMAND $<TARGET_FILE:validator> ${VST3_PLUGIN_SRC}
+      DEPENDS ${ARG_TARGET} validator)
+
+  #------------------------------------------------------------------------
+  # run_editor target
+  #------------------------------------------------------------------------
+  add_custom_target("${ARG_TARGETS_PREFIX}run_editor"
+      COMMAND $<TARGET_FILE:editorhost> ${VST3_PLUGIN_SRC}
+      DEPENDS ${ARG_TARGET} editorhost)
 
 endfunction()
 
