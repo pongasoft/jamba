@@ -23,7 +23,7 @@ set(PLUGIN_MINOR_VERSION ${JAMBA_MINOR_VERSION})
 set(PLUGIN_PATCH_VERSION ${JAMBA_PATCH_VERSION})
 set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PATCH_VERSION}")
 
-set(CPP_SOURCES src/cpp)
+set(CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/cpp)
 
 # We need to recompute the Audio Unit version (AU_PLUGIN_VERSION_HEX) because PLUGIN_MAJOR_VERSION (...) are set
 # AFTER including jamba for this plugin only
@@ -61,63 +61,84 @@ if (MAC OR WIN)
   set(vst_sources ${vst_sources} ${vst2_sources})
 endif ()
 
-set(target pongasoft_JambaTestPlugin)
-jamba_add_vst3plugin(${target} "${vst_sources}")
-target_include_directories(${target} PUBLIC ${VSTGUI_ROOT}/vstgui4)
-target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
+# Defining the list of resources
+set(RES_DIR ${CMAKE_CURRENT_LIST_DIR}/resource)
 
-#------------------------------------------------------------------------
-# Resources - add your resources here...
-#------------------------------------------------------------------------
-jamba_add_vst3_resource(${target} DATA "JambaTestPlugin.uidesc")
-jamba_add_vst3_resource(${target} PNG "button_2frames.png")
-jamba_add_vst3_resource(${target} PNG "button_3frames.png")
-jamba_add_vst3_resource(${target} PNG "button_4frames.png")
-jamba_add_vst3_resource(${target} PNG "image_2frames.png")
-jamba_add_vst3_resource(${target} PNG "image_3frames.png")
-jamba_add_vst3_resource(${target} PNG "image_4frames.png")
-
-# this must be called after you are done calling jamba_add_vst3_resource for all resources
-jamba_gen_vst3_resources(${target} "JambaTestPlugin")
-
-#------------------------------------------------------------------------
-# Create archive (.tgz)
-#------------------------------------------------------------------------
-jamba_create_archive(${target} "JambaTestPlugin")
-
-#------------------------------------------------------------------------
-# Testing - for jamba (NOT the plugin)
-#------------------------------------------------------------------------
-set(JAMBA_TEST_SOURCES "${JAMBA_ROOT}/test/cpp")
-set(JAMBA_TEST_SRC_FILES
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Collection/test-CircularBuffer.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-Lerp.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-StringUtils.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Params/test-GUIParameters.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Params/test-ParamAware.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-CustomViewCreator.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioUtils.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-SampleRateBasedClock.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-Utils.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-FastWriteMemoryStream.cpp
-    ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-ReadOnlyMemoryStream.cpp
+set(vst_resources
+    "${RES_DIR}/button_2frames.png"
+    "${RES_DIR}/button_3frames.png"
+    "${RES_DIR}/button_4frames.png"
+    "${RES_DIR}/image_2frames.png"
+    "${RES_DIR}/image_3frames.png"
+    "${RES_DIR}/image_4frames.png"
     )
 
-set(JAMBA_CPP_FOR_TEST_SOURCES
-    ${LOGURU_IMPL}
-    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
-    )
+jamba_add_vst3_plugin(
+    TARGET pongasoft_JambaTestPlugin
+    RELEASE_FILENAME JambaTestPlugin
+    TARGETS_PREFIX jmb_
+    VST_SOURCES ${vst_sources}
+    UIDESC "${RES_DIR}/JambaTestPlugin.uidesc"
+    RESOURCES ${vst_resources}
+)
 
-set(test_libs base sdk jamba vstgui_support)
-
-jamba_add_test(${target}_test "${JAMBA_TEST_SRC_FILES}" "${JAMBA_CPP_FOR_TEST_SOURCES}" "${test_libs}")
-
-#------------------------------------------------------------------------
-# Dev help
-#------------------------------------------------------------------------
-jamba_dev_scripts(${target})
+#set(target pongasoft_JambaTestPlugin)
+#jamba_add_vst3plugin(${target} "${vst_sources}")
+#target_include_directories(${target} PUBLIC ${VSTGUI_ROOT}/vstgui4)
+#target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
+#
+##------------------------------------------------------------------------
+## Resources - add your resources here...
+##------------------------------------------------------------------------
+#jamba_add_vst3_resource(${target} DATA "JambaTestPlugin.uidesc")
+#jamba_add_vst3_resource(${target} PNG "button_2frames.png")
+#jamba_add_vst3_resource(${target} PNG "button_3frames.png")
+#jamba_add_vst3_resource(${target} PNG "button_4frames.png")
+#jamba_add_vst3_resource(${target} PNG "image_2frames.png")
+#jamba_add_vst3_resource(${target} PNG "image_3frames.png")
+#jamba_add_vst3_resource(${target} PNG "image_4frames.png")
+#
+## this must be called after you are done calling jamba_add_vst3_resource for all resources
+#jamba_gen_vst3_resources(${target} "JambaTestPlugin")
+#
+##------------------------------------------------------------------------
+## Create archive (.tgz)
+##------------------------------------------------------------------------
+#jamba_create_archive(${target} "JambaTestPlugin")
+#
+##------------------------------------------------------------------------
+## Testing - for jamba (NOT the plugin)
+##------------------------------------------------------------------------
+#set(JAMBA_TEST_SOURCES "${JAMBA_ROOT}/test/cpp")
+#set(JAMBA_TEST_SRC_FILES
+#    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Collection/test-CircularBuffer.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/Concurrent/test-concurrent_lockfree.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-Lerp.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/Utils/test-StringUtils.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Params/test-GUIParameters.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Params/test-ParamAware.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-CustomViewCreator.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/GUI/Views/test-SelfContainedViewListener.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioBuffers.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-AudioUtils.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-ParamConverters.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/test-SampleRateBasedClock.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-Utils.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-FastWriteMemoryStream.cpp
+#    ${JAMBA_TEST_SOURCES}/pongasoft/VST/Utils/test-ReadOnlyMemoryStream.cpp
+#    )
+#
+#set(JAMBA_CPP_FOR_TEST_SOURCES
+#    ${LOGURU_IMPL}
+#    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
+#    )
+#
+#set(test_libs base sdk jamba vstgui_support)
+#
+#jamba_add_test(${target}_test "${JAMBA_TEST_SRC_FILES}" "${JAMBA_CPP_FOR_TEST_SOURCES}" "${test_libs}")
+#
+##------------------------------------------------------------------------
+## Dev help
+##------------------------------------------------------------------------
+#jamba_dev_scripts(${target})

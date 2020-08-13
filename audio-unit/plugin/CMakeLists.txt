@@ -12,6 +12,7 @@ if (MAC AND XCODE)
   set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_OTHER_LDFLAGS "-all_load")
   set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE "YES")
   set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "component")
+  set_target_properties(${target} PROPERTIES BUNDLE_EXTENSION "component") # for $<TARGET_BUNDLE_DIR:tgt>
   set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${VST3_OUTPUT_DIR})
   target_link_libraries(${target} PRIVATE auwrapper)
   smtg_set_bundle(${target} INFOPLIST "${AU_PLUGIN_ROOT}/Info.plist" PREPROCESS)

@@ -1,33 +1,12 @@
+#------------------------------------------------------------------------
+# This module delegates to JambaFetchVST3 for determining the location of VST3 SDK
+# It then sets up the necessary pieces required by Jamba/VST3
+#------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-# Handles default VST3_SDK_ROOT location if not defined
+# First we fetch VST3 (optionally)
 #-------------------------------------------------------------------------------
-
-if(NOT VST3_SDK_ROOT)
-  if(MAC)
-    set(VST3_SDK_ROOT "/Users/Shared/Steinberg/VST_SDK.370" CACHE PATH "Location of VST3 SDK")
-  elseif(WIN)
-    set(VST3_SDK_ROOT "C:/Users/Public/Documents/Steinberg/VST_SDK.370" CACHE PATH "Location of VST3 SDK")
-  else()
-    message(FATAL_ERROR "VST3_SDK_ROOT is not defined. Please use -DVST3_SDK_ROOT=<path to VST3 sdk>.")
-  endif()
-endif()
-
-#-------------------------------------------------------------------------------
-# Check for valid VST3 location
-#-------------------------------------------------------------------------------
-
-# This is the file that contains the version number... so should exist!
-set(VSTSDK3_KNOWN_FILE "pluginterfaces/vst/vsttypes.h")
-
-if(NOT EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}")
-  if(EXISTS "${VST3_SDK_ROOT}/VST3_SDK/${VSTSDK3_KNOWN_FILE}")
-    set(VST3_SDK_ROOT "${VST3_SDK_ROOT}/VST3_SDK" CACHE PATH "Location of VST3 SDK" FORCE)
-    message(WARNING "VST3_SDK_ROOT should point to the SDK directly and has been adjusted to ${VST3_SDK_ROOT}")
-  else()
-    message(FATAL_ERROR "VST3_SDK_ROOT=${VST3_SDK_ROOT} does not seem to point to a valid VST3 SDK")
-  endif()
-endif()
+include(JambaFetchVST3)
 
 message(STATUS "VST3_SDK_ROOT=${VST3_SDK_ROOT}")
 

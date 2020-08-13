@@ -25,6 +25,18 @@ set(JAMBA_VERSION "${JAMBA_MAJOR_VERSION}.${JAMBA_MINOR_VERSION}.${JAMBA_PATCH_V
 message(STATUS "jamba git version - ${JAMBA_GIT_VERSION} | jamba git tag - ${JAMBA_GIT_TAG}")
 
 #------------------------------------------------------------------------
+# The VST3 SDK version supported by Jamba
+#------------------------------------------------------------------------
+set(JAMBA_VST3SDK_VERSION "3.7.0" CACHE STRING "VST3 SDK Version (not recommended to change)")
+set(JAMBA_VST3SDK_GIT_REPO "https://github.com/steinbergmedia/vst3sdk" CACHE STRING "Vst3sdk git repository url")
+set(JAMBA_VST3SDK_GIT_TAG 3e651943d4747f8af43d10b21227020bc8b7f438 CACHE STRING "Vst3sdk git tag")
+
+#------------------------------------------------------------------------
+# The VST2 SDK version supported by Jamba
+#------------------------------------------------------------------------
+set(JAMBA_VST2SDK_VERSION "2.4") # not changeable because there is no new version
+
+#------------------------------------------------------------------------
 # Setting local property for multi config (ex: XCode) vs single config (ex: Makefile)
 #------------------------------------------------------------------------
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -71,7 +83,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 #------------------------------------------------------------------------
 # Including VST3 SDK
 #------------------------------------------------------------------------
-include(VST3_SDK)
+include(JambaSetupVST3)
 
 # Defining VST3_OUTPUT_DIR which is the location where the VST3 artifact is hosted
 set(VST3_OUTPUT_DIR ${CMAKE_BINARY_DIR}/VST3)
@@ -80,7 +92,7 @@ set(VST3_OUTPUT_DIR ${CMAKE_BINARY_DIR}/VST3)
 # Optionally including VST2 SDK
 #------------------------------------------------------------------------
 if(JAMBA_ENABLE_VST2)
-  include(VST2_SDK)
+  include(JambaSetupVST2)
 endif ()
 
 #------------------------------------------------------------------------
@@ -89,215 +101,31 @@ endif ()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src jamba)
 
 #------------------------------------------------------------------------
-# jamba_create_archive - Create archive (.tgz)
+# Define main function jamba_add_vst3_plugin
 #------------------------------------------------------------------------
-include(JambaCreateArchive)
+include(JambaAddVST3Plugin)
 
 #------------------------------------------------------------------------
-# jamba_add_vst3_resource
-#------------------------------------------------------------------------
-set(JAMBA_VST3_RESOURCES_RC "")
-if (NOT JAMBA_RESOURCE_DIR)
-  set(JAMBA_RESOURCE_DIR "${PROJECT_SOURCE_DIR}/resource")
-endif ()
-function(jamba_add_vst3_resource target type filename)
-  smtg_add_vst3_resource(${target} "${JAMBA_RESOURCE_DIR}/${filename}" "")
-  file(TO_NATIVE_PATH "${JAMBA_RESOURCE_DIR}/${filename}" JAMBA_VST3_RESOURCE_PATH)
-  string(REPLACE "\\" "\\\\" JAMBA_VST3_RESOURCE_PATH "${JAMBA_VST3_RESOURCE_PATH}")
-  set(JAMBA_VST3_RESOURCES_RC "${JAMBA_VST3_RESOURCES_RC}\n${filename}\t${type}\t\"${JAMBA_VST3_RESOURCE_PATH}\"" PARENT_SCOPE)
-endfunction()
-
-#------------------------------------------------------------------------
-# jamba_gen_vst3_resources
-#------------------------------------------------------------------------
-function(jamba_gen_vst3_resources target name)
-  if (MAC)
-    if (NOT JAMBA_VST3_PLUGIN_MAC_INFO_PLIST)
-      set(JAMBA_VST3_PLUGIN_MAC_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist")
-    endif ()
-    smtg_set_bundle(${target} INFOPLIST "${JAMBA_VST3_PLUGIN_MAC_INFO_PLIST}" PREPROCESS)
-  elseif (WIN)
-    jamba_gen_vst3_resource_rc("${CMAKE_BINARY_DIR}/generated/vst3_resources.rc")
-    target_sources(${target} PRIVATE resource/${name}.rc)
-  endif ()
-endfunction()
-
-
-#------------------------------------------------------------------------
-# jamba_gen_vst3_resource_rc
-#------------------------------------------------------------------------
-function(jamba_gen_vst3_resource_rc filepath)
-  file(WRITE ${filepath} ${JAMBA_VST3_RESOURCES_RC})
-endfunction()
-
-#------------------------------------------------------------------------
-# jamba_add_vst3plugin
+# Behavior moved to jamba_add_vst3_plugin => printing warning messages
 #------------------------------------------------------------------------
 function(jamba_add_vst3plugin target vst_sources)
-
-  # 1. Adds the VST3 plugin
-  smtg_add_vst3plugin(${target} ${VST3_SDK_ROOT} ${vst_sources})
-
-  # 2. Implement a fix for VST2
-  jamba_fix_vst2(${target})
-
-  # 3. If Audio Unit enabled => add audio unit
-  if (MAC AND JAMBA_ENABLE_AUDIO_UNIT)
-
-    set(JAMBA_VST3_PLUGIN_TARGET "${target}")
-    # add the wrapper
-    add_subdirectory(${JAMBA_ROOT}/audio-unit/auwrapper auwrapper)
-    # add the plugin
-    if (NOT AU_PLUGIN_ROOT)
-      set(AU_PLUGIN_ROOT ${PROJECT_SOURCE_DIR}/audio-unit)
-    endif ()
-    add_subdirectory(${JAMBA_ROOT}/audio-unit/plugin auplugin)
-  endif ()
-
+  message(WARNING "jamba_add_vst3plugin is no longer supported. Use jamba_add_vst3_plugin instead")
 endfunction()
 
-#------------------------------------------------------------------------
-# jamba_fix_vst2
-#------------------------------------------------------------------------
-function(jamba_fix_vst2 target)
-  if (JAMBA_ENABLE_VST2)
-    message(STATUS "${target} will be VST2 compatible")
-    if (MAC)
-      # fix missing VSTPluginMain symbol when also building VST 2 version
-      smtg_set_exported_symbols(${target} "${JAMBA_ROOT}/mac/macexport_vst2.exp")
-    endif ()
-    if (WIN)
-      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    endif ()
-  endif ()
+function(jamba_create_archive target plugin_name)
+  message(WARNING "jamba_create_archive is no longer supported. Handled by jamba_add_vst3_plugin with RELEASE_FILENAME \"${plugin_name}\" option.")
 endfunction()
 
-#------------------------------------------------------------------------
-# jamba_dev_scripts
-#------------------------------------------------------------------------
+function(jamba_add_vst3_resource target type filename)
+  message(WARNING "jamba_add_vst3_resource is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
+endfunction()
+
+function(jamba_gen_vst3_resources target name)
+  message(WARNING "jamba_gen_vst3_resources is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
+endfunction()
+
 function(jamba_dev_scripts target)
-  if (NOT JAMBA_RELEASE_FILENAME)
-    message(WARNING "JAMBA_RELEASE_FILENAME not set... you should call jamba_create_archive first!")
-    set(JAMBA_RELEASE_FILENAME "${target}")
-  endif ()
-  if (MAC)
-    if (GENERATOR_IS_MULTI_CONFIG)
-      configure_file(${JAMBA_ROOT}/scripts/jamba_multi.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
-    else ()
-      configure_file(${JAMBA_ROOT}/scripts/jamba_single.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
-    endif ()
-  endif ()
-  if (WIN)
-    configure_file(${JAMBA_ROOT}/scripts/jamba.bat.in ${CMAKE_BINARY_DIR}/jamba.bat @ONLY)
-  endif ()
-
-  # build_vst3 target / can be changed by setting BUILD_VST3_TARGET before calling this function
-  if (NOT BUILD_VST3_TARGET)
-    set(BUILD_VST3_TARGET "${target}")
-  endif ()
-  add_custom_target(build_vst3 DEPENDS "${BUILD_VST3_TARGET}")
-
-  # test_vst3 target / can be changed by setting TEST_VST3_TARGET before calling this function
-  if (NOT TEST_VST3_TARGET)
-    set(TEST_VST3_TARGET "${target}_test")
-  endif ()
-  add_custom_target(test_vst3 DEPENDS "${TEST_VST3_TARGET}")
-
-  # add install targets so that they can be invoked by the scripts (and from the IDE)
-  set(PLUGIN_FILENAME ${JAMBA_RELEASE_FILENAME}$<$<CONFIG:Debug>:_Debug>)
-
-  if (MAC)
-    ### VST3
-    set(VST3_PLUGIN_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
-    if (GENERATOR_IS_MULTI_CONFIG)
-      set(VST3_PLUGIN_SRC "${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.vst3")
-    else ()
-      set(VST3_PLUGIN_SRC "${VST3_OUTPUT_DIR}/${CMAKE_BUILD_TYPE}/${target}.vst3")
-    endif ()
-    set(VST3_PLUGIN_DST "${VST3_PLUGIN_DIR}/${PLUGIN_FILENAME}.vst3")
-
-    ### install_vst3 target
-    add_custom_target(install_vst3
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${VST3_PLUGIN_DIR}
-        COMMAND ${CMAKE_COMMAND} -E remove_directory ${VST3_PLUGIN_DST}
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_PLUGIN_SRC} ${VST3_PLUGIN_DST}
-        DEPENDS build_vst3
-        )
-
-    ### VST2 ??
-    if (JAMBA_ENABLE_VST2)
-      set(VST2_PLUGIN_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
-      set(VST2_PLUGIN_SRC "${VST3_PLUGIN_SRC}")
-      set(VST2_PLUGIN_DST "${VST2_PLUGIN_DIR}/${PLUGIN_FILENAME}.vst")
-
-      ### install_vst2 target
-      add_custom_target(install_vst2
-          COMMAND ${CMAKE_COMMAND} -E make_directory ${VST2_PLUGIN_DIR}
-          COMMAND ${CMAKE_COMMAND} -E remove_directory ${VST2_PLUGIN_DST}
-          COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST2_PLUGIN_SRC} ${VST2_PLUGIN_DST}
-          DEPENDS build_vst3
-          )
-    endif ()
-
-    ### AUDIO UNIT ??
-    if (JAMBA_ENABLE_AUDIO_UNIT)
-      if (XCODE) # audio unit requires XCode... so not available with normal Makefile build (ex: CLion)
-        if (NOT BUILD_AU_TARGET)
-          set(BUILD_AU_TARGET "${target}_au")
-        endif ()
-        add_custom_target(build_au DEPENDS "${BUILD_AU_TARGET}")
-
-        set(AU_PLUGIN_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
-        set(AU_PLUGIN_DST "${AU_PLUGIN_DIR}/${PLUGIN_FILENAME}.component")
-
-        ### install_au target
-        add_custom_target(install_au
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${AU_PLUGIN_DIR}
-            COMMAND ${CMAKE_COMMAND} -E remove_directory ${AU_PLUGIN_DST}
-            COMMAND ${CMAKE_COMMAND} -E copy_directory "${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component" ${AU_PLUGIN_DST}
-            DEPENDS build_au
-            )
-      endif()
-    endif()
-  elseif (WIN)
-    ### VST3
-    set(VST3_PLUGIN_DIR "C:/Program\ Files/Common\ Files/VST3")
-    set(VST3_PLUGIN_DST "${VST3_PLUGIN_DIR}/${PLUGIN_FILENAME}.vst3")
-
-    ### install_vst3 target
-    add_custom_target(install_vst3
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${VST3_PLUGIN_DIR}
-        COMMAND ${CMAKE_COMMAND} -E remove -f ${VST3_PLUGIN_DST}
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${VST3_PLUGIN_DST}
-        COMMENT "#### You might need to run as administrator if the command fails"
-        DEPENDS build_vst3
-        )
-
-    add_custom_command(TARGET install_vst3 
-                       POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E echo "#### VST3 plugin installed under ${VST3_PLUGIN_DST}"
-                      )
-
-    ### VST2 ??
-    if (JAMBA_ENABLE_VST2)
-      set(VST2_PLUGIN_DIR "C:/Program\ Files/VSTPlugins")
-      set(VST2_PLUGIN_DST "${VST2_PLUGIN_DIR}/${PLUGIN_FILENAME}.dll")
-
-      ### install_vst2 target
-      add_custom_target(install_vst2
-          COMMAND ${CMAKE_COMMAND} -E make_directory ${VST2_PLUGIN_DIR}
-          COMMAND ${CMAKE_COMMAND} -E remove -f ${VST2_PLUGIN_DST}
-          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${VST2_PLUGIN_DST}
-          COMMENT "#### You might need to run as administrator if the command fails"
-          DEPENDS build_vst3
-          )
-
-      add_custom_command(TARGET install_vst2 
-                         POST_BUILD
-                         COMMAND ${CMAKE_COMMAND} -E echo "#### VST2 plugin installed under ${VST2_PLUGIN_DST}"
-                        )
-    endif ()
-  endif ()
+  message(WARNING "jamba_dev_scripts is no longer supported. Handled by jamba_add_vst3_plugin.")
 endfunction()
 
 #------------------------------------------------------------------------

@@ -193,5 +193,5 @@ if (JAMBA_ENABLE_VST2)
   target_include_directories(jamba PUBLIC ${VST2_SDK_ROOT})
 endif()
 target_compile_definitions(jamba PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
-
+target_link_libraries(jamba PUBLIC base sdk vstgui_support)
 set(JAMBA_CPP_SOURCES ${JAMBA_CPP_SOURCES} PARENT_SCOPE)

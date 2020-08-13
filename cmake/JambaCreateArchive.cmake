@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------
-# jamba_create_archive - Create archive (.tgz)
+# internal_jamba_create_archive - Create archive (.tgz)
 #------------------------------------------------------------------------
-function(jamba_create_archive target plugin_name)
+function(internal_jamba_create_archive target plugin_name)
   if (MAC)
     set(ARCHITECTURE "macOS_64bits")
   elseif (WIN)
