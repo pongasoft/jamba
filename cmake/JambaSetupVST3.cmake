@@ -18,6 +18,7 @@ option(SMTG_ENABLE_TARGET_VARS_LOG "" OFF) # disable dump variables
 option(SMTG_RUN_VST_VALIDATOR "" OFF) # disable validator (explicit validate step)
 option(SMTG_CREATE_PLUGIN_LINK "" OFF) # disable link (explicit install step)
 option(SMTG_ADD_VST3_PLUGINS_SAMPLES "" OFF) # disable plugin samples
+option(SMTG_CREATE_BUNDLE_FOR_WINDOWS "" OFF) # disable bundle for Windows (can't build vst2 otherwise)
 
 #-------------------------------------------------------------------------------
 # Properties for VST3
