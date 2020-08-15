@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+
+# Copyright (c) 2020 pongasoft
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# @author Yan Pujante
+
+import argparse
+import platform
+
+
+targets_prefix = '@ARG_TARGETS_PREFIX@'
+
+generator_is_multi_config = @python_GENERATOR_IS_MULTI_CONFIG@
+cmake_single_config_build_type = '@CMAKE_BUILD_TYPE@'
+
+jamba_enable_vst2 = @python_JAMBA_ENABLE_VST2@
+
+script_name = ''
+
+if platform.system() == 'Darwin':
+    script_name = 'jamba.sh'
+    jamba_enable_audio_unit = @python_JAMBA_ENABLE_AUDIO_UNIT@
+else:
+    script_name = 'jamba.bat'
+    jamba_enable_audio_unit = False
+
+if generator_is_multi_config:
+    script_options = 'dr'
+    doc_build_config = ''
+else:
+    script_options = ''
+    doc_build_config = f'[{cmake_single_config_build_type}]'
+
+if jamba_enable_vst2:
+    doc_vst2_commands = '''
+
+  ---- VST2 commands ----
+  install-vst2   : install the vst2 plugin only
+  uninstall-vst2 : uninstall the vst2 plugin only
+
+'''
+else:
+    doc_vst2_commands = ''
+
+if jamba_enable_audio_unit:
+    doc_au_commands = '''
+
+  ---- Audio Unit commands ----
+  validate-au  : run the Audio Unit validator
+  install-au   : install the vst2 plugin only
+  uninstall-au : uninstall the vst2 plugin only
+
+'''
+else:
+    doc_au_commands = ''
+
+if jamba_enable_vst2 or jamba_enable_audio_unit:
+    doc_vst3_commands = '''
+
+  ---- VST3 commands ----
+  install-vst3   : install the vst3 plugin only
+  uninstall-vst3 : uninstall the vst3 plugin only
+
+'''
+else:
+    doc_vst3_commands = ''
+
+parser = argparse.ArgumentParser(allow_abbrev=False,
+                                 usage=f'{script_name} [-hnvb{script_options}] <command> [<command> ...] [-- [native-options]]',
+                                 formatter_class=argparse.RawDescriptionHelpFormatter,
+                                 epilog=f'''
+Commands {doc_build_config}
+  ---- Main commands ----
+  build     : build the plugin
+  clean     : clean all builds
+  test      : run the tests for the plugin
+  edit      : run the editor (works only in Debug config)
+  validate  : delete the installed plugins (vst2/vst3/audio unit)
+  install   : build and install all the plugins (vst2/vst3/audio unit)
+  uninstall : delete the installed plugins (vst2/vst3/audio unit)
+{doc_vst3_commands}{doc_vst2_commands}{doc_au_commands}
+
+  ---- CMake target ----
+  <command>   : Any unknown <command> is treated as a cmake target
+  
+  --- Native options ----
+  Pass remaining options to the native tool (ex: -- -j 8 for parallel build) 
+''')
+
+parser.add_argument("-n", "--dry-run", help="Dry run (prints what it is going to do)", action="store_true",
+                    dest="dry_run")
+parser.add_argument("-v", "--verbose", help="Verbose build", action="store_true")
+parser.add_argument("-b", "--banner", help="Display a banner before every command", action="store_true")
+
+if generator_is_multi_config:
+    parser.add_argument("-d", "--debug", help="use Debug build config", action="store_true")
+    parser.add_argument("-r", "--release", help="use Release build config", action="store_true")
+
+parser.add_argument('command', help='See "Commands" section', nargs=argparse.REMAINDER)
+
+args = parser.parse_args()
+
+# determines '--' position
+commands = args.command
+native_tool_options = []
+pos = next((i for i, x in enumerate(commands) if x == '--'), -1)
+if pos > -1:
+    commands = args.command[:pos]
+    native_tool_options = args.command[pos:]
+
+if not commands:
+    parser.print_help()
+    exit(0)
+
+available_commands = {
+    'clean': f'{targets_prefix}clean_all',
+    'build': f'{targets_prefix}build_vst3',
+    'install': f'{targets_prefix}install_all',
+    'uninstall': f'{targets_prefix}uninstall_all',
+    'edit': f'{targets_prefix}run_editor',
+    'validate': f'{targets_prefix}run_validator',
+    'test': f'{targets_prefix}test_vst3',
+
+    # both vst2 and vst3
+    'install-vst': f'{targets_prefix}install_vst',
+
+    # vst3
+    'install-vst3': f'{targets_prefix}install_vst3',
+    'uninstall-vst3': f'{targets_prefix}uninstall_vst3',
+
+    # audio unit
+    'build-au': f'{targets_prefix}build_au',
+    'install-au' : f'{targets_prefix}install_au',
+    'validate-au' : f'{targets_prefix}validate_au',
+
+    # vst2
+    'install-vst2': f'{targets_prefix}install_vst2',
+    'uninstall-vst2': f'{targets_prefix}uninstall_vst2',
+}
+
+cmake_verbose = [] if not args.verbose else ['--verbose']
+
+if generator_is_multi_config:
+    if args.release and args.debug:
+        print('Conflicting options (-r and -d) used')
+        parser.print_help()
+        exit(1)
+    config = 'Release' if args.release else 'Debug'
+else:
+    config = cmake_single_config_build_type
+
+cmake_config = ['--config', config]
+
+step = 0
+
+for command in commands:
+    step += 1
+    if args.banner:
+        if step > 1:
+          print("")
+          print("")
+        print("=============================================================")
+        print("==")
+        print(f"== Step {step} : {command}")
+        print("==")
+        print("=============================================================")
+    if command in available_commands:
+        cmake_target = available_commands[command]
+    else:
+        cmake_target = command
+    cmake_command = ['cmake', '--build', '.', *cmake_verbose, *cmake_config, '--target', cmake_target, *native_tool_options]
+    if args.dry_run:
+        print(' '.join(cmake_command))
+    else:
+        import os
+        import sys
+        import subprocess
+
+        this_script_root_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+        subprocess.run(cmake_command, cwd=this_script_root_dir)

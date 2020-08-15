@@ -90,3 +90,9 @@ set(googletest_GIT_REPO "https://github.com/google/googletest" CACHE STRING "goo
 # release-1.10.0 => 703bd9caab50b139428cea1aaff9974ebee5742e
 #------------------------------------------------------------------------
 set(googletest_GIT_TAG "703bd9caab50b139428cea1aaff9974ebee5742e" CACHE STRING "googletest git tag")
+
+#------------------------------------------------------------------------
+# Option to enable generating the dev script which allows to build and install the plugin
+# with a convenient command line tool.
+#------------------------------------------------------------------------
+option(JAMBA_ENABLE_DEV_SCRIPT "Enable Dev Script (jamba.py)" ON)

@@ -4,7 +4,7 @@ function(jamba_add_vst3_plugin)
   # Argument parsing / default values
   #############################################
   set(options "")
-  set(oneValueArgs TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX)
+  set(oneValueArgs TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX PYTHON3_EXECUTABLE)
   set(multiValueArgs VST_SOURCES RESOURCES)
   cmake_parse_arguments(
       "ARG" # prefix
@@ -24,8 +24,6 @@ function(jamba_add_vst3_plugin)
   set_default_value(ARG_TARGET ${CMAKE_PROJECT_NAME})
   set_default_value(ARG_RELEASE_FILENAME ${ARG_TARGET})
 
-  message(STATUS "ARG_TARGET=${ARG_TARGET}")
-
   # Adds the VST3 plugin
   internal_jamba_add_vst3()
 
@@ -38,11 +36,13 @@ function(jamba_add_vst3_plugin)
   # Adds Audio Unit (if enabled)
   internal_jamba_add_audio_unit()
 
-  # Adds jamba.sh / jamba.bat
-  internal_jamba_add_dev_scripts()
+  # Adds jamba.sh / jamba.bat / jamba.py
+  if(JAMBA_ENABLE_DEV_SCRIPT)
+    include(JambaDevScript)
+  endif()
 
+  # Create the targets for the project
   include(JambaCreateTargets)
-  internal_jamba_create_targets()
 
 endfunction()
 
@@ -95,6 +95,31 @@ function(internal_jamba_add_audio_unit)
       message(STATUS "Audio Unit disabled (requires XCode CMake generator)")
     endif()
   endif ()
+  ###############################################################################
+  # Function Name : validate_au()
+  ###############################################################################
+#  validate_au()
+#{
+#if [ "${JAMBA_ENABLE_AUDIO_UNIT}" == "ON" ]; then
+#install_au
+#
+#AU_BUILD_COMPONENT="VST3/${BUILD_CONFIG}/${BUILD_TARGET}_au.component"
+#AU_PLIST_FILE="$AU_BUILD_COMPONENT/Contents/Info.plist"
+#if [ -z "$DRY_RUN" ]; then
+#AU_TYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:type" "${AU_PLIST_FILE}"`
+#AU_SUBTYPE=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" "${AU_PLIST_FILE}"`
+#AU_MANUFACTURER=`/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}"`
+#else
+#${DRY_RUN} AU_TYPE=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:type" "${AU_PLIST_FILE}"
+#${DRY_RUN} AU_SUBTYPE=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" "${AU_PLIST_FILE}"
+#${DRY_RUN} AU_MANUFACTURER=/usr/libexec/PlistBuddy -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}"
+#AU_TYPE="\$AU_TYPE"
+#AU_SUBTYPE="\$AU_SUBTYPE"
+#AU_MANUFACTURER="\$AU_MANUFACTURER"
+#fi
+#${DRY_RUN} /usr/bin/auvaltool -v $AU_TYPE $AU_SUBTYPE $AU_MANUFACTURER
+#fi
+#}
 endfunction()
 
 #------------------------------------------------------------------------
@@ -144,20 +169,4 @@ function(internal_jamba_add_resource resource type inList outList)
   string(REPLACE "\\" "\\\\" JAMBA_VST3_RESOURCE_PATH "${JAMBA_VST3_RESOURCE_PATH}")
   list(APPEND inList "${filename}\t${type}\t\"${JAMBA_VST3_RESOURCE_PATH}\"")
   set(${outList} ${inList} PARENT_SCOPE)
-endfunction()
-
-#------------------------------------------------------------------------
-# internal_jamba_add_dev_scripts
-#------------------------------------------------------------------------
-function(internal_jamba_add_dev_scripts)
-  if (MAC)
-    if (GENERATOR_IS_MULTI_CONFIG)
-      configure_file(${JAMBA_ROOT}/scripts/jamba_multi.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
-    else ()
-      configure_file(${JAMBA_ROOT}/scripts/jamba_single.sh.in ${CMAKE_BINARY_DIR}/jamba.sh @ONLY)
-    endif ()
-  endif ()
-  if (WIN)
-    configure_file(${JAMBA_ROOT}/scripts/jamba.bat.in ${CMAKE_BINARY_DIR}/jamba.bat @ONLY)
-  endif ()
 endfunction()
