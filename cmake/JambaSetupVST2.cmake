@@ -1,16 +1,3 @@
-#------------------------------------------------------------------------
-# Determine local / default location
-# Either install the SDK in its default location or provide VST2_SDK_ROOT
-#------------------------------------------------------------------------
-if(NOT VST2_SDK_ROOT)
-  if(MAC)
-    set(VST2_SDK_ROOT "/Users/Shared/Steinberg/VST_SDK.${JAMBA_VST2SDK_VERSION}" CACHE PATH "Location of VST2 SDK")
-  elseif(WIN)
-    set(VST2_SDK_ROOT "C:/Users/Public/Documents/Steinberg/VST_SDK.${JAMBA_VST2SDK_VERSION}" CACHE PATH "Location of VST2 SDK")
-  else()
-    message(FATAL_ERROR "Jamba currently supports only macOS and Windows")
-  endif()
-endif()
 
 #-------------------------------------------------------------------------------
 # Includes

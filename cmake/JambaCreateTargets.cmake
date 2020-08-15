@@ -128,12 +128,20 @@ function(internal_jamba_create_install_target component src dstDir extension)
 
   set(PLUGIN_FILENAME "${ARG_RELEASE_FILENAME}$<$<CONFIG:Debug>:_Debug>.${extension}")
 
+  #------------------------------------------------------------------------
+  # target install_<component>
+  # Invokes cmake --install with right component and config
+  #------------------------------------------------------------------------
   add_custom_target("${ARG_TARGETS_PREFIX}install_${component}"
       COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --component ${component} --config $<CONFIG>
       DEPENDS "${ARG_TARGETS_PREFIX}build_${component}"
       COMMAND ${CMAKE_COMMAND} -E echo "Installed ${component} plugin under ${dstDir}/${PLUGIN_FILENAME}"
       )
 
+  #------------------------------------------------------------------------
+  # target uninstall_<component>
+  # Deletes the folder / file installed with install_<component>
+  #------------------------------------------------------------------------
   add_custom_target("${ARG_TARGETS_PREFIX}uninstall_${component}"
       COMMAND ${CMAKE_COMMAND} -E rm -r -f "${dstDir}/${PLUGIN_FILENAME}"
       COMMAND ${CMAKE_COMMAND} -E echo "Removed ${component} plugin [${PLUGIN_FILENAME}] from ${dstDir}"

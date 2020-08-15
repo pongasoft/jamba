@@ -9,10 +9,6 @@ else()
   set(FETCHCONTENT_SOURCE_DIR_GOOGLETEST "")
 endif()
 
-set(googletest_GIT_REPO "https://github.com/google/googletest" CACHE STRING "googletest git repository URL")
-# release-1.10.0 => 703bd9caab50b139428cea1aaff9974ebee5742e
-set(googletest_GIT_TAG "703bd9caab50b139428cea1aaff9974ebee5742e" CACHE STRING "googletest git tag")
-
 FetchContent_Declare(googletest
     GIT_REPOSITORY    ${googletest_GIT_REPO}
     GIT_TAG           ${googletest_GIT_TAG}
@@ -42,7 +38,7 @@ endif()
 
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+set(gtest_force_shared_crt ON CACHE BOOL "Set by Jamba" FORCE)
 
 # Add googletest directly to our build. This defines
 # the gtest and gtest_main targets.

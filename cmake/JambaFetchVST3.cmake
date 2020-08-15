@@ -7,23 +7,6 @@
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
-# Determine behavior when no local install
-#------------------------------------------------------------------------
-option(JAMBA_DOWNLOAD_VSTSDK "Download VST SDK if not installed locally" OFF)
-
-#------------------------------------------------------------------------
-# Determine local / default location
-# Either install the SDK in its default location or provide VST3_SDK_ROOT
-#------------------------------------------------------------------------
-if(APPLE)
-  set(VST3_SDK_ROOT "/Users/Shared/Steinberg/VST_SDK.${JAMBA_VST3SDK_VERSION}" CACHE PATH "Location of VST3 SDK")
-elseif(WIN32)
-  set(VST3_SDK_ROOT "C:/Users/Public/Documents/Steinberg/VST_SDK.${JAMBA_VST3SDK_VERSION}" CACHE PATH "Location of VST3 SDK")
-else()
-  message(FATAL_ERROR "Jamba currently supports only macOS and Windows")
-endif()
-
-#------------------------------------------------------------------------
 # Check for valid installation
 #------------------------------------------------------------------------
 # This is the file that contains the version number... so should exist!
@@ -47,6 +30,7 @@ if(NOT EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}" AND JAMBA_DOWNLOAD_VSTSDK
       GIT_TAG           ${JAMBA_VST3SDK_GIT_TAG}
       GIT_CONFIG        advice.detachedHead=false
       GIT_SHALLOW       true
+      GIT_PROGRESS      true
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/vst3sdk"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/vst3sdk-build"
       CONFIGURE_COMMAND ""

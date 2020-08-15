@@ -11,14 +11,14 @@ include(JambaFetchVST3)
 message(STATUS "VST3_SDK_ROOT=${VST3_SDK_ROOT}")
 
 #-------------------------------------------------------------------------------
-# Options defined prior to including SDK
+# Options defined prior to including SDK (not changeable for correct Jamba behavior)
 #-------------------------------------------------------------------------------
-option(SMTG_CREATE_VST2_VERSION "" ${JAMBA_ENABLE_VST2})
-option(SMTG_ENABLE_TARGET_VARS_LOG "" OFF) # disable dump variables
-option(SMTG_RUN_VST_VALIDATOR "" OFF) # disable validator (explicit validate step)
-option(SMTG_CREATE_PLUGIN_LINK "" OFF) # disable link (explicit install step)
-option(SMTG_ADD_VST3_PLUGINS_SAMPLES "" OFF) # disable plugin samples
-option(SMTG_CREATE_BUNDLE_FOR_WINDOWS "" OFF) # disable bundle for Windows (can't build vst2 otherwise)
+set(SMTG_CREATE_VST2_VERSION ${JAMBA_ENABLE_VST2} CACHE BOOL "Set by Jamba" FORCE)
+set(SMTG_ENABLE_TARGET_VARS_LOG OFF CACHE BOOL "Set by Jamba" FORCE) # disable dump variables
+set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "Set by Jamba" FORCE) # disable validator (explicit validate step)
+set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "Set by Jamba" FORCE) # disable link (explicit install step)
+set(SMTG_ADD_VST3_PLUGINS_SAMPLES OFF CACHE BOOL "Set by Jamba" FORCE) # disable plugin samples
+set(SMTG_CREATE_BUNDLE_FOR_WINDOWS OFF CACHE BOOL "Set by Jamba" FORCE) # disable bundle for Windows (can't build vst2 otherwise)
 
 #-------------------------------------------------------------------------------
 # Properties for VST3
