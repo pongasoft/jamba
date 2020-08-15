@@ -88,7 +88,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src jamba)
 #------------------------------------------------------------------------
 # Define main function jamba_add_vst3_plugin
 #------------------------------------------------------------------------
-include(JambaAddVST3Plugin)
+include(JambaFramework)
 
 #------------------------------------------------------------------------
 # Optionally setup testing
