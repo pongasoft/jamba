@@ -64,7 +64,7 @@ function(jamba_add_vst3_plugin)
   # Argument parsing / default values
   #------------------------------------------------------------------------
   set(options "")
-  set(oneValueArgs TARGET TEST_TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX PYTHON3_EXECUTABLE)
+  set(oneValueArgs TARGET TEST_TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX MAC_INFO_PLIST PYTHON3_EXECUTABLE)
   set(multiValueArgs VST_SOURCES INCLUDE_DIRECTORIES COMPILE_DEFINITIONS COMPILE_OPTIONS LINK_LIBRARIES
                      RESOURCES
                      TEST_CASE_SOURCES TEST_SOURCES TEST_INCLUDE_DIRECTORIES TEST_COMPILE_DEFINITIONS TEST_COMPILE_OPTIONS TEST_LINK_LIBRARIES)
@@ -86,6 +86,7 @@ function(jamba_add_vst3_plugin)
   set_default_value(ARG_TARGET "${CMAKE_PROJECT_NAME}")
   set_default_value(ARG_TEST_TARGET "${ARG_TARGET}_test")
   set_default_value(ARG_RELEASE_FILENAME "${ARG_TARGET}")
+  set_default_value(ARG_MAC_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist")
 
   # Adds the VST3 plugin
   include(JambaAddVST3Plugin)

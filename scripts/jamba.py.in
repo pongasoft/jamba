@@ -58,6 +58,7 @@ if jamba_enable_audio_unit:
     doc_au_commands = '''
 
   ---- Audio Unit commands ----
+  build-au     : builds the Audio Unit wrapper
   validate-au  : run the Audio Unit validator
   install-au   : install the vst2 plugin only
   uninstall-au : uninstall the vst2 plugin only
@@ -189,4 +190,9 @@ for command in commands:
         import subprocess
 
         this_script_root_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
-        subprocess.run(cmake_command, cwd=this_script_root_dir)
+        cp = subprocess.run(cmake_command, cwd=this_script_root_dir)
+        if cp.returncode != 0:
+          import sys
+          args = ' '.join(cp.args)
+          print(f'Error: Command "{command}" [{args}] failed with error code {cp.returncode}', file=sys.stderr)
+          exit(cp.returncode)
