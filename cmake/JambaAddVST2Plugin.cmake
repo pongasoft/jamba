@@ -22,9 +22,11 @@ endfunction()
 function(internal_add_vst2_targets)
   # add install targets so that they can be invoked by the scripts (and from the IDE)
   if (MAC)
+    set(VST2_PLUGIN_SRC $<TARGET_BUNDLE_DIR:${ARG_TARGET}>)
     set(VST2_PLUGIN_DST_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
     set(VST2_PLUGIN_EXTENSION "vst")
   elseif (WIN)
+    set(VST2_PLUGIN_SRC $<TARGET_FILE:${ARG_TARGET}>)
     set(VST2_PLUGIN_DST_DIR "C:/Program\ Files/VSTPlugins")
     set(VST2_PLUGIN_EXTENSION "dll")
   endif ()
@@ -35,7 +37,7 @@ function(internal_add_vst2_targets)
   # uninstall_vst2 target
   #------------------------------------------------------------------------
   add_custom_target("${ARG_TARGETS_PREFIX}build_vst2" DEPENDS "${ARG_TARGETS_PREFIX}build_vst3")
-  internal_jamba_create_install_target("vst2" "${VST3_PLUGIN_SRC}" "${VST2_PLUGIN_DST_DIR}" "${VST2_PLUGIN_EXTENSION}")
+  internal_jamba_create_install_target("vst2" "${VST2_PLUGIN_SRC}" "${VST2_PLUGIN_DST_DIR}" "${VST2_PLUGIN_EXTENSION}")
 
   #------------------------------------------------------------------------
   # add to install_vst / install_all / uninstall_all
