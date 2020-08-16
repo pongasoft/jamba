@@ -16,6 +16,11 @@ list(APPEND CMAKE_MODULE_PATH "${JAMBA_ROOT}/cmake")
 #------------------------------------------------------------------------
 include(JambaOptions)
 
+# This needs to be done as soon as possible
+if(JAMBA_ENABLE_TESTING)
+  enable_testing()
+endif()
+
 #------------------------------------------------------------------------
 # Jamba Version - use git to fetch exact tag/version
 #------------------------------------------------------------------------
@@ -91,32 +96,28 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src jamba)
 include(JambaFramework)
 
 #------------------------------------------------------------------------
-# Optionally setup testing
+# Behavior moved to jamba_add_vst3_plugin => printing deprecation messages
 #------------------------------------------------------------------------
-if(JAMBA_ENABLE_TESTING)
-  include(JambaTesting)
-endif()
-
-#------------------------------------------------------------------------
-# Behavior moved to jamba_add_vst3_plugin => printing warning messages
-#------------------------------------------------------------------------
-function(jamba_add_vst3plugin target vst_sources)
-  message(WARNING "jamba_add_vst3plugin is no longer supported. Use jamba_add_vst3_plugin instead")
+function(jamba_add_vst3plugin)
+  message(DEPRECATION "Since 5.0.0 - jamba_add_vst3plugin is no longer supported. Use jamba_add_vst3_plugin instead")
 endfunction()
 
-function(jamba_create_archive target plugin_name)
-  message(WARNING "jamba_create_archive is no longer supported. Handled by jamba_add_vst3_plugin with RELEASE_FILENAME \"${plugin_name}\" option.")
+function(jamba_create_archive)
+  message(DEPRECATION "Since 5.0.0 - jamba_create_archive is no longer supported. Handled by jamba_add_vst3_plugin with RELEASE_FILENAME \"${plugin_name}\" option.")
 endfunction()
 
-function(jamba_add_vst3_resource target type filename)
-  message(WARNING "jamba_add_vst3_resource is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
+function(jamba_add_vst3_resource)
+  message(DEPRECATION "Since 5.0.0 - jamba_add_vst3_resource is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
 endfunction()
 
-function(jamba_gen_vst3_resources target name)
-  message(WARNING "jamba_gen_vst3_resources is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
+function(jamba_gen_vst3_resources)
+  message(DEPRECATION "Since 5.0.0 - jamba_gen_vst3_resources is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
 endfunction()
 
-function(jamba_dev_scripts target)
-  message(WARNING "jamba_dev_scripts is no longer supported. Handled by jamba_add_vst3_plugin.")
+function(jamba_dev_scripts)
+  message(DEPRECATION "Since 5.0.0 - jamba_dev_scripts is no longer supported. Handled by jamba_add_vst3_plugin.")
 endfunction()
 
+function(jamba_add_test)
+  message(DEPRECATION "Since 5.0.0 - jamba_add_test is no longer supported. Handled by jamba_add_vst3_plugin.")
+endfunction()

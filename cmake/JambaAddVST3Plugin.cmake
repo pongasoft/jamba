@@ -6,10 +6,25 @@
 # internal_add_vst3_plugin
 #------------------------------------------------------------------------
 function(internal_add_vst3_plugin)
-  smtg_add_vst3plugin(${ARG_TARGET} ${VST3_SDK_ROOT} ${ARG_VST_SOURCES})
+  smtg_add_vst3plugin("${ARG_TARGET}" "${VST3_SDK_ROOT}" "${ARG_VST_SOURCES}")
 
   # We need to link with jamba (which defines what it needs to link with)
-  target_link_libraries(${ARG_TARGET} PUBLIC jamba)
+  target_link_libraries("${ARG_TARGET}" PUBLIC "jamba" "${ARG_LINK_LIBRARIES}")
+
+  # Extra includes?
+  if(ARG_INCLUDE_DIRECTORIES)
+    target_include_directories("${ARG_TARGET}" PUBLIC "${ARG_INCLUDE_DIRECTORIES}")
+  endif()
+
+  # Extra compile definitions?
+  if(ARG_COMPILE_DEFINITIONS)
+    target_compile_definitions("${ARG_TARGET}" PUBLIC "${ARG_COMPILE_DEFINITIONS}")
+  endif()
+
+  # Extra compile options?
+  if(ARG_COMPILE_OPTIONS)
+    target_compile_options("${ARG_TARGET}" PUBLIC "${ARG_COMPILE_OPTIONS}")
+  endif()
 
   if (XCODE)
     # $<TARGET_BUNDLE_DIR:tgt> relies on this property so we must set it (not set by VST3 SDK when XCODE)
@@ -28,14 +43,6 @@ function(internal_add_vst3_targets)
     set(BUILD_VST3_TARGET "${ARG_TARGET}")
   endif ()
   add_custom_target("${ARG_TARGETS_PREFIX}build_vst3" DEPENDS "${BUILD_VST3_TARGET}")
-
-  #------------------------------------------------------------------------
-  # test_vst3 target | can be changed by setting TEST_VST3_TARGET before calling this function
-  #------------------------------------------------------------------------
-  if (NOT TEST_VST3_TARGET)
-    set(TEST_VST3_TARGET "${ARG_TARGET}_test")
-  endif ()
-  add_custom_target("${ARG_TARGETS_PREFIX}test_vst3" DEPENDS "${TEST_VST3_TARGET}")
 
   # add install targets so that they can be invoked by the scripts (and from the IDE)
   if (MAC)

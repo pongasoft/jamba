@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required (VERSION 3.17)
 
 #------------------------------------------------------------------------
 # Jamba compile Options
@@ -9,7 +9,7 @@ option(JAMBA_DEBUG_LOGGING "Enable debug logging for jamba framework" OFF)
 # Defining files to include to generate the library
 #------------------------------------------------------------------------
 set(JAMBA_CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/cpp)
-set(LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/loguru.cpp)
+set(JAMBA_LOGURU_IMPL ${JAMBA_CPP_SOURCES}/pongasoft/logging/loguru.cpp)
 
 set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/logging/logging.h
@@ -111,7 +111,7 @@ set(JAMBA_sources_h
     )
 
 set(JAMBA_sources_cpp
-    ${LOGURU_IMPL}
+    ${JAMBA_LOGURU_IMPL}
 
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamDisplay.cpp
     ${JAMBA_CPP_SOURCES}/pongasoft/VST/Debug/ParamLine.cpp
@@ -194,4 +194,6 @@ if (JAMBA_ENABLE_VST2)
 endif()
 target_compile_definitions(jamba PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
 target_link_libraries(jamba PUBLIC base sdk vstgui_support)
-set(JAMBA_CPP_SOURCES ${JAMBA_CPP_SOURCES} PARENT_SCOPE)
+
+set(JAMBA_CPP_SOURCES "${JAMBA_CPP_SOURCES}" PARENT_SCOPE)
+set(JAMBA_LOGURU_IMPL "${JAMBA_LOGURU_IMPL}" PARENT_SCOPE)

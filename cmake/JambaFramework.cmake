@@ -64,8 +64,10 @@ function(jamba_add_vst3_plugin)
   # Argument parsing / default values
   #------------------------------------------------------------------------
   set(options "")
-  set(oneValueArgs TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX PYTHON3_EXECUTABLE)
-  set(multiValueArgs VST_SOURCES RESOURCES)
+  set(oneValueArgs TARGET TEST_TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX PYTHON3_EXECUTABLE)
+  set(multiValueArgs VST_SOURCES INCLUDE_DIRECTORIES COMPILE_DEFINITIONS COMPILE_OPTIONS LINK_LIBRARIES
+                     RESOURCES
+                     TEST_CASE_SOURCES TEST_SOURCES TEST_INCLUDE_DIRECTORIES TEST_COMPILE_DEFINITIONS TEST_COMPILE_OPTIONS TEST_LINK_LIBRARIES)
   cmake_parse_arguments(
       "ARG" # prefix
       "${options}" # options
@@ -81,8 +83,9 @@ function(jamba_add_vst3_plugin)
   endmacro()
 
   # Make sure ARG_TARGET has a value (default to project name if not provided)
-  set_default_value(ARG_TARGET ${CMAKE_PROJECT_NAME})
-  set_default_value(ARG_RELEASE_FILENAME ${ARG_TARGET})
+  set_default_value(ARG_TARGET "${CMAKE_PROJECT_NAME}")
+  set_default_value(ARG_TEST_TARGET "${ARG_TARGET}_test")
+  set_default_value(ARG_RELEASE_FILENAME "${ARG_TARGET}")
 
   # Adds the VST3 plugin
   include(JambaAddVST3Plugin)
@@ -103,6 +106,11 @@ function(jamba_add_vst3_plugin)
   # Adds jamba.sh / jamba.bat / jamba.py
   if(JAMBA_ENABLE_DEV_SCRIPT)
     include(JambaDevScript)
+  endif()
+
+  # Optionally setup testing
+  if(JAMBA_ENABLE_TESTING)
+    include(JambaAddTest)
   endif()
 
 endfunction()

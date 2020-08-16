@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required (VERSION 3.17)
 
 project(jamba)
 
@@ -15,17 +15,6 @@ set(CMAKE_CXX_STANDARD 17)
 # adds the test plugin as a subdirectory (which will end up including jamba.cmake)
 #------------------------------------------------------------------------
 add_subdirectory(jamba-test-plugin)
-
-#------------------------------------------------------------------------
-# test for jamba framework
-#------------------------------------------------------------------------
-file(COPY test.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-add_custom_target(test_jamba
-    COMMAND ctest -C $<CONFIG>
-    WORKING_DIRECTORY "jamba-test-plugin"
-    DEPENDS test_vst3
-    )
 
 #------------------------------------------------------------------------
 # Extract version
