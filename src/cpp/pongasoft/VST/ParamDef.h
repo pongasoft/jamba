@@ -373,8 +373,9 @@ public:
         s << iValue;
         return s.str();
       }
+      else
+        return "";
     }
-    return "";
   }
 
   /**

@@ -11,9 +11,6 @@ function(internal_add_vst2_plugin)
     # fix missing VSTPluginMain symbol when also building VST 2 version
     smtg_set_exported_symbols(${ARG_TARGET} "${JAMBA_ROOT}/mac/macexport_vst2.exp")
   endif ()
-  if (WIN)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-  endif ()
 endfunction()
 
 #------------------------------------------------------------------------

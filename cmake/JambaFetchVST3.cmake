@@ -29,7 +29,6 @@ if(NOT EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}" AND JAMBA_DOWNLOAD_VSTSDK
       GIT_REPOSITORY    ${JAMBA_VST3SDK_GIT_REPO}
       GIT_TAG           ${JAMBA_VST3SDK_GIT_TAG}
       GIT_CONFIG        advice.detachedHead=false
-      GIT_SHALLOW       true
       GIT_PROGRESS      true
       SOURCE_DIR        "${CMAKE_BINARY_DIR}/vst3sdk"
       BINARY_DIR        "${CMAKE_BINARY_DIR}/vst3sdk-build"
