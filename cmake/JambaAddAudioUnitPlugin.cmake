@@ -3,9 +3,9 @@
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
-# internal_add_au_plugin
+# internal_jamba_add_au_plugin
 #------------------------------------------------------------------------
-function(internal_add_au_plugin)
+function(internal_jamba_add_au_plugin)
   if (XCODE)
     set(JAMBA_VST3_PLUGIN_TARGET "${ARG_TARGET}")
     # add the wrapper
@@ -21,9 +21,9 @@ function(internal_add_au_plugin)
 endfunction()
 
 #------------------------------------------------------------------------
-# internal_add_au_targets
+# internal_jamba_add_au_targets
 #------------------------------------------------------------------------
-function(internal_add_au_targets)
+function(internal_jamba_add_au_targets)
   if (XCODE)
     #------------------------------------------------------------------------
     # build_au target | can be changed by setting BUILD_AU_TARGET before calling this function
@@ -59,5 +59,5 @@ function(internal_add_au_targets)
 endfunction()
 
 # invoke the functions
-internal_add_au_plugin()
-internal_add_au_targets()
+internal_jamba_add_au_plugin()
+internal_jamba_add_au_targets()

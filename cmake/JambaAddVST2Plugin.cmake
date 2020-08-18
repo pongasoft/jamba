@@ -3,9 +3,9 @@
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
-# internal_add_vst2_plugin
+# internal_jamba_add_vst2_plugin
 #------------------------------------------------------------------------
-function(internal_add_vst2_plugin)
+function(internal_jamba_add_vst2_plugin)
   message(STATUS "${ARG_TARGET} will be VST2 compatible")
   if (MAC)
     # fix missing VSTPluginMain symbol when also building VST 2 version
@@ -14,9 +14,9 @@ function(internal_add_vst2_plugin)
 endfunction()
 
 #------------------------------------------------------------------------
-# internal_add_vst2_targets
+# internal_jamba_add_vst2_targets
 #------------------------------------------------------------------------
-function(internal_add_vst2_targets)
+function(internal_jamba_add_vst2_targets)
   # add install targets so that they can be invoked by the scripts (and from the IDE)
   if (MAC)
     set(VST2_PLUGIN_SRC $<TARGET_BUNDLE_DIR:${ARG_TARGET}>)
@@ -45,5 +45,5 @@ function(internal_add_vst2_targets)
 endfunction()
 
 # invoke the functions
-internal_add_vst2_plugin()
-internal_add_vst2_targets()
+internal_jamba_add_vst2_plugin()
+internal_jamba_add_vst2_targets()

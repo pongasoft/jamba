@@ -4,9 +4,9 @@
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
-# internal_add_dev_script
+# internal_jamba_add_dev_script
 #------------------------------------------------------------------------
-function(internal_add_dev_script)
+function(internal_jamba_add_dev_script)
   # Determine python executable
   if (ARG_PYTHON3_EXECUTABLE)
     set(Python3_EXECUTABLE ${ARG_PYTHON3_EXECUTABLE})
@@ -45,4 +45,4 @@ function(internal_add_dev_script)
 endfunction()
 
 # invoke the functions
-internal_add_dev_script()
+internal_jamba_add_dev_script()

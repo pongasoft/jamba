@@ -3,9 +3,9 @@
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
-# internal_add_vst3_plugin
+# internal_jamba_add_vst3_plugin
 #------------------------------------------------------------------------
-function(internal_add_vst3_plugin)
+function(internal_jamba_add_vst3_plugin)
   smtg_add_vst3plugin("${ARG_TARGET}" "${VST3_SDK_ROOT}" "${ARG_VST_SOURCES}")
 
   # We need to link with jamba (which defines what it needs to link with)
@@ -33,9 +33,9 @@ function(internal_add_vst3_plugin)
 endfunction()
 
 #------------------------------------------------------------------------
-# internal_add_vst3_targets
+# internal_jamba_add_vst3_targets
 #------------------------------------------------------------------------
-function(internal_add_vst3_targets)
+function(internal_jamba_add_vst3_targets)
   #------------------------------------------------------------------------
   # build_vst3 target | can be changed by setting BUILD_VST3_TARGET before calling this function
   #------------------------------------------------------------------------
@@ -90,5 +90,5 @@ function(internal_add_vst3_targets)
 endfunction()
 
 # invoke the functions
-internal_add_vst3_plugin()
-internal_add_vst3_targets()
+internal_jamba_add_vst3_plugin()
+internal_jamba_add_vst3_targets()
