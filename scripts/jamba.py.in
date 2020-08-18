@@ -59,7 +59,6 @@ if jamba_enable_audio_unit:
 
   ---- Audio Unit commands ----
   build-au     : builds the Audio Unit wrapper
-  validate-au  : run the Audio Unit validator
   install-au   : install the vst2 plugin only
   uninstall-au : uninstall the vst2 plugin only
 
@@ -144,7 +143,6 @@ available_commands = {
     # audio unit
     'build-au': f'{targets_prefix}build_au',
     'install-au' : f'{targets_prefix}install_au',
-    'validate-au' : f'{targets_prefix}validate_au',
 
     # vst2
     'install-vst2': f'{targets_prefix}install_vst2',
