@@ -38,6 +38,25 @@ function(internal_add_au_targets)
     set(AU_PLUGIN_EXTENSION "component")
 
     internal_jamba_create_install_target("au" "${AU_PLUGIN_SRC}" "${AU_PLUGIN_DST_DIR}" "${AU_PLUGIN_EXTENSION}")
+
+    find_program(PlistBuddy_EXE PlistBuddy "/usr/libexec")
+    find_program(auvaltool_EXE auvaltool "/usr/bin")
+
+    if((NOT PlistBuddy_EXE) OR (NOT auvaltool_EXE))
+      add_custom_target("${ARG_TARGETS_PREFIX}validate_au"
+          COMMAND ${CMAKE_COMMAND} -E echo "Could not find either /usr/libexec/PlistBuddy or /usr/bin/auvaltool required for validating the Audio Unit"
+          )
+    else()
+      set(AU_PLIST_FILE "$<TARGET_BUNDLE_DIR:${BUILD_AU_TARGET}>/Contents/Info.plist")
+      set(AUVALTOOL_ARGS_FILE "${CMAKE_CURRENT_BINARY_DIR}/auvaltool.args")
+      add_custom_command(OUTPUT "${AUVALTOOL_ARGS_FILE}"
+          COMMAND "${PlistBuddy_EXE}" -c "Print :AudioComponents:0:type" -c "Print :AudioComponents:0:subtype" -c "Print :AudioComponents:0:manufacturer" "${AU_PLIST_FILE}" > "${AUVALTOOL_ARGS_FILE}"
+          DEPENDS ${ARG_TARGETS_PREFIX}install_au)
+      add_custom_target("${ARG_TARGETS_PREFIX}validate_au"
+          COMMAND cat "${AUVALTOOL_ARGS_FILE}" | xargs -t "${auvaltool_EXE}" -v
+          DEPENDS "${AUVALTOOL_ARGS_FILE}"
+          )
+    endif()
   else ()
     # XCode is required to build audio unit => simply display a message about it
     add_custom_target("${ARG_TARGETS_PREFIX}build_au"
@@ -47,6 +66,9 @@ function(internal_add_au_targets)
         COMMAND ${CMAKE_COMMAND} -E echo "You need to use the XCode generator to build the Audio Unit wrapper"
         )
     add_custom_target("${ARG_TARGETS_PREFIX}uninstall_au"
+        COMMAND ${CMAKE_COMMAND} -E echo "You need to use the XCode generator to build the Audio Unit wrapper"
+        )
+    add_custom_target("${ARG_TARGETS_PREFIX}validate_au"
         COMMAND ${CMAKE_COMMAND} -E echo "You need to use the XCode generator to build the Audio Unit wrapper"
         )
   endif ()
