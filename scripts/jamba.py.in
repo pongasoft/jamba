@@ -90,6 +90,7 @@ Commands {doc_build_config}
   validate  : delete the installed plugins (vst2/vst3/audio unit)
   install   : build and install all the plugins (vst2/vst3/audio unit)
   uninstall : delete the installed plugins (vst2/vst3/audio unit)
+  archive   : create an archive containing the plugins
 {doc_vst3_commands}{doc_vst2_commands}{doc_au_commands}
 
   ---- CMake target ----
@@ -132,6 +133,7 @@ available_commands = {
     'edit': f'{targets_prefix}run_editor',
     'validate': f'{targets_prefix}run_validator',
     'test': f'{targets_prefix}test_vst3',
+    'archive': f'{targets_prefix}create_archive',
 
     # both vst2 and vst3
     'install-vst': f'{targets_prefix}install_vst',

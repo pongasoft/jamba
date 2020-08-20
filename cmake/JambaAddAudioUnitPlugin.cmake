@@ -1,6 +1,11 @@
 #------------------------------------------------------------------------
 # This module will build the audio unit plugin wrapper
+# Must define jamba_add_au_plugin
 #------------------------------------------------------------------------
+function(jamba_add_au_plugin)
+  internal_jamba_add_au_plugin()
+  internal_jamba_add_au_targets()
+endfunction()
 
 #------------------------------------------------------------------------
 # internal_jamba_add_au_plugin
@@ -32,9 +37,10 @@ function(internal_jamba_add_au_targets)
       set(BUILD_AU_TARGET "${ARG_TARGET}_au")
     endif ()
     add_custom_target("${ARG_TARGETS_PREFIX}build_au" DEPENDS "${BUILD_AU_TARGET}")
+    add_dependencies("${ARG_TARGETS_PREFIX}build_all" "${ARG_TARGETS_PREFIX}build_au")
 
     set(AU_PLUGIN_SRC $<TARGET_BUNDLE_DIR:${BUILD_AU_TARGET}>)
-    set(AU_PLUGIN_DST_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
+    set(AU_PLUGIN_DST_DIR "Components")
     set(AU_PLUGIN_EXTENSION "component")
 
     internal_jamba_create_install_target("au" "${AU_PLUGIN_SRC}" "${AU_PLUGIN_DST_DIR}" "${AU_PLUGIN_EXTENSION}")
@@ -58,6 +64,3 @@ function(internal_jamba_add_au_targets)
   add_dependencies("${ARG_TARGETS_PREFIX}uninstall_all" "${ARG_TARGETS_PREFIX}uninstall_au")
 endfunction()
 
-# invoke the functions
-internal_jamba_add_au_plugin()
-internal_jamba_add_au_targets()

@@ -1,6 +1,11 @@
 #------------------------------------------------------------------------
 # This module makes the VST3 plugin also VST2 compatible
+# Must define jamba_add_vst2_plugin
 #------------------------------------------------------------------------
+function(jamba_add_vst2_plugin)
+  internal_jamba_add_vst2_plugin()
+  internal_jamba_add_vst2_targets()
+endfunction()
 
 #------------------------------------------------------------------------
 # internal_jamba_add_vst2_plugin
@@ -20,11 +25,11 @@ function(internal_jamba_add_vst2_targets)
   # add install targets so that they can be invoked by the scripts (and from the IDE)
   if (MAC)
     set(VST2_PLUGIN_SRC $<TARGET_BUNDLE_DIR:${ARG_TARGET}>)
-    set(VST2_PLUGIN_DST_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
+    set(VST2_PLUGIN_DST_DIR "VST")
     set(VST2_PLUGIN_EXTENSION "vst")
   elseif (WIN)
     set(VST2_PLUGIN_SRC $<TARGET_FILE:${ARG_TARGET}>)
-    set(VST2_PLUGIN_DST_DIR "C:/Program\ Files/VSTPlugins")
+    set(VST2_PLUGIN_DST_DIR "VSTPlugins")
     set(VST2_PLUGIN_EXTENSION "dll")
   endif ()
 
@@ -34,6 +39,7 @@ function(internal_jamba_add_vst2_targets)
   # uninstall_vst2 target
   #------------------------------------------------------------------------
   add_custom_target("${ARG_TARGETS_PREFIX}build_vst2" DEPENDS "${ARG_TARGETS_PREFIX}build_vst3")
+  add_dependencies("${ARG_TARGETS_PREFIX}build_all" "${ARG_TARGETS_PREFIX}build_vst2")
   internal_jamba_create_install_target("vst2" "${VST2_PLUGIN_SRC}" "${VST2_PLUGIN_DST_DIR}" "${VST2_PLUGIN_EXTENSION}")
 
   #------------------------------------------------------------------------
@@ -43,7 +49,3 @@ function(internal_jamba_add_vst2_targets)
   add_dependencies("${ARG_TARGETS_PREFIX}install_all" "${ARG_TARGETS_PREFIX}install_vst2")
   add_dependencies("${ARG_TARGETS_PREFIX}uninstall_all" "${ARG_TARGETS_PREFIX}uninstall_vst2")
 endfunction()
-
-# invoke the functions
-internal_jamba_add_vst2_plugin()
-internal_jamba_add_vst2_targets()

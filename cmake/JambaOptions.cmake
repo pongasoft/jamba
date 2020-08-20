@@ -77,8 +77,16 @@ option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" OFF)
 #------------------------------------------------------------------------
 # Option to enable/disable testing (includes GoogleTest)
 # Simply set to OFF if you want to use your own testing methodology
+# You can also write your own JambaAddTest.cmake module instead.
 #------------------------------------------------------------------------
 option(JAMBA_ENABLE_TESTING "Enable Testing (GoogleTest)" ON)
+
+#------------------------------------------------------------------------
+# Option to enable/disable creating adding a target to create an archive
+# Simply set to OFF if you do not want the default archiving mechanism
+# You can also write your own JambaCreateArchive.cmake module instead.
+#------------------------------------------------------------------------
+option(JAMBA_ENABLE_CREATE_ARCHIVE "Enable Creating an archive (zip)" ON)
 
 #------------------------------------------------------------------------
 # The git respository to fetch googletest from

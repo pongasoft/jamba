@@ -1,11 +1,8 @@
 #------------------------------------------------------------------------
 # This module adds all the resources (images and .uidesc and .rc to the build)
+# Must define jamba_add_all_resources
 #------------------------------------------------------------------------
-
-#------------------------------------------------------------------------
-# internal_jamba_add_all_resources
-#------------------------------------------------------------------------
-function(internal_jamba_add_all_resources)
+function(jamba_add_all_resources)
   set(JAMBA_VST3_RESOURCES_RC "")
 
   get_filename_component(UIDESC_FILENAME ${ARG_UIDESC} NAME_WLE)
@@ -47,6 +44,3 @@ function(internal_jamba_add_resource resource type inList outList)
   list(APPEND inList "${filename}\t${type}\t\"${JAMBA_VST3_RESOURCE_PATH}\"")
   set(${outList} ${inList} PARENT_SCOPE)
 endfunction()
-
-# invoke the functions
-internal_jamba_add_all_resources()

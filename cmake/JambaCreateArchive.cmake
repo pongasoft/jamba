@@ -1,66 +1,47 @@
 #------------------------------------------------------------------------
-# internal_jamba_create_archive - Create archive (.tgz)
+# This module creates the archive (artifact to install the plugin)
+# Must define jamba_create_archive
 #------------------------------------------------------------------------
-function(internal_jamba_create_archive target plugin_name)
+function(jamba_create_archive)
   if (MAC)
     set(ARCHITECTURE "macOS_64bits")
   elseif (WIN)
     set(ARCHITECTURE "win_64bits")
   endif ()
 
-  set(JAMBA_RELEASE_FILENAME "${plugin_name}" PARENT_SCOPE)
+  set(CPACK_PACKAGE_NAME                "${ARG_RELEASE_FILENAME}")
+  set(CPACK_PACKAGE_VERSION_MAJOR       "${PLUGIN_MAJOR_VERSION}")
+  set(CPACK_PACKAGE_VERSION_MINOR       "${PLUGIN_MINOR_VERSION}")
+  set(CPACK_PACKAGE_VERSION_PATCH       "${PLUGIN_PATCH_VERSION}")
+  set(CPACK_GENERATOR ZIP)
+  set(CPACK_SYSTEM_NAME "${ARCHITECTURE}")
+  set(CPACK_VERBATIM_VARIABLES TRUE)
+  set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
+  set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
+  set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 
-  set(ARCHIVE_NAME ${target}-${ARCHITECTURE}-${PLUGIN_VERSION})
-  set(ARCHIVE_PATH ${CMAKE_BINARY_DIR}/archive/${ARCHIVE_NAME})
+  # Add the doc folder at the root if it exists
+  if(EXISTS "${ARG_ARCHIVE_DOC_DIR}")
+    set(CPACK_INSTALLED_DIRECTORIES "${ARG_ARCHIVE_DOC_DIR}" ".")
+  endif()
 
-  add_custom_command(OUTPUT ${ARCHIVE_PATH}
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${ARCHIVE_PATH}
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/LICENSE.txt ${ARCHIVE_PATH}
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/archive/README-${ARCHITECTURE}.txt ${ARCHIVE_PATH}/README.txt
+  include(CPack)
+
+  cpack_add_component(vst3)
+
+  if (JAMBA_ENABLE_VST2)
+    cpack_add_component(vst2)
+  endif()
+
+  if (MAC AND JAMBA_ENABLE_AUDIO_UNIT AND XCODE)
+    cpack_add_component(au)
+  endif()
+
+  add_custom_target("${ARG_TARGETS_PREFIX}create_archive"
+      COMMAND ${CMAKE_COMMAND} -E echo "Creating archive..."
+      COMMAND "${CMAKE_CPACK_COMMAND}" --verbose -G ZIP -C $<CONFIG>
+      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" # CPackConfig.cmake is created there
+      DEPENDS "${ARG_TARGETS_PREFIX}build_all"
       )
 
-  if (MAC)
-    if (XCODE)
-      add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-          COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION} ${ARCHIVE_PATH}/${plugin_name}.vst3
-          DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}.${VST3_EXTENSION}
-          DEPENDS ${ARCHIVE_PATH}
-          WORKING_DIRECTORY archive
-          )
-      if (JAMBA_ENABLE_AUDIO_UNIT)
-        add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component ${ARCHIVE_PATH}/${plugin_name}.component
-            DEPENDS ${VST3_OUTPUT_DIR}/$<CONFIG>/${target}_au.component
-            DEPENDS ${ARCHIVE_PATH}
-            WORKING_DIRECTORY archive
-            APPEND
-            )
-      endif ()
-    else ()
-      add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-          COMMAND ${CMAKE_COMMAND} -E copy_directory ${VST3_OUTPUT_DIR}/${target}.${VST3_EXTENSION} ${ARCHIVE_PATH}/${plugin_name}.vst3
-          DEPENDS ${VST3_OUTPUT_DIR}/${target}.${VST3_EXTENSION}
-          DEPENDS ${ARCHIVE_PATH}
-          WORKING_DIRECTORY archive
-          )
-    endif ()
-  elseif (WIN)
-    add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${ARCHIVE_PATH}/${plugin_name}.vst3
-        DEPENDS ${target}
-        DEPENDS ${ARCHIVE_PATH}
-        WORKING_DIRECTORY archive
-        )
-  endif ()
-
-  add_custom_command(OUTPUT ${ARCHIVE_PATH}.zip
-      COMMAND ${CMAKE_COMMAND} -E tar cvf ${ARCHIVE_NAME}$<$<CONFIG:Debug>:_Debug>.zip --format=zip ${ARCHIVE_PATH}
-      COMMAND ${CMAKE_COMMAND} -E remove_directory ${ARCHIVE_PATH}
-      COMMAND ${CMAKE_COMMAND} -E echo "Archive available under ${CMAKE_BINARY_DIR}/archive/${ARCHIVE_NAME}$<$<CONFIG:Debug>:_Debug>.zip"
-      APPEND
-      )
-
-  add_custom_target(archive
-      DEPENDS ${ARCHIVE_PATH}.zip
-      )
 endfunction()

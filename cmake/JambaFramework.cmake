@@ -43,7 +43,7 @@ function(internal_jamba_create_install_target component src dstDir extension)
   add_custom_target("${ARG_TARGETS_PREFIX}install_${component}"
       COMMAND ${CMAKE_COMMAND} --install "${CMAKE_BINARY_DIR}" --component "${component}" --config $<CONFIG>
       DEPENDS "${ARG_TARGETS_PREFIX}build_${component}"
-      COMMAND ${CMAKE_COMMAND} -E echo "Installed ${component} plugin under ${dstDir}/${PLUGIN_FILENAME}"
+      COMMAND ${CMAKE_COMMAND} -E echo "Installed ${component} plugin under ${CMAKE_INSTALL_PREFIX}/${dstDir}/${PLUGIN_FILENAME}"
       )
 
   #------------------------------------------------------------------------
@@ -51,10 +51,19 @@ function(internal_jamba_create_install_target component src dstDir extension)
   # Deletes the folder / file installed with install_<component>
   #------------------------------------------------------------------------
   add_custom_target("${ARG_TARGETS_PREFIX}uninstall_${component}"
-      COMMAND ${CMAKE_COMMAND} -E rm -r -f "${dstDir}/${PLUGIN_FILENAME}"
-      COMMAND ${CMAKE_COMMAND} -E echo "Removed ${component} plugin [${PLUGIN_FILENAME}] from ${dstDir}"
+      COMMAND ${CMAKE_COMMAND} -E rm -r -f "${CMAKE_INSTALL_PREFIX}/${dstDir}/${PLUGIN_FILENAME}"
+      COMMAND ${CMAKE_COMMAND} -E echo "Removed ${component} plugin [${PLUGIN_FILENAME}] from ${CMAKE_INSTALL_PREFIX}/${dstDir}"
       )
 endfunction()
+
+#------------------------------------------------------------------------
+# set_default_value - convenient macro
+#------------------------------------------------------------------------
+macro(set_default_value name default_value)
+  if(NOT ${name})
+    set(${name} ${default_value})
+  endif()
+endmacro()
 
 #------------------------------------------------------------------------
 # jamba_add_vst3_plugin
@@ -64,7 +73,7 @@ function(jamba_add_vst3_plugin)
   # Argument parsing / default values
   #------------------------------------------------------------------------
   set(options "")
-  set(oneValueArgs TARGET TEST_TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX MAC_INFO_PLIST PYTHON3_EXECUTABLE)
+  set(oneValueArgs TARGET TEST_TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX MAC_INFO_PLIST PYTHON3_EXECUTABLE INSTALL_PREFIX ARCHIVE_DOC_DIR)
   set(multiValueArgs VST_SOURCES INCLUDE_DIRECTORIES COMPILE_DEFINITIONS COMPILE_OPTIONS LINK_LIBRARIES
                      RESOURCES
                      TEST_CASE_SOURCES TEST_SOURCES TEST_INCLUDE_DIRECTORIES TEST_COMPILE_DEFINITIONS TEST_COMPILE_OPTIONS TEST_LINK_LIBRARIES)
@@ -76,42 +85,57 @@ function(jamba_add_vst3_plugin)
       ${ARGN}
   )
 
-  macro(set_default_value name default_value)
-    if(NOT ${name})
-      set(${name} ${default_value})
-    endif()
-  endmacro()
-
   # Make sure ARG_TARGET has a value (default to project name if not provided)
   set_default_value(ARG_TARGET "${CMAKE_PROJECT_NAME}")
   set_default_value(ARG_TEST_TARGET "${ARG_TARGET}_test")
   set_default_value(ARG_RELEASE_FILENAME "${ARG_TARGET}")
   set_default_value(ARG_MAC_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist")
+  set_default_value(ARG_ARCHIVE_DOC_DIR "${CMAKE_CURRENT_LIST_DIR}/archive")
+  if(MAC)
+    set_default_value(ARG_INSTALL_PREFIX "$ENV{HOME}/Library/Audio/Plug-Ins")
+  elseif(WIN)
+    set_default_value(ARG_INSTALL_PREFIX "C:/Program\ Files")
+  endif()
+
+  # where the plugins are installed
+  set(CMAKE_INSTALL_PREFIX "${ARG_INSTALL_PREFIX}" CACHE PATH "Forcing CMAKE_INSTALL_PREFIX" FORCE)
 
   # Adds the VST3 plugin
   include(JambaAddVST3Plugin)
+  jamba_add_vst3_plugin()
 
   # Add all resources (uidesc + graphics)
   include(JambaAddAllResources)
+  jamba_add_all_resources()
 
   # Adds VST2 (if enabled)
   if (JAMBA_ENABLE_VST2)
     include(JambaAddVST2Plugin)
+    jamba_add_vst2_plugin()
   endif()
 
   # Adds Audio Unit (if enabled)
   if (MAC AND JAMBA_ENABLE_AUDIO_UNIT)
     include(JambaAddAudioUnitPlugin)
+    jamba_add_au_plugin()
   endif()
 
   # Adds jamba.sh / jamba.bat / jamba.py
   if(JAMBA_ENABLE_DEV_SCRIPT)
     include(JambaDevScript)
+    jamba_add_dev_script()
   endif()
 
   # Optionally setup testing
   if(JAMBA_ENABLE_TESTING)
     include(JambaAddTest)
+    jamba_add_test()
+  endif()
+
+  # Optionally create archive
+  if(JAMBA_ENABLE_CREATE_ARCHIVE)
+    include(JambaCreateArchive)
+    jamba_create_archive()
   endif()
 
 endfunction()

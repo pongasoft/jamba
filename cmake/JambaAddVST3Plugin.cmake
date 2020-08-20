@@ -1,6 +1,11 @@
 #------------------------------------------------------------------------
 # This module adds the VST3 plugin
+# Must define jamba_add_vst3_plugin
 #------------------------------------------------------------------------
+function(jamba_add_vst3_plugin)
+  internal_jamba_add_vst3_plugin()
+  internal_jamba_add_vst3_targets()
+endfunction()
 
 #------------------------------------------------------------------------
 # internal_jamba_add_vst3_plugin
@@ -43,15 +48,16 @@ function(internal_jamba_add_vst3_targets)
     set(BUILD_VST3_TARGET "${ARG_TARGET}")
   endif ()
   add_custom_target("${ARG_TARGETS_PREFIX}build_vst3" DEPENDS "${BUILD_VST3_TARGET}")
+  add_custom_target("${ARG_TARGETS_PREFIX}build_all" DEPENDS "${ARG_TARGETS_PREFIX}build_vst3")
 
   # add install targets so that they can be invoked by the scripts (and from the IDE)
   if (MAC)
     set(VST3_PLUGIN_SRC $<TARGET_BUNDLE_DIR:${ARG_TARGET}>)
-    set(VST3_PLUGIN_DST_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
+    set(VST3_PLUGIN_DST_DIR "VST3")
     set(VST3_PLUGIN_EXTENSION "vst3")
   elseif (WIN)
     set(VST3_PLUGIN_SRC $<TARGET_FILE:${ARG_TARGET}>)
-    set(VST3_PLUGIN_DST_DIR "C:/Program\ Files/Common\ Files/VST3")
+    set(VST3_PLUGIN_DST_DIR "Common\ Files/VST3")
     set(VST3_PLUGIN_EXTENSION "vst3")
   endif ()
 
@@ -88,7 +94,3 @@ function(internal_jamba_add_vst3_targets)
       COMMAND ${CMAKE_COMMAND} --build . --config $<CONFIG> --target clean
       )
 endfunction()
-
-# invoke the functions
-internal_jamba_add_vst3_plugin()
-internal_jamba_add_vst3_targets()

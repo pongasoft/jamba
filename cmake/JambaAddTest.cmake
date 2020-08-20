@@ -1,14 +1,15 @@
 #------------------------------------------------------------------------
-# Testing
+# This module add testing (via Google Test)
+# Must define jamba_add_test()
 #------------------------------------------------------------------------
 # Download and unpack googletest at configure time
 include(JambaFetchGoogleTest)
 include(GoogleTest)
 
 #------------------------------------------------------------------------
-# internal_jamba_add_test - Testing
+# jamba_add_test - Testing
 #------------------------------------------------------------------------
-function(internal_jamba_add_test)
+function(jamba_add_test)
   message(STATUS "Adding target ${ARG_TEST_TARGET} for test cases: ${ARG_TEST_CASE_SOURCES}")
 
   if (WIN)
@@ -49,5 +50,3 @@ function(internal_jamba_add_test)
   endif ()
 endfunction()
 
-# invoke function
-internal_jamba_add_test()

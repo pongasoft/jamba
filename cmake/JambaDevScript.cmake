@@ -1,12 +1,9 @@
 #------------------------------------------------------------------------
 # This module adds the jamba.py (and jamba.sh / jamba.bat shortcuts) convenient
 # command line commands
+# Must define jamba_add_dev_script
 #------------------------------------------------------------------------
-
-#------------------------------------------------------------------------
-# internal_jamba_add_dev_script
-#------------------------------------------------------------------------
-function(internal_jamba_add_dev_script)
+function(jamba_add_dev_script)
   # Determine python executable
   if (ARG_PYTHON3_EXECUTABLE)
     set(Python3_EXECUTABLE ${ARG_PYTHON3_EXECUTABLE})
@@ -43,6 +40,3 @@ function(internal_jamba_add_dev_script)
 
   message(STATUS "Jamba main script available at ${CMAKE_BINARY_DIR}/${JAMBA_SCRIPT_FILE}. Run ${JAMBA_SCRIPT_FILE} -h for help.")
 endfunction()
-
-# invoke the functions
-internal_jamba_add_dev_script()
