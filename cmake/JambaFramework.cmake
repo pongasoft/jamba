@@ -60,7 +60,7 @@ endfunction()
 # set_default_value - convenient macro
 #------------------------------------------------------------------------
 macro(set_default_value name default_value)
-  if(NOT ${name})
+  if(NOT DEFINED ${name})
     set(${name} ${default_value})
   endif()
 endmacro()
