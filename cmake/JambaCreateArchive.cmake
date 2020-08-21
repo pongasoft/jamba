@@ -15,6 +15,18 @@ function(jamba_create_archive)
   set_default_value(CPACK_PACKAGE_VERSION_PATCH       "${PLUGIN_PATCH_VERSION}")
   set_default_value(CPACK_SYSTEM_NAME                 "${ARCHITECTURE}")
 
+  # Generating a file which CPack will read to handle naming the archive differently based on
+  # build config (also note that CPACK_PACKAGE_VERSION is not available until then)
+  file(WRITE "${CMAKE_BINARY_DIR}/CPackProjectConfig.cmake" [[
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_SYSTEM_NAME}-${CPACK_PACKAGE_VERSION}")
+
+if("${CPACK_BUILD_CONFIG}" STREQUAL "Debug")
+  set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}_Debug")
+endif()
+]])
+
+  set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackProjectConfig.cmake")
+
   set(CPACK_GENERATOR ZIP)
   set(CPACK_VERBATIM_VARIABLES TRUE)
   set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
