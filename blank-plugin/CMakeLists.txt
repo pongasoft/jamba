@@ -14,85 +14,73 @@ set(PLUGIN_MINOR_VERSION 0)
 set(PLUGIN_PATCH_VERSION 0)
 set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PATCH_VERSION}")
 
-project([-name-])
+project("[-name-]")
 
 # To use local jamba install, uncomment the following line (no download)
-[-remote_jamba-]unset(JAMBA_ROOT_DIR)
+[-remote_jamba-]set(JAMBA_ROOT_DIR "")
 [-local_jamba-]set(JAMBA_ROOT_DIR "[-jamba_root_dir-]")
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly
-unset(GOOGLETEST_ROOT_DIR)
+set(GOOGLETEST_ROOT_DIR "")
 #set(GOOGLETEST_ROOT_DIR ../../google/googletest)
-
-# check for existence of default VST3.6.9 install and install it if not found
-if(JAMBA_DOWNLOAD_VSTSDK)
-  include(vst369.cmake)
-endif()
 
 # download jamba framework
 include(jamba.cmake)
 
-set(CPP_SOURCES src/cpp)
+set(CPP_SOURCES "src/cpp")
 
-configure_file(${CPP_SOURCES}/version.h.in ${CMAKE_BINARY_DIR}/generated/version.h)
-include_directories(${CMAKE_BINARY_DIR}/generated/)
+# Generating the version.h header file which contains the plugin version (to make sure it is in sync with the version
+# defined here)
+set(VERSION_DIR "${CMAKE_BINARY_DIR}/generated")
+configure_file(${CPP_SOURCES}/version.h.in "${VERSION_DIR}/version.h")
 
+# Source files for VST2
 if (JAMBA_ENABLE_VST2)
   set(vst2_sources
-      ${CPP_SOURCES}/[-name-]_VST2.cpp
+      "${CPP_SOURCES}/[-name-]_VST2.cpp"
       )
 endif ()
 
+# Source files for VST3
 set(vst_sources
-    ${CPP_SOURCES}/[-name-]_VST3.cpp
+    "${CPP_SOURCES}/[-name-]_VST3.cpp"
 
-    ${CPP_SOURCES}/Plugin.h
-    ${CPP_SOURCES}/[-name-]CIDs.h
+    "${CPP_SOURCES}/Plugin.h"
+    "${CPP_SOURCES}/[-name-]CIDs.h"
 
-    ${CPP_SOURCES}/RT/[-name-]Processor.h
-    ${CPP_SOURCES}/RT/[-name-]Processor.cpp
+    "${CPP_SOURCES}/RT/[-name-]Processor.h"
+    "${CPP_SOURCES}/RT/[-name-]Processor.cpp"
 
-    ${CPP_SOURCES}/GUI/[-name-]Controller.h
-    ${CPP_SOURCES}/GUI/[-name-]Controller.cpp
+    "${CPP_SOURCES}/GUI/[-name-]Controller.h"
+    "${CPP_SOURCES}/GUI/[-name-]Controller.cpp"
     )
 
-# VST2 is only defined for macOS and Windows
-if (MAC OR WIN)
-  set(vst_sources ${vst_sources} ${vst2_sources})
-endif ()
+# Location of resources
+set(RES_DIR "${CMAKE_CURRENT_LIST_DIR}/resource")
 
-set(target [-target-])
-jamba_add_vst3plugin(${target} "${vst_sources}")
-target_include_directories(${target} PUBLIC ${VSTGUI_ROOT}/vstgui4)
-target_link_libraries(${target} PRIVATE base sdk vstgui_support jamba)
+# List of resources (images)
+set(vst_resources
+#    "${RES_DIR}/background.png"
+)
 
-###################################################
-# Resources - add your resources here...
-###################################################
-jamba_add_vst3_resource(${target} DATA "[-name-].uidesc")
-# jamba_add_vst3_resource(${target} PNG "background.png")
+# Location of the test cases
+set(TEST_DIR "${CMAKE_CURRENT_LIST_DIR}/test/cpp")
 
-# this must be called after you are done calling jamba_add_vst3_resource for all resources
-jamba_gen_vst3_resources(${target} "[-name-]")
+# List of test cases
+set(test_case_sources
+    "${TEST_DIR}/test-[-name-].cpp"
+)
 
-###################################################
-# Create archive (.tgz)
-###################################################
-jamba_create_archive(${target} "[-filename-]")
-
-####################################################
-## Testing
-####################################################
-file(GLOB_RECURSE TEST_SRC_FILES RELATIVE ${PROJECT_SOURCE_DIR} test/cpp/*cpp)
-set(test_sources ${test_sources}
-    ${LOGURU_IMPL}
-    #${CPP_SOURCES}/Model.cpp
-    )
-set(test_libs base sdk vstgui_support jamba)
-
-jamba_add_test(${target}_test "${TEST_SRC_FILES}" "${test_sources}" "${test_libs}")
-
-###################################################
-# Dev help
-###################################################
-jamba_dev_scripts(${target})
+# Finally invoke jamba_add_vst3_plugin
+jamba_add_vst3_plugin(
+    TARGET              "[-target-]" # name of CMake target for the plugin
+    RELEASE_FILENAME    "[-filename-]" # filename for the plugin (JambaSampleGain.vst3)
+    TARGETS_PREFIX      "jmb_" # prefix used by all targets directly linked to this plugin
+    VST_SOURCES         "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
+    INCLUDE_DIRECTORIES "${VERSION_DIR}" # we add the version folder to the list of includes
+    UIDESC              "${RES_DIR}/[-name-].uidesc" # the main xml file for the GUI
+    RESOURCES           "${vst_resources}" # the resources for the GUI (png files)
+    TEST_CASE_SOURCES   "${test_case_sources}" # the source files containing the test cases
+#    TEST_SOURCES        "${CPP_SOURCES}/xxx.cpp" # individual files required for compiling tests but we could add ${vst_sources} if we needed more
+    TEST_LINK_LIBRARIES "jamba" # the library needed for linking the tests
+)
