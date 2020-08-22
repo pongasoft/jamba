@@ -1,3 +1,19 @@
+# Copyright (c) 2020 pongasoft
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# @author Yan Pujante
+
 #------------------------------------------------------------------------
 # This module adds all the resources (images and .uidesc and .rc to the build)
 # Must define jamba_add_all_resources
@@ -11,9 +27,9 @@ function(jamba_add_all_resources)
   internal_jamba_add_resource("${ARG_UIDESC}" "DATA" "" JAMBA_VST3_RESOURCES_RC)
   internal_jamba_add_resources("${JAMBA_VST3_RESOURCES_RC}" JAMBA_VST3_RESOURCES_RC)
 
-  if (MAC)
+  if (APPLE)
     smtg_set_bundle(${ARG_TARGET} INFOPLIST "${ARG_MAC_INFO_PLIST}" PREPROCESS)
-  elseif (WIN)
+  elseif (WIN32)
     list(JOIN JAMBA_VST3_RESOURCES_RC "\n" JAMBA_VST3_RESOURCES_RC)
     file(WRITE "${CMAKE_BINARY_DIR}/generated/vst3_resources.rc" ${JAMBA_VST3_RESOURCES_RC})
     target_sources(${ARG_TARGET} PRIVATE "${UIDESC_DIR}/${UIDESC_FILENAME}.rc")

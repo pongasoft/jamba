@@ -1,3 +1,19 @@
+# Copyright (c) 2020 pongasoft
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# @author Yan Pujante
+
 #------------------------------------------------------------------------
 # This module adds the VST3 plugin
 # Must define jamba_add_vst3_plugin
@@ -51,11 +67,11 @@ function(internal_jamba_add_vst3_targets)
   add_custom_target("${ARG_TARGETS_PREFIX}build_all" DEPENDS "${ARG_TARGETS_PREFIX}build_vst3")
 
   # add install targets so that they can be invoked by the scripts (and from the IDE)
-  if (MAC)
+  if (APPLE)
     set(VST3_PLUGIN_SRC $<TARGET_BUNDLE_DIR:${ARG_TARGET}>)
     set(VST3_PLUGIN_DST_DIR "VST3")
     set(VST3_PLUGIN_EXTENSION "vst3")
-  elseif (WIN)
+  elseif (WIN32)
     set(VST3_PLUGIN_SRC $<TARGET_FILE:${ARG_TARGET}>)
     set(VST3_PLUGIN_DST_DIR "Common\ Files/VST3")
     set(VST3_PLUGIN_EXTENSION "vst3")

@@ -1,3 +1,19 @@
+# Copyright (c) 2020 pongasoft
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# @author Yan Pujante
+
 cmake_minimum_required (VERSION 3.17)
 
 #------------------------------------------------------------------------
@@ -50,7 +66,7 @@ get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG
 # Compiler options (general)
 #------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD ${JAMBA_CMAKE_CXX_STANDARD})
-if(WIN)
+if(WIN32)
   message(STATUS "Adding compiler options")
   add_compile_options("/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING" "/EHsc" "/D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING" "/D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING")
 endif ()
@@ -58,7 +74,7 @@ endif ()
 #------------------------------------------------------------------------
 # Audio Unit (macOS only) => determine Audio Unit Version
 #------------------------------------------------------------------------
-if(MAC AND JAMBA_ENABLE_AUDIO_UNIT)
+if(APPLE AND JAMBA_ENABLE_AUDIO_UNIT)
   if(NOT SMTG_COREAUDIO_SDK_PATH)
     set(SMTG_COREAUDIO_SDK_PATH "${JAMBA_ROOT}/audio-unit/CoreAudioSDK/CoreAudio")
   endif()

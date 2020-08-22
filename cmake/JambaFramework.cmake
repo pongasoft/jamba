@@ -1,3 +1,19 @@
+# Copyright (c) 2020 pongasoft
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# @author Yan Pujante
+
 #------------------------------------------------------------------------
 # This module defines the Jamba Framework which contains the main
 # jamba_add_vst3_plugin function to be called by the plugin CMakeFile.txt
@@ -7,7 +23,7 @@
 # internal_jamba_create_install_target
 #------------------------------------------------------------------------
 function(internal_jamba_create_install_target component src dstDir extension)
-  if(MAC)
+  if(APPLE)
     # Cannot use generator expression in install => must define multiple with different CONFIGURATIONS
     install(DIRECTORY "${src}/"
         COMPONENT "${component}"
@@ -19,7 +35,7 @@ function(internal_jamba_create_install_target component src dstDir extension)
         CONFIGURATIONS Release
         DESTINATION "${dstDir}/${ARG_RELEASE_FILENAME}.${extension}"
         )
-  elseif(WIN)
+  elseif(WIN32)
     install(FILES "${src}"
         COMPONENT "${component}"
         DESTINATION "${dstDir}"
@@ -91,9 +107,9 @@ function(jamba_add_vst3_plugin)
   set_default_value(ARG_RELEASE_FILENAME "${ARG_TARGET}")
   set_default_value(ARG_MAC_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist")
   set_default_value(ARG_ARCHIVE_DOC_DIR "${CMAKE_CURRENT_LIST_DIR}/archive")
-  if(MAC)
+  if(APPLE)
     set_default_value(ARG_INSTALL_PREFIX "$ENV{HOME}/Library/Audio/Plug-Ins")
-  elseif(WIN)
+  elseif(WIN32)
     set_default_value(ARG_INSTALL_PREFIX "C:/Program\ Files")
   endif()
 
@@ -115,7 +131,7 @@ function(jamba_add_vst3_plugin)
   endif()
 
   # Adds Audio Unit (if enabled)
-  if (MAC AND JAMBA_ENABLE_AUDIO_UNIT)
+  if (APPLE AND JAMBA_ENABLE_AUDIO_UNIT)
     include(JambaAddAudioUnitPlugin)
     jamba_add_au_plugin()
   endif()

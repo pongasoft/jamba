@@ -1,3 +1,19 @@
+# Copyright (c) 2020 pongasoft
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# @author Yan Pujante
+
 #------------------------------------------------------------------------
 # This module add testing (via Google Test)
 # Must define jamba_add_test()
@@ -12,7 +28,7 @@ include(GoogleTest)
 function(jamba_add_test)
   message(STATUS "Adding target ${ARG_TEST_TARGET} for test cases: ${ARG_TEST_CASE_SOURCES}")
 
-  if (WIN)
+  if (WIN32)
     set(WIN_SOURCES "${JAMBA_ROOT}/windows/testmain.cpp")
   endif ()
 
