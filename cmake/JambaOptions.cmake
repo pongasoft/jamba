@@ -120,3 +120,12 @@ set(googletest_GIT_TAG "703bd9caab50b139428cea1aaff9974ebee5742e" CACHE STRING "
 # with a convenient command line tool.
 #------------------------------------------------------------------------
 option(JAMBA_ENABLE_DEV_SCRIPT "Enable Dev Script (jamba.py)" ON)
+
+#------------------------------------------------------------------------
+# Path to the dev script (allow you to rename it if you don't like the name)
+#------------------------------------------------------------------------
+if (APPLE)
+  set(JAMBA_SCRIPT_COMMAND "${CMAKE_BINARY_DIR}/jamba.sh" CACHE PATH "Path to jamba dev script")
+elseif (WIN32)
+  set(JAMBA_SCRIPT_COMMAND "${CMAKE_BINARY_DIR}/jamba.bat" CACHE PATH "Path to jamba dev script")
+endif ()

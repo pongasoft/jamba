@@ -33,12 +33,14 @@ function(jamba_add_dev_script)
   endif ()
 
   if (APPLE)
-    set(JAMBA_SCRIPT_FILE "jamba.sh")
+    set(JAMBA_SCRIPT_FILE "jamba.sh.in")
   elseif (WIN32)
-    set(JAMBA_SCRIPT_FILE "jamba.bat")
+    set(JAMBA_SCRIPT_FILE "jamba.bat.in")
   endif ()
 
-  configure_file("${JAMBA_ROOT}/scripts/${JAMBA_SCRIPT_FILE}.in" "${CMAKE_BINARY_DIR}/${JAMBA_SCRIPT_FILE}" @ONLY)
+  set(JAMBA_SCRIPT_EXE "${CMAKE_BINARY_DIR}/jamba.py")
+
+  configure_file("${JAMBA_ROOT}/scripts/${JAMBA_SCRIPT_FILE}" "${JAMBA_SCRIPT_COMMAND}" @ONLY)
 
   macro(cmake_option_to_python_bool cmake_opt python_opt)
     if ("${cmake_opt}")
@@ -52,7 +54,7 @@ function(jamba_add_dev_script)
   cmake_option_to_python_bool(${JAMBA_ENABLE_VST2} JAMBA_ENABLE_VST2)
   cmake_option_to_python_bool(${JAMBA_ENABLE_AUDIO_UNIT} JAMBA_ENABLE_AUDIO_UNIT)
 
-  configure_file(${JAMBA_ROOT}/scripts/jamba.py.in ${CMAKE_BINARY_DIR}/jamba.py @ONLY)
+  configure_file(${JAMBA_ROOT}/scripts/jamba.py.in "${JAMBA_SCRIPT_EXE}" @ONLY)
 
-  message(STATUS "Jamba main script available at ${CMAKE_BINARY_DIR}/${JAMBA_SCRIPT_FILE}. Run ${JAMBA_SCRIPT_FILE} -h for help.")
+  message(STATUS "Jamba main script available at ${JAMBA_SCRIPT_COMMAND}. Use -h option for help.")
 endfunction()

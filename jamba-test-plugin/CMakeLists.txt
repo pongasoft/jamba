@@ -43,24 +43,19 @@ if (JAMBA_ENABLE_VST2)
 endif ()
 
 set(vst_sources
-    ${CPP_SOURCES}/JambaTestPlugin_VST3.cpp
+    "${CPP_SOURCES}/JambaTestPlugin_VST3.cpp"
 
-    ${CPP_SOURCES}/JambaTestPluginCIDs.h
-    ${CPP_SOURCES}/Model.h
-    ${CPP_SOURCES}/Plugin.h
-    ${CPP_SOURCES}/Plugin.cpp
+    "${CPP_SOURCES}/JambaTestPluginCIDs.h"
+    "${CPP_SOURCES}/Model.h"
+    "${CPP_SOURCES}/Plugin.h"
+    "${CPP_SOURCES}/Plugin.cpp"
 
-    ${CPP_SOURCES}/RT/JambaTestPluginProcessor.h
-    ${CPP_SOURCES}/RT/JambaTestPluginProcessor.cpp
+    "${CPP_SOURCES}/RT/JambaTestPluginProcessor.h"
+    "${CPP_SOURCES}/RT/JambaTestPluginProcessor.cpp"
 
-    ${CPP_SOURCES}/GUI/JambaTestPluginController.h
-    ${CPP_SOURCES}/GUI/JambaTestPluginController.cpp
+    "${CPP_SOURCES}/GUI/JambaTestPluginController.h"
+    "${CPP_SOURCES}/GUI/JambaTestPluginController.cpp"
     )
-
-# VST2 is only defined for macOS and Windows
-if (MAC OR WIN)
-  set(vst_sources ${vst_sources} ${vst2_sources})
-endif ()
 
 # Defining the list of resources
 set(RES_DIR ${CMAKE_CURRENT_LIST_DIR}/resource)
@@ -97,15 +92,14 @@ set(JAMBA_TEST_CASES_SOURCES
     ${JAMBA_TEST_CASES_DIR}/pongasoft/VST/Utils/test-ReadOnlyMemoryStream.cpp
     )
 
-jamba_add_vst3_plugin(
+jamba_add_vst_plugin(
     TARGET              "pongasoft_JambaTestPlugin" # name of CMake target for the plugin
     RELEASE_FILENAME    "JambaTestPlugin" # filename for the plugin (xxx.vst3)
     TARGETS_PREFIX      "jmb_" # prefix used by all targets directly linked to this plugin
-    VST_SOURCES         "${vst_sources}" # the source files that compose the plugin
+    VST_SOURCES         "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
     INCLUDE_DIRECTORIES "${VERSION_DIR}" # we add the version folder to the list of includes
     UIDESC              "${RES_DIR}/JambaTestPlugin.uidesc" # the main xml file for the GUI
     RESOURCES           "${vst_resources}" # the resources for the GUI (png files)
     TEST_CASE_SOURCES   "${JAMBA_TEST_CASES_SOURCES}" # the source files containing the test cases
     TEST_LINK_LIBRARIES "jamba" # the library needed for linking the tests
 )
-

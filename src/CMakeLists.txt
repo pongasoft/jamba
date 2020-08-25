@@ -188,7 +188,7 @@ if (JAMBA_DEBUG_LOGGING)
 endif ()
 
 add_library(jamba STATIC ${JAMBA_sources_cpp} ${JAMBA_vst2_sources} ${JAMBA_sources_h})
-target_include_directories(jamba PUBLIC ${JAMBA_CPP_SOURCES} ${VSTGUI_ROOT}/vstgui4 ${JAMBA_GENERATED_DIR})
+target_include_directories(jamba PUBLIC ${JAMBA_CPP_SOURCES} ${JAMBA_GENERATED_DIR})
 if (JAMBA_ENABLE_VST2)
   target_include_directories(jamba PUBLIC ${VST2_SDK_ROOT})
   if (WIN32)

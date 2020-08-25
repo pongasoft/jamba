@@ -22,7 +22,7 @@ import sys
 import platform
 
 parser = argparse.ArgumentParser(allow_abbrev=False,
-                                 usage='configure.py [-h] [-n] [-f] [-r] [--vst3 VST3_SDK_ROOT] [--vst2 VST2_SDK_ROOT] [-G GENERATOR] [-B BUILD_DIR] [-- <cmake_options>]',
+                                 usage='configure.py [--h] [--n] [--f] [--r] [---vst3 VST3_SDK_ROOT] [---vst2 VST2_SDK_ROOT] [--G GENERATOR] [--B BUILD_DIR] [--- <cmake_options>]',
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog='''
 Notes

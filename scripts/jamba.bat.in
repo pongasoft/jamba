@@ -6,4 +6,4 @@ cd %BASEDIR%
 
 set PYTHON_EXE="@Python3_EXECUTABLE@"
 
-%PYTHON_EXE% jamba.py %*
+%PYTHON_EXE% "@JAMBA_SCRIPT_EXE@" %*

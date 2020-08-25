@@ -71,8 +71,8 @@ set(test_case_sources
     "${TEST_DIR}/test-[-name-].cpp"
 )
 
-# Finally invoke jamba_add_vst3_plugin
-jamba_add_vst3_plugin(
+# Finally invoke jamba_add_vst_plugin
+jamba_add_vst_plugin(
     TARGET              "[-target-]" # name of CMake target for the plugin
     RELEASE_FILENAME    "[-filename-]" # filename for the plugin (JambaSampleGain.vst3)
     TARGETS_PREFIX      "jmb_" # prefix used by all targets directly linked to this plugin
@@ -82,5 +82,6 @@ jamba_add_vst3_plugin(
     RESOURCES           "${vst_resources}" # the resources for the GUI (png files)
     TEST_CASE_SOURCES   "${test_case_sources}" # the source files containing the test cases
 #    TEST_SOURCES        "${CPP_SOURCES}/xxx.cpp" # individual files required for compiling tests but we could add ${vst_sources} if we needed more
-    TEST_LINK_LIBRARIES "jamba" # the library needed for linking the tests
+    TEST_LINK_LIBRARIES "jamba" # the libraries needed for linking the tests (if your tests don't depend on Jamba you can comment this out)
+
 )

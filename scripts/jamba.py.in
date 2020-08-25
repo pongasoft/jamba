@@ -37,10 +37,8 @@ else:
     jamba_enable_audio_unit = False
 
 if generator_is_multi_config:
-    script_options = 'dr'
     doc_build_config = ''
 else:
-    script_options = ''
     doc_build_config = f'[{cmake_single_config_build_type}]'
 
 if jamba_enable_vst2:
@@ -78,16 +76,16 @@ else:
     doc_vst3_commands = ''
 
 parser = argparse.ArgumentParser(allow_abbrev=False,
-                                 usage=f'{script_name} [-hnvb{script_options}] <command> [<command> ...] [-- [native-options]]',
+                                 usage=f'{script_name} [-hnvbdr] <command> [<command> ...] [-- [native-options]]',
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog=f'''
 Commands {doc_build_config}
   ---- Main commands ----
-  build     : build the plugin
   clean     : clean all builds
+  build     : build the plugin
   test      : run the tests for the plugin
-  edit      : run the editor (works only in Debug config)
-  validate  : delete the installed plugins (vst2/vst3/audio unit)
+  validate  : run the validator for the vst3 plugin
+  edit      : run the editor (full editing available in Debug config only)
   install   : build and install all the plugins (vst2/vst3/audio unit)
   uninstall : delete the installed plugins (vst2/vst3/audio unit)
   archive   : create an archive containing the plugins
@@ -104,10 +102,8 @@ parser.add_argument("-n", "--dry-run", help="Dry run (prints what it is going to
                     dest="dry_run")
 parser.add_argument("-v", "--verbose", help="Verbose build", action="store_true")
 parser.add_argument("-b", "--banner", help="Display a banner before every command", action="store_true")
-
-if generator_is_multi_config:
-    parser.add_argument("-d", "--debug", help="use Debug build config", action="store_true")
-    parser.add_argument("-r", "--release", help="use Release build config", action="store_true")
+parser.add_argument("-d", "--debug", help="use Debug build config", action="store_true")
+parser.add_argument("-r", "--release", help="use Release build config", action="store_true")
 
 parser.add_argument('command', help='See "Commands" section', nargs=argparse.REMAINDER)
 
@@ -153,14 +149,17 @@ available_commands = {
 
 cmake_verbose = [] if not args.verbose else ['--verbose']
 
+if args.release and args.debug:
+    print('Conflicting options (-r and -d) used')
+    exit(1)
+
 if generator_is_multi_config:
-    if args.release and args.debug:
-        print('Conflicting options (-r and -d) used')
-        parser.print_help()
-        exit(1)
     config = 'Release' if args.release else 'Debug'
 else:
-    config = cmake_single_config_build_type
+    config = 'Release' if args.release else 'Debug' if args.debug else cmake_single_config_build_type
+    if cmake_single_config_build_type != config:
+      print(f'Single Config Build is [{cmake_single_config_build_type}]... cannot build in [{config}] mode')
+      exit(1)
 
 cmake_config = ['--config', config]
 

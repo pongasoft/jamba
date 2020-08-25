@@ -107,33 +107,33 @@ endif ()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src jamba)
 
 #------------------------------------------------------------------------
-# Define main function jamba_add_vst3_plugin
+# Define main function jamba_add_vst_plugin
 #------------------------------------------------------------------------
-include(JambaFramework)
+include(JambaAddVSTPlugin)
 
 #------------------------------------------------------------------------
-# Behavior moved to jamba_add_vst3_plugin => printing deprecation messages
+# Behavior moved to jamba_add_vst_plugin => printing deprecation messages
 #------------------------------------------------------------------------
 function(jamba_add_vst3plugin)
-  message(DEPRECATION "Since 5.0.0 - jamba_add_vst3plugin is no longer supported. Use jamba_add_vst3_plugin instead")
+  message(DEPRECATION "Since 5.0.0 - jamba_add_vst3plugin is no longer supported. Use jamba_add_vst_plugin instead")
 endfunction()
 
 function(jamba_create_archive)
-  message(DEPRECATION "Since 5.0.0 - jamba_create_archive is no longer supported. Handled by jamba_add_vst3_plugin with RELEASE_FILENAME \"${plugin_name}\" option.")
+  message(DEPRECATION "Since 5.0.0 - jamba_create_archive is no longer supported. Handled by jamba_add_vst_plugin with RELEASE_FILENAME \"${plugin_name}\" option.")
 endfunction()
 
 function(jamba_add_vst3_resource)
-  message(DEPRECATION "Since 5.0.0 - jamba_add_vst3_resource is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
+  message(DEPRECATION "Since 5.0.0 - jamba_add_vst3_resource is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst_plugin instead.")
 endfunction()
 
 function(jamba_gen_vst3_resources)
-  message(DEPRECATION "Since 5.0.0 - jamba_gen_vst3_resources is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst3_plugin instead.")
+  message(DEPRECATION "Since 5.0.0 - jamba_gen_vst3_resources is no longer supported. Use UIDESC and RESOURCES arguments when invoking jamba_add_vst_plugin instead.")
 endfunction()
 
 function(jamba_dev_scripts)
-  message(DEPRECATION "Since 5.0.0 - jamba_dev_scripts is no longer supported. Handled by jamba_add_vst3_plugin.")
+  message(DEPRECATION "Since 5.0.0 - jamba_dev_scripts is no longer supported. Handled by jamba_add_vst_plugin.")
 endfunction()
 
 function(jamba_add_test)
-  message(DEPRECATION "Since 5.0.0 - jamba_add_test is no longer supported. Handled by jamba_add_vst3_plugin.")
+  message(DEPRECATION "Since 5.0.0 - jamba_add_test is no longer supported. Handled by jamba_add_vst_plugin.")
 endfunction()

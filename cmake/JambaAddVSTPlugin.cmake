@@ -16,7 +16,7 @@
 
 #------------------------------------------------------------------------
 # This module defines the Jamba Framework which contains the main
-# jamba_add_vst3_plugin function to be called by the plugin CMakeFile.txt
+# jamba_add_vst_plugin function to be called by the plugin CMakeFile.txt
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
@@ -82,14 +82,14 @@ macro(set_default_value name default_value)
 endmacro()
 
 #------------------------------------------------------------------------
-# jamba_add_vst3_plugin
+# jamba_add_vst_plugin
 #------------------------------------------------------------------------
-function(jamba_add_vst3_plugin)
+function(jamba_add_vst_plugin)
   #------------------------------------------------------------------------
   # Argument parsing / default values
   #------------------------------------------------------------------------
   set(options "")
-  set(oneValueArgs TARGET TEST_TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX MAC_INFO_PLIST PYTHON3_EXECUTABLE INSTALL_PREFIX ARCHIVE_DOC_DIR)
+  set(oneValueArgs TARGET TEST_TARGET UIDESC RELEASE_FILENAME TARGETS_PREFIX MAC_INFO_PLIST_FILE PYTHON3_EXECUTABLE INSTALL_PREFIX_DIR ARCHIVE_ROOT_DIR)
   set(multiValueArgs VST_SOURCES INCLUDE_DIRECTORIES COMPILE_DEFINITIONS COMPILE_OPTIONS LINK_LIBRARIES
                      RESOURCES
                      TEST_CASE_SOURCES TEST_SOURCES TEST_INCLUDE_DIRECTORIES TEST_COMPILE_DEFINITIONS TEST_COMPILE_OPTIONS TEST_LINK_LIBRARIES)
@@ -103,18 +103,19 @@ function(jamba_add_vst3_plugin)
 
   # Make sure ARG_TARGET has a value (default to project name if not provided)
   set_default_value(ARG_TARGET "${CMAKE_PROJECT_NAME}")
+  set_default_value(ARG_UIDESC "${CMAKE_CURRENT_LIST_DIR}/resource/${ARG_TARGET}.uidesc")
   set_default_value(ARG_TEST_TARGET "${ARG_TARGET}_test")
   set_default_value(ARG_RELEASE_FILENAME "${ARG_TARGET}")
-  set_default_value(ARG_MAC_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist")
-  set_default_value(ARG_ARCHIVE_DOC_DIR "${CMAKE_CURRENT_LIST_DIR}/archive")
+  set_default_value(ARG_MAC_INFO_PLIST_FILE "${CMAKE_CURRENT_LIST_DIR}/mac/Info.plist")
+  set_default_value(ARG_ARCHIVE_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/archive")
   if(APPLE)
-    set_default_value(ARG_INSTALL_PREFIX "$ENV{HOME}/Library/Audio/Plug-Ins")
+    set_default_value(ARG_INSTALL_PREFIX_DIR "$ENV{HOME}/Library/Audio/Plug-Ins")
   elseif(WIN32)
-    set_default_value(ARG_INSTALL_PREFIX "C:/Program\ Files")
+    set_default_value(ARG_INSTALL_PREFIX_DIR "C:/Program\ Files")
   endif()
 
   # where the plugins are installed
-  set(CMAKE_INSTALL_PREFIX "${ARG_INSTALL_PREFIX}" CACHE PATH "Forcing CMAKE_INSTALL_PREFIX" FORCE)
+  set(CMAKE_INSTALL_PREFIX "${ARG_INSTALL_PREFIX_DIR}" CACHE PATH "Forcing CMAKE_INSTALL_PREFIX" FORCE)
 
   # Adds the VST3 plugin
   include(JambaAddVST3Plugin)

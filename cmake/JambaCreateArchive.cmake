@@ -50,8 +50,8 @@ endif()
   set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 
   # Add the doc folder at the root if it exists
-  if(EXISTS "${ARG_ARCHIVE_DOC_DIR}")
-    set(CPACK_INSTALLED_DIRECTORIES "${ARG_ARCHIVE_DOC_DIR}" ".")
+  if(EXISTS "${ARG_ARCHIVE_ROOT_DIR}")
+    list(APPEND CPACK_INSTALLED_DIRECTORIES "${ARG_ARCHIVE_ROOT_DIR}" ".")
   endif()
 
   include(CPack)

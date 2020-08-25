@@ -28,7 +28,7 @@ function(jamba_add_all_resources)
   internal_jamba_add_resources("${JAMBA_VST3_RESOURCES_RC}" JAMBA_VST3_RESOURCES_RC)
 
   if (APPLE)
-    smtg_set_bundle(${ARG_TARGET} INFOPLIST "${ARG_MAC_INFO_PLIST}" PREPROCESS)
+    smtg_set_bundle(${ARG_TARGET} INFOPLIST "${ARG_MAC_INFO_PLIST_FILE}" PREPROCESS)
   elseif (WIN32)
     list(JOIN JAMBA_VST3_RESOURCES_RC "\n" JAMBA_VST3_RESOURCES_RC)
     file(WRITE "${CMAKE_BINARY_DIR}/generated/vst3_resources.rc" ${JAMBA_VST3_RESOURCES_RC})
