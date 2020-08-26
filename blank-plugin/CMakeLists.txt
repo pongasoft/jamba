@@ -74,7 +74,7 @@ set(test_case_sources
 # Finally invoke jamba_add_vst_plugin
 jamba_add_vst_plugin(
     TARGET              "[-target-]" # name of CMake target for the plugin
-    RELEASE_FILENAME    "[-filename-]" # filename for the plugin (JambaSampleGain.vst3)
+    RELEASE_FILENAME    "[-filename-]" # filename for the plugin ([-filename-].vst3)
     TARGETS_PREFIX      "jmb_" # prefix used by all targets directly linked to this plugin
     VST_SOURCES         "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
     INCLUDE_DIRECTORIES "${VERSION_DIR}" # we add the version folder to the list of includes
