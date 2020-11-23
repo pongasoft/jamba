@@ -33,7 +33,7 @@ bool DeinitModule()
 //------------------------------------------------------------------------
 //  VST3 Plugin Main entry point
 //------------------------------------------------------------------------
-EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
+SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
 {
   return JambaPluginFactory::GetVST3PluginFactory<
     [-namespace-]::RT::[-name-]Processor, // processor class (Real Time)
