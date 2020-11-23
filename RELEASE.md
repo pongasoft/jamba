@@ -1,6 +1,17 @@
 Release Notes {#release-notes}
 -------------
 
+Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
+
+## [5.1.0 | 2020-11-23](https://github.com/pongasoft/jamba/tree/v5.1.0)
+
+* Migrated Jamba to use VST3 SDK 3.7.1
+
+#### Potential breaking changes
+
+* SDK 3.7.1 made a number of changes in the cmake based build files (mostly renaming) and it is all covered by Jamba unless you have been using those symbols directly in your own cmake build files
+* SDK 3.7.1 renamed the define `EXPORT_FACTORY` into `SMTG_EXPORT_SYMBOL`. Jamba is adding it back for backward compatibility (in `PluginFactory.h`) but you may want to update it.
+
 ## [5.0.0 | 2020-08-26](https://github.com/pongasoft/jamba/tree/v5.0.0)
 
 * Migrated Jamba to use VST3 SDK 3.7.0

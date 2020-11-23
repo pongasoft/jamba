@@ -51,21 +51,21 @@ set(pluginterfaces_SOURCE_DIR ${SDK_ROOT}/pluginterfaces)
 
 list(APPEND CMAKE_MODULE_PATH "${VST3_SDK_ROOT}/cmake/modules")
 
-include(Global)
-include(AddVST3Library)
-include(Bundle)
-include(ExportedSymbols)
-include(PrefixHeader)
-include(PlatformToolset)
-include(CoreAudioSupport)
-include(VstGuiSupport)
-include(UniversalBinary)
-include(AddVST3Options)
+include(SMTG_Global)
+include(SMTG_AddVST3Library)
+include(SMTG_Bundle)
+include(SMTG_ExportedSymbols)
+include(SMTG_PrefixHeader)
+include(SMTG_PlatformToolset)
+include(SMTG_CoreAudioSupport)
+include(SMTG_VstGuiSupport)
+include(SMTG_UniversalBinary)
+include(SMTG_AddVST3Options)
 
 #-------------------------------------------------------------------------------
 # Setting up platform toolset
 #-------------------------------------------------------------------------------
-setupPlatformToolset()
+smtg_setup_platform_toolset()
 
 # the entire SDK is added as include directories
 include_directories(${VST3_SDK_ROOT})
@@ -73,9 +73,9 @@ include_directories(${VST3_SDK_ROOT})
 #-------------------------------------------------------------------------------
 # Adding VSTGUI support (Jamba depends on it)
 #-------------------------------------------------------------------------------
-set(VSTGUI_ROOT "${VST3_SDK_ROOT}")
-setupVstGuiSupport()
-set_property(GLOBAL PROPERTY VSTGUI_ROOT ${VSTGUI_ROOT})
+set(SMTG_VSTGUI_ROOT "${VST3_SDK_ROOT}")
+smtg_enable_vstgui_support()
+set_property(GLOBAL PROPERTY SMTG_VSTGUI_ROOT ${SMTG_VSTGUI_ROOT})
 
 #-------------------------------------------------------------------------------
 # Setting up Core Audio Support (for macOS)
@@ -99,6 +99,7 @@ add_subdirectory(${VST3_SDK_ROOT}/public.sdk vst3-sdk/public)
 add_subdirectory(${VST3_SDK_ROOT}/pluginterfaces vst3-sdk/pluginterfaces)
 
 # validator & editor
+set(SMTG_ADD_VST3_HOSTING_SAMPLES ON)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/validator vst3-sdk/validator)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)
 

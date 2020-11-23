@@ -28,6 +28,9 @@
 #include <pluginterfaces/vst/ivstcomponent.h>
 #include <public.sdk/source/main/pluginfactory.h>
 
+// SDK 3.7.1 renamed the old define so restoring it to avoid backward incompatibilities
+#define EXPORT_FACTORY SMTG_EXPORT_SYMBOL
+
 namespace pongasoft::VST {
 
 /**
