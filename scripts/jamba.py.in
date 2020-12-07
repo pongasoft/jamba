@@ -56,9 +56,9 @@ if jamba_enable_audio_unit:
     doc_au_commands = '''
 
   ---- Audio Unit commands ----
-  build-au     : builds the Audio Unit wrapper
-  install-au   : install the vst2 plugin only
-  uninstall-au : uninstall the vst2 plugin only
+  build-au     : builds the Audio Unit only
+  install-au   : install the Audio Unit only
+  uninstall-au : uninstall the Audio Unit only
 
 '''
 else:
@@ -141,6 +141,7 @@ available_commands = {
     # audio unit
     'build-au': f'{targets_prefix}build_au',
     'install-au' : f'{targets_prefix}install_au',
+    'uninstall-au' : f'{targets_prefix}uninstall_au',
 
     # vst2
     'install-vst2': f'{targets_prefix}install_vst2',

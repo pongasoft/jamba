@@ -6,7 +6,9 @@ Check the [Requirements](https://jamba.dev/requirements/) documentation for info
 ## [5.1.1 | 2020-12-07](https://github.com/pongasoft/jamba/tree/v5.1.1)
 
 * Added `JambaPluginFactory::GetNonDistributableVST3PluginFactory` function to create a plugin that would not be distributable
-* Added default implementation to `IParamSerializer` methods 
+* Added default implementation to `IParamSerializer` methods
+* Fixed Audio Unit build (changes in VST 3.7.0)
+* Added missing `uninstall-au` command to `jamba.py`
 
 ## [5.1.0 | 2020-11-23](https://github.com/pongasoft/jamba/tree/v5.1.0)
 

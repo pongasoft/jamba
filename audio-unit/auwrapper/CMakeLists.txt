@@ -14,25 +14,19 @@ if (MAC)
         ${AU_WRAPPER_ROOT}/auwrapper.h
         ${AU_WRAPPER_ROOT}/NSDataIBStream.mm
         ${AU_WRAPPER_ROOT}/NSDataIBStream.h
-        ${VST3_SDK_ROOT}/pluginterfaces/base/funknown.cpp
-        ${VST3_SDK_ROOT}/pluginterfaces/base/ustring.cpp
-        ${VST3_SDK_ROOT}/pluginterfaces/base/coreiids.cpp
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/eventlist.cpp
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/eventlist.h
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/hostclasses.cpp
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/hostclasses.h
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.cpp
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/parameterchanges.h
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/pluginterfacesupport.cpp
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/pluginterfacesupport.h
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.h
-        ${VST3_SDK_ROOT}/public.sdk/source/vst/vstinitiids.cpp
         )
     add_library(${target} STATIC ${auwrapper_sources})
     smtg_setup_universal_binary(${target})
     set_target_properties(${target} PROPERTIES ${SDK_IDE_LIBS_FOLDER})
-    target_link_libraries(${target} PRIVATE base "-framework AudioUnit" "-framework CoreMIDI" "-framework AudioToolbox" "-framework CoreFoundation" "-framework Carbon" "-framework Cocoa" "-framework CoreAudio")
+    target_link_libraries(${target} PRIVATE
+        sdk_hosting
+        "-framework AudioUnit"
+        "-framework CoreMIDI"
+        "-framework AudioToolbox"
+        "-framework CoreFoundation"
+        "-framework Carbon"
+        "-framework Cocoa"
+        "-framework CoreAudio")
     target_include_directories(${target} PRIVATE "${SMTG_COREAUDIO_SDK_PATH}/**")
     string(MD5 AU_NAMESPACE_SUFFIX "${JAMBA_VST3_PLUGIN_TARGET}")
     file(WRITE "${CMAKE_BINARY_DIR}/generated/aucocoaclassprefix.h" "#define SMTG_AU_NAMESPACE SMTGAUCocoa${AU_NAMESPACE_SUFFIX}_\n")
