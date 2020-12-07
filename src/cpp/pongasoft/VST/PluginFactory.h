@@ -44,7 +44,7 @@ namespace pongasoft::VST {
  *
  * ```
  * // this is the main entry point that every plugin must define
- * EXPORT_FACTORY Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
+ * SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
  * {
  *   return JambaPluginFactory::GetVST3PluginFactory<
  *     pongasoft::test::jamba::RT::JambaTestPluginProcessor,  // processor class (Real Time)
@@ -86,20 +86,71 @@ public:
                                                          const std::string& iPluginName,
                                                          const std::string& iPluginVersion,
                                                          const std::string& iSubCategories,
-                                                         void *iContext = nullptr);
+                                                         void *iContext = nullptr)
+  {
+    return createFactory<RTProcessorClass, GUIControllerClass>(iVendor,
+                                                               iURL,
+                                                               iEmail,
+                                                               iPluginName,
+                                                               iPluginVersion,
+                                                               iSubCategories,
+                                                               iContext,
+                                                               static_cast<Steinberg::int32>(Steinberg::Vst::kDistributable));
+  }
+
+  /**
+   * This flavor of this API lets you create a plugin that is not declared distributable.
+   *
+   * @note This can be used in the rare cases when %GUI and %RT need to actually share data
+   *       (for example large amounts of data) and using messaging is too expensive
+   *
+   * @see GetVST3PluginFactory
+   */
+  template<typename RTProcessorClass, typename GUIControllerClass>
+  static Steinberg::IPluginFactory* GetNonDistributableVST3PluginFactory(const std::string& iVendor,
+                                                                         const std::string& iURL,
+                                                                         const std::string& iEmail,
+                                                                         const std::string& iPluginName,
+                                                                         const std::string& iPluginVersion,
+                                                                         const std::string& iSubCategories,
+                                                                         void *iContext = nullptr)
+  {
+    return createFactory<RTProcessorClass, GUIControllerClass>(iVendor,
+                                                               iURL,
+                                                               iEmail,
+                                                               iPluginName,
+                                                               iPluginVersion,
+                                                               iSubCategories,
+                                                               iContext,
+                                                               0); // non distributable
+  }
+
+
+private:
+  // createFactory
+  template<typename RTProcessorClass, typename GUIControllerClass>
+  static Steinberg::IPluginFactory* createFactory(const std::string& iVendor,
+                                                  const std::string& iURL,
+                                                  const std::string& iEmail,
+                                                  const std::string& iPluginName,
+                                                  const std::string& iPluginVersion,
+                                                  const std::string& iSubCategories,
+                                                  void *iContext,
+                                                  int32 iProcessorFlags);
 };
 
 //------------------------------------------------------------------------
 // JambaPluginFactory::GetVST3PluginFactory
 //------------------------------------------------------------------------
 template<typename RTClass, typename GUIClass>
-Steinberg::IPluginFactory *JambaPluginFactory::GetVST3PluginFactory(std::string const &iVendor,
-                                                                    std::string const &iURL,
-                                                                    std::string const &iEmail,
-                                                                    std::string const &iPluginName,
-                                                                    std::string const &iPluginVersion,
-                                                                    std::string const &iSubCategories,
-                                                                    void *iContext)
+Steinberg::IPluginFactory *JambaPluginFactory::createFactory(std::string const &iVendor,
+                                                             std::string const &iURL,
+                                                             std::string const &iEmail,
+                                                             std::string const &iPluginName,
+                                                             std::string const &iPluginVersion,
+                                                             std::string const &iSubCategories,
+                                                             void *iContext,
+                                                             int32 iProcessorFlags)
 {
   // implementation note: this code was essentially copied from the macros coming from the SDKs and adapted this way:
   // 1) do not use Steinberg::gPluginFactory global variable
@@ -119,7 +170,7 @@ Steinberg::IPluginFactory *JambaPluginFactory::GetVST3PluginFactory(std::string 
                                      Steinberg::PClassInfo::kManyInstances,
                                      kVstAudioEffectClass,
                                      iPluginName.c_str(),
-                                     static_cast<Steinberg::int32>(Steinberg::Vst::kDistributable),
+                                     iProcessorFlags,
                                      iSubCategories.c_str(),
                                      nullptr,
                                      iPluginVersion.c_str(),

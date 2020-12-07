@@ -3,6 +3,11 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [5.1.1 | 2020-12-07](https://github.com/pongasoft/jamba/tree/v5.1.1)
+
+* Added `JambaPluginFactory::GetNonDistributableVST3PluginFactory` function to create a plugin that would not be distributable
+* Added default implementation to `IParamSerializer` methods 
+
 ## [5.1.0 | 2020-11-23](https://github.com/pongasoft/jamba/tree/v5.1.0)
 
 * Migrated Jamba to use VST3 SDK 3.7.1

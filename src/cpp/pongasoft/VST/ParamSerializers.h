@@ -99,6 +99,8 @@ protected:
  * to ParamValue (for example a string). The parameter simply needs to provide an implementation of this interface
  * which represents a way to serialize/deserialize the type to the stream.
  *
+ * @note This interface can also be used to simply display the parameter (even if not serializable)
+ *
  * @tparam T the actual type that the parameter represents
  */
 template<typename T>
@@ -106,8 +108,18 @@ class IParamSerializer
 {
 public:
   using ParamType = T;
-  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const = 0;
-  virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const = 0;
+
+  /**
+   * This method should read from the stream and populate `oValue` accordingly (aka deserialization)
+   * @return `kResultOk` if reading was successful, `kResultFalse` otherwise
+   *                     (or `kNotImplemented` if not supported) */
+  virtual tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const { return kNotImplemented; };
+
+  /**
+   * This method should write `iValue` to the stream (aka serialization)
+   * @return `kResultOk` if writing was successful, `kResultFalse` otherwise
+   *                     (or `kNotImplemented` if not supported) */
+  virtual tresult writeToStream(const ParamType &iValue, IBStreamer &oStreamer) const { return kNotImplemented; };
 
   /**
    * By default, this implementation simply writes the value to the stream IF it is
@@ -404,12 +416,12 @@ public:
  *
  * // ...
  * fTab =
- *   jmb<ETabs>(EJambaTestPluginParamID::kTab, STR16("Tab"))
- *     .serializer<DiscreteTypeParamSerializer<ETabs>>(
- *                                          {
- *                                            {ETabs::kTabAll,              "All Controls"},
- *                                            {ETabs::kTabToggleButtonView, "ToggleButtonView"}
- *                                          })
+ *  vst<DiscreteTypeParamConverter<ETabs>>(EJambaTestPluginParamID::kTab,
+ *                                         STR16("Tab"),
+ *                                         {
+ *                                           {ETabs::kTabAll,                 STR16("All Controls")},
+ *                                           {ETabs::kTabToggleButtonView,    STR16("ToggleButton")},
+ *                                         })
  *     .add();
  *
  * ```
