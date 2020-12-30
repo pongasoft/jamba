@@ -75,6 +75,9 @@ public:
   JmbParam<Gain> fGainJmb;
   JmbParam<UTF8String> fUTF8String;
 
+  // version (displayed in GUI)
+  JmbParam<std::string> fPluginVersion;
+
 public:
   JambaTestPluginParameters();
 };

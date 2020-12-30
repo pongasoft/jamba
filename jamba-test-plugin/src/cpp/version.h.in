@@ -32,12 +32,11 @@
 // Audio Unit version (as an hex int)
 #define AU_VERSION_INT 0x@AU_PLUGIN_VERSION_HEX@
 
+// Architecture
+#define BUILD_ARCHIVE_ARCHITECTURE "@JAMBA_ARCHIVE_ARCHITECTURE@"
+
 #define stringOriginalFilename	"JambaTestPlugin.vst3"
-#ifdef PLATFORM_64
-#define stringFileDescription	"JambaTestPlugin plugin by pongasoft (64Bit)"
-#else
-#define stringFileDescription	"JambaTestPlugin plugin by pongasoft"
-#endif
+#define stringFileDescription	"JambaTestPlugin plugin by pongasoft (@JAMBA_ARCHIVE_ARCHITECTURE@)"
 #define stringCompanyName		"pongasoft\0"
 #define stringLegalCopyright	"© 2019-202 pongasoft"
 

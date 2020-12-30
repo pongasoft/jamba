@@ -20,26 +20,27 @@
 #------------------------------------------------------------------------
 function(jamba_create_archive)
   if (APPLE)
-    set(ARCHITECTURE "macOS_64bits")
+    set_default_value(ARG_ARCHIVE_ARCHITECTURE "macOS_64bits")
   elseif (WIN32)
-    set(ARCHITECTURE "win_64bits")
+    set_default_value(ARG_ARCHIVE_ARCHITECTURE "win_64bits")
   endif ()
 
   set_default_value(CPACK_PACKAGE_NAME                "${ARG_RELEASE_FILENAME}")
   set_default_value(CPACK_PACKAGE_VERSION_MAJOR       "${PLUGIN_MAJOR_VERSION}")
   set_default_value(CPACK_PACKAGE_VERSION_MINOR       "${PLUGIN_MINOR_VERSION}")
   set_default_value(CPACK_PACKAGE_VERSION_PATCH       "${PLUGIN_PATCH_VERSION}")
-  set_default_value(CPACK_SYSTEM_NAME                 "${ARCHITECTURE}")
+  set_default_value(CPACK_SYSTEM_NAME                 "${ARG_ARCHIVE_ARCHITECTURE}")
+  set_default_value(ARG_ARCHIVE_FILENAME              "${CPACK_PACKAGE_NAME}-${CPACK_SYSTEM_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 
   # Generating a file which CPack will read to handle naming the archive differently based on
-  # build config (also note that CPACK_PACKAGE_VERSION is not available until then)
-  file(WRITE "${CMAKE_BINARY_DIR}/CPackProjectConfig.cmake" [[
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_SYSTEM_NAME}-${CPACK_PACKAGE_VERSION}")
+  # build config
+  file(WRITE "${CMAKE_BINARY_DIR}/CPackProjectConfig.cmake" "
+set(CPACK_PACKAGE_FILE_NAME \"${ARG_ARCHIVE_FILENAME}\")
 
-if("${CPACK_BUILD_CONFIG}" STREQUAL "Debug")
-  set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}_Debug")
+if(\"\${CPACK_BUILD_CONFIG}\" STREQUAL \"Debug\")
+  set(CPACK_PACKAGE_FILE_NAME \"\${CPACK_PACKAGE_FILE_NAME}_Debug\")
 endif()
-]])
+")
 
   set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackProjectConfig.cmake")
 

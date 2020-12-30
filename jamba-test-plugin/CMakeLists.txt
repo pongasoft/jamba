@@ -6,14 +6,17 @@ option(JAMBA_ENABLE_VST2 "Use VST2" ON)
 # build Audio Unit?
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" ON)
 
-project(JambaTestPlugin)
-
 # To use local jamba install, uncomment the following line (no download)
-set(JAMBA_ROOT_DIR "..")
+set(JAMBA_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
+
+# Determine proper architecture for the project
+include(${JAMBA_ROOT_DIR}/cmake/JambaSetArchitecture.cmake)
+
+project(JambaTestPlugin)
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly
 unset(GOOGLETEST_ROOT_DIR)
-#set(GOOGLETEST_ROOT_DIR ../../../google/googletest)
+#set(GOOGLETEST_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../google/googletest")
 
 # finally we include jamba itself
 include(${JAMBA_ROOT_DIR}/jamba.cmake)
@@ -93,13 +96,14 @@ set(JAMBA_TEST_CASES_SOURCES
     )
 
 jamba_add_vst_plugin(
-    TARGET              "pongasoft_JambaTestPlugin" # name of CMake target for the plugin
-    RELEASE_FILENAME    "JambaTestPlugin" # filename for the plugin (xxx.vst3)
-    TARGETS_PREFIX      "jmb_" # prefix used by all targets directly linked to this plugin
-    VST_SOURCES         "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
-    INCLUDE_DIRECTORIES "${VERSION_DIR}" # we add the version folder to the list of includes
-    UIDESC              "${RES_DIR}/JambaTestPlugin.uidesc" # the main xml file for the GUI
-    RESOURCES           "${vst_resources}" # the resources for the GUI (png files)
-    TEST_CASE_SOURCES   "${JAMBA_TEST_CASES_SOURCES}" # the source files containing the test cases
-    TEST_LINK_LIBRARIES "jamba" # the library needed for linking the tests
+    TARGET               "pongasoft_JambaTestPlugin" # name of CMake target for the plugin
+    RELEASE_FILENAME     "JambaTestPlugin" # filename for the plugin (xxx.vst3)
+    ARCHIVE_ARCHITECTURE "${JAMBA_ARCHIVE_ARCHITECTURE}"
+    TARGETS_PREFIX       "jmb_" # prefix used by all targets directly linked to this plugin
+    VST_SOURCES          "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
+    INCLUDE_DIRECTORIES  "${VERSION_DIR}" # we add the version folder to the list of includes
+    UIDESC               "${RES_DIR}/JambaTestPlugin.uidesc" # the main xml file for the GUI
+    RESOURCES            "${vst_resources}" # the resources for the GUI (png files)
+    TEST_CASE_SOURCES    "${JAMBA_TEST_CASES_SOURCES}" # the source files containing the test cases
+    TEST_LINK_LIBRARIES  "jamba" # the library needed for linking the tests
 )

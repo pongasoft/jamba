@@ -32,6 +32,7 @@ parser.add_argument("-l", "--local", help="Use local jamba", action="store_true"
 parser.add_argument("-f", "--filename", help="The filename of the plugin")
 parser.add_argument("-C", "--company", help="The name of the company")
 parser.add_argument("-c", "--aucode", help="The 4 characters for the audio unit manufacturer code")
+parser.add_argument("-x", "--osx", help="The macOS deployment target")
 parser.add_argument("-u", "--url", help="The url for the company")
 parser.add_argument("-e", "--email", help="The email for the company")
 parser.add_argument("-n", "--namespace", help="The C++ namespace")
@@ -86,6 +87,7 @@ def config(plugin):
     plugin['name'] = maybe_ask_user(args.plugin, "Plugin Name (must be a valid C++ class name)", None)
     plugin['enable_vst2'] = "ON" if maybe_confirm_user(args.vst2, "Enable VST2") else "OFF"
     plugin['enable_audio_unit'] = "ON" if maybe_confirm_user(args.au, "Enable Audio Unit") else "OFF"
+    plugin['macos_deployment_target'] = maybe_ask_user(args.osx, "macOS deployment target", "10.14")
     plugin['audio_unit_manufacturer_code'] = \
         maybe_ask_user(args.aucode,
                        "Audio Unit manufacturer code (4 chars / one capital letter)",
@@ -109,6 +111,7 @@ def config(plugin):
     print(f'''##################
 Plugin Name        - {plugin["name"]}
 VST2 Enabled       - {plugin["enable_vst2"]}
+macOS Target       - {plugin["macos_deployment_target"]}
 Audio Unit Enabled - {plugin["enable_audio_unit"]}
 AU Plugin Code     - {plugin["audio_unit_manufacturer_code"]}
 Filename           - {plugin["filename"]} (will generate {plugin["filename"]}.vst3)

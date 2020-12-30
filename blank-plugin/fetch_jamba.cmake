@@ -41,5 +41,3 @@ endif()
 
 set(JAMBA_ROOT_DIR ${jamba_SOURCE_DIR})
 
-# finally we include jamba itself
-include(${JAMBA_ROOT_DIR}/jamba.cmake)

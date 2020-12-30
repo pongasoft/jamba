@@ -33,7 +33,11 @@ namespace pongasoft::test::jamba::RT {
 //------------------------------------------------------------------------
 JambaTestPluginProcessor::JambaTestPluginProcessor() : RTProcessor(JambaTestPluginControllerUID), fParams{}, fState{fParams}
 {
-  DLOG_F(INFO, "[%s] JambaTestPluginProcessor() - jamba: %s - plugin: v%s", stringPluginName, JAMBA_GIT_VERSION_STR, FULL_VERSION_STR);
+  DLOG_F(INFO, "[%s] JambaTestPluginProcessor() - jamba: %s - plugin: v%s (%s)",
+         stringPluginName,
+         JAMBA_GIT_VERSION_STR,
+         FULL_VERSION_STR,
+         BUILD_ARCHIVE_ARCHITECTURE);
 
   // in Debug mode we display the parameters in a table
 #ifndef NDEBUG

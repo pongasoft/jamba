@@ -17,6 +17,7 @@
  */
 
 #include "Plugin.h"
+#include "version.h"
 
 namespace pongasoft::test::jamba {
 
@@ -204,6 +205,12 @@ JambaTestPluginParameters::JambaTestPluginParameters()
     jmb<UTF8StringSerializer>(EJambaTestPluginParamID::kUTF8StringJmb, STR16("UTF8StringJmb"))
       .defaultValue("<empty>")
       .add();
+
+  // fPluginVersion
+  fPluginVersion = jmbFromType<std::string>(EJambaTestPluginParamID::kPluginVersion, STR16 ("Version"))
+    .transient()
+    .defaultValue(FULL_VERSION_STR " [" BUILD_ARCHIVE_ARCHITECTURE "]")
+    .add();
 
   // same for GUI - note that if the GUI does not save anything then you don't need this
   setGUISaveStateOrder(CONTROLLER_STATE_VERSION,
