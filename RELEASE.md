@@ -5,7 +5,8 @@ Check the [Requirements](https://jamba.dev/requirements/) documentation for info
 
 ## [5.1.2 | 2021-01-02](https://github.com/pongasoft/jamba/tree/v5.1.2)
 
-* Added support for Apple Silicon / universal build (no code change)
+* Added support for Apple Silicon / universal build and macOS target deployment (no code change)
+* Added (optional) `ARCHIVE_FILENAME` and `ARCHIVE_ARCHITECTURE` to the main `jamba_add_vst_plugin` CMake api
 
 #### Migration optional
 
