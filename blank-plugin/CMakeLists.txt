@@ -20,7 +20,7 @@ set(JAMBA_MACOS_DEPLOYMENT_TARGET "[-macos_deployment_target-]" CACHE STRING "ma
 include(fetch_jamba.cmake)
 
 # Determine proper architecture for the project
-include(${JAMBA_ROOT_DIR}/cmake/JambaSetArchitecture.cmake)
+include("${JAMBA_ROOT_DIR}/cmake/JambaSetArchitecture.cmake")
 
 # Plugin version
 set(PLUGIN_MAJOR_VERSION 1)
@@ -36,14 +36,14 @@ set(GOOGLETEST_ROOT_DIR "")
 #set(GOOGLETEST_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../google/googletest")
 
 # Include Jamba
-include(${JAMBA_ROOT_DIR}/jamba.cmake)
+include("${JAMBA_ROOT_DIR}/jamba.cmake")
 
 set(CPP_SOURCES "src/cpp")
 
 # Generating the version.h header file which contains the plugin version (to make sure it is in sync with the version
 # defined here)
 set(VERSION_DIR "${CMAKE_BINARY_DIR}/generated")
-configure_file(${CPP_SOURCES}/version.h.in "${VERSION_DIR}/version.h")
+configure_file("${CPP_SOURCES}/version.h.in" "${VERSION_DIR}/version.h")
 
 # Source files for VST2
 if (JAMBA_ENABLE_VST2)

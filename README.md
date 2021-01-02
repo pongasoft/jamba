@@ -19,6 +19,7 @@ Features
 - build a **self contained** plugin that depends on the VST3 SDK
 - optionally builds a VST2 compatible plugin
 - optionally wraps the VST3 plugin into an Audio Unit plugin (macOS)
+- build a universal plugin for Apple Silicon support (macOS)  
 - easily adds resources (images) in a cross platform way
 - easily write unit tests for your project
 - build on macOS and Windows 10
@@ -45,7 +46,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 Latest Release
 --------------
 
-5.1.1 | 2020-12-07
+5.1.2 | 2021-01-02
 
 [Release notes (local)](RELEASE.md)
 

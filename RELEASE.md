@@ -3,6 +3,17 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [5.1.2 | 2021-01-02](https://github.com/pongasoft/jamba/tree/v5.1.2)
+
+* Added support for Apple Silicon / universal build (no code change)
+
+#### Migration optional
+
+* Apple Silicon support is optional but if you want to benefit from it you need to change your `CMakeLists.txt` 
+    * You can check the [migration guide](https://jamba.dev/releases/migration) for more details and help.
+    * You can also go to [Jamba Web Quickstart](https://jamba.dev/quickstart/web/), generate a blank plugin and use the generated `CMakeLists.txt` as an example.
+    * You can also check the [documentation plugin](https://github.com/pongasoft/jamba-sample-gain) for another example.
+
 ## [5.1.1 | 2020-12-07](https://github.com/pongasoft/jamba/tree/v5.1.1)
 
 * Added `JambaPluginFactory::GetNonDistributableVST3PluginFactory` function to create a plugin that would not be distributable
