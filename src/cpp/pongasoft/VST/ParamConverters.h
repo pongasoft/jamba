@@ -298,7 +298,7 @@ public:
     Steinberg::UString wrapper(oString, str16BufferSize (String128));
     if(!fFormat.empty())
     {
-      String s;
+      Steinberg::String s;
       s.printf(fFormat.c_str(), iValue + fToStringOffset);
       wrapper.assign(s.text());
     }
