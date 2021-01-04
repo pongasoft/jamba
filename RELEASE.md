@@ -3,6 +3,10 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [5.1.3 | 2021-01-02](https://github.com/pongasoft/jamba/tree/v5.1.3)
+
+* Fixed compilation issue on Windows
+
 ## [5.1.2 | 2021-01-02](https://github.com/pongasoft/jamba/tree/v5.1.2)
 
 * Added support for Apple Silicon / universal build and macOS target deployment (no code change)
