@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2020 pongasoft
+# Copyright (c) 2020-2021 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,10 @@ import argparse
 import os
 import sys
 import platform
+
+if sys.hexversion < 0x03070000:
+    print("You must use python version 3.7+")
+    sys.exit(1)
 
 parser = argparse.ArgumentParser(allow_abbrev=False,
                                  usage='configure.py [-h] [-n] [-f] [-r] [--vst3 VST3_SDK_ROOT] [--vst2 VST2_SDK_ROOT] [-G GENERATOR] [-B BUILD_DIR] [-- <cmake_options>]',

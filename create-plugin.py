@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2018 pongasoft
+# Copyright (c) 2018-2021 pongasoft
 # 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -208,19 +208,19 @@ For macOs:
 ### configuring
 
 cd <build_folder>
-{plugin['root_dir']}/configure.sh
+{plugin['root_dir']}/configure.py
 
 ### building, testing, etc...
 cd <build_folder>/build
-./jamba.sh -h
+./jamba.py -h
 
 For Windows 10:
 ---------------
 ### configuring
 
 cd <build_folder>
-{plugin['root_dir']}/configure.bat
+python {plugin['root_dir']}/configure.py
 
 ### building, testing, etc... (PowerShell recommended)
 cd <build_folder>/build
-./jamba.bat -h''')
+python ./jamba.py -h''')

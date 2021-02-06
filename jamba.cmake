@@ -1,4 +1,4 @@
-# Copyright (c) 2020 pongasoft
+# Copyright (c) 2020-2021 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -42,7 +42,7 @@ endif()
 #------------------------------------------------------------------------
 set(JAMBA_MAJOR_VERSION 5)
 set(JAMBA_MINOR_VERSION 1)
-set(JAMBA_PATCH_VERSION 3)
+set(JAMBA_PATCH_VERSION 4)
 execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     RESULT_VARIABLE result
     OUTPUT_VARIABLE JAMBA_GIT_VERSION

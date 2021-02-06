@@ -3,6 +3,11 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [5.1.4 | 2021-02-06](https://github.com/pongasoft/jamba/tree/v5.1.4)
+
+* Fixed issue #11: _create-plugin.py instructions point to wrong configure script_
+* Fixed issue #10: _jamba is for python 3.7+_
+
 ## [5.1.3 | 2021-01-04](https://github.com/pongasoft/jamba/tree/v5.1.3)
 
 * Fixed compilation issue on Windows
