@@ -36,18 +36,6 @@ void TextEditView::registerParameters()
 }
 
 //------------------------------------------------------------------------
-// TextEditView::valueChanged
-//------------------------------------------------------------------------
-void TextEditView::valueChanged()
-{
-  CTextEdit::valueChanged();
-  if(fText.exists())
-  {
-    fText.update(getText());
-  }
-}
-
-//------------------------------------------------------------------------
 // TextEditView::setListener
 //------------------------------------------------------------------------
 void TextEditView::setListener(IControlListener *l)
@@ -57,6 +45,19 @@ void TextEditView::setListener(IControlListener *l)
   // (see https://github.com/steinbergmedia/vstgui/blob/a9b1f800f1442846bf38280aaf62bc161e2137ca/vstgui/plugin-bindings/vst3editor.cpp#L200)
   if(dynamic_cast<VSTGUI::VST3Editor *>(l) == nullptr)
     CControl::setListener(l);
+}
+
+//------------------------------------------------------------------------
+// TextEditView::CLabelListener::valueChanged
+//------------------------------------------------------------------------
+void TextEditView::CLabelListener::valueChanged(CControl *pControl)
+{
+  // the control is an instance of TextEditView so it is CTextLabel
+  auto control = reinterpret_cast<CTextLabel *>(pControl);
+  if(fText.exists())
+  {
+    fText.update(control->getText());
+  }
 }
 
 }

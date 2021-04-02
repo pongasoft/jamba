@@ -18,6 +18,7 @@
 #pragma once
 
 #include <vstgui4/vstgui/lib/controls/ctextedit.h>
+#include <vstgui4/vstgui/lib/controls/icontrollistener.h>
 #include <pongasoft/VST/GUI/Views/CustomView.h>
 
 namespace pongasoft::VST::GUI::Views {
@@ -46,14 +47,13 @@ class TextEditView : public CustomViewAdapter<TextEdit>
 {
 public:
   // Constructor
-  explicit TextEditView(const CRect &iSize) : CustomViewAdapter(iSize)
-  {}
+  explicit TextEditView(const CRect &iSize) : CustomViewAdapter(iSize), fOnChangeListener{new CLabelListener(fText)}
+  {
+    registerControlListener(fOnChangeListener.get());
+  }
 
   // registerParameters
   void registerParameters() override;
-
-  // valueChanged
-  void valueChanged() override;
 
   // setListener
   void setListener(IControlListener *l) override;
@@ -61,6 +61,17 @@ public:
 protected:
   // the underlying jmb parameter of type UTF8String
   GUIJmbParam<UTF8String> fText{};
+
+private:
+  //! Control listener to handle changes to the `CTextLabel` and propagates to `fText`
+  struct CLabelListener : public IControlListener {
+    CLabelListener(GUIJmbParam<UTF8String> &iText) : fText{iText} {}
+    void valueChanged(CControl *pControl) override;
+    GUIJmbParam<UTF8String> &fText;
+  };
+
+  std::unique_ptr<CLabelListener> fOnChangeListener;
+
 
 public:
   class Creator : public CustomViewCreator<TextEditView, CustomViewAdapter<TextEdit>>
