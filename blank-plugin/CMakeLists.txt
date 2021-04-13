@@ -84,16 +84,17 @@ set(test_case_sources
 
 # Finally invoke jamba_add_vst_plugin
 jamba_add_vst_plugin(
-    TARGET               "[-target-]" # name of CMake target for the plugin
-    RELEASE_FILENAME     "[-filename-]" # filename for the plugin ([-filename-].vst3)
-    ARCHIVE_ARCHITECTURE "${JAMBA_ARCHIVE_ARCHITECTURE}"
-    TARGETS_PREFIX       "jmb_" # prefix used by all targets directly linked to this plugin
-    VST_SOURCES          "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
-    INCLUDE_DIRECTORIES  "${VERSION_DIR}" # we add the version folder to the list of includes
-    UIDESC               "${RES_DIR}/[-name-].uidesc" # the main xml file for the GUI
-    RESOURCES            "${vst_resources}" # the resources for the GUI (png files)
-    TEST_CASE_SOURCES    "${test_case_sources}" # the source files containing the test cases
-#    TEST_SOURCES         "${CPP_SOURCES}/xxx.cpp" # individual files required for compiling tests but we could add ${vst_sources} if we needed more
-    TEST_LINK_LIBRARIES  "jamba" # the libraries needed for linking the tests (if your tests don't depend on Jamba you can comment this out)
+    TARGET                "[-target-]" # name of CMake target for the plugin
+    RELEASE_FILENAME      "[-filename-]" # filename for the plugin ([-filename-].vst3)
+    RELEASE_SNAPSHOTS     "${RES_DIR}/[-snapshot_uuid-]_snapshot.png" "${RES_DIR}/[-snapshot_uuid-]_snapshot_2.0x.png"
+    ARCHIVE_ARCHITECTURE  "${JAMBA_ARCHIVE_ARCHITECTURE}"
+    TARGETS_PREFIX        "jmb_" # prefix used by all targets directly linked to this plugin
+    VST_SOURCES           "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
+    INCLUDE_DIRECTORIES   "${VERSION_DIR}" # we add the version folder to the list of includes
+    UIDESC                "${RES_DIR}/[-name-].uidesc" # the main xml file for the GUI
+    RESOURCES             "${vst_resources}" # the resources for the GUI (png files)
+    TEST_CASE_SOURCES     "${test_case_sources}" # the source files containing the test cases
+#    TEST_SOURCES          "${CPP_SOURCES}/xxx.cpp" # individual files required for compiling tests but we could add ${vst_sources} if we needed more
+    TEST_LINK_LIBRARIES   "jamba" # the libraries needed for linking the tests (if your tests don't depend on Jamba you can comment this out)
 
 )

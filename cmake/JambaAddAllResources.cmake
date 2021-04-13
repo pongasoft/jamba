@@ -34,6 +34,12 @@ function(jamba_add_all_resources)
     file(WRITE "${CMAKE_BINARY_DIR}/generated/vst3_resources.rc" ${JAMBA_VST3_RESOURCES_RC})
     target_sources(${ARG_TARGET} PRIVATE "${UIDESC_DIR}/${UIDESC_FILENAME}.rc")
   endif ()
+
+  if(ARG_RELEASE_SNAPSHOTS)
+    foreach(snapshot IN LISTS ARG_RELEASE_SNAPSHOTS)
+      smtg_add_vst3_snapshot(${ARG_TARGET} "${snapshot}")
+    endforeach()
+  endif()
 endfunction()
 
 #------------------------------------------------------------------------

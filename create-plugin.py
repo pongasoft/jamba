@@ -18,6 +18,7 @@
 
 import sys
 import os
+import shutil
 from string import Template
 import uuid
 import datetime
@@ -146,13 +147,13 @@ config(plugin)
 # generate_uuid
 def generate_uuid():
     a = uuid.uuid4().hex
-    return f"0x{a[0:8]}, 0x{a[8:16]}, 0x{a[16:24]}, 0x{a[24:32]}"
+    return f"0x{a[0:8]}, 0x{a[8:16]}, 0x{a[16:24]}, 0x{a[24:32]}", a.upper()
 
 
-plugin['processor_uuid'] = generate_uuid()
-plugin['controller_uuid'] = generate_uuid()
-plugin['debug_processor_uuid'] = generate_uuid()
-plugin['debug_controller_uuid'] = generate_uuid()
+plugin['processor_uuid'], plugin['snapshot_uuid'] = generate_uuid()
+plugin['controller_uuid'], _ = generate_uuid()
+plugin['debug_processor_uuid'], _ = generate_uuid()
+plugin['debug_controller_uuid'], _ = generate_uuid()
 plugin['year'] = datetime.datetime.now().year
 
 ignoredFiles = ['.DS_Store']
@@ -172,16 +173,19 @@ class Processor(Template):
     )
     '''
 
+noProcessingExtensions = ['.png']
 
 # process_file
 def process_file(in_file_path, out_file_path):
-    with open(in_file_path, 'r') as in_file:
-        content = in_file.read()
-        content = Processor(content).substitute(plugin)
-        with open(out_file_path, 'w') as out_file:
-            out_file.write(content)
-        os.chmod(out_file_path, os.stat(in_file_path).st_mode)
-
+    if os.path.splitext(in_file_path)[1] in noProcessingExtensions:
+        shutil.copy(in_file_path, out_file_path)
+    else:
+        with open(in_file_path, 'r') as in_file:
+            content = in_file.read()
+            content = Processor(content).substitute(plugin)
+            with open(out_file_path, 'w') as out_file:
+                out_file.write(content)
+            os.chmod(out_file_path, os.stat(in_file_path).st_mode)
 
 # process_dir
 def process_dir(directory, parent):
@@ -189,6 +193,7 @@ def process_dir(directory, parent):
         for entry in it:
             if entry.name not in ignoredFiles:
                 name = entry.name.replace('__Plugin__', plugin['name'])
+                name = name.replace('__snapshot_uuid__', plugin['snapshot_uuid'])
                 path = os.path.join(plugin['root_dir'], parent, name)
                 if entry.is_dir():
                     os.makedirs(path, exist_ok=True)
