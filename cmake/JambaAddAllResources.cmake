@@ -28,7 +28,18 @@ function(jamba_add_all_resources)
   internal_jamba_add_resources("${JAMBA_VST3_RESOURCES_RC}" JAMBA_VST3_RESOURCES_RC)
 
   if (APPLE)
-    smtg_set_bundle(${ARG_TARGET} INFOPLIST "${ARG_MAC_INFO_PLIST_FILE}" PREPROCESS)
+    # processes replacement properties in ARG_MAC_INFO_PLIST_FILE
+    set(PLUGIN_INFO_PLIST_FILE "${CMAKE_BINARY_DIR}/PluginInfo.plist")
+    set(MACOSX_BUNDLE_EXECUTABLE_NAME "${ARG_TARGET}")
+    configure_file("${ARG_MAC_INFO_PLIST_FILE}" "${PLUGIN_INFO_PLIST_FILE}" @ONLY)
+    smtg_set_bundle(${ARG_TARGET} INFOPLIST "${PLUGIN_INFO_PLIST_FILE}" PREPROCESS)
+    if(XCODE)
+      # make sure that "version.h" is in the path
+      set_target_properties(${ARG_TARGET} PROPERTIES XCODE_ATTRIBUTE_INFOPLIST_OTHER_PREPROCESSOR_FLAGS "-I ${CMAKE_BINARY_DIR}/generated")
+    else()
+      # when not using XCode, we need to use PLUGIN_INFO_PLIST_FILE as well
+      set_target_properties(${ARG_TARGET} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${PLUGIN_INFO_PLIST_FILE}")
+    endif()
   elseif (WIN32)
     list(JOIN JAMBA_VST3_RESOURCES_RC "\n" JAMBA_VST3_RESOURCES_RC)
     file(WRITE "${CMAKE_BINARY_DIR}/generated/vst3_resources.rc" ${JAMBA_VST3_RESOURCES_RC})

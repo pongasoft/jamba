@@ -129,3 +129,10 @@ if (APPLE)
 elseif (WIN32)
   set(JAMBA_SCRIPT_COMMAND "${CMAKE_BINARY_DIR}/jamba.bat" CACHE PATH "Path to jamba dev script")
 endif ()
+
+#------------------------------------------------------------------------
+# Sets some useful variables
+#------------------------------------------------------------------------
+string(TIMESTAMP JAMBA_CURRENT_YEAR "%Y")
+string(TIMESTAMP JAMBA_CURRENT_MONTH "%m")
+string(TIMESTAMP JAMBA_CURRENT_DAY "%d")

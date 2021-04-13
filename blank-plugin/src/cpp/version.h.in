@@ -10,8 +10,11 @@
 #define PATCH_NUMBER_STR "@PLUGIN_PATCH_VERSION@"
 #define PATCH_NUMBER_INT @PLUGIN_PATCH_VERSION@
 
-// Version with build number
+// Version with build number (as a string)
 #define FULL_VERSION_STR "@PLUGIN_VERSION@"
+
+// Version with build number
+#define FULL_VERSION @PLUGIN_VERSION@
 
 // Architecture
 #define BUILD_ARCHIVE_ARCHITECTURE "@JAMBA_ARCHIVE_ARCHITECTURE@"

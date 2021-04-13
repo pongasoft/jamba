@@ -47,7 +47,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+  <string>FULL_VERSION</string>
 	<key>CSResourcesFileMapped</key>
 	<string>yes</string>
 

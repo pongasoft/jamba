@@ -26,8 +26,11 @@
 #define PATCH_NUMBER_STR "@PLUGIN_PATCH_VERSION@"
 #define PATCH_NUMBER_INT @PLUGIN_PATCH_VERSION@
 
-// Version with build number
+// Version with build number (as a string)
 #define FULL_VERSION_STR "@PLUGIN_VERSION@"
+
+// Version with build number
+#define FULL_VERSION @PLUGIN_VERSION@
 
 // Audio Unit version (as an hex int)
 #define AU_VERSION_INT 0x@AU_PLUGIN_VERSION_HEX@
@@ -38,7 +41,9 @@
 #define stringOriginalFilename	"JambaTestPlugin.vst3"
 #define stringFileDescription	"JambaTestPlugin plugin by pongasoft (@JAMBA_ARCHIVE_ARCHITECTURE@)"
 #define stringCompanyName		"pongasoft\0"
-#define stringLegalCopyright	"© 2019-202 pongasoft"
+#define stringLegalCopyright	"© 2019-@JAMBA_CURRENT_YEAR@ pongasoft"
+
+#define JAMBA_CURRENT_YEAR @JAMBA_CURRENT_YEAR@
 
 #ifndef NDEBUG
 #define stringPluginName "JambaTestPlugin_Debug"
