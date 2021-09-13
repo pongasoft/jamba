@@ -73,7 +73,7 @@ TEST(TestReadOnlyMemoryStream, test_read)
 
   auto read = [&ms](int32 numBytes, std::vector<int8> iExpected) {
     std::vector<int8> buf{};
-    buf.reserve(numBytes + 1);
+    buf.resize(numBytes + 1);
     int32 numBytesRead = 0;
     ASSERT_EQ(kResultOk, ms.read(buf.data(), numBytes, &numBytesRead));
     ASSERT_EQ(iExpected.size(), numBytesRead);

@@ -12,6 +12,8 @@ Check the [Requirements](https://jamba.dev/requirements/) documentation for info
   proper version
 * Use latest version of GoogleTest (get rid of CMake warnings)
 * Use `gtest_discover_tests` instead of `gtest_add_tests` to minimize CMake invocation when building tests
+* Make sure that `.rc` file gets regenerated properly when resource files change (Windows)
+* Fixed test issue
 
 > #### Potential breaking changes
 >

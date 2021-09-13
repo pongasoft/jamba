@@ -93,7 +93,7 @@ TEST(TestFastWriteMemoryStream, test_read)
 
   auto read = [&vs](int32 numBytes, std::vector<int8> iExpected) {
     std::vector<int8> buf{};
-    buf.reserve(numBytes + 1);
+    buf.resize(numBytes + 1);
     int32 numBytesRead = 0;
     ASSERT_EQ(kResultOk, vs.read(buf.data(), numBytes, &numBytesRead));
     ASSERT_EQ(iExpected.size(), numBytesRead);
