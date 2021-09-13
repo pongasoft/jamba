@@ -42,7 +42,7 @@ endif()
 #------------------------------------------------------------------------
 set(JAMBA_MAJOR_VERSION 5)
 set(JAMBA_MINOR_VERSION 1)
-set(JAMBA_PATCH_VERSION 4)
+set(JAMBA_PATCH_VERSION 5)
 execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     RESULT_VARIABLE result
     OUTPUT_VARIABLE JAMBA_GIT_VERSION

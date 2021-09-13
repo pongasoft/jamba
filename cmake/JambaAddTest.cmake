@@ -34,7 +34,7 @@ function(jamba_add_test)
 
   add_executable("${ARG_TEST_TARGET}" "${ARG_TEST_CASE_SOURCES}" "${ARG_TEST_SOURCES}" "${WIN_SOURCES}")
   target_link_libraries("${ARG_TEST_TARGET}" gtest_main "${ARG_TEST_LINK_LIBRARIES}")
-  target_include_directories("${ARG_TEST_TARGET}" PUBLIC "${PROJECT_SOURCE_DIR}" "${GTEST_INCLUDE_DIRS}" "${ARG_TEST_INCLUDE_DIRECTORIES}")
+  target_include_directories("${ARG_TEST_TARGET}" PUBLIC "${PROJECT_SOURCE_DIR}" "${ARG_TEST_INCLUDE_DIRECTORIES}")
 
   # Extra compile definitions?
   if(ARG_TEST_COMPILE_DEFINITIONS)
@@ -46,10 +46,7 @@ function(jamba_add_test)
     target_compile_options("${ARG_TEST_TARGET}" PUBLIC "${ARG_TEST_COMPILE_OPTIONS}")
   endif()
 
-  gtest_add_tests(
-      TARGET "${ARG_TEST_TARGET}"
-      TEST_LIST "${ARG_TEST_TARGET}_targets"
-  )
+  gtest_discover_tests("${ARG_TEST_TARGET}")
 
   #------------------------------------------------------------------------
   # test_vst3 target | can be changed by setting TEST_VST3_TARGET before calling this function

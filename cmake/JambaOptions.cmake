@@ -111,9 +111,9 @@ set(googletest_GIT_REPO "https://github.com/google/googletest" CACHE STRING "goo
 
 #------------------------------------------------------------------------
 # The git tag for googletest
-# release-1.10.0 => 703bd9caab50b139428cea1aaff9974ebee5742e
+# release-1.11.0 => e2239ee6043f73722e7aa812a459f54a28552929
 #------------------------------------------------------------------------
-set(googletest_GIT_TAG "703bd9caab50b139428cea1aaff9974ebee5742e" CACHE STRING "googletest git tag")
+set(googletest_GIT_TAG "e2239ee6043f73722e7aa812a459f54a28552929" CACHE STRING "googletest git tag")
 
 #------------------------------------------------------------------------
 # Option to enable generating the dev script which allows to build and install the plugin

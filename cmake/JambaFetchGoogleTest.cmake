@@ -1,4 +1,4 @@
-# Copyright (c) 2020 pongasoft
+# Copyright (c) 2021 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -55,9 +55,8 @@ endif()
 # settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "Set by Jamba" FORCE)
 
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+# Do not install GoogleTest!
+option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" OFF)
 
-# specify include dir
-set(GTEST_INCLUDE_DIRS ${googletest_SOURCE_DIR}/googletest/include)
+# Add googletest directly to our build. This defines the gtest and gtest_main targets.
+add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)

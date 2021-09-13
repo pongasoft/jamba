@@ -3,6 +3,33 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [5.1.5 | 2021-09-13](https://github.com/pongasoft/jamba/tree/v5.1.5)
+
+* Added support for snapshot
+* Processes `Info.plist` through CMake replacement, thus allowing to inject dates, versions, etc...
+* Processes `Info.plist` through Xcode preprocessing when using Xcode generator
+* Fixed issue when plugin was generated without Xcode generator (macOS only) which lead to an `Info.plist` without 
+  proper version
+* Use latest version of GoogleTest (get rid of CMake warnings)
+* Use `gtest_discover_tests` instead of `gtest_add_tests` to minimize CMake invocation when building tests
+
+> #### Potential breaking changes
+>
+> * Due to the change in `Info.plist` processing, you should replace:
+>    ```xml
+>    <-- File mac/Info.plist -->
+>    <-- Replace this (processed only via Xcode preprocessing) -->
+>    <key>CFBundleExecutable</key>
+>    <string>$(EXECUTABLE_NAME)</string>
+>    
+>    <-- With this (processed with all generators) -->
+>    <key>CFBundleExecutable</key>
+>    <string>@MACOSX_BUNDLE_EXECUTABLE_NAME@</string>
+>    ```
+>
+> * Note that since Audio Unit plugins are only generated with the Xcode generator, this change is not necessary for 
+  `audio-unit/Info.plist`
+
 ## [5.1.4 | 2021-02-06](https://github.com/pongasoft/jamba/tree/v5.1.4)
 
 * Fixed issue #11: _create-plugin.py instructions point to wrong configure script_
