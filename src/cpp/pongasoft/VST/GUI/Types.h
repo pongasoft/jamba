@@ -63,9 +63,8 @@ using GradientSPtr = SharedPointer<CGradient>;
 using Range = Utils::Range<CCoord>;
 
 /**
- * Used to register global keyboard hooks
- */
-using KeyboardEventCallback = std::function<CKeyboardEventResult(VstKeyCode const&)>;
+ * Used to register global keyboard hooks */
+using KeyboardEventCallback = std::function<void(KeyboardEvent &)>;
 
 }
 }

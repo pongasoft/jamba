@@ -14,7 +14,7 @@
 #
 # @author Yan Pujante
 
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.19)
 
 include(FetchContent)
 

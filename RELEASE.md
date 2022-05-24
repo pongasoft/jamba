@@ -96,7 +96,7 @@ Check the [Requirements](https://jamba.dev/requirements/) documentation for info
 * Jamba now has a requirement on python (3) for the script (note that you can disable generation of the script by using the CMake option `JAMBA_ENABLE_DEV_SCRIPT` in which case python is not required)
 * `install` command no longer deletes the folder before installation. Use `./jamba.sh uninstall install` if you want this behavior.
 * `prod` command has been removed from main dev script (equivalent to `jamba.sh -r -b test validate archive` but check migration guide for details on how to add it back as a target if you really need it)
-* Requires CMake 3.17
+* Requires CMake 3.19
 * Tested on macOS 10.14.6 with Xcode 11.3.1 (may work with prior versions but untested). Note that there is no requirement changes for Windows.
 
 #### Misc.

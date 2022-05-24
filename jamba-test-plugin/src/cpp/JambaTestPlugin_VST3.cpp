@@ -35,20 +35,6 @@ using namespace pongasoft::VST;
 //------------------------------------------------------------------------
 
 //------------------------------------------------------------------------
-// called after library was loaded
-bool InitModule()
-{
-  return true;
-}
-
-//------------------------------------------------------------------------
-// called after library is unloaded
-bool DeinitModule()
-{
-  return true;
-}
-
-//------------------------------------------------------------------------
 //  VST3 Plugin Main entry point
 //------------------------------------------------------------------------
 SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()

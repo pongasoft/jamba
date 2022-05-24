@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.19)
 
 # build VST 2?
 option(JAMBA_ENABLE_VST2 "Use VST2" ON)

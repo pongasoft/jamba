@@ -18,6 +18,7 @@
 #pragma once
 
 #include <vstgui4/vstgui/lib/cframe.h>
+#include <vstgui4/vstgui/lib/events.h>
 #include <pongasoft/VST/GUI/Types.h>
 #include "SelfContainedViewListener.h"
 
@@ -38,6 +39,7 @@ using namespace VSTGUI;
  * // assuming we are writing a custom view
  * void initState(GUIState *iGUIState)
  * {
+ *   // TODO: fix example
  *   CustomView::initState(iGUIState);
  *   Views::registerGlobalKeyboardHook(this)
  *     ->onKeyDown([this](VstKeyCode const &iKeyCode) -> auto {
@@ -63,28 +65,15 @@ class GlobalKeyboardHook : public SelfContainedViewListener, protected IKeyboard
 {
 public:
   /**
-   * Call this method to register the callback invoked on a key down event. It replaces
+   * Call this method to register the callback invoked on a keyboard event. It replaces
    * any other if there was one and is optional.
    *
-   * @param iOnKeyDownCallback see GUI::KeyboardEventCallback for the function definition
+   * @param iOnKeyboardEventCallback see GUI::KeyboardEventCallback for the function definition
    * @return itself (as a shared pointer) for chaining calls (see example at the top)
    */
-  std::shared_ptr<GlobalKeyboardHook> onKeyDown(KeyboardEventCallback iOnKeyDownCallback)
+  std::shared_ptr<GlobalKeyboardHook> onKeyboardEvent(KeyboardEventCallback iOnKeyboardEventCallback)
   {
-    fOnKeyDownCallback = std::move(iOnKeyDownCallback);
-    return std::dynamic_pointer_cast<GlobalKeyboardHook>(shared_from_this());
-  }
-
-  /**
-   * Call this method to register the callback invoked on a key up event. It replaces
-   * any other if there was one and is optional.
-   *
-   * @param iOnKeyUpCallback see GUI::KeyboardEventCallback for the function definition
-   * @return itself (as a shared pointer) for chaining calls (see example at the top)
-   */
-  std::shared_ptr<GlobalKeyboardHook> onKeyUp(KeyboardEventCallback iOnKeyUpCallback)
-  {
-    fOnKeyUpCallback = std::move(iOnKeyUpCallback);
+    fOnKeyboardEventCallback = std::move(iOnKeyboardEventCallback);
     return std::dynamic_pointer_cast<GlobalKeyboardHook>(shared_from_this());
   }
 
@@ -173,23 +162,15 @@ protected:
   /**
    * Delegate to callback
    */
-  int32_t onKeyDown(const VstKeyCode &iCode, CFrame *frame) override
+  void onKeyboardEvent(KeyboardEvent &event, CFrame *frame) override
   {
-    return fOnKeyDownCallback ? fOnKeyDownCallback(iCode): CKeyboardEventResult::kKeyboardEventNotHandled;
-  }
-
-  /**
-   * Delegate to callback
-   */
-  int32_t onKeyUp(const VstKeyCode &iCode, CFrame *frame) override
-  {
-    return fOnKeyUpCallback ? fOnKeyUpCallback(iCode): CKeyboardEventResult::kKeyboardEventNotHandled;
+    if(fOnKeyboardEventCallback)
+      fOnKeyboardEventCallback(event);
   }
 
 protected:
   CFrame *fFrame{};
-  KeyboardEventCallback fOnKeyDownCallback{};
-  KeyboardEventCallback fOnKeyUpCallback{};
+  KeyboardEventCallback fOnKeyboardEventCallback{};
 };
 
 /**

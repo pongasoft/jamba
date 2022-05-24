@@ -35,6 +35,7 @@ set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "Set by Jamba" FORCE) # disable valida
 set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "Set by Jamba" FORCE) # disable link (explicit install step)
 set(SMTG_ADD_VST3_PLUGINS_SAMPLES OFF CACHE BOOL "Set by Jamba" FORCE) # disable plugin samples
 set(SMTG_CREATE_BUNDLE_FOR_WINDOWS OFF CACHE BOOL "Set by Jamba" FORCE) # disable bundle for Windows (can't build vst2 otherwise)
+set(SMTG_CREATE_MODULE_INFO OFF CACHE BOOL "Set by Jamba" FORCE) # disable moduleinfo (does not work for now)
 
 #-------------------------------------------------------------------------------
 # Properties for VST3
@@ -102,6 +103,9 @@ add_subdirectory(${VST3_SDK_ROOT}/pluginterfaces vst3-sdk/pluginterfaces)
 set(SMTG_ADD_VST3_HOSTING_SAMPLES ON)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/validator vst3-sdk/validator)
 add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)
+
+# moduleinfo
+#add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-utilities vst3-sdk/vst-utilities)
 
 #-------------------------------------------------------------------------------
 # IDE sorting
