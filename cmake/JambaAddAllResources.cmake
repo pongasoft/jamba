@@ -55,7 +55,7 @@ function(jamba_add_all_resources)
 
   if(ARG_RELEASE_SNAPSHOTS)
     foreach(snapshot IN LISTS ARG_RELEASE_SNAPSHOTS)
-      smtg_add_vst3_snapshot(${ARG_TARGET} "${snapshot}")
+      smtg_target_add_plugin_snapshots (${ARG_TARGET} RESOURCES "${snapshot}")
     endforeach()
   endif()
 endfunction()
