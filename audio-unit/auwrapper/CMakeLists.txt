@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.19)
 if (MAC)
   if (XCODE)
     set(AU_WRAPPER_ROOT "${VST3_SDK_ROOT}/public.sdk/source/vst/auwrapper")
-    set(target auwrapper)
+    set(target jmb_auwrapper)
     set(auwrapper_sources
         ${AU_WRAPPER_ROOT}/aucarbonview.mm
         ${AU_WRAPPER_ROOT}/aucarbonview.h
@@ -17,7 +17,6 @@ if (MAC)
         )
     add_library(${target} STATIC ${auwrapper_sources})
     smtg_setup_universal_binary(${target})
-    set_target_properties(${target} PROPERTIES ${SDK_IDE_LIBS_FOLDER})
     target_link_libraries(${target} PRIVATE
         sdk_hosting
         "-framework AudioUnit"

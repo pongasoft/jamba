@@ -29,8 +29,9 @@ endfunction()
 function(internal_jamba_add_vst2_plugin)
   message(STATUS "${ARG_TARGET} will be VST2 compatible")
   if (APPLE)
-    # fix missing VSTPluginMain symbol when also building VST 2 version
-    smtg_target_set_exported_symbols(${ARG_TARGET} "${JAMBA_ROOT}/mac/macexport_vst2.exp")
+    target_link_options(${ARG_TARGET} PUBLIC "LINKER:-exported_symbol,_VSTPluginMain")
+  elseif (WIN32)
+    target_link_options(${ARG_TARGET} PUBLIC "/export:VSTPluginMain")
   endif ()
 endfunction()
 

@@ -51,6 +51,25 @@ function(internal_jamba_add_vst3_plugin)
     # $<TARGET_BUNDLE_DIR:tgt> relies on this property so we must set it (not set by VST3 SDK when XCODE)
     set_target_properties(${ARG_TARGET} PROPERTIES BUNDLE_EXTENSION "vst3")
   endif ()
+
+  if (APPLE)
+    # In the case of Apple we add bundleEntry and bundleExit
+    set(LINK_OPTIONS
+        "LINKER:-exported_symbol,_GetPluginFactory"
+        "LINKER:-exported_symbol,_bundleEntry"
+        "LINKER:-exported_symbol,_bundleExit"
+        )
+  elseif (WIN32)
+    # In the case of Apple we add InitDLL and ExitDLL
+    set(LINK_OPTIONS
+        "/export:GetPluginFactory"
+        "/export:InitDll"
+        "/export:ExitDll"
+        )
+  endif ()
+
+  target_link_options(${ARG_TARGET} PUBLIC ${LINK_OPTIONS} ${ARG_LINK_OPTIONS})
+
 endfunction()
 
 #------------------------------------------------------------------------

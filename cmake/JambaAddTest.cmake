@@ -28,11 +28,14 @@ include(GoogleTest)
 function(jamba_add_test)
   message(STATUS "Adding target ${ARG_TEST_TARGET} for test cases: ${ARG_TEST_CASE_SOURCES}")
 
-  if (WIN32)
-    set(WIN_SOURCES "${JAMBA_ROOT}/windows/testmain.cpp")
-  endif ()
+  # required to run the tests (provide moduleHandle)
+  if(APPLE)
+    set(MAIN_TEST_SOURCES "${VST3_SDK_ROOT}/public.sdk/source/main/macmain.cpp")
+  elseif(WIN32)
+    set(MAIN_TEST_SOURCES "${VST3_SDK_ROOT}/public.sdk/source/main/dllmain.cpp")
+  endif()
 
-  add_executable("${ARG_TEST_TARGET}" "${ARG_TEST_CASE_SOURCES}" "${ARG_TEST_SOURCES}" "${WIN_SOURCES}")
+  add_executable("${ARG_TEST_TARGET}" "${ARG_TEST_CASE_SOURCES}" "${ARG_TEST_SOURCES}" "${MAIN_TEST_SOURCES}")
   target_link_libraries("${ARG_TEST_TARGET}" gtest_main "${ARG_TEST_LINK_LIBRARIES}")
   target_include_directories("${ARG_TEST_TARGET}" PUBLIC "${PROJECT_SOURCE_DIR}" "${ARG_TEST_INCLUDE_DIRECTORIES}")
 

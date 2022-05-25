@@ -14,7 +14,7 @@ if (MAC AND XCODE)
   set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "component")
   set_target_properties(${target} PROPERTIES BUNDLE_EXTENSION "component") # for $<TARGET_BUNDLE_DIR:tgt>
   set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${VST3_OUTPUT_DIR})
-  target_link_libraries(${target} PRIVATE auwrapper)
+  target_link_libraries(${target} PRIVATE jmb_auwrapper)
   smtg_set_bundle(${target} INFOPLIST "${AU_PLUGIN_ROOT}/Info.plist" PREPROCESS)
   set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_INFOPLIST_OTHER_PREPROCESSOR_FLAGS "-I ${CMAKE_BINARY_DIR}/generated")
 
