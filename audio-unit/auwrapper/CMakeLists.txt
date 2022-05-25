@@ -16,7 +16,7 @@ if (MAC)
         ${AU_WRAPPER_ROOT}/NSDataIBStream.h
         )
     add_library(${target} STATIC ${auwrapper_sources})
-    smtg_setup_universal_binary(${target})
+    smtg_target_setup_universal_binary(${target})
     target_link_libraries(${target} PRIVATE
         sdk_hosting
         "-framework AudioUnit"
