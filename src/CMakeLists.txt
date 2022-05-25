@@ -168,16 +168,12 @@ if (JAMBA_ENABLE_VST2)
       ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/processdata.cpp
 
       # JAMBA overrides
-#      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/basewrapper/basewrapper.cpp
-#      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/basewrapper/basewrapper.h
-#      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
-#      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/basewrapper/basewrapper.cpp
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/basewrapper/basewrapper.h
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
+      ${JAMBA_CPP_SOURCES}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
 
       ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
-      ${VST3_SDK_ROOT}/public.sdk/source/vst/basewrapper/basewrapper.cpp
-      ${VST3_SDK_ROOT}/public.sdk/source/vst/basewrapper/basewrapper.h
-      ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
-      ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
 
       # VST2 sources
       ${VST2_SDK_ROOT}/public.sdk/source/vst2.x/audioeffect.cpp

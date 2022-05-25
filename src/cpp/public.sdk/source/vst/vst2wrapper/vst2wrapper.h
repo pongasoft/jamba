@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2020, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -80,7 +80,7 @@ public:
 	//--- BaseWrapper ------------------------------------------
 	bool init () SMTG_OVERRIDE;
 	void _canDoubleReplacing (bool val) SMTG_OVERRIDE;
-	void _setInitialDelay (int32 delay) SMTG_OVERRIDE;
+	void _setInitialDelay (uint32 delay) SMTG_OVERRIDE;
 	void _noTail (bool val) SMTG_OVERRIDE;
 	void setupProcessTimeInfo () SMTG_OVERRIDE;
 
@@ -89,8 +89,8 @@ public:
 
 	void _ioChanged () SMTG_OVERRIDE;
 	void _updateDisplay () SMTG_OVERRIDE;
-	void _setNumInputs (int32 inputs) SMTG_OVERRIDE;
-	void _setNumOutputs (int32 outputs) SMTG_OVERRIDE;
+	void _setNumInputs (uint32 inputs) SMTG_OVERRIDE;
+	void _setNumOutputs (uint32 outputs) SMTG_OVERRIDE;
 	bool _sizeWindow (int32 width, int32 height) SMTG_OVERRIDE;
 
 	//--- ---------------------------------------------------------------------
@@ -188,6 +188,7 @@ public:
 
 	//------------------------------------------------------------------------
 protected:
+
 	VstSpeakerArrangement* mVst2InputArrangement {nullptr};
 	VstSpeakerArrangement* mVst2OutputArrangement {nullptr};
 	Vst2MidiEventQueue* mVst2OutputEvents {nullptr};
@@ -218,5 +219,3 @@ protected:
 
 /** Must be implemented externally. */
 extern ::AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
-
-/// \endcond

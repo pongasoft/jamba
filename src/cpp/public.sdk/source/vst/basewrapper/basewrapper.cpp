@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2020, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -73,7 +73,81 @@
 #include <pongasoft/VST/VstUtils/ReadOnlyMemoryStream.h>
 #include <pongasoft/logging/logging.h>
 
-extern bool DeinitModule (); //! Called in BaseWrapper destructor
+#if SMTG_OS_MACOS
+#include <CoreFoundation/CoreFoundation.h>
+#include <dlfcn.h>
+#endif
+
+extern "C" {
+#if SMTG_OS_MACOS
+	// implemented in macmain.cpp
+	SMTG_EXPORT_SYMBOL bool bundleEntry (CFBundleRef);
+	SMTG_EXPORT_SYMBOL bool bundleExit (void);
+#elif SMTG_OS_WINDOWS
+	// implemented in dllmain.cpp
+	SMTG_EXPORT_SYMBOL bool InitDll ();
+	SMTG_EXPORT_SYMBOL bool ExitDll ();
+#else
+#error platform not supported!
+#endif
+}
+
+#if SMTG_OS_MACOS
+//------------------------------------------------------------------------
+static CFBundleRef GetBundleFromExecutable (const char* filepath)
+{
+	// AutoreleasePool ap;
+	char* fname = strdup (filepath);
+	int pos = strlen (fname);
+	int level = 3;
+	while (level > 0 && --pos >= 0)
+	{
+		if (fname[pos] == '/')
+			level--;
+	}
+	if (level > 0)
+		return 0;
+
+	fname[pos] = 0;
+	CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*)fname, pos, true);
+	CFBundleRef bundle = CFBundleCreate (0, url);
+	return bundle;
+}
+
+//------------------------------------------------------------------------
+static CFBundleRef GetCurrentBundle ()
+{
+	Dl_info info;
+	if (dladdr ((const void*)GetCurrentBundle, &info))
+	{
+		if (info.dli_fname)
+		{
+			return GetBundleFromExecutable (info.dli_fname);
+		}
+	}
+	return 0;
+}
+#endif // SMTG_OS_MACOS
+
+//------------------------------------------------------------------------
+bool _InitModule ()
+{
+#if SMTG_OS_MACOS
+	return bundleEntry (GetCurrentBundle ());
+#else
+	return InitDll ();
+#endif
+}
+
+//------------------------------------------------------------------------
+bool _DeinitModule ()
+{
+#if SMTG_OS_MACOS
+	return bundleExit ();
+#else
+	return ExitDll ();
+#endif
+}
 
 //------------------------------------------------------------------------
 namespace Steinberg {
@@ -253,8 +327,8 @@ public:
 	VstPresetStream (char const* memory, TSize memorySize) : ReadOnlyMemoryStream (memory, memorySize) {}
 
 	//---from Vst::IStreamAttributes-----
-	tresult PLUGIN_API getFileName (String128 name) SMTG_OVERRIDE { return kNotImplemented; }
-	IAttributeList* PLUGIN_API getAttributes () SMTG_OVERRIDE { return &attrList; }
+	tresult PLUGIN_API getFileName (String128 /*name*/) SMTG_OVERRIDE { return kNotImplemented; }
+	IAttributeList* PLUGIN_API getAttributes () SMTG_OVERRIDE { return attrList; }
 
 //------------------------------------------------------------------------
 	DELEGATE_REFCOUNT (ReadOnlyMemoryStream)
@@ -265,7 +339,7 @@ public:
 	}
 
 protected:
-	HostAttributeList attrList;
+	IPtr<IAttributeList> attrList {HostAttributeList::make ()};
 };
 
 //------------------------------------------------------------------------
@@ -304,6 +378,12 @@ BaseWrapper::BaseWrapper (SVST3Config& config)
 
 //------------------------------------------------------------------------
 BaseWrapper::~BaseWrapper ()
+{
+	term ();
+}
+
+//------------------------------------------------------------------------
+void BaseWrapper::term ()
 {
 	mTimer = nullptr;
 
@@ -345,10 +425,13 @@ BaseWrapper::~BaseWrapper ()
 	mUnitInfo = nullptr;
 	mMidiMapping = nullptr;
 
-	if (mMidiCCMapping[0])
+	if (mMidiCCMapping[0][0])
 		for (int32 b = 0; b < kMaxMidiMappingBusses; b++)
 			for (int32 i = 0; i < 16; i++)
+			{
 				delete mMidiCCMapping[b][i];
+				mMidiCCMapping[b][i] = nullptr;
+			}
 
 	mEditor = nullptr;
 	mController = nullptr;
@@ -358,8 +441,6 @@ BaseWrapper::~BaseWrapper ()
 	mPlugInterfaceSupport = nullptr;
 	mProcessorConnection = nullptr;
 	mControllerConnection = nullptr;
-
-	DeinitModule ();
 }
 
 //------------------------------------------------------------------------
@@ -665,9 +746,9 @@ void BaseWrapper::getUnitPath (UnitID unitID, String& path) const
 	}
 }
 //------------------------------------------------------------------------
-int32 BaseWrapper::_getChunk (void** data, bool isPreset)
+int32 BaseWrapper::_getChunk (void** data, bool /*isPreset*/)
 {
-  // Host stores plug-in state. Returns the size in bytes of the chunk (Plug-in allocates the data
+	// Host stores plug-in state. Returns the size in bytes of the chunk (Plug-in allocates the data
 	// array)
 	FastWriteMemoryStream componentStream;
 	if (mComponent && mComponent->getState (&componentStream) != kResultTrue)
@@ -697,22 +778,22 @@ int32 BaseWrapper::_getChunk (void** data, bool isPreset)
 //------------------------------------------------------------------------
 int32 BaseWrapper::_setChunk (void* data, int32 byteSize, bool isPreset)
 {
-  if(!mComponent)
-    return 0;
+	if (!mComponent)
+		return 0;
 
-  // throw away all previously queued parameter changes, they are obsolete
-  mGuiTransfer.removeChanges();
-  mInputTransfer.removeChanges();
+	// throw away all previously queued parameter changes, they are obsolete
+	mGuiTransfer.removeChanges ();
+	mInputTransfer.removeChanges ();
 
   // here ReadOnlyMemoryStream is fine because it is simply used to read a data array => it does not allocate any memory
   ReadOnlyMemoryStream chunk(static_cast<char const *>(data), byteSize);
-  IBStreamer acc(&chunk, kLittleEndian);
+	IBStreamer acc (&chunk, kLittleEndian);
 
-  int64 componentDataSize = 0;
-  int64 controllerDataSize = 0;
+	int64 componentDataSize = 0;
+	int64 controllerDataSize = 0;
 
-  acc.readInt64(componentDataSize);
-  acc.readInt64(controllerDataSize);
+	acc.readInt64 (componentDataSize);
+	acc.readInt64 (controllerDataSize);
 
   // sanity check: we make sure that the pointer passed contains enough data, otherwise the following code
   // will access potentially invalid memory
@@ -722,27 +803,30 @@ int32 BaseWrapper::_setChunk (void* data, int32 byteSize, bool isPreset)
     return 0;
   }
 
-  VstPresetStream componentStream(((char *) data) + acc.tell(), componentDataSize);
-  VstPresetStream controllerStream(((char *) data) + acc.tell() + componentDataSize, controllerDataSize);
+	VstPresetStream componentStream (((char*)data) + acc.tell (), componentDataSize);
+	VstPresetStream controllerStream (((char*)data) + acc.tell () + componentDataSize,
+	                                  controllerDataSize);
 
-  if(!isPreset)
-  {
-    if(Vst::IAttributeList *attr = componentStream.getAttributes())
-      attr->setString(Vst::PresetAttributes::kStateType, String(Vst::StateType::kProject));
-    if(Vst::IAttributeList *attr = controllerStream.getAttributes())
-      attr->setString(Vst::PresetAttributes::kStateType, String(Vst::StateType::kProject));
-  }
+	if (!isPreset)
+	{
+		if (Vst::IAttributeList* attr = componentStream.getAttributes ())
+			attr->setString (Vst::PresetAttributes::kStateType,
+				String (Vst::StateType::kProject));
+		if (Vst::IAttributeList* attr = controllerStream.getAttributes ())
+			attr->setString (Vst::PresetAttributes::kStateType,
+				String (Vst::StateType::kProject));
+	}
 
-  mComponent->setState(&componentStream);
-  componentStream.seek(0, IBStream::kIBSeekSet, nullptr);
+	mComponent->setState (&componentStream);
+	componentStream.seek (0, IBStream::kIBSeekSet, nullptr);
 
-  if(mController)
-  {
-    mController->setComponentState(&componentStream);
-    mController->setState(&controllerStream);
-  }
+	if (mController)
+	{
+		mController->setComponentState (&componentStream);
+		mController->setState (&controllerStream);
+	}
 
-  return 0;
+	return 0;
 }
 
 //------------------------------------------------------------------------
@@ -826,18 +910,18 @@ void BaseWrapper::setEffectVersion (char* version)
 		mVersion = 0;
 	else
 	{
-		int32 major = 1;
-		int32 minor = 0;
-		int32 subminor = 0;
-		int32 subsubminor = 0;
-		int32 ret = sscanf (version, "%d.%d.%d.%d", &major, &minor, &subminor, &subsubminor);
-		mVersion = (major & 0xff) << 24;
+		long major = 1;
+		long minor = 0;
+		long subminor = 0;
+		long subsubminor = 0;
+		int32 ret = sscanf (version, "%ld.%ld.%ld.%ld", &major, &minor, &subminor, &subsubminor);
+		mVersion = static_cast<int32> ((major & 0xff) << 24);
 		if (ret > 3)
-			mVersion += (subsubminor & 0xff);
+			mVersion += static_cast<int32> (subsubminor & 0xff);
 		if (ret > 2)
-			mVersion += (subminor & 0xff) << 8;
+			mVersion += static_cast<int32> ((subminor & 0xff) << 8);
 		if (ret > 1)
-			mVersion += (minor & 0xff) << 16;
+			mVersion += static_cast<int32> ((minor & 0xff) << 16);
 	}
 }
 
@@ -960,7 +1044,7 @@ void BaseWrapper::setupParameters ()
 		ProgramListID programListId;
 		if (getProgramListAndUnit (midiChannel, unitId, programListId))
 		{
-			for (int32 i = 0; i < static_cast<int32> (programParameterInfos.size ()); i++)
+			for (uint32 i = 0; i < programParameterInfos.size (); i++)
 			{
 				const ParameterInfo& paramInfo = programParameterInfos.at (i);
 				if (paramInfo.unitId == unitId)
@@ -986,7 +1070,7 @@ void BaseWrapper::initMidiCtrlerAssignment ()
 	{
 		for (int32 b = 0; b < busses; b++)
 			for (int32 i = 0; i < 16; i++)
-				mMidiCCMapping[b][i] = NEW int32[Vst::kCountCtrlNumber];
+				mMidiCCMapping[b][i] = NEW ParamID[Vst::kCountCtrlNumber];
 	}
 
 	ParamID paramID;
@@ -1024,9 +1108,9 @@ void BaseWrapper::_setSampleRate (float newSamplerate)
 }
 
 //-----------------------------------------------------------------------------
-int32 BaseWrapper::countMainBusChannels (BusDirection dir, uint64& mainBusBitset)
+uint32 BaseWrapper::countMainBusChannels (BusDirection dir, uint64& mainBusBitset)
 {
-	int32 result = 0;
+	uint32 result = 0;
 	mainBusBitset = 0;
 
 	int32 busCount = mComponent->getBusCount (kAudio, dir);
@@ -1055,8 +1139,8 @@ int32 BaseWrapper::countMainBusChannels (BusDirection dir, uint64& mainBusBitset
 void BaseWrapper::processMidiEvent (Event& toAdd, char* midiData, bool isLive, int32 noteLength,
                                     float noteOffVelocity, float detune)
 {
-	uint8 status = midiData[0] & kStatusMask;
-	uint8 channel = midiData[0] & kChannelMask;
+	uint8 status = static_cast<uint8> (midiData[0] & kStatusMask);
+	uint8 channel = static_cast<uint8> (midiData[0] & kChannelMask);
 
 	// not allowed
 	if (channel >= 16)
@@ -1097,8 +1181,8 @@ void BaseWrapper::processMidiEvent (Event& toAdd, char* midiData, bool isLive, i
 		{
 			toAdd.type = Vst::Event::kPolyPressureEvent;
 			toAdd.polyPressure.channel = channel;
-			toAdd.polyPressure.pitch = midiData[1] & kDataMask;
-			toAdd.polyPressure.pressure = (midiData[2] & kDataMask) * kMidiScaler;
+			toAdd.polyPressure.pitch = static_cast<int16>(midiData[1] & kDataMask);
+			toAdd.polyPressure.pressure = (float)(midiData[2] & kDataMask) * kMidiScaler;
 			toAdd.polyPressure.noteId = -1; // TODO ?
 
 			mInputEvents->addEvent (toAdd);
@@ -1116,11 +1200,9 @@ void BaseWrapper::processMidiEvent (Event& toAdd, char* midiData, bool isLive, i
 					ParamValue value = (double)midiData[2] * kMidiScaler;
 
 					int32 index = 0;
-					IParamValueQueue* queue = mInputChanges.addParameterData (paramID, index);
-					if (queue)
-					{
+					if (IParamValueQueue* queue = mInputChanges.addParameterData (paramID, index))
 						queue->addPoint (toAdd.sampleOffset, value, index);
-					}
+
 					mGuiTransfer.addChange (paramID, value, toAdd.sampleOffset);
 				}
 			}
@@ -1136,15 +1218,13 @@ void BaseWrapper::processMidiEvent (Event& toAdd, char* midiData, bool isLive, i
 				{
 					const double kPitchWheelScaler = 1. / (double)0x3FFF;
 
-					const int32 ctrl = (midiData[1] & kDataMask) | (midiData[2] & kDataMask) << 7;
+					const int32 ctrl = static_cast<int32> ((midiData[1] & kDataMask) | ((midiData[2] & kDataMask) << 7));
 					ParamValue value = kPitchWheelScaler * (double)ctrl;
 
 					int32 index = 0;
-					IParamValueQueue* queue = mInputChanges.addParameterData (paramID, index);
-					if (queue)
-					{
+					if (IParamValueQueue* queue = mInputChanges.addParameterData (paramID, index))					
 						queue->addPoint (toAdd.sampleOffset, value, index);
-					}
+					
 					mGuiTransfer.addChange (paramID, value, toAdd.sampleOffset);
 				}
 			}
@@ -1161,11 +1241,9 @@ void BaseWrapper::processMidiEvent (Event& toAdd, char* midiData, bool isLive, i
 					ParamValue value = (ParamValue) (midiData[1] & kDataMask) * kMidiScaler;
 
 					int32 index = 0;
-					IParamValueQueue* queue = mInputChanges.addParameterData (paramID, index);
-					if (queue)
-					{
+					if (IParamValueQueue* queue = mInputChanges.addParameterData (paramID, index))
 						queue->addPoint (toAdd.sampleOffset, value, index);
-					}
+
 					mGuiTransfer.addChange (paramID, value, toAdd.sampleOffset);
 				}
 			}
@@ -1406,8 +1484,12 @@ tresult PLUGIN_API BaseWrapper::createInstance (TUID cid, TUID iid, void** obj)
 	}
 	else if (classID == IAttributeList::iid && interfaceID == IAttributeList::iid)
 	{
-		*obj = new HostAttributeList;
-		return kResultTrue;
+		if (auto al = HostAttributeList::make ())
+		{
+			*obj = al.take ();
+			return kResultTrue;
+		}
+		return kOutOfMemory;
 	}
 	*obj = nullptr;
 	return kResultFalse;
@@ -1416,13 +1498,13 @@ tresult PLUGIN_API BaseWrapper::createInstance (TUID cid, TUID iid, void** obj)
 //-----------------------------------------------------------------------------
 // IUnitHandler
 //-----------------------------------------------------------------------------
-tresult PLUGIN_API BaseWrapper::notifyUnitSelection (UnitID unitId)
+tresult PLUGIN_API BaseWrapper::notifyUnitSelection (UnitID /*unitId*/)
 {
 	return kResultTrue;
 }
 
 //-----------------------------------------------------------------------------
-tresult PLUGIN_API BaseWrapper::notifyProgramListChange (ProgramListID listId, int32 programIndex)
+tresult PLUGIN_API BaseWrapper::notifyProgramListChange (ProgramListID /*listId*/, int32 /*programIndex*/)
 {
 	// TODO -> redirect to hasMidiProgramsChanged somehow...
 	return kResultTrue;

@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2020, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -64,6 +64,7 @@
 #include "pluginterfaces/vst/ivstprocesscontext.h"
 #include "pluginterfaces/vst/ivstunits.h"
 
+#include "public.sdk/source/common/memorystream.h"
 #include "public.sdk/source/vst/hosting/eventlist.h"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "public.sdk/source/vst/hosting/pluginterfacesupport.h"
@@ -141,14 +142,14 @@ public:
 
 	virtual bool init ();
 
-	virtual void _canDoubleReplacing (bool val) {}
-	virtual void _setInitialDelay (int32 delay) {}
-	virtual void _noTail (bool val) {}
+	virtual void _canDoubleReplacing (bool /*val*/) {}
+	virtual void _setInitialDelay (uint32 /*delay*/) {}
+	virtual void _noTail (bool /*val*/) {}
 
 	virtual void _ioChanged () {}
 	virtual void _updateDisplay () {}
-	virtual void _setNumInputs (int32 inputs) { mNumInputs = inputs; }
-	virtual void _setNumOutputs (int32 outputs) { mNumOutputs = outputs; }
+	virtual void _setNumInputs (uint32 inputs) { mNumInputs = inputs; }
+	virtual void _setNumOutputs (uint32 outputs) { mNumOutputs = outputs; }
 	virtual bool _sizeWindow (int32 width, int32 height) = 0;
 	virtual int32 _getChunk (void** data, bool isPreset);
 	virtual int32 _setChunk (void* data, int32 byteSize, bool isPreset);
@@ -156,8 +157,8 @@ public:
 	virtual bool getEditorSize (int32& width, int32& height) const;
 
 	bool isActive () const { return mActive; }
-	int32 getNumInputs () const { return mNumInputs; }
-	int32 getNumOutputs () const { return mNumOutputs; }
+	uint32 getNumInputs () const { return mNumInputs; }
+	uint32 getNumOutputs () const { return mNumOutputs; }
 
 	BaseEditorWrapper* getEditor () const { return mEditor; }
 
@@ -183,6 +184,8 @@ public:
 
 //-------------------------------------------------------------------------------------------------------
 protected:
+	void term ();
+
 	virtual void setupParameters ();
 	virtual void setupProcessTimeInfo () = 0;
 	virtual void processOutputEvents () {}
@@ -217,7 +220,7 @@ protected:
 	void initMidiCtrlerAssignment ();
 	void getUnitPath (UnitID unitID, String& path) const;
 
-	int32 countMainBusChannels (BusDirection dir, uint64& mainBusBitset);
+	uint32 countMainBusChannels (BusDirection dir, uint64& mainBusBitset);
 
 	/**	Returns the last param change from guiTransfer queue. */
 	bool getLastParamChange (ParamID id, ParamValue& value);
@@ -296,14 +299,14 @@ protected:
 	int32 mBlockSize {256};
 	int32 mNumParams {0};
 	int32 mCurProgram {-1};
-	int32 mNumInputs {0};
-	int32 mNumOutputs {0};
+	uint32 mNumInputs {0};
+	uint32 mNumOutputs {0};
 
 	enum
 	{
 		kMaxMidiMappingBusses = 4
 	};
-	int32* mMidiCCMapping[kMaxMidiMappingBusses][16];
+	ParamID* mMidiCCMapping[kMaxMidiMappingBusses][16];
 
 	bool mComponentInitialized = false;
 	bool mControllerInitialized = false;
