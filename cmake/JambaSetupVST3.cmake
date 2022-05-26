@@ -46,7 +46,6 @@ set(vst3sdk_SOURCE_DIR "${VST3_SDK_ROOT}")
 set(SMTG_VSTGUI_ROOT "${vst3sdk_SOURCE_DIR}")
 add_subdirectory(${vst3sdk_SOURCE_DIR} ${PROJECT_BINARY_DIR}/vst3sdk)
 smtg_enable_vst3_sdk()
-smtg_setup_symbol_visibility()
 
 #-------------------------------------------------------------------------------
 # editorhost - excluded by vst3sdk/CMakeLists.txt => need to add it manually
