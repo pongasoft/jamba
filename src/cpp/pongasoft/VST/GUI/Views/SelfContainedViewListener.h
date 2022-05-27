@@ -74,7 +74,7 @@ using namespace VSTGUI;
  * }
  * ```
  *
- * Implementation note: internally this class keeps a `std::shared_ptr` to ifself for as long as `this` is registered
+ * Implementation note: internally this class keeps a `std::shared_ptr` to itself for as long as `this` is registered
  * with the view itself, ensuring that this class is not going to be deleted until the view goes away (or it is
  * unregistered). If an outside piece of code also has a reference to this class which is scenario 2, then the class
  * itself won't be deleted until this other reference goes away.
@@ -98,7 +98,7 @@ public:
   template<typename T, typename ...Args>
   static std::shared_ptr<T> create(CView *iView, Args&& ...iArgs)
   {
-    // ensures that TView is a subclass of CView
+    // ensures that TView is a subclass of SelfContainedViewListener
     static_assert(std::is_convertible<T *, SelfContainedViewListener*>::value, "T must be a subclass of SelfContainedViewListener");
 
     auto res = std::make_shared<T>(std::forward<Args>(iArgs)...);
