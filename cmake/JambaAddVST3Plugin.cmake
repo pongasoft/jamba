@@ -119,8 +119,15 @@ function(internal_jamba_add_vst3_targets)
   # run_editor target
   #------------------------------------------------------------------------
   add_custom_target("${ARG_TARGETS_PREFIX}run_editor"
-      COMMAND $<TARGET_FILE:editorhost> ${VST3_PLUGIN_SRC}
+      COMMAND $<TARGET_FILE:editorhost> "${VST3_PLUGIN_SRC}"
       DEPENDS ${ARG_TARGET} editorhost)
+
+  #------------------------------------------------------------------------
+  # run_info target
+  #------------------------------------------------------------------------
+  add_custom_target("${ARG_TARGETS_PREFIX}run_info"
+      COMMAND $<TARGET_FILE:moduleinfotool> -create -version "${PROJECT_VERSION}" -path "${VST3_PLUGIN_SRC}"
+      DEPENDS ${ARG_TARGET} moduleinfotool)
 
   #------------------------------------------------------------------------
   # run_inspector target

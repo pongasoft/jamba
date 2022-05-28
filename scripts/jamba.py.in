@@ -90,6 +90,7 @@ Commands {doc_build_config}
   test      : run the tests for the plugin
   validate  : run the validator for the vst3 plugin
   edit      : run the editor (full editing available in Debug config only)
+  info      : run the module info tool (display json info about the plugin)
   inspect   : run the inspector (inspects ALL installed plugins)
   install   : build and install all the plugins (vst2/vst3/audio unit)
   uninstall : delete the installed plugins (vst2/vst3/audio unit)
@@ -132,6 +133,7 @@ available_commands = {
     'install': f'{targets_prefix}install_all',
     'uninstall': f'{targets_prefix}uninstall_all',
     'edit': f'{targets_prefix}run_editor',
+    'info': f'{targets_prefix}run_info',
     'inspect': f'{targets_prefix}run_inspector',
     'validate': f'{targets_prefix}run_validator',
     'test': f'{targets_prefix}test_vst3',

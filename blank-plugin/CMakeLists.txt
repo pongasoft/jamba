@@ -29,7 +29,7 @@ set(PLUGIN_PATCH_VERSION 0)
 set(PLUGIN_VERSION "${PLUGIN_MAJOR_VERSION}.${PLUGIN_MINOR_VERSION}.${PLUGIN_PATCH_VERSION}")
 
 # Project
-project("[-name-]")
+project("[-name-]" VERSION "${PLUGIN_VERSION}")
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly
 set(GOOGLETEST_ROOT_DIR "")

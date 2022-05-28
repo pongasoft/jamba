@@ -101,6 +101,14 @@ function(jamba_add_vst_plugin)
       ${ARGN}
   )
 
+  #------------------------------------------------------------------------
+  # Sanity check
+  #------------------------------------------------------------------------
+  if(NOT PROJECT_VERSION)
+    message(WARNING "project VERSION not set. Consider setting it with PLUGIN_VERSION (ex: project(xxx VERSION \${PLUGIN_VERSION})")
+    set(PROJECT_VERSION "${PLUGIN_VERSION}")
+  endif()
+
   # Make sure ARG_TARGET has a value (default to project name if not provided)
   set_default_value(ARG_TARGET "${CMAKE_PROJECT_NAME}")
   set_default_value(ARG_UIDESC "${CMAKE_CURRENT_LIST_DIR}/resource/${ARG_TARGET}.uidesc")
