@@ -34,7 +34,9 @@ set(SMTG_ENABLE_TARGET_VARS_LOG OFF CACHE BOOL "Set by Jamba" FORCE) # disable d
 set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "Set by Jamba" FORCE) # disable validator (explicit validate step)
 set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "Set by Jamba" FORCE) # disable link (explicit install step)
 set(SMTG_ADD_VST3_PLUGINS_SAMPLES OFF CACHE BOOL "Set by Jamba" FORCE) # disable plugin samples
-set(SMTG_CREATE_BUNDLE_FOR_WINDOWS OFF CACHE BOOL "Set by Jamba" FORCE) # disable bundle for Windows (can't build vst2 otherwise)
+if(WIN32 AND JAMBA_ENABLE_VST2)
+    set(SMTG_CREATE_BUNDLE_FOR_WINDOWS OFF CACHE BOOL "Set by Jamba" FORCE) # disable bundle for Windows (can't build vst2 otherwise)
+endif()
 
 #-------------------------------------------------------------------------------
 # Including vst3sdk as a subdirectory (requires some variables to be setup)

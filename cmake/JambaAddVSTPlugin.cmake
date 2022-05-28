@@ -25,29 +25,32 @@
 function(internal_jamba_create_install_target component src dstDir extension)
   if(APPLE)
     # Cannot use generator expression in install => must define multiple with different CONFIGURATIONS
-    install(DIRECTORY "${src}/"
-        COMPONENT "${component}"
-        CONFIGURATIONS Debug
-        DESTINATION "${dstDir}/${ARG_RELEASE_FILENAME}_Debug.${extension}"
-        )
-    install(DIRECTORY "${src}/"
-        COMPONENT "${component}"
-        CONFIGURATIONS Release
-        DESTINATION "${dstDir}/${ARG_RELEASE_FILENAME}.${extension}"
-        )
   elseif(WIN32)
-    install(FILES "${src}"
-        COMPONENT "${component}"
-        DESTINATION "${dstDir}"
-        CONFIGURATIONS Debug
-        RENAME "${ARG_RELEASE_FILENAME}_Debug.${extension}"
-        )
-    install(FILES "${src}"
-        COMPONENT "${component}"
-        DESTINATION "${dstDir}"
-        CONFIGURATIONS Release
-        RENAME "${ARG_RELEASE_FILENAME}.${extension}"
-        )
+    if(SMTG_CREATE_BUNDLE_FOR_WINDOWS)
+      install(DIRECTORY "${src}/"
+              COMPONENT "${component}"
+              CONFIGURATIONS Debug
+              DESTINATION "${dstDir}/${ARG_RELEASE_FILENAME}_Debug.${extension}"
+              )
+      install(DIRECTORY "${src}/"
+              COMPONENT "${component}"
+              CONFIGURATIONS Release
+              DESTINATION "${dstDir}/${ARG_RELEASE_FILENAME}.${extension}"
+              )
+    else()
+      install(FILES "${src}"
+              COMPONENT "${component}"
+              DESTINATION "${dstDir}"
+              CONFIGURATIONS Debug
+              RENAME "${ARG_RELEASE_FILENAME}_Debug.${extension}"
+              )
+      install(FILES "${src}"
+              COMPONENT "${component}"
+              DESTINATION "${dstDir}"
+              CONFIGURATIONS Release
+              RENAME "${ARG_RELEASE_FILENAME}.${extension}"
+              )
+    endif()
   endif()
 
   set(PLUGIN_FILENAME "${ARG_RELEASE_FILENAME}$<$<CONFIG:Debug>:_Debug>.${extension}")

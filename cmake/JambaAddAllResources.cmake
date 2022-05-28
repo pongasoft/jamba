@@ -25,7 +25,9 @@ function(jamba_add_all_resources)
   get_filename_component(UIDESC_FILENAME ${ARG_UIDESC} NAME_WLE)
   get_filename_component(UIDESC_DIR ${ARG_UIDESC} DIRECTORY)
 
-  internal_jamba_add_resource("${ARG_UIDESC}" "DATA" "" JAMBA_VST3_RESOURCES_RC "" JAMBA_VST3_RESOURCES_FILE_DEPENDENCY)
+  if(NOT SMTG_CREATE_BUNDLE_FOR_WINDOWS)
+    internal_jamba_add_resource("${ARG_UIDESC}" "DATA" "" JAMBA_VST3_RESOURCES_RC "" JAMBA_VST3_RESOURCES_FILE_DEPENDENCY)
+  endif()
   internal_jamba_add_resources("${JAMBA_VST3_RESOURCES_RC}" JAMBA_VST3_RESOURCES_RC "${JAMBA_VST3_RESOURCES_FILE_DEPENDENCY}" JAMBA_VST3_RESOURCES_FILE_DEPENDENCY)
 
   if (APPLE)
