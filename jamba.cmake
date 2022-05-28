@@ -94,6 +94,15 @@ include(JambaSetupVST3)
 # Defining VST3_OUTPUT_DIR which is the location where the VST3 artifact is hosted
 set(VST3_OUTPUT_DIR ${CMAKE_BINARY_DIR}/VST3)
 
+if(WIN32)
+  # Patching win32resourcestream.cpp which contains a bug
+  get_target_property(vstgui_sources vstgui SOURCES)
+  list(REMOVE_ITEM vstgui_sources "platform/win32/win32resourcestream.cpp")
+  list(APPEND vstgui_sources "${CMAKE_CURRENT_LIST_DIR}/src/cpp/vstgui4/vstgui/lib/platform/win32/win32resourcestream.cpp")
+  set_target_properties(vstgui PROPERTIES SOURCES "${vstgui_sources}")
+  target_include_directories(vstgui PRIVATE "${SMTG_VSTGUI_ROOT}")
+endif()
+
 #------------------------------------------------------------------------
 # Optionally including VST2 SDK
 #------------------------------------------------------------------------
