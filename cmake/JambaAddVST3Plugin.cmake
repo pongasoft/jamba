@@ -123,6 +123,13 @@ function(internal_jamba_add_vst3_targets)
       DEPENDS ${ARG_TARGET} editorhost)
 
   #------------------------------------------------------------------------
+  # run_inspector target
+  #------------------------------------------------------------------------
+  add_custom_target("${ARG_TARGETS_PREFIX}run_inspector"
+      COMMAND $<TARGET_FILE:VST3Inspector>
+      DEPENDS VST3Inspector)
+
+  #------------------------------------------------------------------------
   # clean_all target
   #------------------------------------------------------------------------
   add_custom_target("${ARG_TARGETS_PREFIX}clean_all"
