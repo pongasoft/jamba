@@ -35,7 +35,9 @@ set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "Set by Jamba" FORCE) # disable valida
 set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "Set by Jamba" FORCE) # disable link (explicit install step)
 set(SMTG_ADD_VST3_PLUGINS_SAMPLES OFF CACHE BOOL "Set by Jamba" FORCE) # disable plugin samples
 if(WIN32 AND JAMBA_ENABLE_VST2)
-    set(SMTG_CREATE_BUNDLE_FOR_WINDOWS OFF CACHE BOOL "Set by Jamba" FORCE) # disable bundle for Windows (can't build vst2 otherwise)
+    # disable bundle for Windows (can't build vst2 otherwise)
+    set(SMTG_CREATE_MODULE_INFO OFF CACHE BOOL "Set by Jamba" FORCE)
+    set(SMTG_CREATE_BUNDLE_FOR_WINDOWS OFF CACHE BOOL "Set by Jamba" FORCE)
 endif()
 
 #-------------------------------------------------------------------------------

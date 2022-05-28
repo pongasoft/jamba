@@ -12,6 +12,9 @@ set(JAMBA_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 # Determine proper architecture for the project
 include("${JAMBA_ROOT_DIR}/cmake/JambaSetArchitecture.cmake")
 
+# can't set version because it must match jamba version (chicken and egg problem)
+set(JAMBA_PROJECT_VERSION_WARNING_DISABLED ON)
+
 project(JambaTestPlugin)
 
 # To use local googletest install, uncomment the following line (no download) and modify the path accordingly

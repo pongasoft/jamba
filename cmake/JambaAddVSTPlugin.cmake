@@ -108,7 +108,9 @@ function(jamba_add_vst_plugin)
   # Sanity check
   #------------------------------------------------------------------------
   if(NOT PROJECT_VERSION)
-    message(WARNING "project VERSION not set. Consider setting it with PLUGIN_VERSION (ex: project(xxx VERSION \${PLUGIN_VERSION})")
+    if(NOT JAMBA_PROJECT_VERSION_WARNING_DISABLED)
+      message(WARNING "project VERSION not set. Consider setting it with PLUGIN_VERSION (ex: project(xxx VERSION \${PLUGIN_VERSION})")
+    endif()
     set(PROJECT_VERSION "${PLUGIN_VERSION}")
   endif()
 
