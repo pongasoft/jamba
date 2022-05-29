@@ -199,6 +199,7 @@ if (JAMBA_ENABLE_VST2)
 endif()
 target_compile_definitions(jamba PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
 target_link_libraries(jamba PUBLIC base sdk vstgui_support)
+smtg_target_setup_universal_binary(jamba)
 
 set(JAMBA_CPP_SOURCES "${JAMBA_CPP_SOURCES}" PARENT_SCOPE)
 set(JAMBA_LOGURU_IMPL "${JAMBA_LOGURU_IMPL}" PARENT_SCOPE)

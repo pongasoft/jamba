@@ -25,7 +25,7 @@ option(JAMBA_ENABLE_XCODE_UNIVERSAL_BUILD "Enable building x86/arm64 universal b
 if(APPLE)
   # set the deployment target if provided
   if(JAMBA_MACOS_DEPLOYMENT_TARGET)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "${JAMBA_MACOS_DEPLOYMENT_TARGET}" CACHE STRING "")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "${JAMBA_MACOS_DEPLOYMENT_TARGET}" CACHE STRING "" FORCE)
   endif()
 
   # on macOS "uname -m" returns the architecture (x86_64 or arm64)
@@ -40,10 +40,11 @@ if(APPLE)
   if(JAMBA_ENABLE_XCODE_UNIVERSAL_BUILD                     # is universal build enabled?
       AND (CMAKE_GENERATOR STREQUAL "Xcode")                # works only with Xcode
       AND (JAMBA_OSX_NATIVE_ARCHITECTURE STREQUAL "arm64")) # and only when running on arm64
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "")
+    option(SMTG_BUILD_UNIVERSAL_BINARY "Build universal binary (x86_64 & arm64)" ON)
     set(JAMBA_ARCHIVE_ARCHITECTURE "macOS_universal")
     message(STATUS "macOS universal (x86_64 / arm64) build")
   else()
+    option(SMTG_BUILD_UNIVERSAL_BINARY "Build universal binary (x86_64 & arm64)" OFF)
     set(JAMBA_ARCHIVE_ARCHITECTURE "macOS_${JAMBA_OSX_NATIVE_ARCHITECTURE}")
     message(STATUS "macOS native ${JAMBA_OSX_NATIVE_ARCHITECTURE} build")
   endif()

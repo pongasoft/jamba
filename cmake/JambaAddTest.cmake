@@ -38,6 +38,7 @@ function(jamba_add_test)
   add_executable("${ARG_TEST_TARGET}" "${ARG_TEST_CASE_SOURCES}" "${ARG_TEST_SOURCES}" "${MAIN_TEST_SOURCES}")
   target_link_libraries("${ARG_TEST_TARGET}" gtest_main "${ARG_TEST_LINK_LIBRARIES}")
   target_include_directories("${ARG_TEST_TARGET}" PUBLIC "${PROJECT_SOURCE_DIR}" "${ARG_TEST_INCLUDE_DIRECTORIES}")
+  smtg_target_setup_universal_binary("${ARG_TEST_TARGET}")
 
   # Extra compile definitions?
   if(ARG_TEST_COMPILE_DEFINITIONS)

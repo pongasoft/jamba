@@ -6,6 +6,9 @@ option(JAMBA_ENABLE_VST2 "Use VST2" ON)
 # build Audio Unit?
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" ON)
 
+# Sets the deployment target for macOS
+set(JAMBA_MACOS_DEPLOYMENT_TARGET "10.14" CACHE STRING "macOS deployment target")
+
 # To use local jamba install, uncomment the following line (no download)
 set(JAMBA_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 

@@ -60,3 +60,8 @@ option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding goo
 
 # Add googletest directly to our build. This defines the gtest and gtest_main targets.
 add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+smtg_target_setup_universal_binary("gtest")
+smtg_target_setup_universal_binary("gtest_main")
+smtg_target_setup_universal_binary("gmock")
+smtg_target_setup_universal_binary("gmock_main")
