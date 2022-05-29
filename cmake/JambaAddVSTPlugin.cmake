@@ -25,6 +25,16 @@
 function(internal_jamba_create_install_target component src dstDir extension)
   if(APPLE)
     # Cannot use generator expression in install => must define multiple with different CONFIGURATIONS
+    install(DIRECTORY "${src}/"
+            COMPONENT "${component}"
+            CONFIGURATIONS Debug
+            DESTINATION "${dstDir}/${ARG_RELEASE_FILENAME}_Debug.${extension}"
+            )
+    install(DIRECTORY "${src}/"
+            COMPONENT "${component}"
+            CONFIGURATIONS Release
+            DESTINATION "${dstDir}/${ARG_RELEASE_FILENAME}.${extension}"
+        )
   elseif(WIN32)
     if(SMTG_CREATE_BUNDLE_FOR_WINDOWS)
       install(DIRECTORY "${src}/"
