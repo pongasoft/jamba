@@ -3,6 +3,29 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [6.0.0 | 2022-05-30](https://github.com/pongasoft/jamba/tree/v6.0.0)
+
+* Migrated Jamba to use VST3 SDK 3.7.5 (introduces breaking changes)
+* Requires CMake minimum version 3.19 (SDK requirement)
+* Added `inspect` command to run the `VST3Inspector` tool
+* Added `info` command to run the `moduleinfotool` tool (new since SDK 3.7.5)
+* Generate and bundle `moduleinfo.json` (new since SDK 3.7.5)
+* On Windows, build a module (`.vst3` folder) instead of a DLL when `VST2` is disabled
+* Use json format instead of xml (new since SDK 3.7.2)
+
+> #### Migration required
+>
+> * `InitModule()` (resp. `DeinitModule()`) cannot be used anymore (since the SDK now implements them).
+>   Instead, you need to use `Steinberg::ModuleInitializer` (resp. `Steinberg::ModuleTerminator`) concept.
+>   If your code simply has empty implementations for these functions, you can safely delete them.
+> * You should provide the version of the plugin in the project definition (required by `moduleinfotool`)
+>  ```
+>  # From CMakeLists.txt
+>  project(MyPlugin VERSION "${PLUGIN_VERSION}")
+>  ```
+> * The `GlobalKeyboardHook::onKeyDown` and `GlobalKeyboardHook::onKeyUp` methods have been replaced by
+>   a single `GlobalKeyboardHook::onKeyboardEvent` (due to changes in the SDK)
+
 ## [5.1.5 | 2021-09-13](https://github.com/pongasoft/jamba/tree/v5.1.5)
 
 * Added support for snapshot

@@ -16,11 +16,11 @@ Features
 ### Build & Deploy
 
 - simple script to build, test, validate, edit and install the plugin from the command line (see [jamba.sh (.bat)](https://jamba.dev/jamba.sh/)
-- build a **self contained** plugin that depends on the VST3 SDK
+- build a **self-contained** plugin that depends on the VST3 SDK
 - optionally builds a VST2 compatible plugin
 - optionally wraps the VST3 plugin into an Audio Unit plugin (macOS)
 - build a universal plugin for Apple Silicon support (macOS)  
-- easily adds resources (images) in a cross platform way
+- easily adds resources (images) in a cross-platform way
 - easily write unit tests for your project
 - build on macOS and Windows 10
 - package your project as an archive (zip file) for production release
@@ -46,7 +46,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 Latest Release
 --------------
 
-5.1.5 | 2021-09-13
+6.0.0 | 2022-05-30
 
 [Release notes (local)](RELEASE.md)
 

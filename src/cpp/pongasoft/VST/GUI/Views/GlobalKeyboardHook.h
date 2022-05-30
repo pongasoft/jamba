@@ -27,7 +27,7 @@ namespace pongasoft::VST::GUI::Views {
 using namespace VSTGUI;
 
 /**
- * The `CView` class provides 2 methods to handle keyboard events (`CView::onKeyDown` and `CView::onKeyUp`) which
+ * The `CView` class provides a method to handle keyboard events (`CView::onKeyboardEvent`) which
  * only works as long as the view itself has focus. This helper class is designed to set a keyboard hook which is
  * global so it will work whether the view has the focus or not. This class automatically handles registering
  * the hook to the frame (when it becomes available) and unregistering it automatically as well. As an added bonus
@@ -39,26 +39,16 @@ using namespace VSTGUI;
  * // assuming we are writing a custom view
  * void initState(GUIState *iGUIState)
  * {
- *   // TODO: fix example
  *   CustomView::initState(iGUIState);
- *   Views::registerGlobalKeyboardHook(this)
- *     ->onKeyDown([this](VstKeyCode const &iKeyCode) -> auto {
- *       if(iKeyCode.character == 'z')
+ *   Views::registerGlobalKeyboardHook(this)->onKeyboardEvent([this] (KeyboardEvent &iEvent) {
+ *       if(iEvent.character == 'z'
+ *          && iEvent.type == VSTGUI::EventType::KeyDown
+ *          && iEvent.modifiers.empty())
  *       {
- *         // do something...
- *         return CKeyboardEventResult::kKeyboardEventHandled;
+ *         zoomToSelection();
+ *         iEvent.consumed = true;
  *       }
- *       return CKeyboardEventResult::kKeyboardEventNotHandled;
- *     })
- *     ->onKeyUp([this](VstKeyCode const &iKeyCode) -> auto {
- *       if(iKeyCode.character == 'z')
- *       {
- *         // do something else...
- *         return CKeyboardEventResult::kKeyboardEventHandled;
- *       }
- *       return CKeyboardEventResult::kKeyboardEventNotHandled;
- *    });
- * }
+ *   });
  * ```
  */
 class GlobalKeyboardHook : public SelfContainedViewListener, protected IKeyboardHook
