@@ -58,7 +58,7 @@ set(JAMBA_VST3SDK_GIT_REPO "https://github.com/steinbergmedia/vst3sdk" CACHE STR
 # Note that it is using a commit hash and not a tag since per CMake recommendations, it is faster to use
 # a hash (local check only) vs tag (requires remote check)
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_GIT_TAG 79750cb3e56f3988f33bc178884962cc3f4c3eb9 CACHE STRING "Vst3sdk git tag")
+set(JAMBA_VST3SDK_GIT_TAG 56e4b2a644be164c5d324e8bc9de55b964b0f102 CACHE STRING "Vst3sdk git tag")
 
 #------------------------------------------------------------------------
 # C++ language level (Jamba requires C++17)
