@@ -42,6 +42,7 @@ if(APPLE)
       AND (JAMBA_OSX_NATIVE_ARCHITECTURE STREQUAL "arm64")) # and only when running on arm64
     option(SMTG_BUILD_UNIVERSAL_BINARY "Build universal binary (x86_64 & arm64)" ON)
     set(JAMBA_ARCHIVE_ARCHITECTURE "macOS_universal")
+    set(CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE PRE_TEST) # fixes gtest crash
     message(STATUS "macOS universal (x86_64 / arm64) build")
   else()
     option(SMTG_BUILD_UNIVERSAL_BINARY "Build universal binary (x86_64 & arm64)" OFF)
