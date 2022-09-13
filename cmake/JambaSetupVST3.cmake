@@ -43,10 +43,15 @@ endif()
 #-------------------------------------------------------------------------------
 # Including vst3sdk as a subdirectory (requires some variables to be setup)
 # call smtg_enable_vst3_sdk() for the plugin
-# call smtg_setup_symbol_visibility() (which should be done in smtg_enable_vst3_sdk!)
 #-------------------------------------------------------------------------------
 set(vst3sdk_SOURCE_DIR "${VST3_SDK_ROOT}")
 set(SMTG_VSTGUI_ROOT "${vst3sdk_SOURCE_DIR}")
+
+# For some reason this is needed to remove the visibility warning
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 add_subdirectory(${vst3sdk_SOURCE_DIR} ${PROJECT_BINARY_DIR}/vst3sdk)
 smtg_enable_vst3_sdk()
 

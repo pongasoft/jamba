@@ -60,7 +60,7 @@ function(internal_jamba_add_vst3_plugin)
         "LINKER:-exported_symbol,_bundleExit"
         )
   elseif (WIN32)
-    # In the case of Apple we add InitDLL and ExitDLL
+    # In the case of Windows we add InitDLL and ExitDLL
     set(LINK_OPTIONS
         "/export:GetPluginFactory"
         "/export:InitDll"
