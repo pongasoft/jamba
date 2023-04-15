@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 pongasoft
+ * Copyright (c) 2018-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -262,6 +262,9 @@ private:
   RTVstParameter<T> *fPtr;
 };
 
+template<typename T, size_t N>
+using RTVstParams = std::array<RTVstParam<T>, N>;
+
 //------------------------------------------------------------------------
 // RTRawVstParam - wrapper to make writing the code much simpler and natural
 //------------------------------------------------------------------------
@@ -334,6 +337,9 @@ public:
 private:
   RTRawVstParameter *fPtr;
 };
+
+template<size_t N>
+using RTRawVstParams = std::array<RTRawVstParam, N>;
 
 }
 

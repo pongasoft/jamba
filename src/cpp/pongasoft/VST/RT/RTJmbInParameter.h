@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 pongasoft
+ * Copyright (c) 2018-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -175,5 +175,8 @@ public:
 private:
   RTJmbInParameter<T> *fPtr;
 };
+
+template<typename T, size_t N>
+using RTJmbInParams = std::array<RTJmbInParam<T>, N>;
 
 }

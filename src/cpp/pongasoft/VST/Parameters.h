@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 pongasoft
+ * Copyright (c) 2018-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -465,6 +465,9 @@ private:
   std::map<int16, NormalizedState::SaveOrder> fGUIDeprecatedSaveStateOrders{};
 
 private:
+  // add id to the param (checking that the parameter actually exists)
+  tresult addParamID(std::vector<ParamID> &oParamIDs, ParamID iParamID);
+
   // leaf of templated calls to build a list of ParamIDs from ParamID or ParamDefs
   tresult buildParamIDs(std::vector<ParamID> &iParamIDs) { return kResultOk; }
 
@@ -487,11 +490,15 @@ private:
   }
 
   // case when VstParamDef
-  template<typename ParamConverver, typename... Args>
-  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<VstParamDef<ParamConverver>> &iParamDef, Args&& ...args)
+  template<typename ParamConverter, typename... Args>
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::shared_ptr<VstParamDef<ParamConverter>> &iParamDef, Args&& ...args)
   {
     return buildParamIDs(iParamIDs, iParamDef->fParamID, std::forward<Args>(args)...);
   }
+
+  // case when array of VstParamDef
+  template<typename ParamConverter, size_t N, typename... Args>
+  tresult buildParamIDs(std::vector<ParamID> &iParamIDs, std::array<std::shared_ptr<VstParamDef<ParamConverter>>, N> &iParamDefs, Args&& ...args);
 
   // case when RawVstParamDef
   template<typename... Args>
@@ -663,18 +670,20 @@ Parameters::JmbParamDefBuilder<typename ParamSerializer::ParamType> Parameters::
 template<typename... Args>
 tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, ParamID iParamID, Args&& ...args)
 {
-  tresult res = kResultOk;
+  tresult res = addParamID(iParamIDs, iParamID);
+  res |= buildParamIDs(iParamIDs, std::forward<Args>(args)...);
+  return res;
+}
 
-  if(fVstParams.find(iParamID) != fVstParams.cend() ||
-     fJmbParams.find(iParamID) != fJmbParams.cend())
-  {
-    iParamIDs.emplace_back(iParamID);
-  }
-  else
-  {
-    DLOG_F(ERROR, "No such parameter [%d]", iParamID);
-    res = kResultFalse;
-  }
+//------------------------------------------------------------------------
+// Parameters::buildParamIDs
+//------------------------------------------------------------------------
+template<typename ParamConverter, size_t N, typename... Args>
+tresult Parameters::buildParamIDs(std::vector<ParamID> &iParamIDs, std::array<std::shared_ptr<VstParamDef<ParamConverter>>, N> &iParamDefs, Args&& ...args)
+{
+  tresult res = kResultOk;
+  for(auto &def: iParamDefs)
+    res |= addParamID(iParamIDs, def->fParamID);
   res |= buildParamIDs(iParamIDs, std::forward<Args>(args)...);
   return res;
 }

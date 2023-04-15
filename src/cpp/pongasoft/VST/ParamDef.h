@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 pongasoft
+ * Copyright (c) 2018-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -508,10 +508,19 @@ template<typename T>
 using VstParam = std::shared_ptr<VstParamDef<T>>;
 using RawVstParam = std::shared_ptr<RawVstParamDef>;
 
+template<typename T, size_t N>
+using VstParams = std::array<VstParam<T>, N>;
+
+template<size_t N>
+using RawVstParams = std::array<RawVstParam, N>;
+
 //------------------------------------------------------------------------
 // JmbParam - define shortcut notation
 //------------------------------------------------------------------------
 template<typename T>
 using JmbParam = std::shared_ptr<JmbParamDef<T>>;
+
+template<typename T, size_t N>
+using JmbParams = std::array<JmbParam<T>, N>;
 
 }

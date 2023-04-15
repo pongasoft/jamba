@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 pongasoft
+ * Copyright (c) 2018-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -617,6 +617,26 @@ RawVstParam Parameters::add(RawVstParamDefBuilder const &iBuilder)
 Parameters::RawVstParamDefBuilder Parameters::raw(ParamID iParamID, VstString16 iTitle)
 {
   return Parameters::RawVstParamDefBuilder(this, iParamID, std::move(iTitle));
+}
+
+//------------------------------------------------------------------------
+// Parameters::addParamID
+//------------------------------------------------------------------------
+tresult Parameters::addParamID(std::vector<ParamID> &oParamIDs, ParamID iParamID)
+{
+  tresult res = kResultOk;
+
+  if(fVstParams.find(iParamID) != fVstParams.cend() ||
+     fJmbParams.find(iParamID) != fJmbParams.cend())
+  {
+    oParamIDs.emplace_back(iParamID);
+  }
+  else
+  {
+    DLOG_F(ERROR, "No such parameter [%d]", iParamID);
+    res = kResultFalse;
+  }
+  return res;
 }
 
 }

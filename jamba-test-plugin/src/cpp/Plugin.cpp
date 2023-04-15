@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 pongasoft
+ * Copyright (c) 2019-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -129,6 +129,19 @@ JambaTestPluginParameters::JambaTestPluginParameters()
       .defaultValue(DEFAULT_GAIN)
       .add();
 
+  //------------------------------------------------------------------------
+  // array
+  //------------------------------------------------------------------------
+  for(int i = 0; i < fArrayVst.size(); i++)
+  {
+    fArrayVst[i] =
+      vst<BooleanParamConverter>(EJambaTestPluginParamID::kArrayVst0 + i,
+                                 VstUtils::printf16(STR16("arrayVst[%d]"), i),
+                                 VstUtils::printf16(STR16("Off (arrayVst[%d])"), i),
+                                 VstUtils::printf16(STR16("On (arrayVst[%d])"), i))
+        .add();
+  }
+
   setRTSaveStateOrder(PROCESSOR_STATE_VERSION,
                       fBypass,
                       fRawVst,
@@ -139,7 +152,8 @@ JambaTestPluginParameters::JambaTestPluginParameters()
                       fEnumVst,
                       fEnumClassVst,
                       fNonContiguousEnumVst,
-                      fGainVst);
+                      fGainVst,
+                      fArrayVst);
 
   //------------------------------------------------------------------------
   // various flavors of Jmb parameters

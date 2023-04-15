@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 pongasoft
+ * Copyright (c) 2018-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@
 #pragma once
 
 #include <pongasoft/Utils/Concurrent/Concurrent.h>
+#include <pongasoft/Utils/stl.h>
 #include <pongasoft/VST/Parameters.h>
 #include <pongasoft/VST/NormalizedState.h>
 #include <pongasoft/VST/MessageProducer.h>
@@ -52,11 +53,27 @@ public:
   RTRawVstParam add(RawVstParam iParamDef);
 
   /**
+   * This method is used when multiple params of the same type are managed in an array (ex: leds, etc...). The order
+   * in which this method is called is important and reflects the order that will be used when
+   * reading/writing state to the stream
+   */
+  template<size_t N>
+  RTRawVstParams<N> add(RawVstParams<N> const &iParamDefs);
+
+  /**
    * This method is called for each parameter managed by RTState. The order in which this method is called is
    * important and reflects the order that will be used when reading/writing state to the stream
    */
   template<typename T>
   RTVstParam<T> add(VstParam<T> iParamDef);
+
+  /**
+   * This method is used when multiple params of the same type are managed in an array (ex: leds, etc...). The order in
+   * which this method is called is important and reflects the order that will be used when reading/writing state to
+   * the stream.
+   */
+  template<typename T, size_t N>
+  RTVstParams<T, N> add(VstParams<T, N> const &iParamDefs);
 
   /**
    * This method should be called to add an rt outbound jmb parameter
@@ -65,10 +82,22 @@ public:
   RTJmbOutParam<T> addJmbOut(JmbParam<T> iParamDef);
 
   /**
+   * This method used when multiple params of the same type are managed in an array for outbound jmb parameter
+   */
+  template<typename T, size_t N>
+  RTJmbOutParams<T, N> addJmbOut(JmbParams<T, N> const &iParamDefs);
+
+  /**
    * This method should be called to add an rt inbound jmb parameter
    */
   template<typename T>
   RTJmbInParam<T> addJmbIn(JmbParam<T> iParamDef);
+
+  /**
+   * This method used when multiple params of the same type are managed in an array for inbound jmb parameter
+   */
+  template<typename T, size_t N>
+  RTJmbInParams<T, N> addJmbIn(JmbParams<T, N> const &iParamDefs);
 
   /**
    * Call this method after adding all the parameters. If using the RT processor, it will happen automatically. */
@@ -220,6 +249,24 @@ RTVstParam<T> RTState::add(VstParam<T> iParamDef)
 }
 
 //------------------------------------------------------------------------
+// RTState::add
+//------------------------------------------------------------------------
+template<size_t N>
+RTRawVstParams<N> RTState::add(RawVstParams<N> const &iParamDefs)
+{
+  return stl::transform<RTRawVstParam, RawVstParam>(iParamDefs, [this](auto &p) { return add(p); });
+}
+
+//------------------------------------------------------------------------
+// RTState::add
+//------------------------------------------------------------------------
+template<typename T, size_t N>
+RTVstParams<T, N> RTState::add(VstParams<T, N> const &iParamDefs)
+{
+  return stl::transform<VstParam<T>, RTVstParam<T>>(iParamDefs, [this](auto &p) { return add(p); });
+}
+
+//------------------------------------------------------------------------
 // RTState::addJmbOut
 //------------------------------------------------------------------------
 template<typename T>
@@ -230,6 +277,15 @@ RTJmbOutParam<T> RTState::addJmbOut(JmbParam<T> iParamDef)
   std::unique_ptr<IRTJmbOutParameter> rtParam{rawPtr};
   addOutboundMessagingParameter(std::move(rtParam));
   return rawPtr;
+}
+
+//------------------------------------------------------------------------
+// RTState::addJmbOut
+//------------------------------------------------------------------------
+template<typename T, size_t N>
+RTJmbOutParams<T, N> RTState::addJmbOut(JmbParams<T, N> const &iParamDefs)
+{
+  return stl::transform<RTJmbOutParam<T>, JmbParam<T>>(iParamDefs, [this](auto &p) { return addJmbOut(p); });
 }
 
 //------------------------------------------------------------------------
@@ -244,6 +300,15 @@ RTJmbInParam<T> RTState::addJmbIn(JmbParam<T> iParamDef)
   addInboundMessagingParameter(std::move(rtParam));
   fMessageHandler.registerHandler(iParamDef->fParamID, rawPtr);
   return rawPtr;
+}
+
+//------------------------------------------------------------------------
+// RTState::addJmbIn
+//------------------------------------------------------------------------
+template<typename T, size_t N>
+RTJmbInParams<T, N> RTState::addJmbIn(JmbParams<T, N> const &iParamDefs)
+{
+  return stl::transform<RTJmbInParam<T>, JmbParam<T>>(iParamDefs, [this](auto &p) { return addJmbIn(p); });
 }
 
 }

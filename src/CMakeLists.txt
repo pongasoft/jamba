@@ -26,6 +26,7 @@ set(JAMBA_sources_h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Metaprogramming.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Misc.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/Operators.h
+    ${JAMBA_CPP_SOURCES}/pongasoft/Utils/stl.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.h
     ${JAMBA_CPP_SOURCES}/pongasoft/Utils/StringUtils.cpp
 

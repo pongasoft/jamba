@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,7 +33,7 @@ using namespace Steinberg::Vst;
  * ```
  * int pad = 3;
  * String title;
- * title.printf(STR16("Pad [%d]", pad);
+ * title.printf(STR16("Pad [%d]"), pad);
  *
  * // because std::basic_string<Steinberg::char16> can be created from a char16 const *,
  * // then you can simply use title.text16() wherever a VstString16 is requested

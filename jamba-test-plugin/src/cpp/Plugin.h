@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 pongasoft
+ * Copyright (c) 2019-2023 pongasoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -64,6 +64,9 @@ public:
   VstParam<ENonContiguousEnum> fNonContiguousEnumVst;
   VstParam<Gain> fGainVst;
 
+  // array
+  VstParams<bool, 2> fArrayVst;
+
   // various flavors of Jmb parameters
   JmbParam<ParamValue> fParamValueJmb;
   JmbParam<int32> fInt32Jmb;
@@ -100,6 +103,7 @@ public:
   RTVstParam<EEnumClass> fEnumClassVst;
   RTVstParam<ENonContiguousEnum> fNonContiguousEnumVst;
   RTVstParam<Gain> fGainVst;
+  RTVstParams<bool, 2> fArrayVst;
 
 public:
   explicit JambaTestPluginRTState(JambaTestPluginParameters const &iParams) :
@@ -113,7 +117,8 @@ public:
     fEnumVst{add(iParams.fEnumVst)},
     fEnumClassVst{add(iParams.fEnumClassVst)},
     fNonContiguousEnumVst{add(iParams.fNonContiguousEnumVst)},
-    fGainVst{add(iParams.fGainVst)}
+    fGainVst{add(iParams.fGainVst)},
+    fArrayVst{add(iParams.fArrayVst)}
   {
   }
 

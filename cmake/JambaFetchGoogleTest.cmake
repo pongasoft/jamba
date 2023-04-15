@@ -1,4 +1,4 @@
-# Copyright (c) 2021 pongasoft
+# Copyright (c) 2021-2023 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -26,16 +26,15 @@ else()
 endif()
 
 FetchContent_Declare(googletest
-    GIT_REPOSITORY    ${googletest_GIT_REPO}
-    GIT_TAG           ${googletest_GIT_TAG}
-    GIT_CONFIG        advice.detachedHead=false
-    SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
-    BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND     ""
-    INSTALL_COMMAND   ""
-    TEST_COMMAND      ""
-)
+    URL                        "${googletest_DOWNLOAD_URL}"
+    DOWNLOAD_EXTRACT_TIMESTAMP true
+    SOURCE_DIR                 "${CMAKE_BINARY_DIR}/googletest-src"
+    BINARY_DIR                 "${CMAKE_BINARY_DIR}/googletest-build"
+    CONFIGURE_COMMAND          ""
+    BUILD_COMMAND              ""
+    INSTALL_COMMAND            ""
+    TEST_COMMAND               ""
+    )
 
 FetchContent_GetProperties(googletest)
 
@@ -44,7 +43,7 @@ if(NOT googletest_POPULATED)
   if(FETCHCONTENT_SOURCE_DIR_GOOGLETEST)
     message(STATUS "Using googletest from local ${FETCHCONTENT_SOURCE_DIR_GOOGLETEST}")
   else()
-    message(STATUS "Fetching googletest ${googletest_GIT_REPO}/tree/${googletest_GIT_TAG}")
+    message(STATUS "Fetching googletest from ${googletest_DOWNLOAD_URL}")
   endif()
 
   FetchContent_Populate(googletest)
