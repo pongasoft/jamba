@@ -349,6 +349,15 @@ public:
   }
 
   /**
+   * Makes the buffer NON silent (by setting the flag to 0). A flag is set to 1 when silent, so when set to 0 it is non
+   * silent...
+   */
+  inline void clearSilentFlag()
+  {
+    fBuffer.silenceFlags = 0;
+  }
+
+  /**
    * @return true if the channel is silent (according to silenceFlags)
    */
   inline bool isSilent(int32 iChannel) const
@@ -403,11 +412,17 @@ public:
    */
   inline const Channel getRightChannel() const { return getAudioChannel(DEFAULT_RIGHT_CHANNEL); }
 
-  // returns the underlying buffer
+  //! Returns the underlying (sample) buffer
   inline SampleType **getBuffer();
 
-  // returns the underlying buffer
+  // returns the underlying (sample) buffer (const version)
   inline SampleType const * const *getBuffer() const;
+
+  //! Returns the `AudioBusBuffers` original buffer
+  inline AudioBusBuffers &getAudioBusBuffers() { return fBuffer; }
+
+  //! Returns the `AudioBusBuffers` original buffer (const version)
+  inline AudioBusBuffers const &getAudioBusBuffers() const { return fBuffer; }
 
   /**
    * @return number of channels (2 for stereo) of the underlying buffer

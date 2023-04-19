@@ -3,6 +3,10 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [6.2.0 | 2023-04-19](https://github.com/pongasoft/jamba/tree/v6.2.0)
+
+* Enhanced `AudioBuffer` API
+
 ## [6.1.0 | 2023-04-15](https://github.com/pongasoft/jamba/tree/v6.1.0)
 
 * Added support for arrays of properties (see [Plugin.h](https://github.com/pongasoft/jamba/blob/master/jamba-test-plugin/src/cpp/Plugin.h) for a full example). For example, you can now write:
