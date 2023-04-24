@@ -32,6 +32,11 @@ function(internal_jamba_add_vst3_plugin)
   # We need to link with jamba (which defines what it needs to link with)
   target_link_libraries("${ARG_TARGET}" PUBLIC "jamba" "${ARG_LINK_LIBRARIES}")
 
+  # Making sure that all libraries included are setup for universal build
+  foreach(lib IN LISTS ARG_LINK_LIBRARIES)
+    smtg_target_setup_universal_binary("${lib})")
+  endforeach()
+
   # Extra includes?
   if(ARG_INCLUDE_DIRECTORIES)
     target_include_directories("${ARG_TARGET}" PUBLIC "${ARG_INCLUDE_DIRECTORIES}")
