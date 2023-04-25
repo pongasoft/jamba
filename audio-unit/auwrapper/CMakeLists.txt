@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 
 if (MAC)
   if (XCODE)
-    set(AU_WRAPPER_ROOT "${VST3_SDK_ROOT}/public.sdk/source/vst/auwrapper")
+    set(AU_WRAPPER_ROOT "${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/auwrapper")
     set(target jmb_auwrapper)
     set(auwrapper_sources
         ${AU_WRAPPER_ROOT}/aucarbonview.mm

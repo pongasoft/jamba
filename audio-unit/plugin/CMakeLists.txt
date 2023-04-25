@@ -39,6 +39,6 @@ if (MAC AND XCODE)
       "-I" "${CMAKE_BINARY_DIR}/generated"
       "-o" "${AU_OUTPUT_DIR}/${target}.component/Contents/Resources/${target}.rsrc"
       "-useDF"
-      "${VST3_SDK_ROOT}/public.sdk/source/vst/auwrapper/auresource.r"
+      "${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/auwrapper/auresource.r"
       )
 endif ()

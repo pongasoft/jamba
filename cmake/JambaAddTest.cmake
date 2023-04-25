@@ -1,4 +1,4 @@
-# Copyright (c) 2020 pongasoft
+# Copyright (c) 2020-2023 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -30,9 +30,9 @@ function(jamba_add_test)
 
   # required to run the tests (provide moduleHandle)
   if(APPLE)
-    set(MAIN_TEST_SOURCES "${VST3_SDK_ROOT}/public.sdk/source/main/macmain.cpp")
+    set(MAIN_TEST_SOURCES "${vst3sdk_SOURCE_DIR}/public.sdk/source/main/macmain.cpp")
   elseif(WIN32)
-    set(MAIN_TEST_SOURCES "${VST3_SDK_ROOT}/public.sdk/source/main/dllmain.cpp")
+    set(MAIN_TEST_SOURCES "${vst3sdk_SOURCE_DIR}/public.sdk/source/main/dllmain.cpp")
   endif()
 
   add_executable("${ARG_TEST_TARGET}" "${ARG_TEST_CASE_SOURCES}" "${ARG_TEST_SOURCES}" "${MAIN_TEST_SOURCES}")

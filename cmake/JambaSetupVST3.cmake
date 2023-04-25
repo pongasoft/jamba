@@ -1,4 +1,4 @@
-# Copyright (c) 2020 pongasoft
+# Copyright (c) 2020-2023 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -25,6 +25,7 @@
 include(JambaFetchVST3)
 
 message(STATUS "VST3_SDK_ROOT=${VST3_SDK_ROOT}")
+message(STATUS "vst3sdk_SOURCE_DIR=${vst3sdk_SOURCE_DIR}")
 
 #-------------------------------------------------------------------------------
 # Options defined prior to including SDK (not changeable for correct Jamba behavior)
@@ -44,7 +45,6 @@ endif()
 # Including vst3sdk as a subdirectory (requires some variables to be setup)
 # call smtg_enable_vst3_sdk() for the plugin
 #-------------------------------------------------------------------------------
-set(vst3sdk_SOURCE_DIR "${VST3_SDK_ROOT}")
 set(SMTG_VSTGUI_ROOT "${vst3sdk_SOURCE_DIR}")
 
 # For some reason this is needed to remove the visibility warning
@@ -60,5 +60,5 @@ smtg_enable_vst3_sdk()
 #-------------------------------------------------------------------------------
 set(SDK_IDE_HOSTING_EXAMPLES_FOLDER FOLDER "HostingExamples")
 set(SMTG_ADD_VST3_HOSTING_SAMPLES ON)
-set(SDK_ROOT "${VST3_SDK_ROOT}")
-add_subdirectory(${VST3_SDK_ROOT}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)
+set(SDK_ROOT "${vst3sdk_SOURCE_DIR}")
+add_subdirectory(${vst3sdk_SOURCE_DIR}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)

@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 pongasoft
+# Copyright (c) 2020-2023 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -22,8 +22,7 @@ cmake_minimum_required (VERSION 3.19)
 set(JAMBA_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
 #------------------------------------------------------------------------
-# Adding cmake folder to cmake path => allow for Jamba cmake files +
-# override PlatformToolset
+# Adding cmake folder to cmake path => allow for Jamba cmake files
 #------------------------------------------------------------------------
 list(APPEND CMAKE_MODULE_PATH "${JAMBA_ROOT}/cmake")
 
@@ -31,6 +30,11 @@ list(APPEND CMAKE_MODULE_PATH "${JAMBA_ROOT}/cmake")
 # Including files containing the various options for Jamba (in one place)
 #------------------------------------------------------------------------
 include(JambaOptions)
+
+#------------------------------------------------------------------------
+# Defines jamba_fetch_content()
+#------------------------------------------------------------------------
+include(JambaFetchContent)
 
 # This needs to be done as soon as possible
 if(JAMBA_ENABLE_TESTING)
@@ -93,15 +97,6 @@ include(JambaSetupVST3)
 
 # Defining VST3_OUTPUT_DIR which is the location where the VST3 artifact is hosted
 set(VST3_OUTPUT_DIR ${CMAKE_BINARY_DIR}/VST3)
-
-if(WIN32)
-  # Patching win32resourcestream.cpp which contains a bug
-  get_target_property(vstgui_sources vstgui SOURCES)
-  list(REMOVE_ITEM vstgui_sources "platform/win32/win32resourcestream.cpp")
-  list(APPEND vstgui_sources "${CMAKE_CURRENT_LIST_DIR}/src/cpp/vstgui4/vstgui/lib/platform/win32/win32resourcestream.cpp")
-  set_target_properties(vstgui PROPERTIES SOURCES "${vstgui_sources}")
-  target_include_directories(vstgui PRIVATE "${SMTG_VSTGUI_ROOT}")
-endif()
 
 #------------------------------------------------------------------------
 # Optionally including VST2 SDK

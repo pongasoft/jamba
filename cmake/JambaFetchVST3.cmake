@@ -1,4 +1,4 @@
-# Copyright (c) 2020 pongasoft
+# Copyright (c) 2020-2023 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -34,38 +34,52 @@ if(NOT EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}" AND EXISTS "${VST3_SDK_RO
 endif()
 
 #------------------------------------------------------------------------
+# internal_jamba_copy_vst3sdk
+#------------------------------------------------------------------------
+macro(internal_jamba_copy_vst3sdk FROM_DIR TO_DIR)
+  if(NOT INTERNAL_JAMBA_VST3SDK_COPY_LOCATION)
+    message(STATUS "Copying: ${FROM_DIR} -> ${TO_DIR}")
+    file(COPY "${FROM_DIR}/CMakeLists.txt" DESTINATION "${TO_DIR}")
+    file(COPY "${FROM_DIR}/base" DESTINATION "${TO_DIR}")
+    file(COPY "${FROM_DIR}/cmake" DESTINATION "${TO_DIR}")
+    file(COPY "${FROM_DIR}/pluginterfaces" DESTINATION "${TO_DIR}")
+    file(COPY "${FROM_DIR}/public.sdk" DESTINATION "${TO_DIR}")
+    file(COPY "${FROM_DIR}/vstgui4" DESTINATION "${TO_DIR}")
+    file(CHMOD_RECURSE "${TO_DIR}"
+         FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+         DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_EXECUTE
+        )
+    set(INTERNAL_JAMBA_VST3SDK_COPY_LOCATION "${TO_DIR}" CACHE PATH "Location (copy) of VST3 SDK" FORCE)
+  endif()
+endmacro()
+
+#------------------------------------------------------------------------
+# internal_jamba_patch_vst3sdk
+#------------------------------------------------------------------------
+macro(internal_jamba_patch_vst3sdk FROM_DIR TO_DIR)
+  if(NOT INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION)
+    message(STATUS "Patching: ${FROM_DIR} -> ${TO_DIR}")
+    file(COPY "${FROM_DIR}/public.sdk" DESTINATION "${TO_DIR}")
+    file(COPY "${FROM_DIR}/cmake" DESTINATION "${TO_DIR}")
+    file(COPY "${FROM_DIR}/vstgui4" DESTINATION "${TO_DIR}")
+    set(INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION "${TO_DIR}" CACHE PATH "Location (patch) of VST3 SDK" FORCE)
+  endif()
+endmacro()
+
+#------------------------------------------------------------------------
 # If no local install and download is allowed => fetch it from github
 #------------------------------------------------------------------------
-if(NOT EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}" AND JAMBA_DOWNLOAD_VSTSDK)
-  include(FetchContent)
-
-  set(FETCHCONTENT_SOURCE_DIR_VST3SDK "")
-
-  FetchContent_Declare(vst3sdk
-      GIT_REPOSITORY    ${JAMBA_VST3SDK_GIT_REPO}
-      GIT_TAG           ${JAMBA_VST3SDK_GIT_TAG}
-      GIT_CONFIG        advice.detachedHead=false
-      GIT_PROGRESS      true
-      SOURCE_DIR        "${CMAKE_BINARY_DIR}/vst3sdk"
-      BINARY_DIR        "${CMAKE_BINARY_DIR}/vst3sdk-build"
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND     ""
-      INSTALL_COMMAND   ""
-      TEST_COMMAND      ""
-      )
-
-  FetchContent_GetProperties(vst3sdk)
-
-  if(NOT vst3sdk_POPULATED)
-    message(STATUS "Fetching vst3sdk ${VST3SDK_GIT_REPO}@${VST3SDK_GIT_TAG}")
-    FetchContent_Populate(vst3sdk)
-    set(VST3_SDK_ROOT "${vst3sdk_SOURCE_DIR}" CACHE PATH "Location of VST3 SDK" FORCE)
-  endif()
+if(EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}")
+  set(vst3sdk_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/vst3sdk-src")
+  internal_jamba_copy_vst3sdk("${VST3_SDK_ROOT}" "${vst3sdk_SOURCE_DIR}")
+  internal_jamba_patch_vst3sdk("${JAMBA_ROOT}/vst3sdk_${JAMBA_VST3SDK_VERSION}" "${vst3sdk_SOURCE_DIR}")
+elseif(JAMBA_DOWNLOAD_VSTSDK)
+  jamba_fetch_content(NAME vst3sdk GIT_REPO "${JAMBA_VST3SDK_GIT_REPO}" GIT_TAG "${JAMBA_VST3SDK_GIT_TAG}")
 endif()
 
 #------------------------------------------------------------------------
 # Final check => must find a valid VST3 installation!
 #------------------------------------------------------------------------
-if(NOT EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}")
+if(NOT EXISTS "${vst3sdk_SOURCE_DIR}/${VSTSDK3_KNOWN_FILE}")
   message(FATAL_ERROR "Unable to find (local or remote) a valid VST3 install [VST3_SDK_ROOT=${VST3_SDK_ROOT}]")
 endif()
