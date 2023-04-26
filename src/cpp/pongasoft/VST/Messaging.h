@@ -157,7 +157,7 @@ tresult Message::setSerializableValue(IAttributeList::AttrID id, const IParamSer
   tresult res = iSerializer.writeToStream(iValue, streamer);
   if(res == kResultOk)
   {
-    return setBinary(id, stream.getData(), stream.getSize());
+    return setBinary(id, stream.getData(), static_cast<uint32>(stream.getSize()));
   }
   return res;
 }

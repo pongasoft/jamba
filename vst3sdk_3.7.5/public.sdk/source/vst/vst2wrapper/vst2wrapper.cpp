@@ -1156,7 +1156,7 @@ void Vst2Wrapper::setupVst2Arrangement (VstSpeakerArrangement*& vst2arr,
 				if (props.type >= 0 && props.type < kNumSpeakerNames)
 					strncpy (props.name, gSpeakerNames[props.type], kVstMaxNameLen);
 				else
-					sprintf (props.name, "%d", i + 1);
+					snprintf (props.name, kVstMaxNameLen, "%d", i + 1);
 			}
 		}
 	}

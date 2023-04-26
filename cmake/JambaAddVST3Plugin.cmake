@@ -34,7 +34,7 @@ function(internal_jamba_add_vst3_plugin)
 
   # Making sure that all libraries included are setup for universal build
   foreach(lib IN LISTS ARG_LINK_LIBRARIES)
-    smtg_target_setup_universal_binary("${lib})")
+    smtg_target_setup_universal_binary("${lib}")
   endforeach()
 
   # Extra includes?

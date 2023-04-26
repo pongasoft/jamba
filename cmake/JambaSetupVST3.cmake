@@ -62,3 +62,21 @@ set(SDK_IDE_HOSTING_EXAMPLES_FOLDER FOLDER "HostingExamples")
 set(SMTG_ADD_VST3_HOSTING_SAMPLES ON)
 set(SDK_ROOT "${vst3sdk_SOURCE_DIR}")
 add_subdirectory(${vst3sdk_SOURCE_DIR}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)
+
+#-------------------------------------------------------------------------------
+# Fixing too aggressive errors/warnings
+#-------------------------------------------------------------------------------
+if(CMAKE_HOST_APPLE)
+  target_compile_options("base" PRIVATE -w)
+  target_compile_options("pluginterfaces" PRIVATE -w)
+  target_compile_options("sdk" PRIVATE -w)
+  target_compile_options("sdk_common" PRIVATE -w)
+  target_compile_options("sdk_hosting" PRIVATE -w)
+  target_compile_options("vstgui" PRIVATE -w)
+  target_compile_options("vstgui_uidescription" PRIVATE -w)
+  target_compile_options("vstgui_support" PRIVATE -w)
+  target_compile_options("editorhost" PRIVATE -w)
+  target_compile_options("moduleinfotool" PRIVATE -w)
+  target_compile_options("validator" PRIVATE -w)
+  target_compile_options("VST3Inspector" PRIVATE -w)
+endif()
