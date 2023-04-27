@@ -3,6 +3,12 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [6.2.1 | 2023-04-27](https://github.com/pongasoft/jamba/tree/v6.2.1)
+
+* Fixes compilation issues with XCode 14+
+* Automatically adds libraries (`LINK_LIBRARIES`) to the universal build (M1 builds)
+* Removed most warnings coming from the SDK/Jamba
+
 ## [6.2.0 | 2023-04-19](https://github.com/pongasoft/jamba/tree/v6.2.0)
 
 * Enhanced `AudioBuffer` API
