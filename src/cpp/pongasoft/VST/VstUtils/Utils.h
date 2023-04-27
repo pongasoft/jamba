@@ -32,6 +32,7 @@ namespace pongasoft::VST::VstUtils {
 #if __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
 /**
  * Converts a `VstString16` to a regular `std::string` that is properly utf-8 encoded.
  */
@@ -44,6 +45,7 @@ inline std::string toUT8String(VstString16 const &iString)
 //  utf8Str.toMultiByte(Steinberg::kCP_Utf8);
 //  return utf8Str.text8();
 }
+#if __clang__
 #pragma clang diagnostic pop
 #endif
 

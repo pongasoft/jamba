@@ -108,7 +108,7 @@ macro(smtg_setup_platform_toolset)
           add_compile_options($<$<CONFIG:Debug>:/fsanitize=address>) # Enable Address Sanitizer
           add_link_options($<$<CONFIG:Debug>:/INCREMENTAL:NO>) # Enable Incremental Linking
         else()
-          add_compile_options($<$<CONFIG:Debug>:/ZI>)  # Program Database for Edit And Continue
+          add_compile_options($<$<CONFIG:Debug>:/Zi>)  # Program Database for Edit And Continue
         endif()
       endif()
       if(SMTG_USE_STATIC_CRT)

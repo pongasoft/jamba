@@ -2,14 +2,14 @@
 // in the LICENSE file found in the top-level directory of this
 // distribution and at http://github.com/steinbergmedia/vstgui/LICENSE
 
-#include <vstgui4/vstgui/lib/platform/win32/win32resourcestream.h>
+#include "win32resourcestream.h"
 
 #if WINDOWS
 
-#include <vstgui4/vstgui/lib/cresourcedescription.h>
-#include <vstgui4/vstgui/lib/cstring.h>
-#include <vstgui4/vstgui/lib/platform/platform_win32.h>
-#include <vstgui4/vstgui/lib/platform/win32/win32support.h>
+#include "../../cresourcedescription.h"
+#include "../../cstring.h"
+#include "../platform_win32.h"
+#include "win32support.h"
 
 //------------------------------------------------------------------------
 namespace VSTGUI {
