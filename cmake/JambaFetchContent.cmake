@@ -19,7 +19,7 @@ cmake_minimum_required (VERSION 3.19)
 include(FetchContent)
 
 function(jamba_fetch_content)
-  set(oneValueArgs NAME GIT_REPO GIT_TAG DOWNLOAD_URL ROOT_DIR)
+  set(oneValueArgs NAME GIT_REPO GIT_TAG DOWNLOAD_URL DOWNLOAD_URL_HASH ROOT_DIR)
 
   cmake_parse_arguments(
       "ARG" # prefix
@@ -41,6 +41,7 @@ function(jamba_fetch_content)
 
   set_default_value(ARG_ROOT_DIR "${${ARG_NAME}_ROOT_DIR}")
   set_default_value(ARG_DOWNLOAD_URL "${${ARG_NAME}_DOWNLOAD_URL}")
+  set_default_value(ARG_DOWNLOAD_URL_HASH "${${ARG_NAME}_DOWNLOAD_URL_HASH}")
   set_default_value(ARG_GIT_REPO "${${ARG_NAME}_GIT_REPO}")
   set_default_value(ARG_GIT_TAG  "${${ARG_NAME}_GIT_TAG}")
   set_default_value(ARG_GIT_TAG  "master")
@@ -56,6 +57,7 @@ function(jamba_fetch_content)
   if(ARG_DOWNLOAD_URL)
     FetchContent_Declare(           ${ARG_NAME}
         URL                        "${ARG_DOWNLOAD_URL}"
+        URL_HASH                   "${ARG_DOWNLOAD_URL_HASH}"
         SOURCE_DIR                 "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-src"
         BINARY_DIR                 "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-build"
         DOWNLOAD_EXTRACT_TIMESTAMP true

@@ -121,6 +121,11 @@ set(googletest_GIT_TAG "v1.13.0" CACHE STRING "googletest git tag")
 set(googletest_DOWNLOAD_URL "${googletest_GIT_REPO}/archive/refs/tags/${googletest_GIT_TAG}.zip" CACHE STRING "googletest download url" FORCE)
 
 #------------------------------------------------------------------------
+# The download URL hash for googletest
+#------------------------------------------------------------------------
+set(googletest_DOWNLOAD_URL_HASH "SHA256=ffa17fbc5953900994e2deec164bb8949879ea09b411e07f215bfbb1f87f4632" CACHE STRING "googletest download url hash" FORCE)
+
+#------------------------------------------------------------------------
 # Option to enable generating the dev script which allows to build and install the plugin
 # with a convenient command line tool.
 #------------------------------------------------------------------------
