@@ -21,4 +21,4 @@ jobs:
 
       - name: Run test action
         working-directory: ${{github.workspace}}/build
-        run: ./jamba.sh {{ env.BUILD_TYPE }} test
+        run: ./jamba.sh ${{ env.BUILD_TYPE }} test
