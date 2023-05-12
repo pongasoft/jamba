@@ -68,7 +68,11 @@ TEST(StringUtils, stringToFloat)
 
   ASSERT_FALSE(stringToFloat("abc", d));
   ASSERT_EQ(4.2, d);  // should be untouched
-  ASSERT_TRUE(std::isnan(stringToFloat<double>("abc")));
+
+  auto resultShouldBeNan = stringToFloat<double>("abc");
+  char tmp[256];
+  snprintf(tmp, sizeof(tmp), "%lf", resultShouldBeNan);
+  ASSERT_EQ(std::string("nan"), std::string(tmp));
 }
 
 }

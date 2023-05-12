@@ -93,9 +93,7 @@ TFloat stringToFloat(const std::string &iString)
 }
 
 /**
- * Converts the string to a TFloat
- *
- * @return the float or nan if not a number
+ * Converts the string to a an array of floats
  */
 template<typename TFloat>
 std::vector<TFloat> splitFloats(const std::string &iString, char iDelimiter, bool iSkipEmptyEntries = false)
