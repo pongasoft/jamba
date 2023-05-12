@@ -14,7 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
+        fetch-depth: 0
+        
       - name: Configure Project
         working-directory: ${{github.workspace}}
         run: ${{github.workspace}}/jamba-test-plugin/configure.py -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF
