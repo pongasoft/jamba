@@ -36,10 +36,13 @@ set(CPP_SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/cpp")
 
 # We need to recompute the Audio Unit version (AU_PLUGIN_VERSION_HEX) because PLUGIN_MAJOR_VERSION (...) are set
 # AFTER including jamba for this plugin only
-execute_process(COMMAND bash -c "echo 'obase=16;${PLUGIN_MAJOR_VERSION}*65536+${PLUGIN_MINOR_VERSION}*256+${PLUGIN_PATCH_VERSION}' | bc"
-    OUTPUT_VARIABLE AU_PLUGIN_VERSION_HEX
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+if(APPLE AND JAMBA_ENABLE_AUDIO_UNIT)
+  # Computes the Audio Unit version (AU_PLUGIN_VERSION_HEX)
+  execute_process(COMMAND bash -c "echo 'obase=16;${PLUGIN_MAJOR_VERSION}*65536+${PLUGIN_MINOR_VERSION}*256+${PLUGIN_PATCH_VERSION}' | bc"
+      OUTPUT_VARIABLE AU_PLUGIN_VERSION_HEX
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+endif ()
 
 # Generate the version.h file
 set(VERSION_DIR "${CMAKE_BINARY_DIR}/generated")

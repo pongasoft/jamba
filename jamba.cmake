@@ -89,6 +89,7 @@ endif ()
 #------------------------------------------------------------------------
 # Audio Unit (macOS only) => determine Audio Unit Version
 #------------------------------------------------------------------------
+set(AU_PLUGIN_VERSION_HEX "0")
 if(APPLE AND JAMBA_ENABLE_AUDIO_UNIT)
   if(NOT SMTG_COREAUDIO_SDK_PATH)
     set(SMTG_COREAUDIO_SDK_PATH "${JAMBA_ROOT}/audio-unit/CoreAudioSDK/CoreAudio")
