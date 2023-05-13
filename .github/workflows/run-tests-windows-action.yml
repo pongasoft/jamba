@@ -17,6 +17,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure Project (dry run)
+        working-directory: ${{github.workspace}}
+        run: python ${{github.workspace}}\jamba-test-plugin\configure.py -n -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF -A x64
+
       - name: Configure Project
         working-directory: ${{github.workspace}}
         run: python ${{github.workspace}}\jamba-test-plugin\configure.py -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF -A x64
