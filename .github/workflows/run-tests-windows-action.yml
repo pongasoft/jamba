@@ -1,0 +1,37 @@
+name: Run Tests (Windows)
+
+on:
+  push:
+    branches: [ "github-actions" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: --release
+
+jobs:
+  run_tests:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Pre Configure Project
+        run: cmake -G
+
+      - name: Configure Project
+        working-directory: ${{github.workspace}}
+        run: python ${{github.workspace}}\jamba-test-plugin\configure.py -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF
+
+      - name: Run test action
+        working-directory: ${{github.workspace}}/build
+        run: jamba.bat ${{ env.BUILD_TYPE }} test
+
+      - name: Run validate action
+        working-directory: ${{github.workspace}}/build
+        run: jamba.bat ${{ env.BUILD_TYPE }} validate
+
+      - name: Run archive action
+        working-directory: ${{github.workspace}}/build
+        run: jamba.bat ${{ env.BUILD_TYPE }} archive
