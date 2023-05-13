@@ -78,9 +78,13 @@ bool stringToFloat(const std::string &iString, TFloat &oValue)
 }
 
 /**
- * Converts the string to a TFloat
+ * Converts the string to a `TFloat`
  *
- * @return the float or nan if not a number
+ * Implementation note: the VST3 SDK uses fast-math compilation option which essentially disables the use of NaN,
+ * and so it doesn't make sense to return NaN when the string is not a number because you cannot test for it in
+ * an efficient manner
+ *
+ * @return the float or 0 if not a number
  */
 template<typename TFloat>
 TFloat stringToFloat(const std::string &iString)
@@ -88,7 +92,7 @@ TFloat stringToFloat(const std::string &iString)
   char *endPtr = nullptr;
   auto value = static_cast<TFloat>(strtod(iString.c_str(), &endPtr));
   if(endPtr == iString.c_str())
-    return std::numeric_limits<TFloat>::quiet_NaN();
+    return 0;
   return value;
 }
 
