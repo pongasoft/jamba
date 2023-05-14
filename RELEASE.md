@@ -3,6 +3,14 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [6.3.0 | 2023-05-14](https://github.com/pongasoft/jamba/tree/v6.3.0)
+
+* Fixed NaN issue with `stringToFloat` by changing its return convention (`0` instead of `NaN`) due to `fast-math` option which assumes that there is no NaN in the code.
+* Fixed invalid `version.h` file generated on Windows
+* Integrated with GitHub actions in order to do a matrix style testing (which uncovered the 2 previous issues)
+  * Windows 10 Visual Studio 2019 & 2022
+  * macOS 11 (Xcode 13.2) & macOS 12 (Xcode 14.2)
+
 ## [6.2.1 | 2023-04-27](https://github.com/pongasoft/jamba/tree/v6.2.1)
 
 * Fixes compilation issues with XCode 14+

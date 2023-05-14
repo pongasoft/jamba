@@ -45,8 +45,8 @@ endif()
 # Jamba Version - use git to fetch exact tag/version
 #------------------------------------------------------------------------
 set(JAMBA_MAJOR_VERSION 6)
-set(JAMBA_MINOR_VERSION 2)
-set(JAMBA_PATCH_VERSION 1)
+set(JAMBA_MINOR_VERSION 3)
+set(JAMBA_PATCH_VERSION 0)
 execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     RESULT_VARIABLE result
     OUTPUT_VARIABLE JAMBA_GIT_VERSION

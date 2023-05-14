@@ -1,8 +1,7 @@
 name: Run Tests (Windows)
 
 on:
-  push:
-    branches: [ "github-actions" ]
+  push
 
 jobs:
   run_tests:
