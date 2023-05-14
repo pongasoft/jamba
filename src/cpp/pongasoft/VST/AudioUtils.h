@@ -20,6 +20,7 @@
 #include <pluginterfaces/vst/ivstaudioprocessor.h>
 
 #include <cmath>
+#include <type_traits>
 
 namespace pongasoft {
 namespace VST {
@@ -27,21 +28,21 @@ namespace VST {
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 
-#define BIT_SET(a,b) ((a) |= (static_cast<uint64>(1)<<(b)))
-#define BIT_CLEAR(a,b) ((a) &= ~(static_cast<uint64>(1)<<(b)))
-#define BIT_TEST(a,b) (((a) & (static_cast<uint64>(1)<<(b))) != 0)
+#define BIT_SET(a,b) ((a) |= (static_cast<std::make_unsigned_t<decltype(a)>>(1)<<(b)))
+#define BIT_CLEAR(a,b) ((a) &= ~(static_cast<std::make_unsigned_t<decltype(a)>>(1)<<(b)))
+#define BIT_TEST(a,b) (((a) & (static_cast<std::make_unsigned_t<decltype(a)>>(1)<<(b))) != 0)
 
 //! Sets bit `bit` in `a`
 template<typename T>
-constexpr T bitSet(T a, int bit) { return a | (static_cast<uint64>(1) << bit); }
+constexpr T bitSet(T a, int bit) { return a | (static_cast<std::make_unsigned_t<T>>(1) << bit); }
 
 //! Clears bit `bit` in `a`
 template<typename T>
-constexpr T bitClear(T a, int bit) { return a & ~(static_cast<uint64>(1) << bit); }
+constexpr T bitClear(T a, int bit) { return a & ~(static_cast<std::make_unsigned_t<T>>(1) << bit); }
 
 //! Test if bit `bit` is set in `a`
 template<typename T>
-constexpr bool bitTest(T a, int bit) { return (a & (static_cast<uint64>(1) << bit)) != 0; }
+constexpr bool bitTest(T a, int bit) { return (a & (static_cast<std::make_unsigned_t<T>>(1) << bit)) != 0; }
 
 // defines the threshold of silence as constants
 constexpr Sample32 Sample32SilentThreshold = ((Sample32)2.0e-8);

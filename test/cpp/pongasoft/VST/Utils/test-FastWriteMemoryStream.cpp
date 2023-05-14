@@ -43,7 +43,7 @@ TEST(TestFastWriteMemoryStream, test_write)
 
   std::array<int8, 5> str = {'a', 'b', 'c', 'd', 'e'};
 
-  auto write = [&vs, &str](int64 start, int64 end, std::vector<int8> iExpected) {
+  auto write = [&vs, &str](int32 start, int32 end, std::vector<int8> iExpected) {
     int32 numWritten = 0;
     ASSERT_EQ(kResultOk, vs.write(str.data() + start, end - start, &numWritten));
     ASSERT_EQ(end - start, numWritten);
@@ -82,7 +82,7 @@ TEST(TestFastWriteMemoryStream, test_read)
 
   std::array<int8, 5> str = {'a', 'b', 'c', 'd', 'e'};
 
-  auto write = [&vs, &str](int64 start, int64 end, std::vector<int8> iExpected) {
+  auto write = [&vs, &str](int32 start, int32 end, std::vector<int8> iExpected) {
     int32 numWritten = 0;
     ASSERT_EQ(kResultOk, vs.write(str.data() + start, end - start, &numWritten));
     ASSERT_EQ(end - start, numWritten);
