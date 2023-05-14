@@ -6,7 +6,12 @@ on:
 
 jobs:
   run_tests:
-    runs-on: [macos-11, macos-12, macos-13]
+    strategy:
+      matrix:
+        os: [macos-11, macos-12]
+        # macos-13 is currently beta so not included
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
