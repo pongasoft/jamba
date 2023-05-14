@@ -5,6 +5,8 @@ Jamba is a set of helpers (classes, concepts, build files, etc...) built on top 
 
 Check the [Jamba](https://jamba.dev/) website for more details.
 
+[![Run Tests (macOS)](https://github.com/pongasoft/jamba/actions/workflows/run-tests-macos-action.yml/badge.svg)](https://github.com/pongasoft/jamba/actions/workflows/run-tests-macos-action.yml) [![Run Tests (Windows)](https://github.com/pongasoft/jamba/actions/workflows/run-tests-windows-action.yml/badge.svg)](https://github.com/pongasoft/jamba/actions/workflows/run-tests-windows-action.yml)
+
 Features
 --------
 
@@ -59,12 +61,12 @@ In order to work on this project itself (not a plugin), you need to clone this r
 
 Although this project does not contain a great deal of tests, it is being heavily used (and as a result tested) by the plugins it has been designed to build.
 
-Plugin | Description
------- | -----------
-[vst-ab-switch](https://github.com/pongasoft/vst-ab-switch) | A/B Audio Switch VST plugin
-[vst-vac-6](https://github.com/pongasoft/vst-vac-6v) | VST (2 & 3) plugin to analyze and control the peak volume of a signal
-[vst-sam-spl-64](https://github.com/pongasoft/vst-sam-spl-64) | A free/open source VST2, VST3 and AudioUnit plugin to easily split a sample in up to 64 slices
-[jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) | Documentation plugin for Jamba framework: a simple gain plugin for VST2/3
+| Plugin                                                              | Description                                                                                    |
+|---------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| [vst-ab-switch](https://github.com/pongasoft/vst-ab-switch)         | A/B Audio Switch VST plugin                                                                    |
+| [vst-vac-6](https://github.com/pongasoft/vst-vac-6v)                | VST (2 & 3) plugin to analyze and control the peak volume of a signal                          |
+| [vst-sam-spl-64](https://github.com/pongasoft/vst-sam-spl-64)       | A free/open source VST2, VST3 and AudioUnit plugin to easily split a sample in up to 64 slices |
+| [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) | Documentation plugin for Jamba framework: a simple gain plugin for VST2/3                      |
 
 History
 -------
