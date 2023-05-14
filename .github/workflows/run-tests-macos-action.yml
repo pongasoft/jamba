@@ -1,19 +1,12 @@
 name: Run Tests (macOS)
 
 on:
-  workflow_dispatch
-
-#on:
-#  push:
-#    branches: [ "github-actions" ]
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: --release
+  push:
+    branches: [ "github-actions" ]
 
 jobs:
   run_tests:
-    runs-on: macos-latest
+    runs-on: [macos-11, macos-12, macos-13]
 
     steps:
       - uses: actions/checkout@v3
@@ -28,14 +21,10 @@ jobs:
         working-directory: ${{github.workspace}}
         run: ${{github.workspace}}/jamba-test-plugin/configure.py -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF
 
-      - name: Run test action
+      - name: Run test/validate/archive (Release)
         working-directory: ${{github.workspace}}/build
-        run: ./jamba.sh ${{ env.BUILD_TYPE }} test
+        run: ./jamba.sh --release -b test validate archive
 
-      - name: Run validate action
+      - name: Run test/validate/archive (Debug)
         working-directory: ${{github.workspace}}/build
-        run: ./jamba.sh ${{ env.BUILD_TYPE }} validate
-
-      - name: Run archive action
-        working-directory: ${{github.workspace}}/build
-        run: ./jamba.sh ${{ env.BUILD_TYPE }} archive
+        run: ./jamba.sh -b test validate archive

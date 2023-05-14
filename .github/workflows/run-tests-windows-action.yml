@@ -4,13 +4,18 @@ on:
   push:
     branches: [ "github-actions" ]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: --release
-
 jobs:
   run_tests:
-    runs-on: windows-2019
+    strategy:
+      matrix:
+        os: [windows-2019, windows-2022]
+        include:
+          - os: windows-2019
+            generator: "Visual Studio 16 2019"
+          - os: windows-2022
+            generator: "Visual Studio 17 2022"
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
@@ -19,20 +24,16 @@ jobs:
 
       - name: Configure Project (dry run)
         working-directory: ${{github.workspace}}
-        run: python ${{github.workspace}}\jamba-test-plugin\configure.py -n -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF -A x64
+        run: python ${{github.workspace}}\jamba-test-plugin\configure.py -n -G ${{ matrix.generator }} -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF -A x64
 
       - name: Configure Project
         working-directory: ${{github.workspace}}
-        run: python ${{github.workspace}}\jamba-test-plugin\configure.py -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF -A x64
+        run: python ${{github.workspace}}\jamba-test-plugin\configure.py -G ${{ matrix.generator }} -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF -A x64
 
-      - name: Run test action
+      - name: Run test/validate/archive (Release)
         working-directory: ${{github.workspace}}/build
-        run: .\jamba.bat ${{ env.BUILD_TYPE }} test
+        run: .\jamba.bat --release -b test validate archive
 
-      - name: Run validate action
+      - name: Run test/validate/archive (Debug)
         working-directory: ${{github.workspace}}/build
-        run: .\jamba.bat ${{ env.BUILD_TYPE }} validate
-
-      - name: Run archive action
-        working-directory: ${{github.workspace}}/build
-        run: .\jamba.bat ${{ env.BUILD_TYPE }} archive
+        run: .\jamba.bat -b test validate archive
