@@ -51,7 +51,6 @@ function(jamba_add_dev_script)
   endmacro()
 
   cmake_option_to_python_bool(${GENERATOR_IS_MULTI_CONFIG} GENERATOR_IS_MULTI_CONFIG)
-  cmake_option_to_python_bool(${JAMBA_ENABLE_VST2} JAMBA_ENABLE_VST2)
   cmake_option_to_python_bool(${JAMBA_ENABLE_AUDIO_UNIT} JAMBA_ENABLE_AUDIO_UNIT)
 
   configure_file(${JAMBA_ROOT}/scripts/jamba.py.in "${JAMBA_SCRIPT_EXE}" @ONLY)

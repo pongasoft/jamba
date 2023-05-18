@@ -26,12 +26,11 @@ if sys.hexversion < 0x03070000:
     sys.exit(1)
 
 parser = argparse.ArgumentParser(allow_abbrev=False,
-                                 usage='configure.py [--h] [--n] [--f] [--r] [---vst3 VST3_SDK_ROOT] [---vst2 VST2_SDK_ROOT] [--G GENERATOR] [--B BUILD_DIR] [--- <cmake_options>]',
+                                 usage='configure.py [--h] [--n] [--f] [--r] [---vst3 VST3_SDK_ROOT] [--G GENERATOR] [--B BUILD_DIR] [--- <cmake_options>]',
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog='''
 Notes
   ---vst3 defaults to /Users/Shared/Steinberg/VST_SDK.<JAMBA_VST3SDK_VERSION>
-  ---vst2 defaults to /Users/Shared/Steinberg/VST_SDK.<JAMBA_VST2SDK_VERSION>
   
   -G defaults to "Xcode" on macOS and "Visual Studio 16 2019" for Windows10
   run 'cmake --help' to get the list of generators supported
@@ -55,7 +54,6 @@ Examples
 parser.add_argument("-n", "--dry-run", help="Dry run (prints what it is going to do)", action="store_true", dest="dry_run")
 parser.add_argument("-f", "--force", help="Force a regeneration (delete and recreate build folder)", action="store_true")
 parser.add_argument("--vst3", help="Path to the VST3 SDK (optional)", dest="vst3_sdk_root")
-parser.add_argument("--vst2", help="Path to the VST2 SDK (optional)", dest="vst2_sdk_root")
 parser.add_argument("-r", "--release", help="Use CMake Release build type (for single-config generators)", action="store_true")
 parser.add_argument("-G", "--generator", help="CMake generator (optional)")
 parser.add_argument("-B", "--build-dir", help="Build folder (defaults to ./build)", dest="build_dir")
@@ -68,9 +66,6 @@ this_script_root_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 # VST3_SDK_ROOT
 vst3_sdk_root = [f'-DVST3_SDK_ROOT:PATH={args.vst3_sdk_root}'] if args.vst3_sdk_root else []
-
-# VST2_SDK_ROOT
-vst2_sdk_root = [f'-DVST2_SDK_ROOT:PATH={args.vst2_sdk_root}'] if args.vst2_sdk_root else []
 
 # CMake generator
 cmake_generator = ['-G']
@@ -95,7 +90,7 @@ cmake_build_dir = ['-B', build_dir]
 # CMake command
 cmake_command = ['cmake',
                  *cmake_build_dir,
-                 *vst3_sdk_root, *vst2_sdk_root,
+                 *vst3_sdk_root,
                  *cmake_build_type,
                  *cmake_generator,
                  *cmake_options,

@@ -23,7 +23,7 @@
 namespace pongasoft::test::jamba {
 
 //------------------------------------------------------------------------
-// These 2 IDs are used in JambaTestPlugin_VST2.cpp and JambaTestPlugin_VST3.cpp to create
+// These 2 IDs are used in JambaTestPlugin_VST3.cpp to create
 // the processor (RT) and controller (GUI). Those IDs are unique and have
 // been generated automatically.
 //------------------------------------------------------------------------

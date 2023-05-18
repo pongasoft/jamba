@@ -8,10 +8,6 @@ copy it under C:\Program Files
 
 Or if you prefer to install each file individually:
 
-For VST2, copy VstPlugins\[-filename-].dll under
-  - C:\Program Files\VstPlugins
-  - or any DAW specific path (64bits)
-
 For VST3, copy Common Files\VST3\[-filename-].vst3 under
   - C:\Program Files\Common Files\VST3 (may require admin access)
   - or any DAW specific path (64bits)

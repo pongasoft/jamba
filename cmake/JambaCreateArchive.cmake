@@ -59,10 +59,6 @@ endif()
 
   cpack_add_component(vst3)
 
-  if (JAMBA_ENABLE_VST2)
-    cpack_add_component(vst2)
-  endif()
-
   if (APPLE AND JAMBA_ENABLE_AUDIO_UNIT AND XCODE)
     cpack_add_component(au)
   endif()

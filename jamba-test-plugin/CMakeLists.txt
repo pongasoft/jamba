@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
 
-# build VST 2?
-option(JAMBA_ENABLE_VST2 "Use VST2" ON)
-
 # build Audio Unit?
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" ON)
 
@@ -47,12 +44,6 @@ endif ()
 # Generate the version.h file
 set(VERSION_DIR "${CMAKE_BINARY_DIR}/generated")
 configure_file("${CPP_SOURCES}/version.h.in" "${VERSION_DIR}/version.h")
-
-if (JAMBA_ENABLE_VST2)
-  set(vst2_sources
-      "${CPP_SOURCES}/JambaTestPlugin_VST2.cpp"
-      )
-endif ()
 
 set(vst_sources
     "${CPP_SOURCES}/JambaTestPlugin_VST3.cpp"
@@ -109,7 +100,7 @@ jamba_add_vst_plugin(
     RELEASE_FILENAME     "JambaTestPlugin" # filename for the plugin (xxx.vst3)
     ARCHIVE_ARCHITECTURE "${JAMBA_ARCHIVE_ARCHITECTURE}"
     TARGETS_PREFIX       "jmb_" # prefix used by all targets directly linked to this plugin
-    VST_SOURCES          "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
+    VST_SOURCES          "${vst_sources}" # the source files that compose the plugin
     INCLUDE_DIRECTORIES  "${VERSION_DIR}" # we add the version folder to the list of includes
     UIDESC               "${RES_DIR}/JambaTestPlugin.uidesc" # the main xml file for the GUI
     RESOURCES            "${vst_resources}" # the resources for the GUI (png files)

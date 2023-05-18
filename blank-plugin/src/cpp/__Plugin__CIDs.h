@@ -7,7 +7,7 @@
 namespace [-namespace-] {
 
 //------------------------------------------------------------------------
-// These 2 IDs are used in [-name-]_VST2.cpp and [-name-]_VST3.cpp to create
+// These 2 IDs are used in [-name-]_VST3.cpp to create
 // the processor (RT) and controller (GUI). Those IDs are unique and have
 // been generated automatically. Using different ids for Debug/Release
 // targets so that both plugins can live side by side.

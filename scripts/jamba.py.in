@@ -29,8 +29,6 @@ targets_prefix = '@ARG_TARGETS_PREFIX@'
 generator_is_multi_config = @python_GENERATOR_IS_MULTI_CONFIG@
 cmake_single_config_build_type = '@CMAKE_BUILD_TYPE@'
 
-jamba_enable_vst2 = @python_JAMBA_ENABLE_VST2@
-
 script_name = ''
 
 if platform.system() == 'Darwin':
@@ -45,17 +43,6 @@ if generator_is_multi_config:
 else:
     doc_build_config = f'[{cmake_single_config_build_type}]'
 
-if jamba_enable_vst2:
-    doc_vst2_commands = '''
-
-  ---- VST2 commands ----
-  install-vst2   : install the vst2 plugin only
-  uninstall-vst2 : uninstall the vst2 plugin only
-
-'''
-else:
-    doc_vst2_commands = ''
-
 if jamba_enable_audio_unit:
     doc_au_commands = '''
 
@@ -68,7 +55,7 @@ if jamba_enable_audio_unit:
 else:
     doc_au_commands = ''
 
-if jamba_enable_vst2 or jamba_enable_audio_unit:
+if jamba_enable_audio_unit:
     doc_vst3_commands = '''
 
   ---- VST3 commands ----
@@ -92,10 +79,10 @@ Commands {doc_build_config}
   edit      : run the editor (full editing available in Debug config only)
   info      : run the module info tool (display json info about the plugin)
   inspect   : run the inspector (inspects ALL installed plugins)
-  install   : build and install all the plugins (vst2/vst3/audio unit)
-  uninstall : delete the installed plugins (vst2/vst3/audio unit)
+  install   : build and install all the plugins (vst3/audio unit)
+  uninstall : delete the installed plugins (vst3/audio unit)
   archive   : create an archive containing the plugins
-{doc_vst3_commands}{doc_vst2_commands}{doc_au_commands}
+{doc_vst3_commands}{doc_au_commands}
 
   ---- CMake target ----
   <command>   : Any unknown <command> is treated as a cmake target
@@ -139,9 +126,6 @@ available_commands = {
     'test': f'{targets_prefix}test_vst3',
     'archive': f'{targets_prefix}create_archive',
 
-    # both vst2 and vst3
-    'install-vst': f'{targets_prefix}install_vst',
-
     # vst3
     'install-vst3': f'{targets_prefix}install_vst3',
     'uninstall-vst3': f'{targets_prefix}uninstall_vst3',
@@ -150,10 +134,6 @@ available_commands = {
     'build-au': f'{targets_prefix}build_au',
     'install-au' : f'{targets_prefix}install_au',
     'uninstall-au' : f'{targets_prefix}uninstall_au',
-
-    # vst2
-    'install-vst2': f'{targets_prefix}install_vst2',
-    'uninstall-vst2': f'{targets_prefix}uninstall_vst2',
 }
 
 cmake_verbose = [] if not args.verbose else ['--verbose']

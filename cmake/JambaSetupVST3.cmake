@@ -30,16 +30,11 @@ message(STATUS "vst3sdk_SOURCE_DIR=${vst3sdk_SOURCE_DIR}")
 #-------------------------------------------------------------------------------
 # Options defined prior to including SDK (not changeable for correct Jamba behavior)
 #-------------------------------------------------------------------------------
-set(SMTG_CREATE_VST2_VERSION ${JAMBA_ENABLE_VST2} CACHE BOOL "Set by Jamba" FORCE)
+set(SMTG_CREATE_VST2_VERSION OFF CACHE BOOL "Set by Jamba" FORCE)
 set(SMTG_ENABLE_TARGET_VARS_LOG OFF CACHE BOOL "Set by Jamba" FORCE) # disable dump variables
 set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "Set by Jamba" FORCE) # disable validator (explicit validate step)
 set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "Set by Jamba" FORCE) # disable link (explicit install step)
 set(SMTG_ADD_VST3_PLUGINS_SAMPLES OFF CACHE BOOL "Set by Jamba" FORCE) # disable plugin samples
-if(WIN32 AND JAMBA_ENABLE_VST2)
-    # disable bundle for Windows (can't build vst2 otherwise)
-    set(SMTG_CREATE_MODULE_INFO OFF CACHE BOOL "Set by Jamba" FORCE)
-    set(SMTG_CREATE_BUNDLE_FOR_WINDOWS OFF CACHE BOOL "Set by Jamba" FORCE)
-endif()
 
 #-------------------------------------------------------------------------------
 # Including vst3sdk as a subdirectory (requires some variables to be setup)

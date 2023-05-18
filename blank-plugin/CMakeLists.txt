@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
 
-# build VST 2?
-option(JAMBA_ENABLE_VST2 "Use VST2" [-enable_vst2-])
-
 # build Audio Unit?
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" [-enable_audio_unit-])
 
@@ -45,13 +42,6 @@ set(CPP_SOURCES "src/cpp")
 set(VERSION_DIR "${CMAKE_BINARY_DIR}/generated")
 configure_file("${CPP_SOURCES}/version.h.in" "${VERSION_DIR}/version.h")
 
-# Source files for VST2
-if (JAMBA_ENABLE_VST2)
-  set(vst2_sources
-      "${CPP_SOURCES}/[-name-]_VST2.cpp"
-      )
-endif ()
-
 # Source files for VST3
 set(vst_sources
     "${CPP_SOURCES}/[-name-]_VST3.cpp"
@@ -89,7 +79,7 @@ jamba_add_vst_plugin(
     RELEASE_SNAPSHOTS     "${RES_DIR}/[-snapshot_uuid-]_snapshot.png" "${RES_DIR}/[-snapshot_uuid-]_snapshot_2.0x.png"
     ARCHIVE_ARCHITECTURE  "${JAMBA_ARCHIVE_ARCHITECTURE}"
     TARGETS_PREFIX        "jmb_" # prefix used by all targets directly linked to this plugin
-    VST_SOURCES           "${vst_sources}" "${vst2_sources}" # the source files that compose the plugin
+    VST_SOURCES           "${vst_sources}" # the source files that compose the plugin
     INCLUDE_DIRECTORIES   "${VERSION_DIR}" # we add the version folder to the list of includes
     UIDESC                "${RES_DIR}/[-name-].uidesc" # the main xml file for the GUI
     RESOURCES             "${vst_resources}" # the resources for the GUI (png files)

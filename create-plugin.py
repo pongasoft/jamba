@@ -27,7 +27,6 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--plugin", help="The name of the plugin")
-parser.add_argument("-2", "--vst2", help="Enable VST2", action="store_true")
 parser.add_argument("-a", "--au", help="Enable Audio Unit", action="store_true")
 parser.add_argument("-l", "--local", help="Use local jamba", action="store_true")
 parser.add_argument("-f", "--filename", help="The filename of the plugin")
@@ -86,7 +85,6 @@ blank_plugin_root = os.path.join(this_script_root_dir, 'blank-plugin')
 # config
 def config(plugin):
     plugin['name'] = maybe_ask_user(args.plugin, "Plugin Name (must be a valid C++ class name)", None)
-    plugin['enable_vst2'] = "ON" if maybe_confirm_user(args.vst2, "Enable VST2") else "OFF"
     plugin['enable_audio_unit'] = "ON" if maybe_confirm_user(args.au, "Enable Audio Unit") else "OFF"
     plugin['macos_deployment_target'] = maybe_ask_user(args.osx, "macOS deployment target", "10.14")
     plugin['audio_unit_manufacturer_code'] = \
@@ -111,7 +109,6 @@ def config(plugin):
 
     print(f'''##################
 Plugin Name        - {plugin["name"]}
-VST2 Enabled       - {plugin["enable_vst2"]}
 macOS Target       - {plugin["macos_deployment_target"]}
 Audio Unit Enabled - {plugin["enable_audio_unit"]}
 AU Plugin Code     - {plugin["audio_unit_manufacturer_code"]}

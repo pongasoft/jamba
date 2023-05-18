@@ -11,11 +11,6 @@ copy it under $HOME/Library/Audio/Plug-ins (or /Library/Audio/Plug-ins)
 
 Or if you prefer to install each file individually:
 
-For VST2, copy VST/[-filename-].vst under
-  - $HOME/Library/Audio/Plug-ins/VST for a single user
-  - or /Library/Audio/Plug-ins/VST for all users (may require admin access)
-  - or any DAW specific path (64bits)
-
 For VST3, copy VST3/[-filename-].vst3 under
   - $HOME/Library/Audio/Plug-ins/VST3 for a single user
   - or /Library/Audio/Plug-ins/VST3 for all users (may require admin access)

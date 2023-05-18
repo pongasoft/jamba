@@ -158,28 +158,6 @@ set(JAMBA_sources_cpp
 
     )
 
-if (JAMBA_ENABLE_VST2)
-  set(JAMBA_vst2_sources
-      # VST3 hosting sources
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/connectionproxy.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/eventlist.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/hostclasses.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/parameterchanges.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/pluginterfacesupport.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/processdata.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/basewrapper/basewrapper.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/basewrapper/basewrapper.h
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/vst2wrapper/vst2wrapper.cpp
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/vst2wrapper/vst2wrapper.h
-
-      ${vst3sdk_SOURCE_DIR}/public.sdk/source/common/memorystream.cpp
-
-      # VST2 sources
-      ${VST2_SDK_ROOT}/public.sdk/source/vst2.x/audioeffect.cpp
-      ${VST2_SDK_ROOT}/public.sdk/source/vst2.x/audioeffectx.cpp
-      )
-endif ()
-
 set(JAMBA_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 configure_file(${JAMBA_CPP_SOURCES}/pongasoft/logging/jamba_version.h.in ${JAMBA_GENERATED_DIR}/jamba_version.h)
 
@@ -188,14 +166,8 @@ if (JAMBA_DEBUG_LOGGING)
   add_definitions(-DJAMBA_DEBUG_LOGGING)
 endif ()
 
-add_library(jamba STATIC ${JAMBA_sources_cpp} ${JAMBA_vst2_sources} ${JAMBA_sources_h})
+add_library(jamba STATIC ${JAMBA_sources_cpp} ${JAMBA_sources_h})
 target_include_directories(jamba PUBLIC ${JAMBA_CPP_SOURCES} ${JAMBA_GENERATED_DIR})
-if (JAMBA_ENABLE_VST2)
-  target_include_directories(jamba PUBLIC ${VST2_SDK_ROOT})
-  if (WIN32)
-    target_compile_definitions(jamba PRIVATE "_CRT_SECURE_NO_WARNINGS")
-  endif ()
-endif()
 target_compile_definitions(jamba PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
 target_link_libraries(jamba PUBLIC base sdk vstgui_support)
 smtg_target_setup_universal_binary(jamba)

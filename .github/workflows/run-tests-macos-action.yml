@@ -19,11 +19,11 @@ jobs:
 
       - name: Configure Project (dry run)
         working-directory: ${{github.workspace}}
-        run: ${{github.workspace}}/jamba-test-plugin/configure.py -n -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF
+        run: ${{github.workspace}}/jamba-test-plugin/configure.py -n -- -DJAMBA_DOWNLOAD_VSTSDK=ON
 
       - name: Configure Project
         working-directory: ${{github.workspace}}
-        run: ${{github.workspace}}/jamba-test-plugin/configure.py -- -DJAMBA_DOWNLOAD_VSTSDK=ON -DJAMBA_ENABLE_VST2=OFF
+        run: ${{github.workspace}}/jamba-test-plugin/configure.py -- -DJAMBA_DOWNLOAD_VSTSDK=ON
 
       - name: Run test/validate/archive (Release)
         working-directory: ${{github.workspace}}/build

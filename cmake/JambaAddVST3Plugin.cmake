@@ -109,12 +109,10 @@ function(internal_jamba_add_vst3_targets)
   #------------------------------------------------------------------------
   # install_vst3 target
   # uninstall_vst3 target
-  # install_vst target (for installing both vst2 and vst3)
-  # install_all target (for installing vst2/vst3 and audio unit)
+  # install_all target (for installing vst3 and audio unit)
   # uninstall_all target (for uninstalling all)
   #------------------------------------------------------------------------
   internal_jamba_create_install_target("vst3" "${VST3_PLUGIN_SRC}" "${VST3_PLUGIN_DST_DIR}" "${VST3_PLUGIN_EXTENSION}")
-  add_custom_target("${ARG_TARGETS_PREFIX}install_vst" DEPENDS "${ARG_TARGETS_PREFIX}install_vst3")
   add_custom_target("${ARG_TARGETS_PREFIX}install_all" DEPENDS "${ARG_TARGETS_PREFIX}install_vst3")
   add_custom_target("${ARG_TARGETS_PREFIX}uninstall_all" DEPENDS "${ARG_TARGETS_PREFIX}uninstall_vst3")
 

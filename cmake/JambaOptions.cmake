@@ -66,26 +66,6 @@ set(JAMBA_VST3SDK_GIT_TAG 56e4b2a644be164c5d324e8bc9de55b964b0f102 CACHE STRING 
 set(JAMBA_CMAKE_CXX_STANDARD "17" CACHE PATH "C++ version (min 17)")
 
 #------------------------------------------------------------------------
-# Option to enable building VST2 wrapper
-#------------------------------------------------------------------------
-option(JAMBA_ENABLE_VST2 "Use VST2" OFF)
-
-#------------------------------------------------------------------------
-# The VST2 SDK version supported by Jamba
-#------------------------------------------------------------------------
-set(JAMBA_VST2SDK_VERSION "2.4" CACHE STRING "VST2 SDK Version (not recommended to change... no new version!)")
-
-#------------------------------------------------------------------------
-# Determine local / default location
-# Either install the SDK in its default location or provide VST2_SDK_ROOT
-#------------------------------------------------------------------------
-if(APPLE)
-  set(VST2_SDK_ROOT "/Users/Shared/Steinberg/VST_SDK.${JAMBA_VST2SDK_VERSION}" CACHE PATH "Location of VST2 SDK")
-elseif(WIN32)
-  set(VST2_SDK_ROOT "C:/Users/Public/Documents/Steinberg/VST_SDK.${JAMBA_VST2SDK_VERSION}" CACHE PATH "Location of VST2 SDK")
-endif()
-
-#------------------------------------------------------------------------
 # Option to enable building Audio Unit wrapper (macOS only)
 #------------------------------------------------------------------------
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" OFF)

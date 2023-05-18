@@ -148,12 +148,6 @@ function(jamba_add_vst_plugin)
   include(JambaAddAllResources)
   jamba_add_all_resources()
 
-  # Adds VST2 (if enabled)
-  if (JAMBA_ENABLE_VST2)
-    include(JambaAddVST2Plugin)
-    jamba_add_vst2_plugin()
-  endif()
-
   # Adds Audio Unit (if enabled)
   if (APPLE AND JAMBA_ENABLE_AUDIO_UNIT)
     include(JambaAddAudioUnitPlugin)
