@@ -57,13 +57,13 @@ endmacro()
 # internal_jamba_patch_vst3sdk
 #------------------------------------------------------------------------
 macro(internal_jamba_patch_vst3sdk FROM_DIR TO_DIR)
-  if(NOT INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION)
-    message(STATUS "Patching: ${FROM_DIR} -> ${TO_DIR}")
-#    file(COPY "${FROM_DIR}/public.sdk" DESTINATION "${TO_DIR}")
-    file(COPY "${FROM_DIR}/cmake" DESTINATION "${TO_DIR}")
-    file(COPY "${FROM_DIR}/vstgui4" DESTINATION "${TO_DIR}")
-    set(INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION "${TO_DIR}" CACHE PATH "Location (patch) of VST3 SDK" FORCE)
-  endif()
+#  if(NOT INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION)
+#    message(STATUS "Patching: ${FROM_DIR} -> ${TO_DIR}")
+##    file(COPY "${FROM_DIR}/public.sdk" DESTINATION "${TO_DIR}")
+#    file(COPY "${FROM_DIR}/cmake" DESTINATION "${TO_DIR}")
+#    file(COPY "${FROM_DIR}/vstgui4" DESTINATION "${TO_DIR}")
+#    set(INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION "${TO_DIR}" CACHE PATH "Location (patch) of VST3 SDK" FORCE)
+#  endif()
 endmacro()
 
 #------------------------------------------------------------------------

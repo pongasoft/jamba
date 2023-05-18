@@ -34,7 +34,7 @@ set(SMTG_CREATE_VST2_VERSION OFF CACHE BOOL "Set by Jamba" FORCE)
 set(SMTG_ENABLE_TARGET_VARS_LOG OFF CACHE BOOL "Set by Jamba" FORCE) # disable dump variables
 set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "Set by Jamba" FORCE) # disable validator (explicit validate step)
 set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "Set by Jamba" FORCE) # disable link (explicit install step)
-set(SMTG_ADD_VST3_PLUGINS_SAMPLES OFF CACHE BOOL "Set by Jamba" FORCE) # disable plugin samples
+set(SMTG_ENABLE_VST3_PLUGIN_EXAMPLES OFF CACHE BOOL "Set by Jamba" FORCE) # disable plugin samples
 
 #-------------------------------------------------------------------------------
 # Including vst3sdk as a subdirectory (requires some variables to be setup)
@@ -51,12 +51,11 @@ add_subdirectory(${vst3sdk_SOURCE_DIR} ${PROJECT_BINARY_DIR}/vst3sdk)
 smtg_enable_vst3_sdk()
 
 #-------------------------------------------------------------------------------
-# editorhost - excluded by vst3sdk/CMakeLists.txt => need to add it manually
+# editorhost - need to enable hosting examples
 #-------------------------------------------------------------------------------
 set(SDK_IDE_HOSTING_EXAMPLES_FOLDER FOLDER "HostingExamples")
-set(SMTG_ADD_VST3_HOSTING_SAMPLES ON)
+set(SMTG_ENABLE_VST3_HOSTING_EXAMPLES ON)
 set(SDK_ROOT "${vst3sdk_SOURCE_DIR}")
-add_subdirectory(${vst3sdk_SOURCE_DIR}/public.sdk/samples/vst-hosting/editorhost vst3-sdk/editorhost)
 
 #-------------------------------------------------------------------------------
 # Fixing too aggressive errors/warnings
