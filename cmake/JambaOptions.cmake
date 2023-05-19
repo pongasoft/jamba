@@ -58,7 +58,19 @@ set(JAMBA_VST3SDK_GIT_REPO "https://github.com/steinbergmedia/vst3sdk" CACHE STR
 # Note that it is using a commit hash and not a tag since per CMake recommendations, it is faster to use
 # a hash (local check only) vs tag (requires remote check)
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_GIT_TAG 56e4b2a644be164c5d324e8bc9de55b964b0f102 CACHE STRING "Vst3sdk git tag")
+set(JAMBA_VST3SDK_GIT_TAG 0041ef2c879c3c54c03d33cdc11a97eaebfb5752 CACHE STRING "Vst3sdk git tag")
+
+#------------------------------------------------------------------------
+# This (advanced) variable allow for patching the sdk
+# (the entire folder will be copied on top of a copy of the sdk)
+# With sdk 3.7.8 only on Windows with DLL, does it require patching (win32resourcestream.cpp issue)
+#------------------------------------------------------------------------
+if(WIN32)
+  option(SMTG_CREATE_BUNDLE_FOR_WINDOWS "Create Bundle on Windows for the Plug-ins (New since VST 3.6.10!)" ON)
+  if(NOT SMTG_CREATE_BUNDLE_FOR_WINDOWS)
+    set(JAMBA_VST3SDK_PATCH_DIR "${JAMBA_ROOT}/vst3sdk_${JAMBA_VST3SDK_VERSION}" CACHE STRING "Vst3sdk patch")
+  endif()
+endif()
 
 #------------------------------------------------------------------------
 # C++ language level (Jamba requires C++17)

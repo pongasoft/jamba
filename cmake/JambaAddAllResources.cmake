@@ -25,9 +25,8 @@ function(jamba_add_all_resources)
   get_filename_component(UIDESC_FILENAME ${ARG_UIDESC} NAME_WLE)
   get_filename_component(UIDESC_DIR ${ARG_UIDESC} DIRECTORY)
 
-  if(NOT SMTG_CREATE_BUNDLE_FOR_WINDOWS)
-    internal_jamba_add_resource("${ARG_UIDESC}" "DATA" "" JAMBA_VST3_RESOURCES_RC "" JAMBA_VST3_RESOURCES_FILE_DEPENDENCY)
-  endif()
+  # In all cases we add uidesc (JAMBA_VST3_RESOURCES_RC is ignored when building a bundle)
+  internal_jamba_add_resource("${ARG_UIDESC}" "DATA" "" JAMBA_VST3_RESOURCES_RC "" JAMBA_VST3_RESOURCES_FILE_DEPENDENCY)
   internal_jamba_add_resources("${JAMBA_VST3_RESOURCES_RC}" JAMBA_VST3_RESOURCES_RC "${JAMBA_VST3_RESOURCES_FILE_DEPENDENCY}" JAMBA_VST3_RESOURCES_FILE_DEPENDENCY)
 
   if (APPLE)
@@ -44,8 +43,12 @@ function(jamba_add_all_resources)
       set_target_properties(${ARG_TARGET} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${PLUGIN_INFO_PLIST_FILE}")
     endif()
   elseif (WIN32)
-    list(JOIN JAMBA_VST3_RESOURCES_RC "\n" JAMBA_VST3_RESOURCES_RC)
-    file(WRITE "${CMAKE_BINARY_DIR}/generated/vst3_resources.rc" "${JAMBA_VST3_RESOURCES_RC}\n")
+    if(NOT SMTG_CREATE_BUNDLE_FOR_WINDOWS)
+      list(JOIN JAMBA_VST3_RESOURCES_RC "\n" JAMBA_VST3_RESOURCES_RC)
+      file(WRITE "${CMAKE_BINARY_DIR}/generated/vst3_resources.rc" "${JAMBA_VST3_RESOURCES_RC}\n")
+    else()
+      file(WRITE "${CMAKE_BINARY_DIR}/generated/vst3_resources.rc" "// Resources are part of the bundle\n")
+    endif()
     add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/generated/plugin_resources.rc"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${UIDESC_DIR}/${UIDESC_FILENAME}.rc" "${CMAKE_BINARY_DIR}/generated/plugin_resources.rc"
         COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_BINARY_DIR}/generated/plugin_resources.rc"

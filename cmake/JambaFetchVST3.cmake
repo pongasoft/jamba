@@ -33,18 +33,20 @@ if(NOT EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}" AND EXISTS "${VST3_SDK_RO
   set(VST3_SDK_ROOT "${VST3_SDK_ROOT}/VST3_SDK" CACHE PATH "Location of VST3 SDK" FORCE)
 endif()
 
+# the list of files that needs to be copied
+set(INTERNAL_JAMBA_VST3SDK_PATCH_PATH_LIST CMakeLists.txt base cmake pluginterfaces public.sdk vstgui4)
+
 #------------------------------------------------------------------------
 # internal_jamba_copy_vst3sdk
 #------------------------------------------------------------------------
 macro(internal_jamba_copy_vst3sdk FROM_DIR TO_DIR)
   if(NOT INTERNAL_JAMBA_VST3SDK_COPY_LOCATION)
     message(STATUS "Copying: ${FROM_DIR} -> ${TO_DIR}")
-    file(COPY "${FROM_DIR}/CMakeLists.txt" DESTINATION "${TO_DIR}")
-    file(COPY "${FROM_DIR}/base" DESTINATION "${TO_DIR}")
-    file(COPY "${FROM_DIR}/cmake" DESTINATION "${TO_DIR}")
-    file(COPY "${FROM_DIR}/pluginterfaces" DESTINATION "${TO_DIR}")
-    file(COPY "${FROM_DIR}/public.sdk" DESTINATION "${TO_DIR}")
-    file(COPY "${FROM_DIR}/vstgui4" DESTINATION "${TO_DIR}")
+    foreach(PATH IN LISTS INTERNAL_JAMBA_VST3SDK_PATCH_PATH_LIST)
+      if(EXISTS "${FROM_DIR}/${PATH}")
+        file(COPY "${FROM_DIR}/${PATH}" DESTINATION "${TO_DIR}")
+      endif()
+    endforeach()
     file(CHMOD_RECURSE "${TO_DIR}"
          FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
          DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_EXECUTE
@@ -57,24 +59,37 @@ endmacro()
 # internal_jamba_patch_vst3sdk
 #------------------------------------------------------------------------
 macro(internal_jamba_patch_vst3sdk FROM_DIR TO_DIR)
-#  if(NOT INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION)
-#    message(STATUS "Patching: ${FROM_DIR} -> ${TO_DIR}")
-##    file(COPY "${FROM_DIR}/public.sdk" DESTINATION "${TO_DIR}")
-#    file(COPY "${FROM_DIR}/cmake" DESTINATION "${TO_DIR}")
-#    file(COPY "${FROM_DIR}/vstgui4" DESTINATION "${TO_DIR}")
-#    set(INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION "${TO_DIR}" CACHE PATH "Location (patch) of VST3 SDK" FORCE)
-#  endif()
+  if(NOT INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION)
+    message(STATUS "Patching: ${FROM_DIR} -> ${TO_DIR}")
+    foreach(PATH IN LISTS INTERNAL_JAMBA_VST3SDK_PATCH_PATH_LIST)
+      if(EXISTS "${FROM_DIR}/${PATH}")
+        file(COPY "${FROM_DIR}/${PATH}" DESTINATION "${TO_DIR}")
+      endif()
+    endforeach()
+    set(INTERNAL_JAMBA_VST3SDK_PATCH_LOCATION "${TO_DIR}" CACHE PATH "Location (patch) of VST3 SDK" FORCE)
+  endif()
 endmacro()
 
 #------------------------------------------------------------------------
 # If no local install and download is allowed => fetch it from github
 #------------------------------------------------------------------------
 if(EXISTS "${VST3_SDK_ROOT}/${VSTSDK3_KNOWN_FILE}")
-  set(vst3sdk_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/vst3sdk-src")
-  internal_jamba_copy_vst3sdk("${VST3_SDK_ROOT}" "${vst3sdk_SOURCE_DIR}")
-  internal_jamba_patch_vst3sdk("${JAMBA_ROOT}/vst3sdk_${JAMBA_VST3SDK_VERSION}" "${vst3sdk_SOURCE_DIR}")
+  if(EXISTS "${JAMBA_VST3SDK_PATCH_DIR}")
+    set(vst3sdk_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/vst3sdk-src")
+    internal_jamba_copy_vst3sdk("${VST3_SDK_ROOT}" "${vst3sdk_SOURCE_DIR}")
+    internal_jamba_patch_vst3sdk("${JAMBA_VST3SDK_PATCH_DIR}" "${vst3sdk_SOURCE_DIR}")
+  else()
+    # when no patching, there is no reason to copy the sdk...
+    message(STATUS "No SDK patching")
+    set(vst3sdk_SOURCE_DIR "${VST3_SDK_ROOT}")
+  endif()
 elseif(JAMBA_DOWNLOAD_VSTSDK)
   jamba_fetch_content(NAME vst3sdk GIT_REPO "${JAMBA_VST3SDK_GIT_REPO}" GIT_TAG "${JAMBA_VST3SDK_GIT_TAG}")
+  if(EXISTS "${JAMBA_VST3SDK_PATCH_DIR}")
+    internal_jamba_patch_vst3sdk("${JAMBA_VST3SDK_PATCH_DIR}" "${vst3sdk_SOURCE_DIR}")
+  else()
+    message(STATUS "No SDK patching")
+  endif()
 endif()
 
 #------------------------------------------------------------------------
