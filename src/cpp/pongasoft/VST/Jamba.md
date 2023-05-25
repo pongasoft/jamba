@@ -1,6 +1,6 @@
 What is Jamba? {#mainpage}
 --------------
-Jamba is a set of helpers (classes, concepts, build files, etc...) built on top of the VST SDK to provide a lightweight framework to build a VST3 plugin. Jamba has been designed to help in building VST2/3 plugin, not to replace it: you are still writing a VST2/3 plugin, not a Jamba plugin.
+Jamba is a set of helpers (classes, concepts, build files, etc...) built on top of the VST SDK to provide a lightweight framework to build a VST3 plugin. Jamba has been designed to help in building VST3 plugin, not to replace it: you are still writing a VST3 plugin, not a Jamba plugin.
 
 Jamba is a free and open source project hosted on [github](https://github.com/pongasoft/jamba).
 
@@ -17,9 +17,9 @@ Features
 ### Build & Deploy
 
 - simple script to build, test, validate, edit and install the plugin from the command line (see [jamba.sh (.bat)](https://jamba.dev/jamba.sh/))
-- build a **self contained** plugin that depends on the VST3 SDK
+- build a **self-contained** plugin that depends on the VST3 SDK
 - optionally wraps the VST3 plugin into an Audio Unit plugin (macOS)
-- easily adds resources (images) in a cross platform way
+- easily adds resources (images) in a cross-platform way
 - easily write unit tests for your project
 - build on macOS and Windows 10
 - package your project as an archive (zip file) for production release

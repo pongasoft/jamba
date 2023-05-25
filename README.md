@@ -1,7 +1,7 @@
-Jamba - A lightweight VST2/3 framework
+Jamba - A lightweight VST3 framework
 ======================================
 
-Jamba is a set of helpers (classes, concepts, build files, etc...) built on top of the VST SDK to provide a lightweight framework to build a VST2/3 plugin. Jamba has been designed to help in building VST2/3 plugin, not to replace it: you are still writing a VST2/3 plugin, not a Jamba plugin.
+Jamba is a set of helpers (classes, concepts, build files, etc...) built on top of the VST SDK to provide a lightweight framework to build a VST3 plugin. Jamba has been designed to help in building VST3 plugin, not to replace it: you are still writing a VST3 plugin, not a Jamba plugin.
 
 Check the [Jamba](https://jamba.dev/) website for more details.
 
@@ -19,7 +19,6 @@ Features
 
 - simple script to build, test, validate, edit and install the plugin from the command line (see [jamba.sh (.bat)](https://jamba.dev/jamba.sh/)
 - build a **self-contained** plugin that depends on the VST3 SDK
-- optionally builds a VST2 compatible plugin
 - optionally wraps the VST3 plugin into an Audio Unit plugin (macOS)
 - build a universal plugin for Apple Silicon support (macOS)  
 - easily adds resources (images) in a cross-platform way
@@ -66,7 +65,7 @@ Although this project does not contain a great deal of tests, it is being heavil
 | [vst-ab-switch](https://github.com/pongasoft/vst-ab-switch)         | A/B Audio Switch VST plugin                                                                    |
 | [vst-vac-6](https://github.com/pongasoft/vst-vac-6v)                | VST (2 & 3) plugin to analyze and control the peak volume of a signal                          |
 | [vst-sam-spl-64](https://github.com/pongasoft/vst-sam-spl-64)       | A free/open source VST2, VST3 and AudioUnit plugin to easily split a sample in up to 64 slices |
-| [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) | Documentation plugin for Jamba framework: a simple gain plugin for VST2/3                      |
+| [jamba-sample-gain](https://github.com/pongasoft/jamba-sample-gain) | Documentation plugin for Jamba framework: a simple gain plugin for VST3                        |
 
 History
 -------
