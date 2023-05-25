@@ -3,6 +3,19 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [7.0.0 | 2023-05-25](https://github.com/pongasoft/jamba/tree/v7.0.0)
+
+* Migrated Jamba to use VST3 SDK 3.7.8 ([release notes](https://steinbergmedia.github.io/vst3_dev_portal/pages/Versions/Version+3.7.8.html)). Please check other [release notes](https://steinbergmedia.github.io/vst3_dev_portal/pages/Versions/Index.html) to see what has changed since 3.7.5 (last Jamba supported version). 
+* As explained in issue [#16](https://github.com/pongasoft/jamba/issues/16), Jamba is no longer supporting VST2
+* Added a way to patch the SDK by defining the CMake cache string `JAMBA_VST3SDK_PATCH_DIR` (Jamba uses it on Windows/DLL build to fix an issue with `win32resourcestream.cpp`, but you can also use it for your own purposes): by defining this variable, 2 things happen
+  * Jamba copies the SDK inside the build folder
+  * Jamba copies all the files under `${JAMBA_VST3SDK_PATCH_DIR}` on top of this copy while never modifying a local version of the SDK
+
+> #### Migration suggested
+> Remove the `option(JAMBA_ENABLE_VST2 "Use VST2" ON)` entry from your `CMakeLists.txt` (and you can clean up any references to vst2 if you want to).
+> 
+> Note that if you do not remove it (or set it to `OFF`), any `vst2_sources` will try to get compiled and this will no longer work 
+
 ## [6.3.0 | 2023-05-14](https://github.com/pongasoft/jamba/tree/v6.3.0)
 
 * Fixed NaN issue with `stringToFloat` by changing its return convention (`0` instead of `NaN`) due to `fast-math` option which assumes that there is no NaN in the code.

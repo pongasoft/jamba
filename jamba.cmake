@@ -114,7 +114,7 @@ set(VST3_OUTPUT_DIR ${CMAKE_BINARY_DIR}/VST3)
 # JAMBA_ENABLE_VST2 not used anymore
 #------------------------------------------------------------------------
 if(JAMBA_ENABLE_VST2)
-  message(NOTICE "Since Jamba 7, VST2 is no longer supported. Remove JAMBA_ENABLE_VST2 from your build file(s).")
+  message(NOTICE "[NOTICE] Since Jamba 7, VST2 is no longer supported. Remove JAMBA_ENABLE_VST2 from your build file(s).")
 endif ()
 
 #------------------------------------------------------------------------
