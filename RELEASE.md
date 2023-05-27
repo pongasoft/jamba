@@ -3,6 +3,10 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [7.0.1 | 2023-05-27](https://github.com/pongasoft/jamba/tree/v7.0.1)
+
+* Use download url/hash in blank plugin
+
 ## [7.0.0 | 2023-05-25](https://github.com/pongasoft/jamba/tree/v7.0.0)
 
 * Migrated Jamba to use VST3 SDK 3.7.8 ([release notes](https://steinbergmedia.github.io/vst3_dev_portal/pages/Versions/Version+3.7.8.html)). Please check other [release notes](https://steinbergmedia.github.io/vst3_dev_portal/pages/Versions/Index.html) to see what has changed since 3.7.5 (last Jamba supported version). 

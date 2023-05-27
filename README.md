@@ -47,7 +47,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 Latest Release
 --------------
 
-7.0.0 | 2023-05-25
+7.0.1 | 2023-05-27
 
 [Release notes (local)](RELEASE.md)
 
