@@ -39,6 +39,7 @@ parser.add_argument("-n", "--namespace", help="The C++ namespace")
 parser.add_argument("-d", "--directory", help="The directory for the project")
 parser.add_argument("-j", "--project", help="The name of the project")
 parser.add_argument("-g", "--jambagithash", help="The git hash for jamba")
+parser.add_argument("--jamba_download_url_hash", help="The hash for jamba download url (SHA256=xxx)")
 parser.add_argument("-s", "--downloadsdk", help="Download the VST SDK", action="store_true")
 args = parser.parse_args()
 
@@ -137,6 +138,8 @@ else:
                                  capture_output=True, text=True).stdout
     plugin['jamba_git_hash'] = subprocess.run(['git', 'describe', '--tags', jambaGitSha], cwd=blank_plugin_root,
                                               capture_output=True, text=True).stdout.rstrip()
+
+plugin['jamba_download_url_hash'] = args.jamba_download_url_hash if args.jamba_download_url_hash else ''
 
 config(plugin)
 
