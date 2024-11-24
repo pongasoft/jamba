@@ -31,7 +31,7 @@ void ParamDisplayView::draw(CDrawContext *iContext)
   auto string = fParam.exists() ? fParam.toUTF8String(fPrecisionOverride) : "";
 
   drawBack(iContext);
-  drawPlatformText(iContext, UTF8String(string).getPlatformString());
+  drawPlatformText(iContext, UTF8String(string));
   setDirty(false);
 }
 

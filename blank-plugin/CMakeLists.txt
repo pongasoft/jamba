@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.28)
 
 # build Audio Unit?
 option(JAMBA_ENABLE_AUDIO_UNIT "Enable Audio Unit" [-enable_audio_unit-])

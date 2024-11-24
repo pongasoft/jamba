@@ -26,7 +26,7 @@ endif()
 #------------------------------------------------------------------------
 # The VST3 SDK version supported by Jamba
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_VERSION "3.7.8" CACHE STRING "VST3 SDK Version (not recommended to change)")
+set(JAMBA_VST3SDK_VERSION "3.7.12" CACHE STRING "VST3 SDK Version (not recommended to change)")
 
 #------------------------------------------------------------------------
 # The default location for the VST3 SDK
@@ -58,7 +58,7 @@ set(JAMBA_VST3SDK_GIT_REPO "https://github.com/steinbergmedia/vst3sdk" CACHE STR
 # Note that it is using a commit hash and not a tag since per CMake recommendations, it is faster to use
 # a hash (local check only) vs tag (requires remote check)
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_GIT_TAG 0041ef2c879c3c54c03d33cdc11a97eaebfb5752 CACHE STRING "Vst3sdk git tag")
+set(JAMBA_VST3SDK_GIT_TAG cc2adc90382dded9e347caf74e4532f1458715db CACHE STRING "Vst3sdk git tag")
 
 #------------------------------------------------------------------------
 # This (advanced) variable allow for patching the sdk

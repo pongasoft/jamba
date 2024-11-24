@@ -14,9 +14,7 @@
 #
 # @author Yan Pujante
 
-cmake_minimum_required(VERSION 3.19)
-
-jamba_fetch_content(NAME googletest)
+cmake_minimum_required(VERSION 3.28)
 
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
@@ -25,8 +23,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "Set by Jamba" FORCE)
 # Do not install GoogleTest!
 option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" OFF)
 
-# Add googletest directly to our build. This defines the gtest and gtest_main targets.
-add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+jamba_fetch_content(NAME googletest)
 
 smtg_target_setup_universal_binary("gtest")
 smtg_target_setup_universal_binary("gtest_main")
