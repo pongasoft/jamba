@@ -20,7 +20,6 @@
 
 #include "../Types.h"
 #include <string>
-#include <codecvt>
 #include <locale>
 #include <sstream>
 #include <pluginterfaces/base/ftypes.h>
@@ -29,25 +28,15 @@
 
 namespace pongasoft::VST::VstUtils {
 
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
 /**
  * Converts a `VstString16` to a regular `std::string` that is properly utf-8 encoded.
  */
 inline std::string toUT8String(VstString16 const &iString)
 {
-  std::wstring_convert<std::codecvt_utf8_utf16<Steinberg::char16>, Steinberg::char16> converter{};
-  return converter.to_bytes(iString);
-
-//  Steinberg::String utf8Str(iString.c_str());
-//  utf8Str.toMultiByte(Steinberg::kCP_Utf8);
-//  return utf8Str.text8();
+  Steinberg::String utf8Str(iString.c_str());
+  utf8Str.toMultiByte(Steinberg::kCP_Utf8);
+  return utf8Str.text8();
 }
-#if __clang__
-#pragma clang diagnostic pop
-#endif
 
 /**
  * This generic function will determine (at compilation time) whether `T` can be written to an `ostream` and if that
