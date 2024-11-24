@@ -7,8 +7,7 @@ jobs:
   run_tests:
     strategy:
       matrix:
-        os: [macos-11, macos-12]
-        # macos-13 is currently beta so not included
+        os: [macos-12, macos-13]
 
     runs-on: ${{ matrix.os }}
 
