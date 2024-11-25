@@ -96,5 +96,5 @@ endif()
 # Final check => must find a valid VST3 installation!
 #------------------------------------------------------------------------
 if(NOT EXISTS "${vst3sdk_SOURCE_DIR}/${VSTSDK3_KNOWN_FILE}")
-  message(FATAL_ERROR "Unable to find (local or remote) a valid VST3 install [VST3_SDK_ROOT=${VST3_SDK_ROOT}]")
+  message(FATAL_ERROR "Unable to find (local or remote) a valid VST3 install [VST3_SDK_ROOT=${VST3_SDK_ROOT}] (set JAMBA_DOWNLOAD_VSTSDK to ON if you really want to download the SDK)")
 endif()

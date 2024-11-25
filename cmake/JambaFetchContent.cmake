@@ -16,8 +16,6 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-cmake_policy(SET CMP0169 OLD)
-
 include(FetchContent)
 
 function(jamba_fetch_content)
@@ -57,7 +55,8 @@ function(jamba_fetch_content)
   set(FETCHCONTENT_SOURCE_DIR_${UPPERCASE_NAME} ${ARG_ROOT_DIR})
 
   if(ARG_DOWNLOAD_URL)
-    FetchContent_Declare(           ${ARG_NAME}
+    FetchContent_Populate(          ${ARG_NAME}
+        QUIET
         URL                        "${ARG_DOWNLOAD_URL}"
         URL_HASH                   "${ARG_DOWNLOAD_URL_HASH}"
         SOURCE_DIR                 "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-src"
@@ -66,7 +65,8 @@ function(jamba_fetch_content)
         )
     set(FETCH_SOURCE "${ARG_DOWNLOAD_URL}")
   else()
-    FetchContent_Declare(${ARG_NAME}
+    FetchContent_Populate(${ARG_NAME}
+        QUIET
         GIT_REPOSITORY    ${ARG_GIT_REPO}
         GIT_TAG           ${ARG_GIT_TAG}
         GIT_CONFIG        advice.detachedHead=false
@@ -77,17 +77,10 @@ function(jamba_fetch_content)
     set(FETCH_SOURCE "${ARG_GIT_REPO}/tree/${ARG_GIT_TAG}")
   endif()
 
-
-  FetchContent_GetProperties(${ARG_NAME})
-
-  if(NOT ${ARG_NAME}_POPULATED)
-    if(FETCHCONTENT_SOURCE_DIR_${UPPERCASE_NAME})
-      message(STATUS "Using ${ARG_NAME} from local ${FETCHCONTENT_SOURCE_DIR_${UPPERCASE_NAME}}")
-    else()
-      message(STATUS "Fetching ${ARG_NAME} from ${FETCH_SOURCE}")
-    endif()
-
-    FetchContent_Populate(${ARG_NAME})
+  if(FETCHCONTENT_SOURCE_DIR_${UPPERCASE_NAME})
+    message(STATUS "Using ${ARG_NAME} from local ${FETCHCONTENT_SOURCE_DIR_${UPPERCASE_NAME}}")
+  else()
+    message(STATUS "Fetching ${ARG_NAME} from ${FETCH_SOURCE}")
   endif()
 
   set(${ARG_NAME}_ROOT_DIR "${${ARG_NAME}_SOURCE_DIR}" PARENT_SCOPE)
