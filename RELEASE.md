@@ -3,6 +3,11 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [7.1.2 | 2024-11-26](https://github.com/pongasoft/jamba/tree/v7.1.2)
+
+* Fixes issues with some DAWs on Windows when using the bundle format
+* Fixes the `create-plugin.py` tool on Windows
+
 ## [7.1.1 | 2024-11-24](https://github.com/pongasoft/jamba/tree/v7.1.1)
 
 * Fixed deprecated CMake warnings with `FetchContent_Populate`
