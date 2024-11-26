@@ -27,7 +27,9 @@ endfunction()
 # internal_jamba_add_vst3_plugin
 #------------------------------------------------------------------------
 function(internal_jamba_add_vst3_plugin)
-  smtg_add_vst3plugin("${ARG_TARGET}" "${vst3sdk_SOURCE_DIR}" "${ARG_VST_SOURCES}")
+  smtg_add_vst3plugin("${ARG_TARGET}" "${vst3sdk_SOURCE_DIR}" "${ARG_VST_SOURCES}"
+      PACKAGE_NAME "${ARG_PLUGIN_NAME}"
+  )
 
   # We need to link with jamba (which defines what it needs to link with)
   target_link_libraries("${ARG_TARGET}" PUBLIC "jamba" "${ARG_LINK_LIBRARIES}")

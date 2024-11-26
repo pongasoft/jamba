@@ -63,7 +63,7 @@ function(internal_jamba_create_install_target component src dstDir extension)
     endif()
   endif()
 
-  set(PLUGIN_FILENAME "${ARG_RELEASE_FILENAME}$<$<CONFIG:Debug>:_Debug>.${extension}")
+  set(PLUGIN_FILENAME "${ARG_PLUGIN_NAME}.${extension}")
 
   #------------------------------------------------------------------------
   # target install_<component>
@@ -136,6 +136,8 @@ function(jamba_add_vst_plugin)
   elseif(WIN32)
     set_default_value(ARG_INSTALL_PREFIX_DIR "C:/Program\ Files")
   endif()
+
+  set(ARG_PLUGIN_NAME "${ARG_RELEASE_FILENAME}$<$<CONFIG:Debug>:_Debug>")
 
   # where the plugins are installed
   set(CMAKE_INSTALL_PREFIX "${ARG_INSTALL_PREFIX_DIR}" CACHE PATH "Forcing CMAKE_INSTALL_PREFIX" FORCE)
