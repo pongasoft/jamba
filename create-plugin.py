@@ -103,7 +103,7 @@ def config(plugin):
     project_name = maybe_ask_user(args.project, "Project Name", f'{plugin["company"]}-{plugin["name"]}-plugin')
 
     plugin['root_dir'] = os.path.join(os.path.realpath(project_dir), project_name)
-    plugin['jamba_root_dir'] = this_script_root_dir.replace('\\', '\\\\')
+    plugin['jamba_root_dir'] = this_script_root_dir.replace('\\', '/')
     plugin['local_jamba'] = "" if args.local else "#"
     plugin['remote_jamba'] = "" if not args.local else "#"
     plugin['target'] = f'{plugin["company"]}_{plugin["name"]}' if plugin["company"] else plugin["name"]
