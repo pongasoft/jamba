@@ -18,6 +18,7 @@ cmake_minimum_required(VERSION 3.19)
 
 include(FetchContent)
 
+# Note that this function only fetches the content and does NOT make it available
 function(jamba_fetch_content)
   set(oneValueArgs NAME GIT_REPO GIT_TAG DOWNLOAD_URL DOWNLOAD_URL_HASH ROOT_DIR)
 
@@ -54,35 +55,37 @@ function(jamba_fetch_content)
 
   if(ARG_ROOT_DIR)
     message(STATUS "Using ${ARG_NAME} from local ${ARG_ROOT_DIR}")
-    FetchContent_Populate(${ARG_NAME}
-        QUIET
-        SOURCE_DIR        "${ARG_ROOT_DIR}"
-        BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-build"
+    FetchContent_Declare(${ARG_NAME}
+        SOURCE_DIR       "${ARG_ROOT_DIR}"
+        BINARY_DIR       "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-build"
+        SOURCE_SUBDIR    "do_not_make_available" # invalid folder to not execute CMakeLists.txt
     )
   else()
     if(ARG_DOWNLOAD_URL)
       message(STATUS "Fetching ${ARG_NAME} from ${ARG_DOWNLOAD_URL}")
-      FetchContent_Populate(          ${ARG_NAME}
-          QUIET
+      FetchContent_Declare(          ${ARG_NAME}
           URL                        "${ARG_DOWNLOAD_URL}"
           URL_HASH                   "${ARG_DOWNLOAD_URL_HASH}"
           SOURCE_DIR                 "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-src"
           BINARY_DIR                 "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-build"
           DOWNLOAD_EXTRACT_TIMESTAMP true
+          SOURCE_SUBDIR              "do_not_make_available"
       )
     else()
       message(STATUS "Fetching ${ARG_NAME} from ${ARG_GIT_REPO}/tree/${ARG_GIT_TAG}")
-      FetchContent_Populate(${ARG_NAME}
-          QUIET
-          GIT_REPOSITORY    ${ARG_GIT_REPO}
-          GIT_TAG           ${ARG_GIT_TAG}
-          GIT_CONFIG        advice.detachedHead=false
-          GIT_SHALLOW       true
-          SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-src"
-          BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-build"
+      FetchContent_Declare(${ARG_NAME}
+          GIT_REPOSITORY   ${ARG_GIT_REPO}
+          GIT_TAG          ${ARG_GIT_TAG}
+          GIT_CONFIG       advice.detachedHead=false
+          GIT_SHALLOW      true
+          SOURCE_DIR       "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-src"
+          BINARY_DIR       "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}-build"
+          SOURCE_SUBDIR    "do_not_make_available"
       )
     endif()
   endif()
+
+  FetchContent_MakeAvailable(${ARG_NAME})
 
   set(${ARG_NAME}_ROOT_DIR "${${ARG_NAME}_SOURCE_DIR}" PARENT_SCOPE)
   set(${ARG_NAME}_SOURCE_DIR "${${ARG_NAME}_SOURCE_DIR}" PARENT_SCOPE)

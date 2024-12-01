@@ -47,7 +47,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 Latest Release
 --------------
 
-7.1.2 | 2024-11-26 | VST SDK 3.7.12+
+7.1.3 | 2024-12-01 | VST SDK 3.7.12+
 
 [Release notes (local)](RELEASE.md)
 
