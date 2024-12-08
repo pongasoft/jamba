@@ -3,6 +3,10 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [7.1.4 | 2024-12-08](https://github.com/pongasoft/jamba/tree/v7.1.4)
+
+* Fixed class name collision with Audio Unit
+
 ## [7.1.3 | 2024-12-01](https://github.com/pongasoft/jamba/tree/v7.1.3)
 
 * Use `FetchContent_Populate`/`FetchContent_MakeAvailable` with `SOURCE_SUBDIR` option (see [CMake discussion](https://discourse.cmake.org/t/prevent-fetchcontent-makeavailable-to-execute-cmakelists-txt))

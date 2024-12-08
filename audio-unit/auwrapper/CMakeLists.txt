@@ -27,8 +27,11 @@ if (MAC)
         "-framework Cocoa"
         "-framework CoreAudio")
     target_include_directories(${target} PRIVATE "${SMTG_COREAUDIO_SDK_PATH}/**")
-    string(MD5 AU_NAMESPACE_SUFFIX "${JAMBA_VST3_PLUGIN_TARGET}")
-    file(WRITE "${CMAKE_BINARY_DIR}/generated/aucocoaclassprefix.h" "#define SMTG_AU_NAMESPACE SMTGAUCocoa${AU_NAMESPACE_SUFFIX}_\n")
+    string(MAKE_C_IDENTIFIER "SMTG_AUCocoaUIBase_${JAMBA_VST3_PLUGIN_TARGET}" SMTG_AUCocoaUIBase_CLASS_NAME)
+    target_compile_definitions(${target} PUBLIC
+        SMTG_AUCocoaUIBase_CLASS_NAME=$<IF:$<CONFIG:Debug>,${SMTG_AUCocoaUIBase_CLASS_NAME}_Debug,${SMTG_AUCocoaUIBase_CLASS_NAME}>
+        CA_USE_AUDIO_PLUGIN_ONLY=0
+    )
     target_include_directories(${target} PRIVATE "${CMAKE_BINARY_DIR}/generated")
   else ()
     message("* To enable building the AudioUnit wrapper, you need to use the Xcode generator")
