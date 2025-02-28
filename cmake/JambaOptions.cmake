@@ -26,7 +26,7 @@ endif()
 #------------------------------------------------------------------------
 # The VST3 SDK version supported by Jamba
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_VERSION "3.7.12" CACHE STRING "VST3 SDK Version (not recommended to change)")
+set(JAMBA_VST3SDK_VERSION "3.7.13" CACHE STRING "VST3 SDK Version (not recommended to change)")
 
 #------------------------------------------------------------------------
 # The default location for the VST3 SDK
