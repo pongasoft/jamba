@@ -32,7 +32,7 @@ parser = argparse.ArgumentParser(allow_abbrev=False,
 Notes
   ---vst3 defaults to /Users/Shared/Steinberg/VST_SDK.<JAMBA_VST3SDK_VERSION>
   
-  -G defaults to "Xcode" on macOS and "Visual Studio 16 2019" for Windows10
+  -G defaults to "Xcode" on macOS and "Visual Studio 17 2022" for Windows10
   run 'cmake --help' to get the list of generators supported
   
   For single-config generators, Debug is used by default and can be changed with -r for Release
@@ -75,7 +75,7 @@ else:
     if platform.system() == 'Darwin':
         cmake_generator.append('Xcode')
     else:
-        cmake_generator.append('Visual Studio 16 2019')
+        cmake_generator.append('Visual Studio 17 2022')
 
 # CMake options
 cmake_options = [] if not args.cmake_options else args.cmake_options[1:]
