@@ -26,7 +26,7 @@ endif()
 #------------------------------------------------------------------------
 # The VST3 SDK version supported by Jamba
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_VERSION "3.7.13" CACHE STRING "VST3 SDK Version (not recommended to change)")
+set(JAMBA_VST3SDK_VERSION "3.7.14" CACHE STRING "VST3 SDK Version (not recommended to change)")
 
 #------------------------------------------------------------------------
 # The default location for the VST3 SDK
@@ -58,7 +58,7 @@ set(JAMBA_VST3SDK_GIT_REPO "https://github.com/steinbergmedia/vst3sdk" CACHE STR
 # Note that it is using a commit hash and not a tag since per CMake recommendations, it is faster to use
 # a hash (local check only) vs tag (requires remote check)
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_GIT_TAG 8b59557d881bb0158ba08ff256b26f025f078314 CACHE STRING "Vst3sdk git tag")
+set(JAMBA_VST3SDK_GIT_TAG 43b4e366ff84afc9b4247776acbf5e234683b77f CACHE STRING "Vst3sdk git tag")
 
 #------------------------------------------------------------------------
 # This (advanced) variable allow for patching the sdk
@@ -103,9 +103,9 @@ set(googletest_GIT_REPO "https://github.com/google/googletest" CACHE STRING "goo
 
 #------------------------------------------------------------------------
 # The git tag for googletest
-# v1.15.2 (2024/07/31)
+# v1.17.0 (2025/04/33)
 #------------------------------------------------------------------------
-set(googletest_GIT_TAG "v1.15.2" CACHE STRING "googletest git tag")
+set(googletest_GIT_TAG "v1.17.0" CACHE STRING "googletest git tag")
 
 #------------------------------------------------------------------------
 # The download URL for googletest
@@ -115,7 +115,7 @@ set(googletest_DOWNLOAD_URL "${googletest_GIT_REPO}/archive/refs/tags/${googlete
 #------------------------------------------------------------------------
 # The download URL hash for googletest
 #------------------------------------------------------------------------
-set(googletest_DOWNLOAD_URL_HASH "SHA256=f179ec217f9b3b3f3c6e8b02d3e7eda997b49e4ce26d6b235c9053bec9c0bf9f" CACHE STRING "googletest download url hash" FORCE)
+set(googletest_DOWNLOAD_URL_HASH "SHA256=40d4ec942217dcc84a9ebe2a68584ada7d4a33a8ee958755763278ea1c5e18ff" CACHE STRING "googletest download url hash" FORCE)
 
 #------------------------------------------------------------------------
 # Option to enable generating the dev script which allows to build and install the plugin

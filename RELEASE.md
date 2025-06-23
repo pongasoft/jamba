@@ -3,6 +3,11 @@ Release Notes {#release-notes}
 
 Check the [Requirements](https://jamba.dev/requirements/) documentation for information about which VST3 SDK Jamba supports and how to get it.
 
+## [7.3.0 | 2025-06-23](https://github.com/pongasoft/jamba/tree/v7.3.0)
+
+* Upgraded Jamba to use VST3 SDK 3.7.14 ([release notes](https://steinbergmedia.github.io/vst3_dev_portal/pages/Versions/Version+3.7.14.html))
+* Upgraded GoogleTest to 1.17.0
+
 ## [7.2.1 | 2025-06-06](https://github.com/pongasoft/jamba/tree/v7.2.1)
 
 * Uses "Visual Studio 17 2022" by default on Windows when creating a new device

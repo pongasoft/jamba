@@ -17,7 +17,7 @@ Features
 
 ### Build & Deploy
 
-- simple script to build, test, validate, edit and install the plugin from the command line (see [jamba.sh (.bat)](https://jamba.dev/jamba.sh/)
+- a simple script to build, test, validate, edit and install the plugin from the command line (see [jamba.sh (.bat)](https://jamba.dev/jamba.sh/)
 - build a **self-contained** plugin that depends on the VST3 SDK
 - optionally wraps the VST3 plugin into an Audio Unit plugin (macOS)
 - build a universal plugin for Apple Silicon support (macOS)  
@@ -32,11 +32,11 @@ Features
 - define your VST parameters in one location (inherit from `Parameters`) and use both in real time processing (RT) and GUI code
 - define typed VST parameters (ex: a boolean (`bool`) parameter, a gain (`Gain`) parameter, etc...)
 - use typed VST parameters directly in RT processing code as well as GUI code
-- use Jamba parameters for handling non VST parameters (ex: a label/text string cannot be represented by a VST parameters). Jamba parameters can be automatically saved/restored part of the state
+- use Jamba parameters for handling non VST parameters (ex: a VST parameter cannot represent a label/text string). Jamba parameters can be automatically saved/restored part of the state
 - use Jamba parameters to easily exchange messages between RT and GUI (both directions) in a thread safe fashion
-- easily create custom views with their creators (so that they appear in the GUI editor)
-- easily use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
-- store/read state in a thread safe fashion (includes version to allow easy state upgrade)
+- create custom views with their creators (so that they appear in the GUI editor)
+- use multiple parameters in a custom view (ex: a custom display which displays a gain value (parameter 1) in a color depending on parameter 2)
+- store/read state in a thread safe fashion (includes a version to allow easy state upgrade)
 - [Jamba Views](https://jamba.dev/views/)
 
 Getting Started
@@ -47,7 +47,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 Latest Release
 --------------
 
-7.2.1 | 2025-06-06 | VST SDK 3.7.13+
+7.3.0 | 2025-06-23 | VST SDK 3.7.14
 
 [Release notes (local)](RELEASE.md)
 
@@ -56,9 +56,9 @@ Latest Release
 Development
 -----------
 
-In order to work on this project itself (not a plugin), you need to clone this repository and install the VST3 SDK as described in the [requirements](https://jamba.dev/requirements/) section. In addition to the unit tests (under `src/test`), the embedded `jamba-test-plugin` plugin constitutes the main source of testing.
+To work on this project itself (not a plugin), you need to clone this repository and install the VST3 SDK as described in the [requirements](https://jamba.dev/requirements/) section. In addition to the unit tests (under `src/test`), the embedded `jamba-test-plugin` plugin constitutes the main source of testing.
 
-Although this project does not contain a great deal of tests, it is being heavily used (and as a result tested) by the plugins it has been designed to build.
+Although this project does not contain a great number of tests, it is being heavily used (and as a result tested) by the plugins it has been designed to build.
 
 | Plugin                                                              | Description                                                                                    |
 |---------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
