@@ -1,4 +1,4 @@
-# Copyright (c) 2020 pongasoft
+# Copyright (c) 2020-2025 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -26,7 +26,7 @@ endif()
 #------------------------------------------------------------------------
 # The VST3 SDK version supported by Jamba
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_VERSION "3.7.14" CACHE STRING "VST3 SDK Version (not recommended to change)")
+set(JAMBA_VST3SDK_VERSION "3.8.0" CACHE STRING "VST3 SDK Version (not recommended to change)")
 
 #------------------------------------------------------------------------
 # The default location for the VST3 SDK
@@ -58,7 +58,7 @@ set(JAMBA_VST3SDK_GIT_REPO "https://github.com/steinbergmedia/vst3sdk" CACHE STR
 # Note that it is using a commit hash and not a tag since per CMake recommendations, it is faster to use
 # a hash (local check only) vs tag (requires remote check)
 #------------------------------------------------------------------------
-set(JAMBA_VST3SDK_GIT_TAG 43b4e366ff84afc9b4247776acbf5e234683b77f CACHE STRING "Vst3sdk git tag")
+set(JAMBA_VST3SDK_GIT_TAG 9fad9770f2ae8542ab1a548a68c1ad1ac690abe0 CACHE STRING "Vst3sdk git tag")
 
 #------------------------------------------------------------------------
 # This (advanced) variable allow for patching the sdk

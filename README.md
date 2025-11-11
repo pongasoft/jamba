@@ -47,7 +47,7 @@ Check the [Quickstart](https://jamba.dev/quickstart/) section to getting started
 Latest Release
 --------------
 
-7.3.0 | 2025-06-23 | VST SDK 3.7.14
+7.4.0 | 2025-11-12 | VST SDK 3.8.0
 
 [Release notes (local)](RELEASE.md)
 
@@ -82,4 +82,4 @@ Licensing
 
 - Apache 2.0 License. Jamba itself can be used according to the terms of the Apache 2.0 license.
 
-- Note that the primary goal of Jamba is to help build a VST3 plugin and as a result you should check the [Steinberg License](http://www.steinberg.net/sdklicenses_vst3) in order to determine under which terms your plugin needs to be licensed.
+- The VST3 SDK is released under the MIT license (see [Steinberg License](http://www.steinberg.net/sdklicenses_vst3)).

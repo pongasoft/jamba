@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2023 pongasoft
+# Copyright (c) 2020-2025 pongasoft
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -45,7 +45,7 @@ endif()
 # Jamba Version - use git to fetch exact tag/version
 #------------------------------------------------------------------------
 set(JAMBA_MAJOR_VERSION 7)
-set(JAMBA_MINOR_VERSION 3)
+set(JAMBA_MINOR_VERSION 4)
 set(JAMBA_PATCH_VERSION 0)
 execute_process(COMMAND git describe --long --dirty --abbrev=10 --tags
     RESULT_VARIABLE result
@@ -85,6 +85,9 @@ if(WIN32)
   message(STATUS "Adding compiler options")
   add_compile_options("/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING" "/EHsc" "/D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING" "/D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING")
 endif ()
+if(APPLE)
+  enable_language(OBJCXX)
+endif()
 
 #------------------------------------------------------------------------
 # Audio Unit (macOS only) => determine Audio Unit Version
