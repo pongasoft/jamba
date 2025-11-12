@@ -23,22 +23,4 @@ if (MAC AND XCODE)
   add_dependencies(${target} ${JAMBA_VST3_PLUGIN_TARGET})
   add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${AU_OUTPUT_DIR}/${target}.component/Contents/Resources)
   add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${AU_OUTPUT_DIR}/${JAMBA_VST3_PLUGIN_TARGET}.vst3" "${AU_OUTPUT_DIR}/${target}.component/Contents/Resources/plugin.vst3")
-
-  execute_process(COMMAND xcrun --find Rez OUTPUT_VARIABLE OSX_REZ_COMMAND OUTPUT_STRIP_TRAILING_WHITESPACE)
-  add_custom_command(TARGET ${target} POST_BUILD COMMAND "${OSX_REZ_COMMAND}"
-      "-d" "SystemSevenOrLater=1"
-      "-script" "Roman"
-      "-d" "i386_YES"
-      "-d" "x86_64_YES"
-      "-is" "${CMAKE_OSX_SYSROOT}"
-      "-I" "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-      "-I" "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-      "-I" "/System/Library/Frameworks/AudioUnit.framework/Versions/A/Headers/"
-      "-I" "${SMTG_COREAUDIO_SDK_PATH}/AudioUnits/AUPublic/AUBase"
-      "-I" "${AU_PLUGIN_ROOT}"
-      "-I" "${CMAKE_BINARY_DIR}/generated"
-      "-o" "${AU_OUTPUT_DIR}/${target}.component/Contents/Resources/${target}.rsrc"
-      "-useDF"
-      "${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/auwrapper/auresource.r"
-      )
 endif ()
