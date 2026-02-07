@@ -1,3 +1,6 @@
+> [!Warning]
+> This project is now hosted on [Codeberg](https://codeberg.org/pongasoft/jamba).
+
 Jamba - A lightweight VST3 framework
 ======================================
 
